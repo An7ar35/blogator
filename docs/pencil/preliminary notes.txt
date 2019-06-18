@@ -1,0 +1,34 @@
+Source material
+===============
+· File names are in order of publication
+· HTML content is correct (tags are closed)
+· Header:
+    -> open <body> and <html>
+· Footer:
+    -> closing </body> and </html>
+· CSS is already linked in header.html's head tags
+· All posts have a <h1> heading, <span class="tag">..</span>, and <time timedate="YYY-MM-DD...">..</time>
+
+
+
+Running the generator
+=====================
+· MAX number of item in master indices per page is passed to application (or default to 10)
+· HTML source is copied verbatim and then collated/edited where necessary (links)
+· Index pane orders dates in descending order
+· Index pane orders tags in alphabetical order
+
+
+
+Notes
+=====
+Tags for page-per-page navigation:
+    <a rel="prev" href=""></a>
+    <a rel="next" href=""></a>
+
+
+
+Future
+======
+· Localised months from text file with <K,V>=<month number, month string>
+· Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
