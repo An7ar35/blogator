@@ -1,7 +1,7 @@
 #ifndef BLOGATOR_DTO_DATESTAMP_H
 #define BLOGATOR_DTO_DATESTAMP_H
 
-namespace blogator {
+namespace blogator::dto {
     struct DateStamp {
         DateStamp() = default;
 

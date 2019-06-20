@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "../html/html.h"
+#include "../dto/DateStamp.h"
 
 /**
  * Initialise the index
@@ -22,7 +23,7 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     static const std::regex blog_css_regex  = std::regex( "^.*(blog)\\.(css)$" );
     static const std::regex index_css_regex = std::regex( "^.*(index)\\.(css)$" );
 
-    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._css_dir ) ) {
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.css_dir ) ) {
         if( p.is_regular_file() ) {
             if( std::regex_match( p.path().string(), blog_css_regex ) ) {
                 index->_paths.blog_css = p.path();
@@ -35,11 +36,11 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     }
 
     if( index->_paths.blog_css.empty() ) {
-        std::ofstream output( index->_paths.blog_css = global_options._css_dir / "blog.css" );
+        std::ofstream output( index->_paths.blog_css = global_options._paths.css_dir / "blog.css" );
         std::cerr << "No master stylesheet was found for the articles. A blank one was created." << std::endl;
     }
     if( index->_paths.index_css.empty() ) {
-        std::ofstream output( index->_paths.index_css = global_options._css_dir / "index.css" );
+        std::ofstream output( index->_paths.index_css = global_options._paths.css_dir / "index.css" );
         std::cerr << "No master stylesheet was found for the indices. A blank one was created." << std::endl;
     }
 
@@ -48,7 +49,7 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     static const std::regex footer_regx = std::regex( "^.*(footer)\\.(?:html|htm)$" );
     static const std::regex html_regx   = std::regex( "^.*(?:html|htm)$" );
 
-    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._source_dir ) ) {
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.source_dir ) ) {
         if( p.is_regular_file() ) {
             if( std::regex_match( p.path().string(), header_regx ) ) {
                 index->_paths.header = p.path();
@@ -68,6 +69,13 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
         throw  std::runtime_error( "No footer file found." );
     if( index->_file_index.empty() )
         throw  std::runtime_error( "No files to index found." );
+
+    std::sort( index->_file_index.begin(),
+               index->_file_index.end(),
+               []( const dto::Article &a, const dto::Article &b ) {
+                    return dto::DateStamp::compare( a._datestamp, b._datestamp ) < 0;
+               }
+    );
 
     return std::move( index );
 }
@@ -109,7 +117,7 @@ void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem:
  * @return DateStamp object
  * @throws std::invalid_argument when the given string cannot be converted into a DateStamp object
  */
-blogator::DateStamp blogator::indexer::convertDate( const std::string & date ) {
+blogator::dto::DateStamp blogator::indexer::convertDate( const std::string & date ) {
     auto date_rx = std::regex( R"(.*?(\d{4})-(\d{2})-(\d{2}))" );
     std::smatch matches;
     std::regex_search( date, matches, date_rx );
@@ -118,7 +126,7 @@ blogator::DateStamp blogator::indexer::convertDate( const std::string & date ) {
         throw std::invalid_argument( "Malformed date found in <time> tag: " + date );
 
     try {
-        return blogator::DateStamp(
+        return blogator::dto::DateStamp(
             std::stoi( matches[ 1 ] ),
             std::stoi( matches[ 2 ] ),
             std::stoi( matches[ 3 ] )

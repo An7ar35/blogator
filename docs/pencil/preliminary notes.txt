@@ -1,3 +1,9 @@
+//TODO
+======
+· Find/replace tags inside any <span class="tag">..</span> with hyperlinked versions (<a></a>)
+· HTML generator
+· Index of all articles, tags,  etc...
+
 Source material
 ===============
 · File names are in order of publication
@@ -30,5 +36,4 @@ Tags for page-per-page navigation:
 
 Future
 ======
-· Localised months from text file with <K,V>=<month number, month string>
 · Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
