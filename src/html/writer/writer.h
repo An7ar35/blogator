@@ -18,6 +18,9 @@ namespace blogator::html::writer {
 
     void openTree( dto::IndexPane::TagTree &tag_tree );
     void closeTree( dto::IndexPane::TagTree &tag_tree );
+    void openTagNode( const std::string &tag, dto::IndexPane::TagTree &tag_tree );
+    void closeTagNode( dto::IndexPane::TagTree &tag_tree );
+    void addArticleLeaf( const dto::Article &article, const size_t &article_pos, dto::IndexPane::TagTree &tag_tree );
 }
 
 #endif //BLOGATOR_HTML_WRITER_H

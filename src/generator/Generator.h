@@ -29,7 +29,6 @@ namespace blogator {
 
         std::unique_ptr<dto::IndexPane> generateIndexPaneHTML( const dto::Index &master_index, const TagIndexMap_t &tag_index ) const;
         std::unique_ptr<dto::IndexPane> generateIndexPane_ByDate_HTML( const dto::Index &master_index,
-                                                                       const TagIndexMap_t &tag_index,
                                                                        std::unique_ptr<dto::IndexPane> index_pane ) const;
         std::unique_ptr<dto::IndexPane> generateIndexPane_ByTags_HTML( const dto::Index &master_index,
                                                                        const TagIndexMap_t &tag_index,

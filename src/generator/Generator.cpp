@@ -164,7 +164,7 @@ std::unique_ptr<blogator::dto::IndexPane>
                                                 const TagIndexMap_t &tag_index ) const
 {
     auto pane = std::make_unique<dto::IndexPane>();
-    pane = generateIndexPane_ByDate_HTML( master_index, tag_index, std::move( pane ) );
+    pane = generateIndexPane_ByDate_HTML( master_index, std::move( pane ) );
     pane = generateIndexPane_ByTags_HTML( master_index, tag_index, std::move( pane ) );
     return std::move( pane );
 }
@@ -178,7 +178,6 @@ std::unique_ptr<blogator::dto::IndexPane>
  */
 std::unique_ptr<blogator::dto::IndexPane>
     blogator::Generator::generateIndexPane_ByDate_HTML( const blogator::dto::Index & master_index,
-                                                        const blogator::Generator::TagIndexMap_t & tag_index,
                                                         std::unique_ptr<blogator::dto::IndexPane> index_pane ) const
 {
     auto pane = std::move( index_pane );
@@ -228,25 +227,33 @@ std::unique_ptr<blogator::dto::IndexPane>
  * @return IndexPane DTO
  */
 std::unique_ptr<blogator::dto::IndexPane>
-    blogator::Generator::generateIndexPane_ByTags_HTML( const blogator::dto::Index & master_index,
-                                                        const blogator::Generator::TagIndexMap_t & tag_index,
+    blogator::Generator::generateIndexPane_ByTags_HTML( const blogator::dto::Index &master_index,
+                                                        const blogator::Generator::TagIndexMap_t &tag_index,
                                                         std::unique_ptr<blogator::dto::IndexPane> index_pane ) const
 {
     auto pane = std::move( index_pane );
-//TODO
-    auto mapTag = []( const std::string &tag, dto::IndexPane &pane ) {
 
-    };
-    //====INDEX BY-TAGS====
     html::writer::openTree( pane->_tag_tree );
 
-    for( const auto &tag : master_index._global_tags ) {
+    for( const auto &tag : tag_index ) {
+        html::writer::openTagNode( tag.first, pane->_tag_tree );
 
+        for( auto article_i : tag.second ) {
+            try {
+                html::writer::addArticleLeaf( master_index._articles.at( article_i ),
+                                              article_i,
+                                              pane->_tag_tree );
+
+            } catch( std::out_of_range &e ) {
+                std::cerr << "Could not find article in i=" << article_i << " referenced in tag '"
+                          << tag.first << "'. Skipping." << std::endl;
+            }
+        }
+
+        html::writer::closeTagNode( pane->_tag_tree );
     }
 
     html::writer::closeTree( pane->_tag_tree );
-//    auto mapArticle( size_t article_index, )
-    //    void mapTag( const std::string &tag );
-    //    void mapArticleToByTagLine( size_t article_index );
+
     return std::move( pane );
 }
