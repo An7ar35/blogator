@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <regex>
 #include <filesystem>
+#include <eadlib/cli/parser/Parser.h>
 
 #include "indexer/indexer.h"
 #include "generator/Generator.h"
@@ -17,6 +18,7 @@ int main() {
     options._paths.index_dir  = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/index" );
     options._paths.posts_dir  = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/posts" );
     options._paths.month_file = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/months.txt" );
+    options._navigation.index_div_location = dto::Options::Navigation::IndexNavPos::BEFORE;
 
     if( fs::setupEnvironment( options ) ) {
         auto index = indexer::index( options );

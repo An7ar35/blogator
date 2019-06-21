@@ -14,12 +14,12 @@ namespace blogator::dto {
             s << "Footer....: " << index._paths.footer.string() << std::endl;
             s << "Blog CSS..: " << index._paths.blog_css.string() << std::endl;
             s << "Index CSS.: " << index._paths.index_css.string() << std::endl;
-            s << "Articles..: " << index._file_index.size() << " found." << std::endl;
+            s << "Articles..: " << index._articles.size() << " found." << std::endl;
             s << "Tags......: " << std::endl;
             for( const auto &t : index._global_tags )
                 s << "\t" << t.first << std::endl;
             s << std::endl;
-            for( const auto &a : index._file_index )
+            for( const auto &a : index._articles )
                 s << a << std::endl;
             return s;
         }
@@ -31,8 +31,8 @@ namespace blogator::dto {
             std::filesystem::path blog_css;
         } _paths;
 
-        std::vector<Article>                         _file_index;
-        std::map<std::string, std::filesystem::path> _global_tags;
+        std::vector<Article>                         _articles;
+        std::map<std::string, std::filesystem::path> _global_tags; //where in the "index" folder each tag index folder lives in
     };
 }
 

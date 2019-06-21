@@ -1,4 +1,4 @@
-#include "html.h"
+#include "reader.h"
 #include <iostream>
 
 /**
@@ -6,7 +6,7 @@
  * @param line Line of html text
  * @return Heading found
  */
-std::string blogator::html::readHeading( const std::string &line ) {
+std::string blogator::html::reader::getHeading( const std::string &line ) {
     static const std::string h1_tag_open = "<h1>";
 
     std::string heading;
@@ -25,7 +25,7 @@ std::string blogator::html::readHeading( const std::string &line ) {
  * @param line Line of html text
  * @return Date found
  */
-std::string blogator::html::readDate( const std::string &line ) {
+std::string blogator::html::reader::getDate( const std::string &line ) {
     static const std::string time_tag_open = "<time datetime=\"";
 
     std::string date;
@@ -44,7 +44,7 @@ std::string blogator::html::readDate( const std::string &line ) {
  * @param line Line of html text
  * @return Set of tags found
  */
-std::vector<std::string> blogator::html::readTags( const std::string &line ) {
+std::vector<std::string> blogator::html::reader::getTags( const std::string &line ) {
     static const std::string span_tag_open = "<span class=\"tag\">";
     static const std::string span_tag_close = "</span>";
 
@@ -82,7 +82,7 @@ std::vector<std::string> blogator::html::readTags( const std::string &line ) {
  * @throws std::invalid_argument when the tag is empty (i.e.: "")
  * @throws std::out_of_range when the tag cannot be found on any lines
  */
-size_t blogator::html::findLineOfTag( const std::string &tag, const blogator::dto::HTML &html ) {
+size_t blogator::html::reader::findLineOfTag( const std::string &tag, const blogator::dto::HTML &html ) {
     if( tag.empty() )
         throw std::invalid_argument( "No tag was given." );
 

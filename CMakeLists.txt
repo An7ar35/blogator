@@ -55,15 +55,19 @@ set(SOURCE_FILES
         src/dto/Options.h
         src/dto/Index.h
         src/dto/HTML.h
+        src/html/html.h
+        src/html/writer/writer.cpp
+        src/html/writer/writer.h
+        src/html/reader/reader.cpp
+        src/html/reader/reader.h
         src/indexer/indexer.cpp
         src/indexer/indexer.h
-        src/html/html.cpp
-        src/html/html.h
         src/fs/fs.cpp
         src/fs/fs.h
         src/fs/exception/bad_file_source.h
         src/generator/Generator.cpp
-        src/generator/Generator.h)
+        src/generator/Generator.h
+        src/dto/IndexPane.h)
 
 #####################
 # Google Unit-Tests #
@@ -89,7 +93,8 @@ endif()
 
 set(TEST_FILES
         tests/main.cpp
-        tests/html/html.cpp)
+        tests/html/html.cpp
+        tests/dto/DateStamp.cpp)
 
 enable_testing()
 

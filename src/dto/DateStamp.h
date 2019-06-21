@@ -35,6 +35,10 @@ namespace blogator::dto {
                 return 1;
             return 0;
         }
+
+        static unsigned concatYYYYMM( const DateStamp &stamp ) {
+            return stamp._year * 100 + stamp._month;
+        }
     };
 }
 

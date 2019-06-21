@@ -56,9 +56,9 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
             } else if( std::regex_match( p.path().string(), footer_regx ) ) {
                 index->_paths.footer = p.path();
             } else if( std::regex_match( p.path().string(), html_regx ) ) {
-                index->_file_index.emplace_back( readFileProperties( p.path() ) );
-                addTags( index->_file_index.back(), *index );
-                addCSS( css_cache, index->_file_index.back() );
+                index->_articles.emplace_back( readFileProperties( p.path() ) );
+                addTags( index->_articles.back(),*index );
+                addCSS( css_cache, index->_articles.back() );
             }
         }
     }
@@ -67,13 +67,13 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
         throw std::runtime_error( "No header file found." );
     if( index->_paths.footer.empty() )
         throw  std::runtime_error( "No footer file found." );
-    if( index->_file_index.empty() )
+    if( index->_articles.empty() )
         throw  std::runtime_error( "No files to index found." );
 
-    std::sort( index->_file_index.begin(),
-               index->_file_index.end(),
+    std::sort( index->_articles.begin(),
+               index->_articles.end(),
                []( const dto::Article &a, const dto::Article &b ) {
-                    return dto::DateStamp::compare( a._datestamp, b._datestamp ) < 0;
+                    return dto::DateStamp::compare( a._datestamp, b._datestamp ) > 0;
                }
     );
 
@@ -161,19 +161,19 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                 line.erase( trim_begin, trim_end );
 
                 if( !heading_found ) {
-                    article._heading = html::readHeading( line );
+                    article._heading = html::reader::getHeading( line );
                     heading_found = !article._heading.empty();
                 }
 
                 if( !date_found ) {
-                    auto date = html::readDate( line );
+                    auto date = html::reader::getDate( line );
                     if( !date.empty() ) {
                         article._datestamp = convertDate( date );
                         date_found = true;
                     }
                 }
 
-                auto tags = html::readTags( line );
+                auto tags = html::reader::getTags( line );
                 std::copy( tags.begin(), tags.end(),
                            std::inserter( article._tags, article._tags.begin() ) );
             }

@@ -6,6 +6,7 @@
 
 namespace blogator::dto {
     struct HTML {
+        typedef size_t LineIndex_t;
         std::vector<std::string> _lines;
     };
 }
