@@ -45,28 +45,34 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     }
 
     //====HTML====
-    static const std::regex header_regx = std::regex( "^.*(header)\\.(?:html|htm)$" );
-    static const std::regex footer_regx = std::regex( "^.*(footer)\\.(?:html|htm)$" );
-    static const std::regex html_regx   = std::regex( "^.*(?:html|htm)$" );
+    static const std::regex template_post_rx  = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
+    static const std::regex template_index_rx = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
+    static const std::regex template_start_rx = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
+    static const std::regex html_rx           = std::regex( "^.*(?:html|htm)$" );
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.source_dir ) ) {
         if( p.is_regular_file() ) {
-            if( std::regex_match( p.path().string(), header_regx ) ) {
-                index->_paths.header = p.path();
-            } else if( std::regex_match( p.path().string(), footer_regx ) ) {
-                index->_paths.footer = p.path();
-            } else if( std::regex_match( p.path().string(), html_regx ) ) {
-                index->_articles.emplace_back( readFileProperties( p.path() ) );
-                addTags( index->_articles.back(),*index );
-                addCSS( css_cache, index->_articles.back() );
+            if( std::regex_match( p.path().string(), template_post_rx ) ) {
+                index->_paths.post_template = p.path();
+            } else if( std::regex_match( p.path().string(), template_index_rx ) ) {
+                index->_paths.index_template = p.path();
+            } else if( std::regex_match( p.path().string(), template_start_rx ) ) {
+                index->_paths.start_template = p.path();
+            } else if( std::regex_match( p.path().string(), html_rx ) ) {
+                    index->_articles.emplace_back( readFileProperties( p.path() ) );
+                    addTags( index->_articles.back(),*index );
+                    addCSS( css_cache, index->_articles.back() );
+                    addOutputPath( global_options._paths, index->_articles.back() );
             }
         }
     }
 
-    if( index->_paths.header.empty() )
-        throw std::runtime_error( "No header file found." );
-    if( index->_paths.footer.empty() )
-        throw  std::runtime_error( "No footer file found." );
+    if( index->_paths.post_template.empty() )
+        throw std::runtime_error( "No post page template file found." );
+    if( index->_paths.index_template.empty() )
+        throw std::runtime_error( "No index page template file found." );
+    if( index->_paths.start_template.empty() )
+        throw std::runtime_error( "No start page template file found." );
     if( index->_articles.empty() )
         throw  std::runtime_error( "No files to index found." );
 
@@ -103,10 +109,10 @@ void blogator::indexer::addTags( const blogator::dto::Article &article,
 void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem::path> &found_stylesheets,
                                 blogator::dto::Article &article )
 {
-    auto it = found_stylesheets.find( article._html_filepath.stem().string() );
+    auto it = found_stylesheets.find( article._paths.src_html.stem().string() );
 
     if( it != found_stylesheets.end() ) {
-        article._css_filepath = it->second;
+        article._paths.css = it->second;
         found_stylesheets.erase( it );
     }
 }
@@ -146,7 +152,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
     bool heading_found = false;
     bool date_found    = false;
 
-    article._html_filepath = path;
+    article._paths.src_html = path;
 
     std::string   line;
     std::ifstream html_file( path.string() );
@@ -189,6 +195,22 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
     }
 
     return article;
+}
+
+/**
+ * Creates the absolute output path of the post
+ * @param global_paths Global paths set in dto::Options
+ * @param article      Article to create an output path for
+ */
+void blogator::indexer::addOutputPath( const dto::Options::Paths &global_paths,
+                                       blogator::dto::Article &article )
+{
+//    auto abs_target = global_paths.posts_dir/ article._paths.src_html.lexically_relative( global_paths.source_dir );
+//    article._paths.out_html = abs_target.lexically_relative( global_paths.root_dir );
+
+//    article._paths.out_html = article._paths.src_html.lexically_relative( global_paths.source_dir );
+    auto abs_path = global_paths.posts_dir / article._paths.src_html.filename();
+    article._paths.out_html = abs_path.lexically_relative( global_paths.posts_dir );
 }
 
 

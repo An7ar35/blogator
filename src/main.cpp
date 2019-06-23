@@ -12,21 +12,18 @@ int main() {
     using namespace blogator;
 
     auto options = dto::Options();
-    options._paths.root_dir   = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog" );
+    options._paths.root_dir   = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/" );
     options._paths.source_dir = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/source" );
     options._paths.css_dir    = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/css" );
     options._paths.index_dir  = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/index" );
     options._paths.posts_dir  = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/posts" );
-    options._paths.month_file = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/months.txt" );
-    options._navigation.index_div_location = dto::Options::Navigation::IndexNavPos::BEFORE;
+    options._paths.month_file = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/source/template/months.txt" );
 
     if( fs::setupEnvironment( options ) ) {
         auto index = indexer::index( options );
         std::cout << *index << std::endl;
-        auto months = fs::importMonthNames( options._paths.month_file );
 
         auto generator = Generator( options );
-        generator.useMonthStrings( months );
         generator.init( *index );
 
     } else {

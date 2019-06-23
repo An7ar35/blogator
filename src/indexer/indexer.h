@@ -15,6 +15,7 @@ namespace blogator::indexer {
 
     void addTags( const dto::Article &article, dto::Index &master_index );
     void addCSS( std::unordered_map<std::string, std::filesystem::path> &found_stylesheets, dto::Article &article );
+    void addOutputPath( const dto::Options::Paths &global_paths, dto::Article &article );
     dto::DateStamp convertDate( const std::string &date );
     dto::Article readFileProperties( const std::filesystem::path &path );
 }

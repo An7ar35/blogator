@@ -3,6 +3,7 @@
 · Find/replace tags inside any <span class="tag">..</span> with hyperlinked versions (<a></a>)
 · HTML generator
 · Index of all articles, tags,  etc...
+· RSS feed?
 
 Source material
 ===============

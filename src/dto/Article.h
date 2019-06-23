@@ -11,11 +11,12 @@ namespace blogator::dto {
     struct Article {
         friend std::ostream &operator <<( std::ostream &s, const Article &article ) {
             s << "Article={ \n"
-              << "\theading: \"" << article._heading << "\",\n"
-              << "\tdate   : '" << article._datestamp << "',\n"
-              << "\tfile   : " << article._html_filepath.string() << ",\n"
-              << "\tcss    : " << ( article._css_filepath.empty() ? "none" : article._css_filepath.string() ) << ",\n"
-              << "\ttags   : ";
+              << "\tTitle/Heading......: \"" << article._heading << "\"\n"
+              << "\tDate-stamp.........: '" << article._datestamp << "'\n"
+              << "\tSource file path...: " << article._paths.src_html.string() << "\n"
+              << "\tRelative html link.: " << article._paths.out_html.string() << "\n"
+              << "\tArticle stylesheet.: " << ( article._paths.css.empty() ? "none" : article._paths.css.string() ) << "\n"
+              << "\tTags...............: ";
             for( const auto &t : article._tags )
                 s << "\"" << t << "\" ";
             s << "\n};";
@@ -23,10 +24,14 @@ namespace blogator::dto {
             return s;
         }
 
+        struct Paths {
+            std::filesystem::path src_html;
+            std::filesystem::path out_html;
+            std::filesystem::path css;
+        } _paths;
+
         std::string           _heading;
         DateStamp             _datestamp;
-        std::filesystem::path _html_filepath;
-        std::filesystem::path _css_filepath;
         std::set<std::string> _tags;
     };
 }

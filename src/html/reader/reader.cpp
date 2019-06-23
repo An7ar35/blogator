@@ -1,5 +1,6 @@
 #include "reader.h"
 #include <iostream>
+#include <regex>
 
 /**
  * Gets the text between heading (h1) tags
@@ -93,4 +94,38 @@ size_t blogator::html::reader::findLineOfTag( const std::string &tag, const blog
     }
 
     throw std::out_of_range( "Tag \"" + tag + "\" could not be found in dto::HTML." );
+}
+
+/**
+ * Finds insert positions in an HTML structure
+ * @param html HTML DTO to search in
+ * @param divs Map of div class names to find
+ * @return Reference to the modified DivWritePositions_t
+ */
+blogator::dto::Template::DivWritePositions_t &
+    blogator::html::reader::findInsertPositions( const blogator::dto::HTML &html,
+                                                 blogator::dto::Template::DivWritePositions_t &divs )
+{
+    size_t line_number = 0;
+
+    for( const auto &line : html._lines ) {
+        auto d = line.find( "<div " );
+
+        if( d != std::string::npos ) {
+            for( auto &div : divs ) {
+                auto s  = "<div class=\"" + div.first + "\">";
+                auto rx = std::regex( '(' + s + ')' );
+                auto it = std::sregex_iterator( line.begin(), line.end(), rx );
+
+                while( it != std::sregex_iterator() ) {
+                    div.second.emplace_back( line_number, it->position() + s.length() );
+                    ++it;
+                }
+            }
+        }
+
+        ++line_number;
+    }
+
+    return divs;
 }

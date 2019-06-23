@@ -1,7 +1,11 @@
-#ifndef BLOGATOR_HTML_H
-#define BLOGATOR_HTML_H
+#ifndef BLOGATOR_READER_H
+#define BLOGATOR_READER_H
 
 #include "reader/reader.h"
 #include "writer/writer.h"
 
-#endif //BLOGATOR_HTML_H
+namespace blogator::html {
+    std::string createStylesheetLink( const std::filesystem::path &css_loc, const std::filesystem::path &out_dir );
+}
+
+#endif //BLOGATOR_READER_H
