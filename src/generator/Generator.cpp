@@ -24,7 +24,7 @@ blogator::Generator::Generator( blogator::dto::Options global_options ) :
  * @return Success
  */
 bool blogator::Generator::init( const blogator::dto::Index &master_index ) {
-    auto master_tag_index = createTagIndex( master_index );
+    auto master_tag_index = dto::Index::createTagIndex( master_index );
     auto templates        = importTemplates( master_index );
 
     try {
@@ -33,11 +33,11 @@ bool blogator::Generator::init( const blogator::dto::Index &master_index ) {
         std::cout << "Using default month strings (eng)." << std::endl;
     }
 
-    auto success_posts = createPostPages( master_index, *templates, *master_tag_index );
-    auto success_index = createIndexPages( master_index, *templates, *master_tag_index );
-    auto success_start = createStartPage( master_index, *templates, *master_tag_index );
+    auto posts_ok = createPostPages( master_index, *templates, *master_tag_index );
+    auto index_ok = createIndexPages( master_index, *templates, *master_tag_index );
+    auto start_ok = createStartPage( master_index, *templates, *master_tag_index );
 
-    return false;
+    return ( index_ok && posts_ok && start_ok );
 }
 
 /**
@@ -59,31 +59,6 @@ std::unique_ptr<blogator::dto::Template>
     html::reader::findInsertPositions( *templates->_start.html, templates->_start.div_write_pos );
 
     return std::move( templates );
-}
-
-/**
- * Generate a tag index map
- * @param master_index Master Index
- * @return TagIndexMap_t (K=tag string, V=vector of indices to the master Article index)
- */
-std::unique_ptr<blogator::Generator::TagIndexMap_t>
-    blogator::Generator::createTagIndex( const blogator::dto::Index &master_index ) const
-{
-    auto tag_index = std::make_unique<TagIndexMap_t>();
-
-    size_t i = 0;
-    for( const auto &article : master_index._articles ) {
-        for( const auto &tag : article._tags ) {
-            if( tag_index->find( tag ) == tag_index->end() ) {
-                tag_index->insert( std::make_pair( tag, std::vector<size_t>( { i } ) ) );
-            } else {
-                tag_index->at( tag ).emplace_back( i );
-            }
-            ++i;
-        }
-    }
-
-    return std::move( tag_index );
 }
 
 /**
