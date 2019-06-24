@@ -155,6 +155,9 @@ bool blogator::Generator::createIndexPages( const blogator::dto::Index &master_i
                                             const blogator::dto::Template &templates,
                                             const blogator::Generator::TagIndexMap_t &master_tag_index ) const
 {
+    const size_t page_count = ( master_index._articles.size() / _options._index.items_per_page )
+                            + ( master_index._articles.size() % _options._index.items_per_page ) != 0;
+    std::cout << "Going to need " << page_count << " page in the index 'by date'" << std::endl;
     return false;
 }
 

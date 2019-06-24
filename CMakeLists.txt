@@ -70,7 +70,7 @@ set(SOURCE_FILES
         src/fs/fs.h
         src/generator/Generator.cpp
         src/generator/Generator.h
-        src/exception/file_access_failure.h)
+        src/exception/file_access_failure.h src/exception/file_parsing_failure.h)
 
 #####################
 # Google Unit-Tests #

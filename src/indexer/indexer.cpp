@@ -7,6 +7,8 @@
 
 #include "../html/html.h"
 #include "../dto/DateStamp.h"
+#include "../exception/file_access_failure.h"
+#include "../exception/file_parsing_failure.h"
 
 /**
  * Initialise the index
@@ -45,24 +47,34 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     }
 
     //====HTML====
-    static const std::regex template_post_rx  = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
-    static const std::regex template_index_rx = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
-    static const std::regex template_start_rx = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
-    static const std::regex html_rx           = std::regex( "^.*(?:html|htm)$" );
+    static const std::regex template_post_rx    = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
+    static const std::regex template_index_rx   = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
+    static const std::regex template_start_rx   = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
+    static const std::regex index_entry_html_rx = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
+    static const std::regex html_rx             = std::regex( "^.+\\.(?:htm|html)$" );
+
+    auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
+    auto index_entry_match = std::smatch();
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.source_dir ) ) {
         if( p.is_regular_file() ) {
-            if( std::regex_match( p.path().string(), template_post_rx ) ) {
+            auto path = p.path().string();
+            if( std::regex_match( path, template_post_rx ) ) {
                 index->_paths.post_template = p.path();
-            } else if( std::regex_match( p.path().string(), template_index_rx ) ) {
+            } else if( std::regex_match( path, template_index_rx ) ) {
                 index->_paths.index_template = p.path();
-            } else if( std::regex_match( p.path().string(), template_start_rx ) ) {
+            } else if( std::regex_match( path, template_start_rx ) ) {
                 index->_paths.start_template = p.path();
-            } else if( std::regex_match( p.path().string(), html_rx ) ) {
-                    index->_articles.emplace_back( readFileProperties( p.path() ) );
-                    addTags( index->_articles.back(),*index );
-                    addCSS( css_cache, index->_articles.back() );
-                    addOutputPath( global_options._paths, index->_articles.back() );
+            } else if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
+                if( index_entry_match.size() > 1 )
+                    index_entry_files.emplace(
+                        std::make_pair( index_entry_match[1].str(), p.path() )
+                    );
+            } else if( std::regex_match( path, html_rx ) ) {
+                index->_articles.emplace_back( readFileProperties( p.path() ) );
+                addTags( index->_articles.back(),*index );
+                addCSS( css_cache, index->_articles.back() );
+                addOutputPath( global_options._paths, index->_articles.back() );
             }
         }
     }
@@ -75,6 +87,14 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
         throw std::runtime_error( "No start page template file found." );
     if( index->_articles.empty() )
         throw  std::runtime_error( "No files to index found." );
+
+    //Add any *_index html files to their respective articles index entry path if found
+    if( !index_entry_files.empty() )
+        for( auto &article : index->_articles ) {
+            auto entry_it = index_entry_files.find( article._paths.src_html.filename().stem().string() );
+            if( entry_it != index_entry_files.end() )
+                article._paths.entry_html = entry_it->second;
+        }
 
     std::sort( index->_articles.begin(),
                index->_articles.end(),
@@ -146,6 +166,7 @@ blogator::dto::DateStamp blogator::indexer::convertDate( const std::string & dat
  * Gets all the properties (heading, tags, date) from an html post
  * @param path Path of the html file
  * @return Article DTO
+ * @throws blogator::exception::file_parsing_failure when issues are raised during content parsing
  */
 blogator::dto::Article blogator::indexer::readFileProperties( const std::filesystem::path &path ) {
     auto article       = blogator::dto::Article();
@@ -180,6 +201,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                 }
 
                 auto tags = html::reader::getTags( line );
+
                 std::copy( tags.begin(), tags.end(),
                            std::inserter( article._tags, article._tags.begin() ) );
             }
@@ -187,12 +209,20 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
             html_file.close();
 
         } else {
-            std::cout << "could not open: " << path.string() << std::endl;
+            throw exception::file_access_failure( "Could not open: " + path.string() );
         }
 
     } catch( std::invalid_argument &e ) {
-        std::cerr << e.what() << std::endl; //TODO error control: better flaging of error for controller
+        throw exception::file_parsing_failure( "Failed parsing for post '" + path.string() + "': " + e.what() );
     }
+
+    if( !heading_found )
+        throw exception::file_parsing_failure( "No heading (h1) found in post: " + path.string() );
+    if( !date_found )
+        throw exception::file_parsing_failure( "No date (<time>) found in post: " + path.string() );
+
+    if( article._tags.empty() )
+        article._tags.emplace( "no tag" );
 
     return article;
 }
@@ -205,10 +235,6 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
 void blogator::indexer::addOutputPath( const dto::Options::Paths &global_paths,
                                        blogator::dto::Article &article )
 {
-//    auto abs_target = global_paths.posts_dir/ article._paths.src_html.lexically_relative( global_paths.source_dir );
-//    article._paths.out_html = abs_target.lexically_relative( global_paths.root_dir );
-
-//    article._paths.out_html = article._paths.src_html.lexically_relative( global_paths.source_dir );
     auto abs_path = global_paths.posts_dir / article._paths.src_html.filename();
     article._paths.out_html = abs_path.lexically_relative( global_paths.posts_dir );
 }

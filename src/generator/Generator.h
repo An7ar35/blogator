@@ -20,7 +20,7 @@ namespace blogator {
         bool init( const dto::Index &master_index );
 
       private:
-        dto::Options                   _options;
+        dto::Options _options;
 
         std::unique_ptr<dto::Template> importTemplates( const dto::Index &master_index ) const;
 

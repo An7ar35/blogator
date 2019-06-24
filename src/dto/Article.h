@@ -15,6 +15,7 @@ namespace blogator::dto {
               << "\tDate-stamp.........: '" << article._datestamp << "'\n"
               << "\tSource file path...: " << article._paths.src_html.string() << "\n"
               << "\tRelative html link.: " << article._paths.out_html.string() << "\n"
+              << "\tIndex entry html...: " << article._paths.entry_html.string() << "\n"
               << "\tArticle stylesheet.: " << ( article._paths.css.empty() ? "none" : article._paths.css.string() ) << "\n"
               << "\tTags...............: ";
             for( const auto &t : article._tags )
@@ -26,6 +27,7 @@ namespace blogator::dto {
 
         struct Paths {
             std::filesystem::path src_html;
+            std::filesystem::path entry_html;
             std::filesystem::path out_html;
             std::filesystem::path css;
         } _paths;
