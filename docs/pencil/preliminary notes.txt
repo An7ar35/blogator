@@ -38,3 +38,10 @@ Tags for page-per-page navigation:
 Future
 ======
 · Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
+
+
+
+
+Sources
+=======
+Pure CSS tree menu: https://www.thecssninja.com/css/css-tree-menu

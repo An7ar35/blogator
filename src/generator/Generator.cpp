@@ -19,14 +19,13 @@ blogator::Generator::Generator( blogator::dto::Options global_options ) :
 {}
 
 /**
- *
- * @param master_index
- * @return
+ * Initialize HTML page generation
+ * @param master_index Master index of all posts/articles
+ * @return Success
  */
 bool blogator::Generator::init( const blogator::dto::Index &master_index ) {
-    auto master_tag_index    = createTagIndex( master_index );
-    auto templates           = importTemplates( master_index );
-    auto consecutive_div_pos = dto::Template::getConsecutiveWritePositions( templates->_post.div_write_pos );
+    auto master_tag_index = createTagIndex( master_index );
+    auto templates        = importTemplates( master_index );
 
     try {
         templates->_months = fs::importMonthNames( _options._paths.month_file );
@@ -34,112 +33,11 @@ bool blogator::Generator::init( const blogator::dto::Index &master_index ) {
         std::cout << "Using default month strings (eng)." << std::endl;
     }
 
-    std::unique_ptr<dto::IndexDateTree> html_date_tree;
-    std::unique_ptr<dto::IndexTagTree>  html_tag_tree;
+    auto success_posts = createPostPages( master_index, *templates, *master_tag_index );
+    auto success_index = createIndexPages( master_index, *templates, *master_tag_index );
+    auto success_start = createStartPage( master_index, *templates, *master_tag_index );
 
-    if( templates->_post.div_write_pos.find( "index_pane_dates" ) != templates->_post.div_write_pos.end() )
-        html_date_tree = generateIndexDateTreeHTML( master_index, *templates );
-
-    if( templates->_post.div_write_pos.find( "index_pane_tags" ) != templates->_post.div_write_pos.end() )
-        html_tag_tree = generateIndexTagTreeHTML( master_index, *master_tag_index );
-
-//    if( html_pane ) {
-//        std::cout << "====INDEX PANE HTML: DATE TREE====" << std::endl;
-//        for( const auto &line : html_pane->_date_tree.html._lines )
-//            std::cout << line << std::endl;
-//
-//        std::cout << "----Article Index Map----" << std::endl;
-//        for( const auto &a : html_pane->_date_tree.article_line_map )
-//            std::cout << a.first << " -> line #" << a.second << std::endl;
-//
-//        std::cout << "----Date Checkbox Map----" << std::endl;
-//        for( const auto &date : html_pane->_date_tree.date_line_map )
-//            std::cout << date.first << " -> line #" << date.second << std::endl;
-//
-//        std::cout << "====INDEX PANE HTML: TAG TREE====" << std::endl;
-//        for( const auto &line : html_pane->_tag_tree.html._lines )
-//            std::cout << line << std::endl;
-//
-//        std::cout << "----Article Line Map----" << std::endl;
-//        for( const auto &t : html_pane->_tag_tree.articles_line_map ) {
-//            std::cout << t.first << " -> lines { ";
-//            for( auto e : t.second )
-//                std::cout << e << " ";
-//            std::cout << "}" << std::endl;
-//        }
-//
-//        std::cout << "----Tag Line Map----" << std::endl;
-//        for( const auto &tag : html_pane->_tag_tree.tag_line_map )
-//            std::cout << tag.first << " -> line #" << tag.second << std::endl;
-//    }
-//
-//
-//    std::cout << "====MASTER TAG INDEX====" << std::endl;
-//    for( const auto &t : *master_tag_index ) {
-//        std::cout << t.first << " = { ";
-//        for( auto e : t.second )
-//            std::cout << e << " ";
-//        std::cout << "}" << std::endl;
-//    }
-//
-//    std::cout << "====MONTH STRINGS====" << std::endl;
-//    for( const auto &m : _month_map )
-//        std::cout << "{ "<< m.first << ", " << m.second << " }" << std::endl;
-
-    try {
-        const auto css_insert_line = html::reader::findLineOfTag( "</head>", *templates->_post.html );
-        size_t     curr_article_i  = 0;
-
-        for( const auto &article : master_index._articles ) {
-            const auto html_out    = ( _options._paths.posts_dir / article._paths.out_html );
-            const auto css_link    = html::createStylesheetLink( article._paths.css, html_out );
-
-            if( std::filesystem::exists( html_out ) )
-                throw exception::file_access_failure(
-                    "File '" + html_out.string() + "' already exists. Possible files with duplicate names in source folder structure."
-                );
-
-            auto article_out = std::ofstream( html_out );
-
-            if( !article_out.is_open() )
-                throw exception::file_access_failure(
-                    "File '" + html_out.string() + "' could not be opened for writing."
-                );
-
-            size_t curr_src_line = 0;
-            auto   insert_point  = consecutive_div_pos.begin();
-            for( const auto &template_line : templates->_post.html->_lines ) {
-                if( !article._paths.css.empty() && css_insert_line == curr_src_line )
-                    article_out << css_link << std::endl;
-
-                if( insert_point->first.line == curr_src_line ) {
-                    if( insert_point->second == "page_index" ) {
-                        //writePageIndexDiv()
-                    } else if( insert_point->second == "post_content" ) {
-                        writeContentDiv( article._paths.src_html, article_out );
-                    } else if( insert_point->second == "index_pane_dates" ) {
-                        writeIndexDateTree( article_out, article, curr_article_i, *html_date_tree );
-                    } else if( insert_point->second == "index_pane_tags" ) {
-                        writeIndexTagTree( article_out, article, curr_article_i, *html_tag_tree );
-                    } else {
-                        //TODO "don't know what to do with this. Call the dev!"
-                    }
-                    //TODO -> think about hard and soft tag req.: how to handle this?
-                    ++insert_point;
-                }
-
-                article_out << template_line << std::endl;
-                ++curr_src_line;
-            }
-
-            article_out.close();
-            ++curr_article_i;
-        }
-
-        return false; //TODO
-    } catch( exception::file_access_failure &e ) {
-        std::cerr << e.what() << std::endl;
-    }
+    return false;
 }
 
 /**
@@ -187,6 +85,111 @@ std::unique_ptr<blogator::Generator::TagIndexMap_t>
 
     return std::move( tag_index );
 }
+
+/**
+ * Generates all post/article HTML pages
+ * @param master_index     Master index
+ * @param templates        Template DTO
+ * @param master_tag_index Master tag index
+ * @return Success
+ */
+bool blogator::Generator::createPostPages( const dto::Index &master_index,
+                                           const blogator::dto::Template &templates,
+                                           const blogator::Generator::TagIndexMap_t &master_tag_index ) const
+{
+    auto consecutive_div_pos = dto::Template::getConsecutiveWritePositions( templates._post.div_write_pos );
+
+    std::unique_ptr<dto::IndexDateTree> html_date_tree;
+    std::unique_ptr<dto::IndexTagTree>  html_tag_tree;
+
+    if( templates._post.div_write_pos.find( "index_pane_dates" ) != templates._post.div_write_pos.end() )
+        html_date_tree = generateIndexDateTreeHTML( master_index, templates );
+
+    if( templates._post.div_write_pos.find( "index_pane_tags" ) != templates._post.div_write_pos.end() )
+        html_tag_tree = generateIndexTagTreeHTML( master_index, master_tag_index );
+
+    try {
+        const auto css_insert_line = html::reader::findLineOfTag( "</head>", *templates._post.html );
+        size_t     curr_article_i  = 0;
+
+        for( const auto &article : master_index._articles ) {
+            const auto html_out    = ( _options._paths.posts_dir / article._paths.out_html );
+            const auto css_link    = html::createStylesheetLink( article._paths.css, html_out );
+
+            if( std::filesystem::exists( html_out ) )
+                throw exception::file_access_failure(
+                    "File '" + html_out.string() + "' already exists. Possible files with duplicate names in source folder structure."
+                );
+
+            auto article_out = std::ofstream( html_out );
+
+            if( !article_out.is_open() )
+                throw exception::file_access_failure(
+                    "File '" + html_out.string() + "' could not be opened for writing."
+                );
+
+            size_t curr_src_line = 0;
+            auto   insert_point  = consecutive_div_pos.begin();
+            for( const auto &template_line : templates._post.html->_lines ) {
+                if( !article._paths.css.empty() && css_insert_line == curr_src_line )
+                    article_out << css_link << std::endl;
+
+                if( insert_point->first.line == curr_src_line ) {
+                    const auto char_it = find_if( template_line.begin(),
+                                                  template_line.end(),
+                                                  []( char c ) { return !isspace( c ); } );
+                    const auto spaces  = template_line.substr( 0, char_it - template_line.begin() );
+                    article_out << template_line.substr( 0, insert_point->first.col ) << std::endl;
+
+                    if( insert_point->second == "page_index" ) {
+                        writePageNavDiv( article_out, spaces, master_index, curr_article_i );
+                    } else if( insert_point->second == "post_content" ) {
+                        writeContentDiv( article._paths.src_html, spaces, article_out );
+                    } else if( insert_point->second == "index_pane_dates" ) {
+                        writeIndexDateTree( article_out, spaces, article, curr_article_i, *html_date_tree );
+                    } else if( insert_point->second == "index_pane_tags" ) {
+                        writeIndexTagTree( article_out, spaces, article, curr_article_i, *html_tag_tree );
+                    } else {
+                        std::cerr << "Tag HTML Div class '" << insert_point->second << "' not recognised." << std::endl;
+                    }
+
+                    article_out << spaces << template_line.substr( insert_point->first.col ) << std::endl;
+                    ++insert_point;
+
+                } else {
+                    article_out << template_line << std::endl;
+                }
+
+                ++curr_src_line;
+            }
+
+            article_out.close();
+            ++curr_article_i;
+        }
+
+        return true;
+
+    } catch( exception::file_access_failure &e ) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return false;
+}
+
+bool blogator::Generator::createIndexPages( const blogator::dto::Index &master_index, //TODO
+                                            const blogator::dto::Template &templates,
+                                            const blogator::Generator::TagIndexMap_t &master_tag_index ) const
+{
+    return false;
+}
+
+bool blogator::Generator::createStartPage( const blogator::dto::Index &master_index, //TODO
+                                           const blogator::dto::Template &templates,
+                                           const blogator::Generator::TagIndexMap_t &master_tag_index ) const
+{
+    return false;
+}
+
 
 /**
  * Generates the HTML for the By-Date section of the index pane
@@ -276,12 +279,15 @@ std::unique_ptr<blogator::dto::IndexTagTree>
 
 /**
  * Writes the source article lines to a file
- * @param in  Source article
- * @param out Target file
+ * @param in         Source article
+ * @param fore_space Space to place before the output line
+ * @param out        Target file
  * @throws blogator::exception::file_access_failure when source file could not be opened
  */
 void blogator::Generator::writeContentDiv( const std::filesystem::path &source_path,
-                                           std::ofstream &out ) const {
+                                           const std::string &fore_space,
+                                           std::ofstream &out ) const
+{
     auto in = std::ifstream( source_path );
 
     if( !in.is_open() )
@@ -289,19 +295,53 @@ void blogator::Generator::writeContentDiv( const std::filesystem::path &source_p
 
     std::string line;
     while( getline( in, line ) )
-        out << line << std::endl;
+        out << fore_space << "\t" << line << std::endl;
 
     in.close();
 }
 
 /**
+ * Writes the page navigation html to a file
+ * @param file        Target file
+ * @param fore_space  Space to place before the output line
+ * @param index       Master Index
+ * @param article_pos Position of the current article for the page in the master index
+ */
+void blogator::Generator::writePageNavDiv( std::ofstream &file,
+                                           const std::string &fore_space,
+                                           const blogator::dto::Index &master_index,
+                                           const size_t &article_pos ) const
+{
+    const bool is_first = article_pos == 0;
+    const bool is_last  = article_pos != master_index._articles.size() - 1;
+
+    file << fore_space << "\t"
+         << ( is_first
+            ? html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options._page_nav.first, "disabled" )
+            : html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options._page_nav.first ) )
+         << ( is_first
+            ? html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options._page_nav.backwards, "disabled" )
+            : html::createHyperlink( master_index._articles.at( article_pos - 1 )._paths.out_html, _options._page_nav.backwards, "disabled" ) )
+         << std::to_string( article_pos + 1 ) << _options._page_nav.separator << std::to_string( master_index._articles.size() )
+         << ( is_last
+            ? html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.forward, "disabled" )
+            : html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.forward ) )
+         << ( is_last
+            ? html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.last, "disabled" )
+            : html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.last ) )
+         << std::endl;
+}
+
+/**
  * Writes the indexed date tree for a 'post' page
  * @param file        Target 'post' file
+ * @param fore_space  Space to place before the output line
  * @param article     Article DTO
  * @param article_pos Position of article in the master index
  * @param tree        IndexDateTree source html lines
  */
 void blogator::Generator::writeIndexDateTree( std::ofstream &file,
+                                              const std::string &fore_space,
                                               const blogator::dto::Article &article,
                                               const size_t &article_pos,
                                               const blogator::dto::IndexDateTree &tree ) const
@@ -313,13 +353,13 @@ void blogator::Generator::writeIndexDateTree( std::ofstream &file,
     size_t i = 0;
     for( const auto &line : tree.html._lines ) {
         if( year_line != tree.date_line_map.end() && year_line->second == i )
-            file << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
+            file << fore_space << "\t" << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
         else if( month_line != tree.date_line_map.end() && month_line->second == i )
-            file << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
+            file << fore_space << "\t" << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
         else if( article_line != tree.article_line_map.end() && article_line->second == i )
-            file << html::writer::setHyperlinkClass( line, "current" ) << std::endl;
+            file << fore_space << "\t" << html::writer::setHyperlinkClass( line, "current" ) << std::endl;
         else
-            file << line << std::endl;
+            file << fore_space << "\t" << line << std::endl;
         ++i;
     }
 }
@@ -327,11 +367,13 @@ void blogator::Generator::writeIndexDateTree( std::ofstream &file,
 /**
  * Write the indexed tag tree for a 'post' page
  * @param file        Target 'post' file
+ * @param fore_space  Space to place before the output line
  * @param article     Article DTO
  * @param article_pos Position of article in the master index
  * @param tree        IndexTagTree source html lines
  */
 void blogator::Generator::writeIndexTagTree( std::ofstream &file,
+                                             const std::string &fore_space,
                                              const blogator::dto::Article &article,
                                              const size_t &article_pos,
                                              const blogator::dto::IndexTagTree &tree ) const
@@ -362,13 +404,13 @@ void blogator::Generator::writeIndexTagTree( std::ofstream &file,
     size_t i = 0;
     for( const auto &line : tree.html._lines ) {
         if( checkbox_line != tag_checkbox_lines.cend() && *checkbox_line == i ) {
-            file << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
+            file << fore_space << "\t" << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
             ++checkbox_line;
         } else if( link_line != article_link_lines.cend() && *link_line == i ) {
-            file << html::writer::setHyperlinkClass( line, "current" ) << std::endl;
+            file << fore_space << "\t" << html::writer::setHyperlinkClass( line, "current" ) << std::endl;
             ++link_line;
         } else {
-            file << line << std::endl;
+            file << fore_space << "\t" << line << std::endl;
         }
         ++i;
     }

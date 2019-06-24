@@ -19,6 +19,15 @@ namespace blogator::dto {
             size_t items_per_page { 10 }; //number of posts-per-page in the indices
 
         } _index;
+
+        struct PageNav {
+            std::string separator = " / ";
+            std::string forward   = ">>";
+            std::string backwards = "<<";
+            std::string first     = "First";
+            std::string last      = "Last";
+
+        } _page_nav;
     };
 }
 
