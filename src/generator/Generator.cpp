@@ -17,35 +17,41 @@
  * Constructor
  * @param global_options Global blogator options
  */
-blogator::generator::Generator::Generator( dto::Options global_options ) :
+blogator::generator::Generator::Generator( std::shared_ptr<dto::Options> global_options ) :
     _options( std::move( global_options ) )
 {}
 
 /**
  * Initialize HTML page generation
- * @param master_index Master index of all posts/articles
+ * @param master_index  Master index of all posts/articles
+ * @param post_maker    PostMaker instance
+ * @param index_maker   IndexMaker instance
+ * @param landing_maker LandingMaker instance
+ * @param rss_maker     RSS instance
  * @return Success
  */
-bool blogator::generator::Generator::init( const dto::Index &master_index ) {
+bool blogator::generator::Generator::init( const dto::Index &master_index,
+                                           PostMaker        &post_maker,
+                                           IndexMaker       &index_maker,
+                                           LandingMaker     &landing_maker,
+                                           RSS              &rss_maker )
+{
     auto master_tag_index = dto::Index::createTagIndex( master_index );
     auto templates        = importTemplates( master_index );
 
     try {
-        templates->_months = fs::importMonthNames( _options._paths.month_file );
+        templates->_months = fs::importMonthNames( _options->_paths.month_file );
     } catch ( std::exception &e ) {
         std::cout << "Using default month strings (eng)." << std::endl;
     }
 
-    auto post_maker = generator::PostMaker( _options );
     auto posts_ok = post_maker.init( master_index, *templates, *master_tag_index );
-
-    auto index_maker = generator::IndexMaker( _options );
     auto index_ok = index_maker.init( master_index, *templates, *master_tag_index );
 
-    //TODO landing
-    //TODO rss
+    //TODO landing init
+    //TODO rss init
 
-    return ( index_ok && posts_ok );
+    return ( index_ok && posts_ok ); //TODO landing_ok && rss_ok
 }
 
 /**

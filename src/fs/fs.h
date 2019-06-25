@@ -8,7 +8,7 @@
 #include "../dto/HTML.h"
 
 namespace blogator::fs {
-    bool setupEnvironment( const dto::Options &global_options );
+    bool setupEnvironment( std::shared_ptr<dto::Options> global_options );
 
     std::unique_ptr<dto::HTML> importHTML( const std::filesystem::path &file_path );
     std::unordered_map<unsigned, std::string> importMonthNames( const std::filesystem::path &file_path );

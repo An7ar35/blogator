@@ -10,7 +10,7 @@
 namespace blogator::generator {
     class IndexMaker {
       public:
-        explicit IndexMaker( dto::Options global_options );
+        explicit IndexMaker( std::shared_ptr<dto::Options> global_options );
 
         bool init( const dto::Index &master_index,
                    const dto::Template &templates,
@@ -19,8 +19,8 @@ namespace blogator::generator {
       private:
         typedef std::vector<std::filesystem::path> PagePaths_t;
 
-        dto::Options                 _options;
-        std::unique_ptr<PagePaths_t> _by_date_page_paths;
+        std::shared_ptr<dto::Options> _options;
+        std::unique_ptr<PagePaths_t>  _by_date_page_paths;
 
         bool generateDateIndexPages( const dto::Index &master_index,
                                      const dto::Template &templates,

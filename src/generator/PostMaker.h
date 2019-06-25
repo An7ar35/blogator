@@ -12,14 +12,14 @@
 namespace blogator::generator {
     class PostMaker {
       public:
-        explicit PostMaker( dto::Options global_options );
+        explicit PostMaker( std::shared_ptr<dto::Options> global_options );
 
         bool init( const dto::Index &master_index,
                    const dto::Template &templates,
                    const dto::Index::TagIndexMap_t &tag_index );
 
       private:
-        dto::Options _options;
+        std::shared_ptr<dto::Options> _options;
 
         std::unique_ptr<dto::IndexDateTree> generateIndexDateTreeHTML( const dto::Index    &master_index,
                                                                        const dto::Template &master_template ) const;

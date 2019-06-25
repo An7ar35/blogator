@@ -14,7 +14,7 @@
  * Constructor
  * @param global_options Global blogator options
  */
-blogator::generator::PostMaker::PostMaker( blogator::dto::Options global_options ) :
+blogator::generator::PostMaker::PostMaker( std::shared_ptr<dto::Options> global_options ) :
     _options( std::move( global_options ) )
 {}
 
@@ -45,7 +45,7 @@ bool blogator::generator::PostMaker::init( const blogator::dto::Index &master_in
         size_t     curr_article_i  = 0;
 
         for( const auto &article : master_index._articles ) {
-            const auto html_out    = ( _options._paths.posts_dir / article._paths.out_html );
+            const auto html_out    = ( _options->_paths.posts_dir / article._paths.out_html );
             const auto css_link    = html::createStylesheetLink( article._paths.css, html_out );
 
             if( std::filesystem::exists( html_out ) )
@@ -234,18 +234,18 @@ void blogator::generator::PostMaker::writePageNavDiv( std::ofstream &file,
 
     file << fore_space << "\t"
          << ( is_first
-              ? html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options._page_nav.first, "disabled" )
-              : html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options._page_nav.first ) )
+              ? html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options->_page_nav.first, "disabled" )
+              : html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options->_page_nav.first ) )
          << ( is_first
-              ? html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options._page_nav.backwards, "disabled" )
-              : html::createHyperlink( master_index._articles.at( article_pos - 1 )._paths.out_html, _options._page_nav.backwards, "disabled" ) )
-         << std::to_string( article_pos + 1 ) << _options._page_nav.separator << std::to_string( master_index._articles.size() )
+              ? html::createHyperlink( master_index._articles.at( 0 )._paths.out_html, _options->_page_nav.backwards, "disabled" )
+              : html::createHyperlink( master_index._articles.at( article_pos - 1 )._paths.out_html, _options->_page_nav.backwards, "disabled" ) )
+         << std::to_string( article_pos + 1 ) << _options->_page_nav.separator << std::to_string( master_index._articles.size() )
          << ( is_last
-              ? html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.forward, "disabled" )
-              : html::createHyperlink( master_index._articles.at( article_pos + 1 )._paths.out_html, _options._page_nav.forward ) )
+              ? html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options->_page_nav.forward, "disabled" )
+              : html::createHyperlink( master_index._articles.at( article_pos + 1 )._paths.out_html, _options->_page_nav.forward ) )
          << ( is_last
-              ? html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.last, "disabled" )
-              : html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options._page_nav.last ) )
+              ? html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options->_page_nav.last, "disabled" )
+              : html::createHyperlink( master_index._articles.at( master_index._articles.size() - 1 )._paths.out_html, _options->_page_nav.last ) )
          << std::endl;
 }
 

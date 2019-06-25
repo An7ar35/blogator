@@ -16,7 +16,7 @@
  * @return Initialised Index
  * @throws std::runtime_error when the minimum requirements are not met (i.e.: missing files)
  */
-std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::dto::Options &global_options ) {
+std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::shared_ptr<dto::Options>& global_options ) {
     auto index     = std::make_unique<dto::Index>();
     auto css_cache = std::unordered_map<std::string, std::filesystem::path>(); //(K=filename, V=absolute path)
 
@@ -25,7 +25,7 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     static const std::regex blog_css_regex  = std::regex( "^.*(blog)\\.(css)$" );
     static const std::regex index_css_regex = std::regex( "^.*(index)\\.(css)$" );
 
-    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.css_dir ) ) {
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options->_paths.css_dir ) ) {
         if( p.is_regular_file() ) {
             if( std::regex_match( p.path().string(), blog_css_regex ) ) {
                 index->_paths.blog_css = p.path();
@@ -38,11 +38,11 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     }
 
     if( index->_paths.blog_css.empty() ) {
-        std::ofstream output( index->_paths.blog_css = global_options._paths.css_dir / "blog.css" );
+        std::ofstream output( index->_paths.blog_css = global_options->_paths.css_dir / "blog.css" );
         std::cerr << "No master stylesheet was found for the articles. A blank one was created." << std::endl;
     }
     if( index->_paths.index_css.empty() ) {
-        std::ofstream output( index->_paths.index_css = global_options._paths.css_dir / "index.css" );
+        std::ofstream output( index->_paths.index_css = global_options->_paths.css_dir / "index.css" );
         std::cerr << "No master stylesheet was found for the indices. A blank one was created." << std::endl;
     }
 
@@ -56,7 +56,7 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
     auto index_entry_match = std::smatch();
 
-    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.source_dir ) ) {
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options->_paths.source_dir ) ) {
         if( p.is_regular_file() ) {
             auto path = p.path().string();
             if( std::regex_match( path, template_post_rx ) ) {
@@ -74,7 +74,7 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const blogator::
                 index->_articles.emplace_back( readFileProperties( p.path() ) );
                 addTags( index->_articles.back(),*index );
                 addCSS( css_cache, index->_articles.back() );
-                addOutputPath( global_options._paths, index->_articles.back() );
+                addOutputPath( global_options->_paths, index->_articles.back() );
             }
         }
     }

@@ -11,14 +11,23 @@
 #include "../dto/Options.h"
 #include "../dto/Template.h"
 
+#include "PostMaker.h"
+#include "IndexMaker.h"
+#include "LandingMaker.h"
+#include "RSS.h"
+
 namespace blogator::generator {
     class Generator {
       public:
-        explicit Generator( dto::Options global_options );
-        bool init( const dto::Index &master_index );
+        explicit Generator( std::shared_ptr<dto::Options> global_options );
+        bool init( const dto::Index &master_index,
+                   PostMaker        &post_maker,
+                   IndexMaker       &index_maker,
+                   LandingMaker     &landing_maker,
+                   RSS              &rss_maker );
 
       private:
-        dto::Options _options;
+        std::shared_ptr<dto::Options> _options;
 
         std::unique_ptr<dto::Template> importTemplates( const dto::Index &master_index ) const;
     };

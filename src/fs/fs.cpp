@@ -10,23 +10,23 @@
  * @param global_options Global blogator options
  * @return Success
  */
-bool blogator::fs::setupEnvironment( const blogator::dto::Options &global_options ) {
+bool blogator::fs::setupEnvironment( std::shared_ptr<dto::Options> global_options ) {
     try {
         std::uintmax_t purge_count = 0;
-        purge_count += std::filesystem::remove_all( global_options._paths.posts_dir );
-        purge_count += std::filesystem::remove_all( global_options._paths.index_dir );
+        purge_count += std::filesystem::remove_all( global_options->_paths.posts_dir );
+        purge_count += std::filesystem::remove_all( global_options->_paths.index_dir );
 
         std::cout << "Purged " << purge_count << " file(s)/folder(s)" << std::endl;
 
-        if( !std::filesystem::create_directories( global_options._paths.posts_dir ) )
-            std::cerr << "Could not create directories: " << global_options._paths.posts_dir.string() << std::endl;
-        if( !std::filesystem::create_directories( global_options._paths.index_dir ) )
-            std::cerr << "Could not create directories: " << global_options._paths.index_dir.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options->_paths.posts_dir ) )
+            std::cerr << "Could not create directories: " << global_options->_paths.posts_dir.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options->_paths.index_dir ) )
+            std::cerr << "Could not create directories: " << global_options->_paths.index_dir.string() << std::endl;
 
-        if( !std::filesystem::create_directories( global_options._paths.index_dir / global_options._paths.index_sub_dirs.by_date ) )
-            std::cerr << "Could not create index sub-directory: " << global_options._paths.index_sub_dirs.by_date.string() << std::endl;
-        if( !std::filesystem::create_directories( global_options._paths.index_dir / global_options._paths.index_sub_dirs.by_tag ) )
-            std::cerr << "Could not create index sub-directory: " << global_options._paths.index_sub_dirs.by_tag.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options->_paths.index_dir / global_options->_paths.index_sub_dirs.by_date ) )
+            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_sub_dirs.by_date.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options->_paths.index_dir / global_options->_paths.index_sub_dirs.by_tag ) )
+            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_sub_dirs.by_tag.string() << std::endl;
 
         return true;
     } catch( std::exception &e ) {

@@ -14,7 +14,7 @@
  * Constructor
  * @param global_options Global blogator options
  */
-blogator::generator::IndexMaker::IndexMaker( blogator::dto::Options global_options ) :
+blogator::generator::IndexMaker::IndexMaker( std::shared_ptr<dto::Options> global_options ) :
     _options( std::move( global_options ) ),
     _by_date_page_paths( std::make_unique<PagePaths_t>() )
 {}
@@ -30,14 +30,14 @@ bool blogator::generator::IndexMaker::init( const blogator::dto::Index &master_i
                                             const blogator::dto::Template &templates,
                                             const blogator::dto::Index::TagIndexMap_t &tag_index )
 {
-    size_t page_count = ( master_index._articles.size() / _options._index.items_per_page )
-                      + ( ( master_index._articles.size() % _options._index.items_per_page ) > 0 );
+    size_t page_count = ( master_index._articles.size() / _options->_index.items_per_page )
+                      + ( ( master_index._articles.size() % _options->_index.items_per_page ) > 0 );
 
     for( size_t p = 0; p < page_count; ++p ) {
         std::stringstream ss;
         ss << "page" << p << ".html";
         _by_date_page_paths->emplace_back(
-            _options._paths.index_dir / _options._paths.index_sub_dirs.by_date / ss.str()
+            _options->_paths.index_dir / _options->_paths.index_sub_dirs.by_date / ss.str()
         );
     }
 
@@ -127,8 +127,8 @@ void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream & page,
 
             if( insert_point->second == "index_entries" ) {
 
-                while( article_it != articles.cend() && entry_counter < _options._index.items_per_page ) {
-                    auto rel_path = ( _options._paths.posts_dir / article_it->_paths.out_html ).lexically_relative( page_path_it->parent_path() );
+                while( article_it != articles.cend() && entry_counter < _options->_index.items_per_page ) {
+                    auto rel_path = ( _options->_paths.posts_dir / article_it->_paths.out_html ).lexically_relative( page_path_it->parent_path() );
                     writeIndexEntry( page, spaces + "\t", templates._months, *article_it, rel_path );
 
                     ++article_it;
@@ -232,17 +232,17 @@ void blogator::generator::IndexMaker::writePageNavDiv( std::ofstream &file,
 
     file << fore_space << "\t"
          << ( is_first
-              ? html::createHyperlink( *page_paths.cbegin(), _options._page_nav.first, "disabled" )
-              : html::createHyperlink( *page_paths.cbegin(), _options._page_nav.first ) )
+              ? html::createHyperlink( *page_paths.cbegin(), _options->_page_nav.first, "disabled" )
+              : html::createHyperlink( *page_paths.cbegin(), _options->_page_nav.first ) )
          << ( is_first
-              ? html::createHyperlink( *page_paths.cbegin(), _options._page_nav.backwards, "disabled" )
-              : html::createHyperlink( *std::prev( page_path_it ), _options._page_nav.backwards, "disabled" ) )
-         << std::to_string( page_number ) << _options._page_nav.separator << std::to_string( page_paths.size() )
+              ? html::createHyperlink( *page_paths.cbegin(), _options->_page_nav.backwards, "disabled" )
+              : html::createHyperlink( *std::prev( page_path_it ), _options->_page_nav.backwards, "disabled" ) )
+         << std::to_string( page_number ) << _options->_page_nav.separator << std::to_string( page_paths.size() )
          << ( is_last
-              ? html::createHyperlink( *std::prev( page_paths.cend() ), _options._page_nav.forward, "disabled" )
-              : html::createHyperlink( *std::next(  page_path_it ), _options._page_nav.forward ) )
+              ? html::createHyperlink( *std::prev( page_paths.cend() ), _options->_page_nav.forward, "disabled" )
+              : html::createHyperlink( *std::next(  page_path_it ), _options->_page_nav.forward ) )
          << ( is_last
-              ? html::createHyperlink( *std::prev( page_paths.cend() ), _options._page_nav.last, "disabled" )
-              : html::createHyperlink( *std::prev( page_paths.cend() ), _options._page_nav.last ) )
+              ? html::createHyperlink( *std::prev( page_paths.cend() ), _options->_page_nav.last, "disabled" )
+              : html::createHyperlink( *std::prev( page_paths.cend() ), _options->_page_nav.last ) )
          << std::endl;
 }
