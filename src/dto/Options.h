@@ -1,6 +1,7 @@
 #ifndef BLOGATOR_DTO_OPTIONS_H
 #define BLOGATOR_DTO_OPTIONS_H
 
+#include <vector>
 #include <filesystem>
 
 namespace blogator::dto {
@@ -12,6 +13,11 @@ namespace blogator::dto {
             std::filesystem::path css_dir;    //CSS directory where all required stylesheets exist
             std::filesystem::path index_dir;  //output directory for the blog/news index
             std::filesystem::path month_file; //{K,V} source file for month strings to use
+
+            struct IndexSubDirs {
+                const std::filesystem::path by_date = "by_date";
+                const std::filesystem::path by_tag  = "by_tag";
+            } index_sub_dirs;
 
         } _paths; //absolute paths to all directories
 

@@ -58,6 +58,8 @@ set(SOURCE_FILES
         src/dto/IndexDateTree.h
         src/dto/IndexTagTree.h
         src/dto/Template.h
+        src/exception/file_access_failure.h
+        src/exception/file_parsing_failure.h
         src/html/html.cpp
         src/html/html.h
         src/html/writer/writer.cpp
@@ -70,7 +72,14 @@ set(SOURCE_FILES
         src/fs/fs.h
         src/generator/Generator.cpp
         src/generator/Generator.h
-        src/exception/file_access_failure.h src/exception/file_parsing_failure.h)
+        src/generator/PostMaker.cpp
+        src/generator/PostMaker.h
+        src/generator/IndexMaker.cpp
+        src/generator/IndexMaker.h
+        src/generator/RSS.cpp
+        src/generator/RSS.h
+        src/generator/LandingMaker.cpp
+        src/generator/LandingMaker.h)
 
 #####################
 # Google Unit-Tests #

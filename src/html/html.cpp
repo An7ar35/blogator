@@ -33,3 +33,26 @@ std::string blogator::html::createHyperlink( const std::filesystem::path &href,
 
     return ss.str();
 }
+
+/**
+ * Create a time tag
+ * @param date_stamp DateStamp DTO
+ * @param months     Month string lookup map
+ * @param css_class  CSS class to use (optional)
+ * @return Formatted time tag
+ */
+std::string blogator::html::createDateTime( const blogator::dto::DateStamp & date_stamp,
+                                            const dto::Template::MonthStringLookup_t &months,
+                                            const std::string & css_class )
+{
+    std::stringstream ss;
+
+    ss << "<time ";
+    if( !css_class.empty() )
+        ss << "class=\"" << css_class << "\" ";
+    ss << "datetime=\"" << date_stamp._year << "-" << date_stamp._month << "-" << date_stamp._day << "\">"
+       << date_stamp._day << " " << months.at( date_stamp._month ) << " " << date_stamp._year
+       << "</time>";
+
+    return ss.str();
+}

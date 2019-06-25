@@ -23,6 +23,11 @@ bool blogator::fs::setupEnvironment( const blogator::dto::Options &global_option
         if( !std::filesystem::create_directories( global_options._paths.index_dir ) )
             std::cerr << "Could not create directories: " << global_options._paths.index_dir.string() << std::endl;
 
+        if( !std::filesystem::create_directories( global_options._paths.index_dir / global_options._paths.index_sub_dirs.by_date ) )
+            std::cerr << "Could not create index sub-directory: " << global_options._paths.index_sub_dirs.by_date.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options._paths.index_dir / global_options._paths.index_sub_dirs.by_tag ) )
+            std::cerr << "Could not create index sub-directory: " << global_options._paths.index_sub_dirs.by_tag.string() << std::endl;
+
         return true;
     } catch( std::exception &e ) {
         std::cerr << e.what() << std::endl;

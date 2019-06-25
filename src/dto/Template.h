@@ -27,6 +27,7 @@ namespace blogator::dto {
         };
 
         typedef std::map<std::string, std::vector<InsertPosition>> DivWritePositions_t;
+        typedef std::map<InsertPosition, std::string>              ConsecutiveDivWritePositions_t;
         typedef std::unordered_map<unsigned, std::string>          MonthStringLookup_t;
 
         /**
@@ -35,7 +36,7 @@ namespace blogator::dto {
         struct PostPage {
             std::unique_ptr<HTML> html;
             DivWritePositions_t div_write_pos = {
-                { "page_index",       std::vector<InsertPosition>() },
+                { "page_nav",         std::vector<InsertPosition>() },
                 { "post_content",     std::vector<InsertPosition>() },
                 { "index_pane_dates", std::vector<InsertPosition>() },
                 { "index_pane_tags",  std::vector<InsertPosition>() }
@@ -48,8 +49,8 @@ namespace blogator::dto {
         struct IndexPage {
             std::unique_ptr<HTML> html;
             DivWritePositions_t   div_write_pos = {
-                { "page_index",    std::vector<InsertPosition>() },
-                { "index_content", std::vector<InsertPosition>() }
+                { "index_entries", std::vector<InsertPosition>() },
+                { "page_nav", std::vector<InsertPosition>() }
             };
         } _index;
 

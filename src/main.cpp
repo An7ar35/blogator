@@ -18,12 +18,13 @@ int main() {
     options._paths.index_dir  = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/index" );
     options._paths.posts_dir  = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/posts" );
     options._paths.month_file = std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/source/template/months.txt" );
+    options._index.items_per_page = 2;
 
     if( fs::setupEnvironment( options ) ) {
         auto index = indexer::index( options );
         std::cout << *index << std::endl;
 
-        auto generator = Generator( options );
+        auto generator = generator::Generator( options );
         generator.init( *index );
 
     } else {

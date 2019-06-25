@@ -9,7 +9,9 @@
 
 namespace blogator::dto {
     struct Index {
-        typedef std::map<std::string, std::vector<size_t>> TagIndexMap_t;
+        typedef std::vector<dto::Article>                    Articles_t;
+        typedef std::map<std::string, std::vector<size_t>>   TagIndexMap_t;
+        typedef std::map<std::string, std::filesystem::path> TagIndexPaths_t;
 
         struct Paths {
             std::filesystem::path index_css;
@@ -19,8 +21,9 @@ namespace blogator::dto {
             std::filesystem::path start_template;
         } _paths;
 
-        std::vector<Article>                         _articles;
-        std::map<std::string, std::filesystem::path> _global_tags; //where in the "index" folder each tag index folder lives in
+        Articles_t          _articles;
+        TagIndexPaths_t     _global_tags; //where in the "index" folder each tag index folder lives in
+
 
         /**
          * Output stream operator
