@@ -15,8 +15,7 @@ namespace blogator::generator {
         explicit PostMaker( std::shared_ptr<dto::Options> global_options );
 
         bool init( const dto::Index &master_index,
-                   const dto::Template &templates,
-                   const dto::Index::TagIndexMap_t &tag_index );
+                   const dto::Template &templates );
 
       private:
         std::shared_ptr<dto::Options> _options;
@@ -24,8 +23,7 @@ namespace blogator::generator {
         std::unique_ptr<dto::IndexDateTree> generateIndexDateTreeHTML( const dto::Index    &master_index,
                                                                        const dto::Template &master_template ) const;
 
-        std::unique_ptr<dto::IndexTagTree> generateIndexTagTreeHTML( const dto::Index    &master_index,
-                                                                     const dto::Index::TagIndexMap_t &tag_index ) const;
+        std::unique_ptr<dto::IndexTagTree> generateIndexTagTreeHTML( const dto::Index &master_index ) const;
 
         void writeContentDiv( const std::filesystem::path &source_path,
                               const std::string &fore_space,

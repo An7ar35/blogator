@@ -15,8 +15,7 @@
  * @param global_options Global blogator options
  */
 blogator::generator::IndexMaker::IndexMaker( std::shared_ptr<dto::Options> global_options ) :
-    _options( std::move( global_options ) ),
-    _by_date_page_paths( std::make_unique<PagePaths_t>() )
+    _options( std::move( global_options ) )
 {}
 
 /**
@@ -27,20 +26,8 @@ blogator::generator::IndexMaker::IndexMaker( std::shared_ptr<dto::Options> globa
  * @return Success
  */
 bool blogator::generator::IndexMaker::init( const blogator::dto::Index &master_index,
-                                            const blogator::dto::Template &templates,
-                                            const blogator::dto::Index::TagIndexMap_t &tag_index )
+                                            const blogator::dto::Template &templates )
 {
-    size_t page_count = ( master_index._articles.size() / _options->_index.items_per_page )
-                      + ( ( master_index._articles.size() % _options->_index.items_per_page ) > 0 );
-
-    for( size_t p = 0; p < page_count; ++p ) {
-        std::stringstream ss;
-        ss << "page" << p << ".html";
-        _by_date_page_paths->emplace_back(
-            _options->_paths.index_dir / _options->_paths.index_sub_dirs.by_date / ss.str()
-        );
-    }
-
     auto consecutive_div_pos = dto::Template::getConsecutiveWritePositions( templates._index.div_write_pos );
 
     auto index_byDate_ok = generateDateIndexPages( master_index, templates, consecutive_div_pos );
@@ -62,26 +49,28 @@ bool blogator::generator::IndexMaker::generateDateIndexPages( const dto::Index &
 {
     try {
         auto article_it   = master_index._articles.cbegin();
-        auto page_path_it = _by_date_page_paths->cbegin();
+        auto page_path_it = master_index._indices.byDate.page_file_names.cbegin();
         while( article_it != master_index._articles.cend() ) {
 
-            if( page_path_it == _by_date_page_paths->cend() )
+            if( page_path_it == master_index._indices.byDate.page_file_names.cend() )
                 throw std::invalid_argument( "Page paths found for the index pages are not sufficient for the number of articles." );
 
-            if( std::filesystem::exists( *page_path_it ) )
+            auto abs_path = _options->_paths.index_dir / _options->_paths.index_sub_dirs.by_date / *page_path_it;
+
+            if( std::filesystem::exists( abs_path ) )
                 throw exception::file_access_failure(
-                    "File '" + page_path_it->string() + "' already exists. Possible files with duplicate names in source folder structure."
+                    "File '" + abs_path.string() + "' already exists. Possible files with duplicate names in source folder structure."
                 );
 
-            auto page_out = std::ofstream( *page_path_it );
+            auto page_out = std::ofstream( abs_path );
 
             if( !page_out.is_open() )
                 throw exception::file_access_failure(
-                    "File '" + page_path_it->string() + "' could not be opened for writing."
+                    "File '" + abs_path.string() + "' could not be opened for writing."
                 );
 
-            writeDateIndexPage( page_out, page_path_it,
-                                templates, master_index._articles, article_it,
+            writeDateIndexPage( page_out, templates, master_index,
+                                page_path_it, article_it,
                                 insert_points );
 
             page_out.close();
@@ -99,16 +88,16 @@ bool blogator::generator::IndexMaker::generateDateIndexPages( const dto::Index &
 /**
  * Writes a page of entries
  * @param page          Page file
- * @param page_path     Page file path iterator
  * @param templates     Templates
- * @param articles      Articles
+ * @param master_index  Master Index
+ * @param page_path_it  Page file path iterator
  * @param article_it    Iterator to the current article to be processed
  * @param insert_points Index template insertion point locations
  */
-void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream & page,
-                                                          const PagePaths_t::const_iterator &page_path_it,
+void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream &page,
                                                           const dto::Template &templates,
-                                                          const dto::Index::Articles_t &articles,
+                                                          const dto::Index &master_index,
+                                                          const dto::Index::PagePaths_t::const_iterator &page_path_it,
                                                           dto::Index::Articles_t::const_iterator &article_it,
                                                           const dto::Template::ConsecutiveDivWritePositions_t &insert_points ) const
 {
@@ -127,8 +116,10 @@ void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream & page,
 
             if( insert_point->second == "index_entries" ) {
 
-                while( article_it != articles.cend() && entry_counter < _options->_index.items_per_page ) {
-                    auto rel_path = ( _options->_paths.posts_dir / article_it->_paths.out_html ).lexically_relative( page_path_it->parent_path() );
+                while( article_it != master_index._articles.cend() && entry_counter < _options->_index.items_per_page ) {
+                    auto abs_path = _options->_paths.index_dir / _options->_paths.index_sub_dirs.by_date / page_path_it->parent_path();
+                    auto rel_path = ( _options->_paths.posts_dir / article_it->_paths.out_html ).lexically_relative( abs_path );
+
                     writeIndexEntry( page, spaces + "\t", templates._months, *article_it, rel_path );
 
                     ++article_it;
@@ -138,7 +129,7 @@ void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream & page,
                 page << spaces << template_line.substr( insert_point->first.col ) << std::endl;
 
             } else if( insert_point->second == "page_nav" ) {
-                writePageNavDiv( page, spaces + "\t", *_by_date_page_paths, page_path_it );
+                writePageNavDiv( page, spaces + "\t", master_index._indices.byDate.page_file_names, page_path_it );
             } else {
                 std::cerr << "Tag HTML Div class '" << insert_point->second << "' not recognised." << std::endl;
             }
@@ -223,8 +214,8 @@ void blogator::generator::IndexMaker::writeIndexEntry( std::ofstream &file,
  */
 void blogator::generator::IndexMaker::writePageNavDiv( std::ofstream &file,
                                                        const std::string &fore_space,
-                                                       const PagePaths_t &page_paths,
-                                                       const IndexMaker::PagePaths_t::const_iterator &page_path_it ) const
+                                                       const dto::Index::PagePaths_t &page_paths,
+                                                       const dto::Index::PagePaths_t::const_iterator &page_path_it ) const
 {
     const bool   is_first    = page_path_it == page_paths.cbegin();
     const bool   is_last     = page_path_it == std::prev( page_paths.cend() );

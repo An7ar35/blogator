@@ -13,14 +13,10 @@ namespace blogator::generator {
         explicit IndexMaker( std::shared_ptr<dto::Options> global_options );
 
         bool init( const dto::Index &master_index,
-                   const dto::Template &templates,
-                   const dto::Index::TagIndexMap_t &tag_index );
+                   const dto::Template &templates );
 
       private:
-        typedef std::vector<std::filesystem::path> PagePaths_t;
-
         std::shared_ptr<dto::Options> _options;
-        std::unique_ptr<PagePaths_t>  _by_date_page_paths;
 
         bool generateDateIndexPages( const dto::Index &master_index,
                                      const dto::Template &templates,
@@ -29,9 +25,9 @@ namespace blogator::generator {
 //        bool generateTagIndexPages();
 
         void writeDateIndexPage( std::ofstream &page,
-                                 const PagePaths_t::const_iterator &page_path,
                                  const dto::Template &templates,
-                                 const dto::Index::Articles_t &articles,
+                                 const dto::Index &master_index,
+                                 const dto::Index::PagePaths_t::const_iterator &page_path_it,
                                  dto::Index::Articles_t::const_iterator &article_it,
                                  const dto::Template::ConsecutiveDivWritePositions_t &insert_points ) const;
 
@@ -45,8 +41,8 @@ namespace blogator::generator {
 
         void writePageNavDiv( std::ofstream &file,
                               const std::string &fore_space,
-                              const PagePaths_t &page_paths,
-                              const PagePaths_t::const_iterator &page_path_it ) const;
+                              const dto::Index::PagePaths_t &page_paths,
+                              const dto::Index::PagePaths_t::const_iterator &page_path_it ) const;
     };
 }
 

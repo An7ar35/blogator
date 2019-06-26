@@ -22,12 +22,10 @@ blogator::generator::PostMaker::PostMaker( std::shared_ptr<dto::Options> global_
  * Initialize HTML post pages generation
  * @param master_index Master index of all posts/articles
  * @param templates    Master templates
- * @param tag_index    Master Index of tags to articles
  * @return Success
  */
 bool blogator::generator::PostMaker::init( const blogator::dto::Index &master_index,
-                                           const dto::Template &templates,
-                                           const dto::Index::TagIndexMap_t &master_tag_index )
+                                           const dto::Template &templates )
 {
     auto insert_points = dto::Template::getConsecutiveWritePositions( templates._post.div_write_pos );
 
@@ -38,7 +36,7 @@ bool blogator::generator::PostMaker::init( const blogator::dto::Index &master_in
         html_date_tree = generateIndexDateTreeHTML( master_index, templates );
 
     if( templates._post.div_write_pos.find( "index_pane_tags" ) != templates._post.div_write_pos.end() )
-        html_tag_tree = generateIndexTagTreeHTML( master_index, master_tag_index );
+        html_tag_tree = generateIndexTagTreeHTML( master_index );
 
     try {
         const auto css_insert_line = html::reader::findLineOfTag( "</head>", *templates._post.html );
@@ -160,18 +158,16 @@ std::unique_ptr<blogator::dto::IndexDateTree>
 /**
  * Generates the HTML for the By-Tag section of the index pane
  * @param master_index    Master Index of articles
- * @param tag_index       Master Index of tags to articles
  * @return IndexTagTree DTO
  */
 std::unique_ptr<blogator::dto::IndexTagTree>
-    blogator::generator::PostMaker::generateIndexTagTreeHTML( const blogator::dto::Index &master_index,
-                                                              const dto::Index::TagIndexMap_t &tag_index ) const
+    blogator::generator::PostMaker::generateIndexTagTreeHTML( const blogator::dto::Index &master_index ) const
 {
     auto tree = std::make_unique<dto::IndexTagTree>();
 
     html::writer::openTree( *tree );
 
-    for( const auto &tag : tag_index ) {
+    for( const auto &tag : master_index._indices.byTag.tag_to_article_map ) {
         html::writer::openTagNode( tag.first, *tree );
 
         for( auto article_i : tag.second ) {

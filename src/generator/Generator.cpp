@@ -36,8 +36,7 @@ bool blogator::generator::Generator::init( const dto::Index &master_index,
                                            LandingMaker     &landing_maker,
                                            RSS              &rss_maker )
 {
-    auto master_tag_index = dto::Index::createTagIndex( master_index );
-    auto templates        = importTemplates( master_index );
+    auto templates = importTemplates( master_index );
 
     try {
         templates->_months = fs::importMonthNames( _options->_paths.month_file );
@@ -45,11 +44,13 @@ bool blogator::generator::Generator::init( const dto::Index &master_index,
         std::cout << "Using default month strings (eng)." << std::endl;
     }
 
-    auto posts_ok = post_maker.init( master_index, *templates, *master_tag_index );
-    auto index_ok = index_maker.init( master_index, *templates, *master_tag_index );
+    auto posts_ok = post_maker.init( master_index, *templates );
+    auto index_ok = index_maker.init( master_index, *templates );
 
     //TODO landing init
     //TODO rss init
+    for( auto &a : master_index._indices.byTag.tag_directories )
+        std::cout << a.first << ":\t" << a.second << std::endl;
 
     return ( index_ok && posts_ok ); //TODO landing_ok && rss_ok
 }
@@ -64,9 +65,9 @@ std::unique_ptr<blogator::dto::Template>
 {
     auto templates = std::make_unique<dto::Template>();
 
-    templates->_post.html  = fs::importHTML( master_index._paths.post_template );
-    templates->_index.html = fs::importHTML( master_index._paths.index_template );
-    templates->_start.html = fs::importHTML( master_index._paths.start_template );
+    templates->_post.html  = fs::importHTML( master_index._paths.templates.post );
+    templates->_index.html = fs::importHTML( master_index._paths.templates.index );
+    templates->_start.html = fs::importHTML( master_index._paths.templates.start );
 
     html::reader::findInsertPositions( *templates->_post.html, templates->_post.div_write_pos );
     html::reader::findInsertPositions( *templates->_index.html, templates->_index.div_write_pos );

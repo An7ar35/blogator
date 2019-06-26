@@ -16,7 +16,7 @@
  * @return Initialised Index
  * @throws std::runtime_error when the minimum requirements are not met (i.e.: missing files)
  */
-std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::shared_ptr<dto::Options>& global_options ) {
+std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::shared_ptr<dto::Options> &global_options ) {
     auto index     = std::make_unique<dto::Index>();
     auto css_cache = std::unordered_map<std::string, std::filesystem::path>(); //(K=filename, V=absolute path)
 
@@ -28,21 +28,21 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options->_paths.css_dir ) ) {
         if( p.is_regular_file() ) {
             if( std::regex_match( p.path().string(), blog_css_regex ) ) {
-                index->_paths.blog_css = p.path();
+                index->_paths.css.blog = p.path();
             } else if( std::regex_match( p.path().string(), index_css_regex ) ) {
-                index->_paths.index_css = p.path();
+                index->_paths.css.index = p.path();
             } else if( std::regex_match( p.path().string(), posts_css_regex ) ) {
                 css_cache.emplace( std::make_pair( p.path().stem().string(), p.path() ) );
             }
         }
     }
 
-    if( index->_paths.blog_css.empty() ) {
-        std::ofstream output( index->_paths.blog_css = global_options->_paths.css_dir / "blog.css" );
+    if( index->_paths.css.blog.empty() ) {
+        std::ofstream output( index->_paths.css.blog = global_options->_paths.css_dir / "blog.css" );
         std::cerr << "No master stylesheet was found for the articles. A blank one was created." << std::endl;
     }
-    if( index->_paths.index_css.empty() ) {
-        std::ofstream output( index->_paths.index_css = global_options->_paths.css_dir / "index.css" );
+    if( index->_paths.css.index.empty() ) {
+        std::ofstream output( index->_paths.css.index = global_options->_paths.css_dir / "index.css" );
         std::cerr << "No master stylesheet was found for the indices. A blank one was created." << std::endl;
     }
 
@@ -60,11 +60,11 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
         if( p.is_regular_file() ) {
             auto path = p.path().string();
             if( std::regex_match( path, template_post_rx ) ) {
-                index->_paths.post_template = p.path();
+                index->_paths.templates.post = p.path();
             } else if( std::regex_match( path, template_index_rx ) ) {
-                index->_paths.index_template = p.path();
+                index->_paths.templates.index = p.path();
             } else if( std::regex_match( path, template_start_rx ) ) {
-                index->_paths.start_template = p.path();
+                index->_paths.templates.start = p.path();
             } else if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
                 if( index_entry_match.size() > 1 )
                     index_entry_files.emplace(
@@ -72,18 +72,18 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                     );
             } else if( std::regex_match( path, html_rx ) ) {
                 index->_articles.emplace_back( readFileProperties( p.path() ) );
-                addTags( index->_articles.back(),*index );
+                addTags( *global_options, index->_articles.back(),*index );
                 addCSS( css_cache, index->_articles.back() );
                 addOutputPath( global_options->_paths, index->_articles.back() );
             }
         }
     }
 
-    if( index->_paths.post_template.empty() )
+    if( index->_paths.templates.post.empty() )
         throw std::runtime_error( "No post page template file found." );
-    if( index->_paths.index_template.empty() )
+    if( index->_paths.templates.index.empty() )
         throw std::runtime_error( "No index page template file found." );
-    if( index->_paths.start_template.empty() )
+    if( index->_paths.templates.start.empty() )
         throw std::runtime_error( "No start page template file found." );
     if( index->_articles.empty() )
         throw  std::runtime_error( "No files to index found." );
@@ -96,6 +96,10 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                 article._paths.entry_html = entry_it->second;
         }
 
+    generateTagDirPaths( *index, *global_options );
+    createTagToArticleIndexMap( *index );
+
+    //Sort by newest to oldest article
     std::sort( index->_articles.begin(),
                index->_articles.end(),
                []( const dto::Article &a, const dto::Article &b ) {
@@ -108,17 +112,20 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
 
 /**
  * Adds new tags found in article into the index's global Tag set
- * @param article      Article from which to extract tags to add to the global set
- * @param master_index Master index file
+ * @param global_options Global blogator options
+ * @param article        Article from which to extract tags to add to the global set
+ * @param master_index   Master index file
  */
-void blogator::indexer::addTags( const blogator::dto::Article &article,
+void blogator::indexer::addTags( const dto::Options &global_options,
+                                 const blogator::dto::Article &article,
                                  blogator::dto::Index &master_index )
 {
-    std::transform( article._tags.begin(),
-                    article._tags.end(),
-                    std::inserter( master_index._global_tags, master_index._global_tags.end() ),
-                    []( const std::string &tag ) { return std::make_pair( tag, std::filesystem::path() ); }
-    );
+    for( const auto &tag : article._tags ) {
+        auto tag_dir = "tag_" + std::to_string( master_index._indices.byTag.tag_directories.size() );
+        master_index._indices.byTag.tag_directories.insert(
+            std::make_pair( tag, global_options._paths.index_sub_dirs.by_tag / tag_dir )
+        );
+    }
 }
 
 /**
@@ -134,6 +141,44 @@ void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem:
     if( it != found_stylesheets.end() ) {
         article._paths.css = it->second;
         found_stylesheets.erase( it );
+    }
+}
+
+/**
+ * Generate directory names for each tags
+ * @param master_index Master index
+ */
+void blogator::indexer::generateTagDirPaths( blogator::dto::Index & master_index,
+                                             const dto::Options &global_options )
+{
+    size_t page_count = ( master_index._articles.size() / global_options._index.items_per_page )
+                        + ( ( master_index._articles.size() % global_options._index.items_per_page ) > 0 );
+
+    for( size_t p = 0; p < page_count; ++p ) {
+        std::stringstream ss;
+        ss << "page" << p << ".html";
+        master_index._indices.byDate.page_file_names.emplace_back( std::filesystem::path( ss.str() ) );
+    }
+}
+
+/**
+ * Generate a tag index map
+ * @param master_index Master Index
+ */
+void blogator::indexer::createTagToArticleIndexMap( blogator::dto::Index & master_index ) {
+
+    auto &map = master_index._indices.byTag.tag_to_article_map;
+
+    size_t i = 0;
+    for( const auto &article : master_index._articles ) {
+        for( const auto &tag : article._tags ) {
+            if( map.find( tag ) == map.end() ) {
+                map.insert( std::make_pair( tag, std::vector<size_t>( { i } ) ) );
+            } else {
+                map.at( tag ).emplace_back( i );
+            }
+            ++i;
+        }
     }
 }
 
@@ -238,5 +283,3 @@ void blogator::indexer::addOutputPath( const dto::Options::Paths &global_paths,
     auto abs_path = global_paths.posts_dir / article._paths.src_html.filename();
     article._paths.out_html = abs_path.lexically_relative( global_paths.posts_dir );
 }
-
-
