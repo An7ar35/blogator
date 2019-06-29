@@ -19,7 +19,10 @@
 namespace blogator::generator {
     class Generator {
       public:
-        explicit Generator( std::shared_ptr<dto::Options> global_options );
+        Generator( std::shared_ptr<const dto::Index>    master_index,
+                   std::shared_ptr<const dto::Template> templates,
+                   std::shared_ptr<const dto::Options>  global_options );
+
         bool init( const dto::Index &master_index,
                    PostMaker        &post_maker,
                    IndexMaker       &index_maker,
@@ -27,9 +30,9 @@ namespace blogator::generator {
                    RSS              &rss_maker );
 
       private:
-        std::shared_ptr<dto::Options> _options;
-
-        std::unique_ptr<dto::Template> importTemplates( const dto::Index &master_index ) const;
+        std::shared_ptr<const dto::Index>    _master_index;
+        std::shared_ptr<const dto::Template> _templates;
+        std::shared_ptr<const dto::Options>  _options;
     };
 }
 

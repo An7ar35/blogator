@@ -34,6 +34,19 @@ namespace blogator::dto {
             std::string last      = "Last";
 
         } _page_nav;
+
+        struct Breadcrumb {
+            std::string start   = "Start";
+            std::string by_tag  = "Tag list";
+            std::string by_date = "Index";
+            std::string page    = "Page #";
+            std::string post    = "Post #";
+
+        } _breadcrumb;
+
+        struct RSS {
+            std::string root;
+        } _rss;
     };
 }
 

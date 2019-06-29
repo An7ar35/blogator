@@ -36,10 +36,11 @@ namespace blogator::dto {
         struct PostPage {
             std::unique_ptr<HTML> html;
             DivWritePositions_t div_write_pos = {
-                { "page_nav",         std::vector<InsertPosition>() },
-                { "post_content",     std::vector<InsertPosition>() },
-                { "index_pane_dates", std::vector<InsertPosition>() },
-                { "index_pane_tags",  std::vector<InsertPosition>() }
+                { "breadcrumb",       std::vector<InsertPosition>() },
+                { "page-nav",         std::vector<InsertPosition>() },
+                { "post-content",     std::vector<InsertPosition>() },
+                { "index-pane-dates", std::vector<InsertPosition>() },
+                { "index-pane-tags",  std::vector<InsertPosition>() }
             };
         } _post;
 
@@ -49,10 +50,50 @@ namespace blogator::dto {
         struct IndexPage {
             std::unique_ptr<HTML> html;
             DivWritePositions_t   div_write_pos = {
-                { "index_entries", std::vector<InsertPosition>() },
-                { "page_nav", std::vector<InsertPosition>() }
+                { "breadcrumb",    std::vector<InsertPosition>() },
+                { "page-nav",      std::vector<InsertPosition>() },
+                { "index-entries", std::vector<InsertPosition>() }
             };
         } _index;
+
+        /**
+         * Tag list (tags.html) page template
+         */
+        struct TagListIndexPage {
+            std::unique_ptr<HTML> html;
+            DivWritePositions_t   div_write_pos = {
+                { "breadcrumb",         std::vector<InsertPosition>() },
+                { "tag-list",           std::vector<InsertPosition>() },
+                { "tag-list-hierarchy", std::vector<InsertPosition>() },
+                { "tag-list-block_0",   std::vector<InsertPosition>() },
+                { "tag-list-block_a",   std::vector<InsertPosition>() },
+                { "tag-list-block_b",   std::vector<InsertPosition>() },
+                { "tag-list-block_c",   std::vector<InsertPosition>() },
+                { "tag-list-block_d",   std::vector<InsertPosition>() },
+                { "tag-list-block_e",   std::vector<InsertPosition>() },
+                { "tag-list-block_f",   std::vector<InsertPosition>() },
+                { "tag-list-block_g",   std::vector<InsertPosition>() },
+                { "tag-list-block_h",   std::vector<InsertPosition>() },
+                { "tag-list-block_i",   std::vector<InsertPosition>() },
+                { "tag-list-block_j",   std::vector<InsertPosition>() },
+                { "tag-list-block_k",   std::vector<InsertPosition>() },
+                { "tag-list-block_l",   std::vector<InsertPosition>() },
+                { "tag-list-block_m",   std::vector<InsertPosition>() },
+                { "tag-list-block_n",   std::vector<InsertPosition>() },
+                { "tag-list-block_o",   std::vector<InsertPosition>() },
+                { "tag-list-block_p",   std::vector<InsertPosition>() },
+                { "tag-list-block_q",   std::vector<InsertPosition>() },
+                { "tag-list-block_r",   std::vector<InsertPosition>() },
+                { "tag-list-block_s",   std::vector<InsertPosition>() },
+                { "tag-list-block_t",   std::vector<InsertPosition>() },
+                { "tag-list-block_u",   std::vector<InsertPosition>() },
+                { "tag-list-block_v",   std::vector<InsertPosition>() },
+                { "tag-list-block_w",   std::vector<InsertPosition>() },
+                { "tag-list-block_x",   std::vector<InsertPosition>() },
+                { "tag-list-block_y",   std::vector<InsertPosition>() },
+                { "tag-list-block_z",   std::vector<InsertPosition>() }
+            };
+        } _tag_list;
 
         /**
          * Blog landing page (start) template
@@ -60,9 +101,10 @@ namespace blogator::dto {
         struct LandingPage {
             std::unique_ptr<HTML> html;
             DivWritePositions_t   div_write_pos = {
-                { "top_posts",      std::vector<InsertPosition>() },
-                { "newest_posts",   std::vector<InsertPosition>() },
-                { "featured_posts", std::vector<InsertPosition>() }
+                { "breadcrumb",     std::vector<InsertPosition>() },
+                { "newest-posts",   std::vector<InsertPosition>() },
+                { "top-tags",       std::vector<InsertPosition>() },
+                { "featured-posts", std::vector<InsertPosition>() }
             };
         } _start;
 

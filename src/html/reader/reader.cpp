@@ -129,3 +129,19 @@ blogator::dto::Template::DivWritePositions_t &
 
     return divs;
 }
+
+/**
+ * Gets the indent  (blank spaces) on a line
+ * @param line String line
+ * @return Indent string
+ */
+std::string blogator::html::reader::getIndent( const std::string & line ) {
+    if( line.empty() )
+        return "";
+
+    const auto char_it = find_if( line.begin(),
+                                  line.end(),
+                                  []( char c ) { return !isspace( c ); } );
+
+    return line.substr( 0, char_it - line.begin() );
+}

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <regex>
 
+#include "../html/reader/reader.h"
 #include "../exception/file_access_failure.h"
 
 /**
@@ -104,4 +105,25 @@ std::unordered_map<unsigned, std::string> blogator::fs::importMonthNames( const 
         throw std::runtime_error( std::to_string( validated ) + "/12 month strings valid." );
 
     return month_map;
+}
+
+/**
+ * Imports the HTML templates to use
+ * @param options Option DTO (with the paths to the html template files)
+ * @return Template DTO loaded and analysed for insertion points
+ */
+std::shared_ptr<blogator::dto::Template> blogator::fs::importTemplates( const dto::Index &master_index ) {
+    auto templates = std::make_shared<dto::Template>();
+
+    templates->_start.html    = fs::importHTML( master_index._paths.templates.start );
+    templates->_post.html     = fs::importHTML( master_index._paths.templates.post );
+    templates->_index.html    = fs::importHTML( master_index._paths.templates.index );
+    templates->_tag_list.html = fs::importHTML( master_index._paths.templates.tag_list );
+
+    html::reader::findInsertPositions( *templates->_start.html, templates->_start.div_write_pos );
+    html::reader::findInsertPositions( *templates->_post.html, templates->_post.div_write_pos );
+    html::reader::findInsertPositions( *templates->_index.html, templates->_index.div_write_pos );
+    html::reader::findInsertPositions( *templates->_tag_list.html, templates->_tag_list.div_write_pos );
+
+    return std::move( templates );
 }

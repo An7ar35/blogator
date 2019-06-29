@@ -56,3 +56,28 @@ std::string blogator::html::createDateTime( const blogator::dto::DateStamp & dat
 
     return ss.str();
 }
+
+/**
+ * Creates a breadcrumb HTML list
+ * @param breadcrumb Breadcrumb
+ * @return Breadcrumb's HTML
+ */
+blogator::dto::HTML blogator::html::createBreadcrumb( const blogator::html::BreadCrumb_t &breadcrumb ) {
+    auto html = dto::HTML();
+    auto it   = breadcrumb.cbegin();
+    auto last = std::prev( breadcrumb.cend() );
+
+    html._lines.emplace_back( "<ul>" );
+    while( it != breadcrumb.cend() ) {
+        std::stringstream ss;
+        if( it != last )
+            ss << "<li>" << html::createHyperlink( it->first, it->second.string() ) << "</li>";
+        else
+            ss << "<li>" << it->first << "</li>";
+        html._lines.emplace_back( ss.str() );
+        ++it;
+    }
+    html._lines.emplace_back( "</ul>" );
+
+    return html;
+}

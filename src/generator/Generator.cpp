@@ -8,16 +8,19 @@
 
 #include "PostMaker.h"
 #include "IndexMaker.h"
-#include "../fs/fs.h"
-#include "../html/html.h"
-#include "../exception/file_access_failure.h"
 
 
 /**
  * Constructor
+ * @param master_index   Master index
+ * @param templates      Templates
  * @param global_options Global blogator options
  */
-blogator::generator::Generator::Generator( std::shared_ptr<dto::Options> global_options ) :
+blogator::generator::Generator::Generator( std::shared_ptr<const dto::Index>    master_index,
+                                           std::shared_ptr<const dto::Template> templates,
+                                           std::shared_ptr<const dto::Options>  global_options ) :
+    _master_index( std::move( master_index ) ),
+    _templates( std::move( templates ) ),
     _options( std::move( global_options ) )
 {}
 
@@ -36,42 +39,23 @@ bool blogator::generator::Generator::init( const dto::Index &master_index,
                                            LandingMaker     &landing_maker,
                                            RSS              &rss_maker )
 {
-    auto templates = importTemplates( master_index );
-
-    try {
-        templates->_months = fs::importMonthNames( _options->_paths.month_file );
-    } catch ( std::exception &e ) {
-        std::cout << "Using default month strings (eng)." << std::endl;
-    }
-
-    auto posts_ok = post_maker.init( master_index, *templates );
-    auto index_ok = index_maker.init( master_index, *templates );
+    auto posts_ok = post_maker.init();
 
     //TODO landing init
     //TODO rss init
-    for( auto &a : master_index._indices.byTag.tag_directories )
-        std::cout << a.first << ":\t" << a.second << std::endl;
+    for( auto &a : master_index._indices.byTag.tags ) {
+        std::cout << a.first << ":\n"
+                  << "\tprefix: " << a.second.tag_id << "\n"
+                  << "\tindices  : ";
+        for( auto i : a.second.article_indices )
+            std::cout << i << ", ";
+        std::cout << "\n\tpaths    :\n";
+        for( auto p : a.second.file_names )
+            std::cout << "\t\t" << p << "\n";
+        std::cout << std::endl;
+    }
+
+    auto index_ok = index_maker.init();
 
     return ( index_ok && posts_ok ); //TODO landing_ok && rss_ok
-}
-
-/**
- * Imports the HTML templates to use
- * @param options Option DTO (with the paths to the html template files)
- * @return Template DTO loaded and analysed for insertion points
- */
-std::unique_ptr<blogator::dto::Template>
-    blogator::generator::Generator::importTemplates( const dto::Index &master_index ) const
-{
-    auto templates = std::make_unique<dto::Template>();
-
-    templates->_post.html  = fs::importHTML( master_index._paths.templates.post );
-    templates->_index.html = fs::importHTML( master_index._paths.templates.index );
-    templates->_start.html = fs::importHTML( master_index._paths.templates.start );
-
-    html::reader::findInsertPositions( *templates->_post.html, templates->_post.div_write_pos );
-    html::reader::findInsertPositions( *templates->_index.html, templates->_index.div_write_pos );
-    html::reader::findInsertPositions( *templates->_start.html, templates->_start.div_write_pos );
-
-    return std::move( templates );
 }

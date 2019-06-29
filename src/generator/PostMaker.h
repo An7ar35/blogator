@@ -12,39 +12,44 @@
 namespace blogator::generator {
     class PostMaker {
       public:
-        explicit PostMaker( std::shared_ptr<dto::Options> global_options );
+        PostMaker( std::shared_ptr<const dto::Index>    master_index,
+                   std::shared_ptr<const dto::Template> templates,
+                   std::shared_ptr<const dto::Options>  global_options );
 
-        bool init( const dto::Index &master_index,
-                   const dto::Template &templates );
+        bool init();
 
       private:
-        std::shared_ptr<dto::Options> _options;
+        std::shared_ptr<const dto::Index>    _master_index;
+        std::shared_ptr<const dto::Template> _templates;
+        std::shared_ptr<const dto::Options>  _options;
 
-        std::unique_ptr<dto::IndexDateTree> generateIndexDateTreeHTML( const dto::Index    &master_index,
-                                                                       const dto::Template &master_template ) const;
+        std::unique_ptr<dto::IndexDateTree> generateIndexDateTreeHTML() const;
 
-        std::unique_ptr<dto::IndexTagTree> generateIndexTagTreeHTML( const dto::Index &master_index ) const;
+        std::unique_ptr<dto::IndexTagTree> generateIndexTagTreeHTML() const;
 
         void writeContentDiv( const std::filesystem::path &source_path,
-                              const std::string &fore_space,
+                              const std::string &indent,
                               std::ofstream &out ) const;
 
         void writePageNavDiv( std::ofstream &file,
-                              const std::string &fore_space,
-                              const dto::Index &index,
+                              const std::string &indent,
                               const size_t &article_pos ) const;
 
         void writeIndexDateTree( std::ofstream &file,
-                                 const std::string &fore_space,
+                                 const std::string &indent,
                                  const dto::Article &article,
                                  const size_t &article_pos,
                                  const dto::IndexDateTree &tree ) const;
 
         void writeIndexTagTree( std::ofstream &file,
-                                const std::string &fore_space,
+                                const std::string &indent,
                                 const dto::Article &article,
                                 const size_t &article_pos,
                                 const dto::IndexTagTree &tree ) const;
+
+        void writeBreadcrumb( std::ofstream &file,
+                              const std::string &indent,
+                              const dto::Article &article ) const;
     };
 }
 

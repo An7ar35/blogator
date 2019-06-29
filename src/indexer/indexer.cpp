@@ -16,8 +16,8 @@
  * @return Initialised Index
  * @throws std::runtime_error when the minimum requirements are not met (i.e.: missing files)
  */
-std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::shared_ptr<dto::Options> &global_options ) {
-    auto index     = std::make_unique<dto::Index>();
+std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::shared_ptr<dto::Options> &global_options ) {
+    auto index     = std::make_shared<dto::Index>();
     auto css_cache = std::unordered_map<std::string, std::filesystem::path>(); //(K=filename, V=absolute path)
 
     //====CSS====
@@ -47,11 +47,12 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     }
 
     //====HTML====
-    static const std::regex template_post_rx    = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
-    static const std::regex template_index_rx   = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
-    static const std::regex template_start_rx   = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
-    static const std::regex index_entry_html_rx = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
-    static const std::regex html_rx             = std::regex( "^.+\\.(?:htm|html)$" );
+    static const std::regex template_start_rx    = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
+    static const std::regex template_post_rx     = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
+    static const std::regex template_index_rx    = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
+    static const std::regex template_tag_list_rx = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
+    static const std::regex index_entry_html_rx  = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
+    static const std::regex html_rx              = std::regex( "^.+\\.(?:htm|html)$" );
 
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
     auto index_entry_match = std::smatch();
@@ -65,6 +66,8 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                 index->_paths.templates.index = p.path();
             } else if( std::regex_match( path, template_start_rx ) ) {
                 index->_paths.templates.start = p.path();
+            } else if( std::regex_match( path, template_tag_list_rx ) ) {
+                index->_paths.templates.tag_list = p.path();
             } else if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
                 if( index_entry_match.size() > 1 )
                     index_entry_files.emplace(
@@ -79,12 +82,14 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
         }
     }
 
+    if( index->_paths.templates.start.empty() )
+        throw std::runtime_error( "No start page template file found." );
     if( index->_paths.templates.post.empty() )
         throw std::runtime_error( "No post page template file found." );
     if( index->_paths.templates.index.empty() )
         throw std::runtime_error( "No index page template file found." );
-    if( index->_paths.templates.start.empty() )
-        throw std::runtime_error( "No start page template file found." );
+    if( index->_paths.templates.tag_list.empty() )
+        throw std::runtime_error( "No index tag list page template file found." );
     if( index->_articles.empty() )
         throw  std::runtime_error( "No files to index found." );
 
@@ -96,9 +101,6 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                 article._paths.entry_html = entry_it->second;
         }
 
-    generateTagDirPaths( *index, *global_options );
-    createTagToArticleIndexMap( *index );
-
     //Sort by newest to oldest article
     std::sort( index->_articles.begin(),
                index->_articles.end(),
@@ -107,11 +109,15 @@ std::unique_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                }
     );
 
+    generateDateIndexTargets( *index, *global_options );
+    generateTagIndexTargets( *index, *global_options );
+
     return std::move( index );
 }
 
 /**
- * Adds new tags found in article into the index's global Tag set
+ * Adds new tags found in article into the index's global Tag set along with
+ * their corresponding tag directories
  * @param global_options Global blogator options
  * @param article        Article from which to extract tags to add to the global set
  * @param master_index   Master index file
@@ -121,9 +127,8 @@ void blogator::indexer::addTags( const dto::Options &global_options,
                                  blogator::dto::Index &master_index )
 {
     for( const auto &tag : article._tags ) {
-        auto tag_dir = "tag_" + std::to_string( master_index._indices.byTag.tag_directories.size() );
-        master_index._indices.byTag.tag_directories.insert(
-            std::make_pair( tag, global_options._paths.index_sub_dirs.by_tag / tag_dir )
+        master_index._indices.byTag.tags.insert(
+            std::make_pair( tag, std::to_string( master_index._indices.byTag.tags.size() ) )
         );
     }
 }
@@ -145,41 +150,57 @@ void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem:
 }
 
 /**
- * Generate directory names for each tags
- * @param master_index Master index
+ * Generates all tag index targets (output index file names and article indices for each)
+ * @param master_index   Master index
+ * @param global_options Global blogator options
  */
-void blogator::indexer::generateTagDirPaths( blogator::dto::Index & master_index,
-                                             const dto::Options &global_options )
+void blogator::indexer::generateTagIndexTargets( blogator::dto::Index &master_index,
+                                                 const blogator::dto::Options &global_options )
 {
-    size_t page_count = ( master_index._articles.size() / global_options._index.items_per_page )
-                        + ( ( master_index._articles.size() % global_options._index.items_per_page ) > 0 );
+    { //TAG ARTICLE INDEX MAPPING
+        auto & map = master_index._indices.byTag.tags;
+        size_t i = 0;
 
-    for( size_t p = 0; p < page_count; ++p ) {
-        std::stringstream ss;
-        ss << "page" << p << ".html";
-        master_index._indices.byDate.page_file_names.emplace_back( std::filesystem::path( ss.str() ) );
+        for( const auto & article : master_index._articles ) {
+
+            for( const auto & tag : article._tags ) {
+                auto tag_it = map.find( tag );
+
+                if( tag_it != map.end() )
+                    tag_it->second.article_indices.emplace_back( i );
+
+            }
+
+            ++i;
+        }
+    }
+
+    { //TAG INDEX FILE NAMES
+        for( auto &tag : master_index._indices.byTag.tags ) {
+            if( !tag.second.article_indices.empty() ) {
+                const size_t page_count = calcPageCount( global_options._index.items_per_page,
+                                                         tag.second.article_indices.size() );
+
+                for( size_t p = 0; p < page_count; ++p )
+                    tag.second.file_names.emplace_back( makeFileName( tag.second.tag_id, p ) );
+            }
+        }
     }
 }
 
 /**
- * Generate a tag index map
- * @param master_index Master Index
+ * Generates date index filenames
+ * @param master_index   Master index
+ * @param global_options Global blogator options
  */
-void blogator::indexer::createTagToArticleIndexMap( blogator::dto::Index & master_index ) {
+void blogator::indexer::generateDateIndexTargets( blogator::dto::Index &master_index,
+                                                  const blogator::dto::Options &global_options )
+{
+    const size_t page_count = calcPageCount( global_options._index.items_per_page,
+                                             master_index._articles.size() );
 
-    auto &map = master_index._indices.byTag.tag_to_article_map;
-
-    size_t i = 0;
-    for( const auto &article : master_index._articles ) {
-        for( const auto &tag : article._tags ) {
-            if( map.find( tag ) == map.end() ) {
-                map.insert( std::make_pair( tag, std::vector<size_t>( { i } ) ) );
-            } else {
-                map.at( tag ).emplace_back( i );
-            }
-            ++i;
-        }
-    }
+    for( size_t p = 0; p < page_count; ++p )
+        master_index._indices.byDate.page_file_names.emplace_back( makeFileName( p ) );
 }
 
 /**
@@ -282,4 +303,37 @@ void blogator::indexer::addOutputPath( const dto::Options::Paths &global_paths,
 {
     auto abs_path = global_paths.posts_dir / article._paths.src_html.filename();
     article._paths.out_html = abs_path.lexically_relative( global_paths.posts_dir );
+}
+
+/**
+ * Creates a file name based on a page number 'n'
+ * @param n Page number
+ * @return File name formatted as '{n}.html'
+ */
+std::filesystem::path blogator::indexer::makeFileName( const size_t & n ) {
+    std::stringstream ss;
+    ss << n << ".html";
+    return std::filesystem::path( ss.str() );
+}
+
+/**
+ * Creates a file name based on a page number 'n'
+ * @param prefix File name prefix
+ * @param n      Page number
+ * @return File name formatted as '{prefix}_{n}.html'
+ */
+std::filesystem::path blogator::indexer::makeFileName( const std::string &prefix, const size_t &n ) {
+    std::stringstream ss;
+    ss << prefix << "_" << n << ".html";
+    return std::filesystem::path( ss.str() );
+}
+
+/**
+ * Calculates a page count required for 'n' items
+ * @param items_per_page Items per page
+ * @param item_count     Total number of items to fit
+ * @return Number of pages required
+ */
+size_t blogator::indexer::calcPageCount( const size_t &items_per_page, const size_t & item_count ) {
+    return ( item_count / items_per_page ) + ( ( item_count % items_per_page ) > 0 );
 }

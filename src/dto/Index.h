@@ -9,16 +9,25 @@
 
 namespace blogator::dto {
     struct Index {
-        typedef std::vector<dto::Article>                    Articles_t;
-        typedef std::map<std::string, std::vector<size_t>>   TagToArticleIndexMap_t;
-        typedef std::map<std::string, std::filesystem::path> TagIndexPaths_t;
-        typedef std::vector<std::filesystem::path>           PagePaths_t;
+        typedef std::vector<std::filesystem::path> PagePaths_t;
+        typedef std::vector<dto::Article>          Articles_t;
+
+        struct TagIndexContent {
+            explicit TagIndexContent( std::string id ) : tag_id( std::move( id ) ) {};
+
+            std::string           tag_id;          //tag's prefix id
+            std::vector<size_t>   article_indices; //indices to the master Article index
+            PagePaths_t           file_names;      //page file names in the tag's sub-directory
+        };
+
+        typedef std::map<std::string, TagIndexContent> TagIndexPaths_t;
 
         struct Paths {
             struct Templates {
+                std::filesystem::path start;
                 std::filesystem::path post;
                 std::filesystem::path index;
-                std::filesystem::path start;
+                std::filesystem::path tag_list;
             } templates;
 
             struct CSS {
@@ -30,8 +39,7 @@ namespace blogator::dto {
 
         struct Indices {
             struct ByTag {
-                TagIndexPaths_t        tag_directories;
-                TagToArticleIndexMap_t tag_to_article_map; //(K=tag string, V=vector of indices to the master Article index)
+                TagIndexPaths_t tags;
             } byTag;
 
             struct ByDate {
@@ -56,21 +64,22 @@ namespace blogator::dto {
             s << "Index stylesheet ...: " << index._paths.css.index.string() << std::endl;
             s << "Article count.......: " << index._articles.size() << " found." << std::endl;
             s << "Tags found..........: ";
-            for( const auto &t : index._indices.byTag.tag_directories )
+            for( const auto &t : index._indices.byTag.tags )
                 s << "\"" << t.first << "\" ";
             s << std::endl << std::endl;
 
             s << "Tag to Article index mapping:\n";
-            for( auto &e : index._indices.byTag.tag_to_article_map ) {
+            for( auto &e : index._indices.byTag.tags ) {
                 s << e.first << ": { ";
-                for( auto i : e.second )
+                for( auto i : e.second.article_indices )
                     s << i << " ";
                 s << "}\n";
             }
 
-            s << "\n=====ARTICLES=====\n";
+            s << "\n=================================ARTICLES START=================================\n";
             for( const auto &a : index._articles )
                 s << a << std::endl;
+            s << "==================================ARTICLES END==================================\n";
             return s;
         }
     };

@@ -15,6 +15,7 @@ namespace blogator::html::reader {
     std::vector<std::string> getTags( const std::string &line );
     size_t findLineOfTag( const std::string &tag, const dto::HTML &html );
     dto::Template::DivWritePositions_t & findInsertPositions( const dto::HTML &html, dto::Template::DivWritePositions_t &divs );
+    std::string getIndent( const std::string &line );
 }
 
 #endif //BLOGATOR_HTML_READER_H
