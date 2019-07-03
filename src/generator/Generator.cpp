@@ -8,6 +8,7 @@
 
 #include "PostMaker.h"
 #include "IndexMaker.h"
+#include "../exception/failed_expectation.h"
 
 
 /**
@@ -32,6 +33,7 @@ blogator::generator::Generator::Generator( std::shared_ptr<const dto::Index>    
  * @param landing_maker LandingMaker instance
  * @param rss_maker     RSS instance
  * @return Success
+ * @throws exception::failed_expectation when a maker cannot generate its targets
  */
 bool blogator::generator::Generator::init( const dto::Index &master_index,
                                            PostMaker        &post_maker,
@@ -39,23 +41,11 @@ bool blogator::generator::Generator::init( const dto::Index &master_index,
                                            LandingMaker     &landing_maker,
                                            RSS              &rss_maker )
 {
+    //TODO try/catch on exceptions thrown in init() methods
     auto posts_ok = post_maker.init();
-
-    //TODO landing init
-    //TODO rss init
-    for( auto &a : master_index._indices.byTag.tags ) {
-        std::cout << a.first << ":\n"
-                  << "\tprefix: " << a.second.tag_id << "\n"
-                  << "\tindices  : ";
-        for( auto i : a.second.article_indices )
-            std::cout << i << ", ";
-        std::cout << "\n\tpaths    :\n";
-        for( auto p : a.second.file_names )
-            std::cout << "\t\t" << p << "\n";
-        std::cout << std::endl;
-    }
-
     auto index_ok = index_maker.init();
+//    auto landing_ok = landing_maker.init();
+    auto rss_ok = rss_maker.init();
 
-    return ( index_ok && posts_ok ); //TODO landing_ok && rss_ok
+    return ( index_ok && posts_ok && rss_ok ); //TODO landing_ok
 }

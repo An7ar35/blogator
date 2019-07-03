@@ -3,19 +3,31 @@
 #include <fstream>
 #include <regex>
 
+#include "ConfigReader.h"
 #include "../html/reader/reader.h"
 #include "../exception/file_access_failure.h"
+
+/**
+ *
+ * @param file_path
+ * @return
+ */
+std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path ) { //TODO error control?
+    auto reader = ConfigReader();
+    return reader.init( file_path );
+}
 
 /**
  * Sets-up the base directories for generating the posts/index
  * @param global_options Global blogator options
  * @return Success
  */
-bool blogator::fs::setupEnvironment( std::shared_ptr<dto::Options> global_options ) {
+bool blogator::fs::setupEnvironment( const std::shared_ptr<dto::Options> &global_options ) {
     try {
         std::uintmax_t purge_count = 0;
         purge_count += std::filesystem::remove_all( global_options->_paths.posts_dir );
         purge_count += std::filesystem::remove_all( global_options->_paths.index_dir );
+        purge_count += std::filesystem::remove( global_options->_paths.root_dir / global_options->_rss.file_name ) ? 1 : 0;
 
         std::cout << "Purged " << purge_count << " file(s)/folder(s)" << std::endl;
 
@@ -34,6 +46,29 @@ bool blogator::fs::setupEnvironment( std::shared_ptr<dto::Options> global_option
         std::cerr << e.what() << std::endl;
         return false;
     }
+}
+
+/**
+ * Imports the HTML templates to use
+ * @param options Option DTO (with the paths to the html template files)
+ * @return Template DTO loaded and analysed for insertion points
+ */
+std::shared_ptr<blogator::dto::Template> blogator::fs::importTemplates( const dto::Index &master_index ) {
+    auto templates = std::make_shared<dto::Template>();
+
+    templates->_start.html       = fs::importHTML( master_index._paths.templates.start );
+    templates->_post.html        = fs::importHTML( master_index._paths.templates.post );
+    templates->_index.html       = fs::importHTML( master_index._paths.templates.index );
+    templates->_tag_list.html    = fs::importHTML( master_index._paths.templates.tag_list );
+    templates->_index_entry.html = fs::importHTML( master_index._paths.templates.index_entry );
+
+    html::reader::findInsertPositions( *templates->_start.html, templates->_start.div_write_pos );
+    html::reader::findInsertPositions( *templates->_post.html, templates->_post.div_write_pos );
+    html::reader::findInsertPositions( *templates->_index.html, templates->_index.div_write_pos );
+    html::reader::findInsertPositions( *templates->_tag_list.html, templates->_tag_list.div_write_pos );
+    html::reader::findInsertPositions( *templates->_index_entry.html, templates->_index_entry.div_write_pos );
+
+    return std::move( templates );
 }
 
 /**
@@ -58,72 +93,4 @@ std::unique_ptr<blogator::dto::HTML> blogator::fs::importHTML( const std::filesy
     file.close();
 
     return std::move( html );
-}
-
-/**
- * Imports the strings to use for each months of the year
- * @param file_path Path for month file
- * @return Imported key-value pairs from file
- * @throws blogator::exception::file_access_failure when access to source file fails
- * @throws std::runtime_error when any of the data checks fails
- */
-std::unordered_map<unsigned, std::string> blogator::fs::importMonthNames( const std::filesystem::path &file_path ) {
-    /**
-     * [LAMBDA] check if char is a space
-     */
-    static auto isSpace = []( char ch ) {
-        return std::isspace<char>( ch, std::locale::classic() );
-    };
-
-    std::unordered_map<unsigned, std::string> month_map;
-    std::string   line;
-    std::ifstream file( file_path );
-
-    if( !file.is_open() )
-        throw exception::file_access_failure( "Month string file \"" + file_path.string() + "\" could not be opened." );
-
-    //Import months from file
-    while( getline( file, line ) ) {
-        line.erase( std::remove_if( line.begin(), line.end(), isSpace ), line.end() );
-
-        auto separator = line.find( '=' );
-        if( separator != std::string::npos ) {
-            auto month_i = std::stoi( line.substr( 0, separator ) );
-            auto month_s = line.substr( separator + 1 );
-            month_map.insert( std::make_pair( month_i, month_s ) );
-        }
-    }
-
-    file.close();
-
-    //Validate the imported months
-    auto validated = 0;
-    for( auto i = 1; i <= 12; ++i )
-        validated += ( month_map.find( i ) == month_map.end() ) ? 0 : 1;
-
-    if( validated < 12 )
-        throw std::runtime_error( std::to_string( validated ) + "/12 month strings valid." );
-
-    return month_map;
-}
-
-/**
- * Imports the HTML templates to use
- * @param options Option DTO (with the paths to the html template files)
- * @return Template DTO loaded and analysed for insertion points
- */
-std::shared_ptr<blogator::dto::Template> blogator::fs::importTemplates( const dto::Index &master_index ) {
-    auto templates = std::make_shared<dto::Template>();
-
-    templates->_start.html    = fs::importHTML( master_index._paths.templates.start );
-    templates->_post.html     = fs::importHTML( master_index._paths.templates.post );
-    templates->_index.html    = fs::importHTML( master_index._paths.templates.index );
-    templates->_tag_list.html = fs::importHTML( master_index._paths.templates.tag_list );
-
-    html::reader::findInsertPositions( *templates->_start.html, templates->_start.div_write_pos );
-    html::reader::findInsertPositions( *templates->_post.html, templates->_post.div_write_pos );
-    html::reader::findInsertPositions( *templates->_index.html, templates->_index.div_write_pos );
-    html::reader::findInsertPositions( *templates->_tag_list.html, templates->_tag_list.div_write_pos );
-
-    return std::move( templates );
 }

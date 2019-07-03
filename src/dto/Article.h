@@ -11,6 +11,7 @@ namespace blogator::dto {
     struct Article {
         friend std::ostream &operator <<( std::ostream &s, const Article &article ) {
             s << "Article={ \n"
+              << "\tNumber.............: " << article._number << "\n"
               << "\tTitle/Heading......: \"" << article._heading << "\"\n"
               << "\tDate-stamp.........: '" << article._datestamp << "'\n"
               << "\tSource file path...: " << article._paths.src_html.string() << "\n"
@@ -32,6 +33,7 @@ namespace blogator::dto {
             std::filesystem::path css;
         } _paths;
 
+        size_t                _number;
         std::string           _heading;
         DateStamp             _datestamp;
         std::set<std::string> _tags;

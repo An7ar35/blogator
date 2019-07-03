@@ -1,9 +1,8 @@
 //TODO
 ======
 · Find/replace tags inside any <span class="tag">..</span> with hyperlinked versions (<a></a>)
-· HTML generator
-· Index of all articles, tags,  etc...
-· RSS feed?
+· RSS feed
+· Testing with emojis and weird char sets (accents, etc..) and check insert points still work as well as ordering in the index (tag names)
 
 Source material
 ===============
@@ -16,6 +15,10 @@ Source material
 · CSS is already linked in header.html's head tags
 · All posts have a <h1> heading, <span class="tag">..</span>, and <time timedate="YYY-MM-DD...">..</time>
 
+· There can only be 1 Insertion tags per line in the templates
+  "Template file must keep to 1 insertion tag per line. No more.*"
+    "*If and when I get time in the future I might do something about continuous insertion points on a single line"
+· Index entries are nested into a <a></a> tag that links back to the post
 
 
 Running the generator
@@ -24,7 +27,6 @@ Running the generator
 · HTML source is copied verbatim and then collated/edited where necessary (links)
 · Index pane orders dates in descending order
 · Index pane orders tags in alphabetical order
-
 
 
 Notes
@@ -38,8 +40,9 @@ Tags for page-per-page navigation:
 Future
 ======
 · Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
-
-
+· Use collation (http://userguide.icu-project.org/collation/api) for sorting in the future along with wstring?
+· Article indexer/RSS: article author
+· RSS articles: <description>, <guid>
 
 
 Sources

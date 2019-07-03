@@ -27,8 +27,7 @@ namespace blogator::dto {
         };
 
         typedef std::map<std::string, std::vector<InsertPosition>> DivWritePositions_t;
-        typedef std::map<InsertPosition, std::string>              ConsecutiveDivWritePositions_t;
-        typedef std::unordered_map<unsigned, std::string>          MonthStringLookup_t;
+        typedef std::map<InsertPosition, std::string>              ConsecutiveWritePositions_t;
 
         /**
          * Post/Article page template
@@ -60,62 +59,41 @@ namespace blogator::dto {
          * Tag list (tags.html) page template
          */
         struct TagListIndexPage {
-            std::unique_ptr<HTML> html;
-            DivWritePositions_t   div_write_pos = {
+            const std::filesystem::path file_name = "tags.html";
+            std::unique_ptr<HTML>       html;
+            DivWritePositions_t         div_write_pos = {
                 { "breadcrumb",         std::vector<InsertPosition>() },
                 { "tag-list",           std::vector<InsertPosition>() },
-                { "tag-list-hierarchy", std::vector<InsertPosition>() },
-                { "tag-list-block_0",   std::vector<InsertPosition>() },
-                { "tag-list-block_a",   std::vector<InsertPosition>() },
-                { "tag-list-block_b",   std::vector<InsertPosition>() },
-                { "tag-list-block_c",   std::vector<InsertPosition>() },
-                { "tag-list-block_d",   std::vector<InsertPosition>() },
-                { "tag-list-block_e",   std::vector<InsertPosition>() },
-                { "tag-list-block_f",   std::vector<InsertPosition>() },
-                { "tag-list-block_g",   std::vector<InsertPosition>() },
-                { "tag-list-block_h",   std::vector<InsertPosition>() },
-                { "tag-list-block_i",   std::vector<InsertPosition>() },
-                { "tag-list-block_j",   std::vector<InsertPosition>() },
-                { "tag-list-block_k",   std::vector<InsertPosition>() },
-                { "tag-list-block_l",   std::vector<InsertPosition>() },
-                { "tag-list-block_m",   std::vector<InsertPosition>() },
-                { "tag-list-block_n",   std::vector<InsertPosition>() },
-                { "tag-list-block_o",   std::vector<InsertPosition>() },
-                { "tag-list-block_p",   std::vector<InsertPosition>() },
-                { "tag-list-block_q",   std::vector<InsertPosition>() },
-                { "tag-list-block_r",   std::vector<InsertPosition>() },
-                { "tag-list-block_s",   std::vector<InsertPosition>() },
-                { "tag-list-block_t",   std::vector<InsertPosition>() },
-                { "tag-list-block_u",   std::vector<InsertPosition>() },
-                { "tag-list-block_v",   std::vector<InsertPosition>() },
-                { "tag-list-block_w",   std::vector<InsertPosition>() },
-                { "tag-list-block_x",   std::vector<InsertPosition>() },
-                { "tag-list-block_y",   std::vector<InsertPosition>() },
-                { "tag-list-block_z",   std::vector<InsertPosition>() }
+                { "tag-list-hierarchy", std::vector<InsertPosition>() }
             };
         } _tag_list;
+
+        /**
+         * Index entry template
+         */
+        struct IndexEntry {
+            std::unique_ptr<HTML> html;
+            DivWritePositions_t   div_write_pos = {
+                { "post-number", std::vector<InsertPosition>() },
+                { "heading",     std::vector<InsertPosition>() },
+                { "tags",        std::vector<InsertPosition>() },
+                { "date-stamp",  std::vector<InsertPosition>() }
+            };
+        } _index_entry;
 
         /**
          * Blog landing page (start) template
          */
         struct LandingPage {
-            std::unique_ptr<HTML> html;
-            DivWritePositions_t   div_write_pos = {
+            const std::filesystem::path file_name = "index.html";
+            std::unique_ptr<HTML>       html;
+            DivWritePositions_t         div_write_pos = {
                 { "breadcrumb",     std::vector<InsertPosition>() },
                 { "newest-posts",   std::vector<InsertPosition>() },
                 { "top-tags",       std::vector<InsertPosition>() },
                 { "featured-posts", std::vector<InsertPosition>() }
             };
         } _start;
-
-        /**
-         * Month string lookup
-         */
-        MonthStringLookup_t _months = std::unordered_map<unsigned, std::string> ( {
-            { 1, "January" }, { 2, "February" }, { 3, "March" }, { 4, "April" }, { 5, "May" },
-            { 6, "June" }, { 7, "July" }, { 8, "August" }, { 9, "September" }, { 10, "October" },
-            { 11, "November" }, { 12, "December" }
-        } );
 
         /**
          * Gets a map of write positions ordered consecutively

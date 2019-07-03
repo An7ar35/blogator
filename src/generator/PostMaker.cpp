@@ -10,6 +10,7 @@
 
 #include "../fs/fs.h"
 #include "../html/html.h"
+#include "../exception/failed_expectation.h"
 #include "../exception/file_access_failure.h"
 
 /**
@@ -29,10 +30,14 @@ blogator::generator::PostMaker::PostMaker( std::shared_ptr<const dto::Index>    
 /**
  * Initialize HTML post pages generation
  * @return Success
+ * @throws exception::failed_expectation when no insertion points are found in the post template
  */
 bool blogator::generator::PostMaker::init() {
     auto insert_points = dto::Template::getConsecutiveWritePositions( _templates->_post.div_write_pos );
-    //TODO check insert points exists then throw proper error is none found
+
+    if( insert_points.empty() )
+        throw exception::failed_expectation( "No insertion points found in post template." );
+
     std::unique_ptr<dto::IndexDateTree> html_date_tree;
     std::unique_ptr<dto::IndexTagTree>  html_tag_tree;
 
@@ -128,7 +133,7 @@ std::unique_ptr<blogator::dto::IndexDateTree>
 
         html::writer::openTree( *tree );
         html::writer::openYearNode( article->_datestamp, *tree );
-        html::writer::openMonthNode( article->_datestamp, _templates->_months, *tree );
+        html::writer::openMonthNode( article->_datestamp, _options->_months, *tree );
 
         while( article != _master_index->_articles.cend() ) {
 
@@ -136,11 +141,11 @@ std::unique_ptr<blogator::dto::IndexDateTree>
                 html::writer::closeMonthNode( *tree );
                 html::writer::closeYearNode( *tree );
                 html::writer::openYearNode( article->_datestamp, *tree );
-                html::writer::openMonthNode( article->_datestamp, _templates->_months, *tree );
+                html::writer::openMonthNode( article->_datestamp, _options->_months, *tree );
 
             } else if( article->_datestamp._month != curr_date._month ) {
                 html::writer::closeMonthNode( *tree );
-                html::writer::openMonthNode( article->_datestamp, _templates->_months, *tree );
+                html::writer::openMonthNode( article->_datestamp, _options->_months, *tree );
             }
 
             html::writer::addArticleLeaf( *article, curr_i, *tree );
@@ -207,7 +212,7 @@ void blogator::generator::PostMaker::writeContentDiv( const std::filesystem::pat
 
     if( !in.is_open() )
         throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
-
+//    <span class="post_number"></span>
     std::string line;
     while( getline( in, line ) )
         out << indent << "\t" << line << std::endl;
@@ -233,8 +238,8 @@ void blogator::generator::PostMaker::writePageNavDiv( std::ofstream &file,
               ? html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.first, "disabled" )
               : html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.first ) )
          << ( is_first
-              ? html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.backwards, "disabled" )
-              : html::createHyperlink( _master_index->_articles.at( article_pos - 1 )._paths.out_html, _options->_page_nav.backwards, "disabled" ) )
+              ? html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.backward, "disabled" )
+              : html::createHyperlink( _master_index->_articles.at( article_pos - 1 )._paths.out_html, _options->_page_nav.backward, "disabled" ) )
          << std::to_string( article_pos + 1 ) << _options->_page_nav.separator << std::to_string( _master_index->_articles.size() )
          << ( is_last
               ? html::createHyperlink( _master_index->_articles.at( _master_index->_articles.size() - 1 )._paths.out_html, _options->_page_nav.forward, "disabled" )

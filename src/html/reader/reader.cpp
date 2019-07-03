@@ -109,18 +109,14 @@ blogator::dto::Template::DivWritePositions_t &
     size_t line_number = 0;
 
     for( const auto &line : html._lines ) {
-        auto d = line.find( "<div " );
+        for( auto &div : divs ) {
+            auto s  = R"(^(.*<\s*[a-zA-Z\d]+\s*class\s*=\s*"[a-zA-Z-_\s]*)" + div.first + R"((?:\s[a-zA-Z-_\s]*"|")>\s*)(?:</[a-zA-Z\d]+>))";
+            auto rx = std::regex( s );
+            auto it = std::sregex_iterator( line.begin(), line.end(), rx );
 
-        if( d != std::string::npos ) {
-            for( auto &div : divs ) {
-                auto s  = "<div class=\"" + div.first + "\">";
-                auto rx = std::regex( '(' + s + ')' );
-                auto it = std::sregex_iterator( line.begin(), line.end(), rx );
-
-                while( it != std::sregex_iterator() ) {
-                    div.second.emplace_back( line_number, it->position() + s.length() );
-                    ++it;
-                }
+            while( it != std::sregex_iterator() ) {
+                div.second.emplace_back( line_number, it->str( 1 ).length() );
+                ++it;
             }
         }
 

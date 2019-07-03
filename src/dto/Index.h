@@ -28,6 +28,7 @@ namespace blogator::dto {
                 std::filesystem::path post;
                 std::filesystem::path index;
                 std::filesystem::path tag_list;
+                std::filesystem::path index_entry;
             } templates;
 
             struct CSS {

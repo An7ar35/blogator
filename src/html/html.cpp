@@ -42,7 +42,7 @@ std::string blogator::html::createHyperlink( const std::filesystem::path &href,
  * @return Formatted time tag
  */
 std::string blogator::html::createDateTime( const blogator::dto::DateStamp & date_stamp,
-                                            const dto::Template::MonthStringLookup_t &months,
+                                            const dto::Options::MonthStringLookup_t &months,
                                             const std::string & css_class )
 {
     std::stringstream ss;

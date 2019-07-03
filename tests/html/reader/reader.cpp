@@ -105,9 +105,9 @@ TEST( html_reader_tests, findInsertPositions1 ) { //empty line
     HTML html;
     html._lines.emplace_back( "" );
     Template::DivWritePositions_t collection = {
-        { "page_index",   std::vector<Template::InsertPosition_t>() },
-        { "post_content", std::vector<Template::InsertPosition_t>() },
-        { "index_pane",   std::vector<Template::InsertPosition_t>() }
+        { "page_index",   std::vector<Template::InsertPosition>() },
+        { "post_content", std::vector<Template::InsertPosition>() },
+        { "index_pane",   std::vector<Template::InsertPosition>() }
     };
 
     findInsertPositions( html, collection );
@@ -124,9 +124,9 @@ TEST( html_reader_tests, findInsertPositions2 ) { //1x occurrence
     HTML html;
     html._lines.emplace_back( "\t  <div class=\"index_pane\"></div><div class\"a\">some text</div><div class=\"index_pane\"></div>" );
     Template::DivWritePositions_t collection = {
-        { "page_index",   std::vector<Template::InsertPosition_t>() },
-        { "post_content", std::vector<Template::InsertPosition_t>() },
-        { "index_pane",   std::vector<Template::InsertPosition_t>() }
+        { "page_index",   std::vector<Template::InsertPosition>() },
+        { "post_content", std::vector<Template::InsertPosition>() },
+        { "index_pane",   std::vector<Template::InsertPosition>() }
     };
 
     findInsertPositions( html, collection );
@@ -134,7 +134,7 @@ TEST( html_reader_tests, findInsertPositions2 ) { //1x occurrence
     for( const auto &div : collection ) {
         std::cout << div.first << " = {" << std::endl;
         for( auto e : div.second ) {
-            std::cout << "\t{ " << e.first << ", " << e.second << " }" << std::endl;
+            std::cout << "\t{ " << e.line << ", " << e.col << " }" << std::endl;
         }
         std::cout << "}" << std::endl;
     }

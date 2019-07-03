@@ -8,6 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 set(CMAKE_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/external")
 set(CMAKE_RESOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resource")
 set(CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+set(TEMP_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tmp")
 
 include(ExternalProject)
 
@@ -60,6 +61,7 @@ set(SOURCE_FILES
         src/dto/Template.h
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
+        src/exception/failed_expectation.h
         src/html/html.cpp
         src/html/html.h
         src/html/writer/writer.cpp
@@ -70,6 +72,8 @@ set(SOURCE_FILES
         src/indexer/indexer.h
         src/fs/fs.cpp
         src/fs/fs.h
+        src/fs/ConfigReader.cpp
+        src/fs/ConfigReader.h
         src/generator/Generator.cpp
         src/generator/Generator.h
         src/generator/PostMaker.cpp
@@ -127,4 +131,4 @@ add_test(blogator_tests ${TEST_FILES})
 ############
 include_directories(external)
 add_executable(blogator ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} stdc++fs )
+target_link_libraries(${PROJECT_NAME} stdc++fs)

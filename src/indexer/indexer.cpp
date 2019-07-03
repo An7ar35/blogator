@@ -47,12 +47,13 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     }
 
     //====HTML====
-    static const std::regex template_start_rx    = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
-    static const std::regex template_post_rx     = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
-    static const std::regex template_index_rx    = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
-    static const std::regex template_tag_list_rx = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
-    static const std::regex index_entry_html_rx  = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
-    static const std::regex html_rx              = std::regex( "^.+\\.(?:htm|html)$" );
+    static const std::regex template_start_rx       = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
+    static const std::regex template_post_rx        = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
+    static const std::regex template_index_rx       = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
+    static const std::regex template_tag_list_rx    = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
+    static const std::regex template_index_entry_rx = std::regex( "^.*(template_index_entry)\\.(?:html|htm)$" );
+    static const std::regex index_entry_html_rx     = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
+    static const std::regex html_rx                 = std::regex( "^.+\\.(?:htm|html)$" );
 
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
     auto index_entry_match = std::smatch();
@@ -68,6 +69,8 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                 index->_paths.templates.start = p.path();
             } else if( std::regex_match( path, template_tag_list_rx ) ) {
                 index->_paths.templates.tag_list = p.path();
+            } else if( std::regex_match( path, template_index_entry_rx ) ) {
+                index->_paths.templates.index_entry = p.path();
             } else if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
                 if( index_entry_match.size() > 1 )
                     index_entry_files.emplace(
@@ -90,6 +93,8 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
         throw std::runtime_error( "No index page template file found." );
     if( index->_paths.templates.tag_list.empty() )
         throw std::runtime_error( "No index tag list page template file found." );
+    if( index->_paths.templates.index_entry.empty() )
+        throw std::runtime_error( "No index entry template file found." );
     if( index->_articles.empty() )
         throw  std::runtime_error( "No files to index found." );
 
@@ -101,14 +106,7 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
                 article._paths.entry_html = entry_it->second;
         }
 
-    //Sort by newest to oldest article
-    std::sort( index->_articles.begin(),
-               index->_articles.end(),
-               []( const dto::Article &a, const dto::Article &b ) {
-                    return dto::DateStamp::compare( a._datestamp, b._datestamp ) > 0;
-               }
-    );
-
+    sortChronologically( index->_articles );
     generateDateIndexTargets( *index, *global_options );
     generateTagIndexTargets( *index, *global_options );
 
@@ -146,6 +144,26 @@ void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem:
     if( it != found_stylesheets.end() ) {
         article._paths.css = it->second;
         found_stylesheets.erase( it );
+    }
+}
+
+/**
+ * Sort the articles in chronological order from newest to oldest (via the DateStamp)
+ * @param articles Collection of articles
+ */
+void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t & articles ) {
+
+    std::sort( articles.begin(),
+               articles.end(),
+               []( const dto::Article &a, const dto::Article &b ) {
+                   return dto::DateStamp::compare( a._datestamp, b._datestamp ) > 0;
+               }
+    );
+
+    size_t i = 0;
+    for( auto &article : articles ) {
+        article._number = ( articles.size() - i );
+        ++i;
     }
 }
 

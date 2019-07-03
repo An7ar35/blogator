@@ -3,15 +3,28 @@
 
 #include <memory>
 
+#include "../dto/Index.h"
 #include "../dto/Options.h"
+#include "../dto/Template.h"
 
 namespace blogator::generator {
-    class RSS { //TODO
+    class RSS {
       public:
-        RSS( std::shared_ptr<dto::Options> global_options );
+        RSS( std::shared_ptr<const dto::Index> master_index,
+             std::shared_ptr<const dto::Template> templates,
+             std::shared_ptr<const dto::Options> global_options );
+
+        bool init();
 
       private:
-        std::shared_ptr<dto::Options> _options;
+        std::shared_ptr<const dto::Index> _master_index;
+        std::shared_ptr<const dto::Template> _templates;
+        std::shared_ptr<const dto::Options> _options;
+
+        void writeHead( std::ofstream &file ) const;
+        void writeItems( std::ofstream &file ) const;
+        void writeFoot( std::ofstream &file ) const;
+
     };
 }
 
