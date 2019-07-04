@@ -67,6 +67,8 @@ bool blogator::generator::PostMaker::init() {
                     "File '" + html_out.string() + "' could not be opened for writing."
                 );
 
+            article_out << _options->BLOGATOR_SIGNATURE << "\n";
+
             size_t curr_src_line = 0;
             auto   insert_point  = insert_points.cbegin();
             for( const auto &template_line : _templates->_post.html->_lines ) {
@@ -108,13 +110,12 @@ bool blogator::generator::PostMaker::init() {
             ++curr_article_i;
         }
 
-        return true;
-
-    } catch( exception::file_access_failure &e ) {
-        std::cerr << "[generator::PostMaker::init(..)] " << e.what() << std::endl;
+    } catch( std::exception &e ) {
+        std::cerr << e.what() << std::endl;
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 /**

@@ -41,11 +41,21 @@ bool blogator::generator::Generator::init( const dto::Index &master_index,
                                            LandingMaker     &landing_maker,
                                            RSS              &rss_maker )
 {
-    //TODO try/catch on exceptions thrown in init() methods
-    auto posts_ok = post_maker.init();
-    auto index_ok = index_maker.init();
-//    auto landing_ok = landing_maker.init();
-    auto rss_ok = rss_maker.init();
+    std::cout << "> Generating posts ";
+    auto posts_ok   = post_maker.init();
+    std::cout << ( posts_ok ? "[OK]" : "[ERROR]" ) << std::endl;
 
-    return ( index_ok && posts_ok && rss_ok ); //TODO landing_ok
+    std::cout << "> Generating indices ";
+    auto index_ok   = index_maker.init();
+    std::cout << ( index_ok ? "[OK]" : "[ERROR]" ) << std::endl;
+
+    std::cout << "> Generating landing page ";
+    auto landing_ok = landing_maker.init();
+    std::cout << ( landing_ok ? "[OK]" : "[ERROR]" ) << std::endl;
+
+    std::cout << "> Generating RSS feed ";
+    auto rss_ok     = rss_maker.init();
+    std::cout << ( rss_ok ? "[OK]" : "[ERROR]" ) << std::endl;
+
+    return ( index_ok && posts_ok && rss_ok && landing_ok );
 }

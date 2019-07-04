@@ -96,6 +96,19 @@ namespace blogator::dto {
         } _start;
 
         /**
+         * Landing page newest/featured posts entry template
+         */
+        struct LandingPageEntry {
+            std::unique_ptr<HTML> html;
+            DivWritePositions_t   div_write_pos = {
+                { "post-number", std::vector<InsertPosition>() },
+                { "heading",     std::vector<InsertPosition>() },
+                { "tags",        std::vector<InsertPosition>() },
+                { "date-stamp",  std::vector<InsertPosition>() }
+            };
+        } _start_entry;
+
+        /**
          * Gets a map of write positions ordered consecutively
          * @param positions Tag->insert location map
          * @return Consecutive write positions

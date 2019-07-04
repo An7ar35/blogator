@@ -24,13 +24,13 @@ namespace blogator::generator {
         std::shared_ptr<const dto::Template> _templates;
         std::shared_ptr<const dto::Options>  _options;
 
-        bool generateDateIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+        void generateDateIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                      const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
 
-        bool writeTagListPage( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+        void writeTagListPage( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
 
-        bool generateTagIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+        void generateTagIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                     const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
 
         void writeDateIndexPage( std::ofstream &page,

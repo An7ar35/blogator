@@ -275,15 +275,18 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
                                         featured_it->second.value.end(),
                                         QUOTED_STR_RX );
 
+        size_t i = 0;
         while( it != std::sregex_iterator() ) {
             if( it->size() > 1 && std::regex_search( it->str( 1 ), HTML_FILENAME_RX ) )
-                options._landing_page.featured.emplace_back( it->str( 1 ) );
+                options._landing_page.featured.emplace( std::make_pair( it->str( 1 ), i ) );
             else
                 throw exception::file_parsing_failure(
                     "Malformed file name in '" + featured + "' array "
-                    "(line #" + std::to_string( featured_it->second.line ) + "): " + it->str()
+                                                            "(line #" +
+                    std::to_string( featured_it->second.line ) + "): " + it->str()
                 );
 
+            ++i;
             ++it;
         }
 

@@ -4,113 +4,188 @@
 #include <algorithm>
 #include <functional>
 #include <fstream>
+#include <queue>
+#include <list>
+#include <unordered_map>
 
+#include "FeatAggregator.h"
 #include "../html/html.h"
 #include "../dto/DateStamp.h"
 #include "../exception/file_access_failure.h"
 #include "../exception/file_parsing_failure.h"
+#include "../exception/failed_expectation.h"
 
 /**
  * Initialise the index
  * @param global_options Global blogator options
  * @return Initialised Index
- * @throws std::runtime_error when the minimum requirements are not met (i.e.: missing files)
+ * @throws std::failed_expectation when the minimum requirements are not met (i.e.: missing files)
  */
 std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::shared_ptr<dto::Options> &global_options ) {
-    auto index     = std::make_shared<dto::Index>();
-    auto css_cache = std::unordered_map<std::string, std::filesystem::path>(); //(K=filename, V=absolute path)
+    auto index           = std::make_shared<dto::Index>();
+    auto css_cache       = std::unordered_map<std::string, std::filesystem::path>(); //(K=filename, V=absolute path)
+    auto feat_aggregator = indexer::FeatAggregator( global_options );
 
-    //====CSS====
-    static const std::regex posts_css_regex = std::regex( "^.*\\.(css)$" );
+    indexStylesheets( *global_options, *index, css_cache );
+    indexTemplates( *global_options, *index );
+    indexPosts( *global_options, *index, css_cache, feat_aggregator );
+    sortChronologically( index->_articles );
+    generateDateIndexTargets( *index, *global_options );
+    generateTagIndexTargets( *index, *global_options );
+    generateTopTags( *index, *global_options );
+
+    return std::move( index );
+}
+
+/**
+ * Indexes the stylesheets (CSS) files
+ * @param global_options Options DTO
+ * @param index          Index DTO
+ * @param css_cache      Container for caching the post-specific css files
+ */
+void blogator::indexer::indexStylesheets( const dto::Options &global_options,
+                                          dto::Index &index,
+                                          std::unordered_map<std::string, std::filesystem::path> &css_cache )
+{
     static const std::regex blog_css_regex  = std::regex( "^.*(blog)\\.(css)$" );
     static const std::regex index_css_regex = std::regex( "^.*(index)\\.(css)$" );
+    static const std::regex posts_css_regex = std::regex( "^.*\\.(css)$" );
 
-    for( auto &p: std::filesystem::recursive_directory_iterator( global_options->_paths.css_dir ) ) {
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.css_dir ) ) {
         if( p.is_regular_file() ) {
             if( std::regex_match( p.path().string(), blog_css_regex ) ) {
-                index->_paths.css.blog = p.path();
+                index._paths.css.blog = p.path();
             } else if( std::regex_match( p.path().string(), index_css_regex ) ) {
-                index->_paths.css.index = p.path();
+                index._paths.css.index = p.path();
             } else if( std::regex_match( p.path().string(), posts_css_regex ) ) {
                 css_cache.emplace( std::make_pair( p.path().stem().string(), p.path() ) );
             }
         }
     }
 
-    if( index->_paths.css.blog.empty() ) {
-        std::ofstream output( index->_paths.css.blog = global_options->_paths.css_dir / "blog.css" );
+    if( index._paths.css.blog.empty() ) {
+        std::ofstream output( index._paths.css.blog = global_options._paths.css_dir / "blog.css" );
         std::cerr << "No master stylesheet was found for the articles. A blank one was created." << std::endl;
     }
-    if( index->_paths.css.index.empty() ) {
-        std::ofstream output( index->_paths.css.index = global_options->_paths.css_dir / "index.css" );
+    if( index._paths.css.index.empty() ) {
+        std::ofstream output( index._paths.css.index = global_options._paths.css_dir / "index.css" );
         std::cerr << "No master stylesheet was found for the indices. A blank one was created." << std::endl;
     }
+}
 
-    //====HTML====
-    static const std::regex template_start_rx       = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
-    static const std::regex template_post_rx        = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
-    static const std::regex template_index_rx       = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
-    static const std::regex template_tag_list_rx    = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
-    static const std::regex template_index_entry_rx = std::regex( "^.*(template_index_entry)\\.(?:html|htm)$" );
-    static const std::regex index_entry_html_rx     = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
-    static const std::regex html_rx                 = std::regex( "^.+\\.(?:htm|html)$" );
+/**
+ * Indexes the template files
+ * @param global_options Options DTO
+ * @param index          Index DTO
+ * @throws exception::failed_expectation when detecting missing template file(s)
+ */
+void blogator::indexer::indexTemplates( const dto::Options &global_options, dto::Index &index ) {
+    static const std::regex landing_rx       = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
+    static const std::regex landing_entry_rx = std::regex( "^.*(template_start_entry)\\.(?:html|htm)$" );
+    static const std::regex post_rx          = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
+    static const std::regex index_rx         = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
+    static const std::regex tag_list_rx      = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
+    static const std::regex index_entry_rx   = std::regex( "^.*(template_index_entry)\\.(?:html|htm)$" );
+
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.template_dir ) ) {
+        if( p.is_regular_file() ) {
+            auto path = p.path().string();
+            if( std::regex_match( path, post_rx ) ) {
+                index._paths.templates.post = p.path();
+            } else if( std::regex_match( path, index_rx ) ) {
+                index._paths.templates.index = p.path();
+            } else if( std::regex_match( path, landing_rx ) ) {
+                index._paths.templates.start = p.path();
+            } else if( std::regex_match( path, landing_entry_rx ) ) {
+                index._paths.templates.start_entry = p.path();
+            } else if( std::regex_match( path, tag_list_rx ) ) {
+                index._paths.templates.tag_list = p.path();
+            } else if( std::regex_match( path, index_entry_rx ) ) {
+                index._paths.templates.index_entry = p.path();
+            }
+        }
+    }
+
+    size_t errors { 0 };
+
+    if( index._paths.templates.start.empty() ) {
+        std::cerr << "Template missing: landing page" << std::endl;
+        ++errors;
+    }
+    if( index._paths.templates.start_entry.empty() ) {
+        std::cerr << "Template missing: landing entry" << std::endl;
+        ++errors;
+    }
+    if( index._paths.templates.post.empty() ) {
+        std::cerr << "Template missing: post page" << std::endl;
+        ++errors;
+    }
+    if( index._paths.templates.index.empty() ) {
+        std::cerr << "Template missing: index page" << std::endl;
+        ++errors;
+    }
+    if( index._paths.templates.tag_list.empty() ) {
+        std::cerr << "Template missing: tag list page" << std::endl;
+        ++errors;
+    }
+    if( index._paths.templates.index_entry.empty() ) {
+        std::cerr << "Template missing: index entry" << std::endl;
+        ++errors;
+    }
+
+    if( errors > 0 )
+        throw exception::failed_expectation( "Missing template(s)." );
+}
+
+/**
+ * Indexes the posts (articles)
+ * @param global_options Options DTO
+ * @param index          Master index
+ * @param css_cache      Cached post-specific css files
+ * @throws exception::failed_expectation when no source post files were found to index
+ */
+void blogator::indexer::indexPosts( const dto::Options &global_options,
+                                    dto::Index &index,
+                                    std::unordered_map<std::string, std::filesystem::path> &css_cache,
+                                    FeatAggregator &feat_aggregator )
+{
+    static const std::regex index_entry_html_rx = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
+    static const std::regex html_rx             = std::regex( "^.+\\.(?:htm|html)$" );
 
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
     auto index_entry_match = std::smatch();
 
-    for( auto &p: std::filesystem::recursive_directory_iterator( global_options->_paths.source_dir ) ) {
+    for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.source_dir ) ) {
         if( p.is_regular_file() ) {
             auto path = p.path().string();
-            if( std::regex_match( path, template_post_rx ) ) {
-                index->_paths.templates.post = p.path();
-            } else if( std::regex_match( path, template_index_rx ) ) {
-                index->_paths.templates.index = p.path();
-            } else if( std::regex_match( path, template_start_rx ) ) {
-                index->_paths.templates.start = p.path();
-            } else if( std::regex_match( path, template_tag_list_rx ) ) {
-                index->_paths.templates.tag_list = p.path();
-            } else if( std::regex_match( path, template_index_entry_rx ) ) {
-                index->_paths.templates.index_entry = p.path();
-            } else if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
+            if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
                 if( index_entry_match.size() > 1 )
                     index_entry_files.emplace(
                         std::make_pair( index_entry_match[1].str(), p.path() )
                     );
             } else if( std::regex_match( path, html_rx ) ) {
-                index->_articles.emplace_back( readFileProperties( p.path() ) );
-                addTags( *global_options, index->_articles.back(),*index );
-                addCSS( css_cache, index->_articles.back() );
-                addOutputPath( global_options->_paths, index->_articles.back() );
+                index._articles.emplace_back( readFileProperties( p.path() ) );
+                addTags( global_options, index._articles.back(), index );
+                addCSS( css_cache, index._articles.back() );
+                addOutputPath( global_options._paths, index._articles.back() );
+                feat_aggregator.addArticleIfFeatured( index._articles.back() );
             }
         }
     }
 
-    if( index->_paths.templates.start.empty() )
-        throw std::runtime_error( "No start page template file found." );
-    if( index->_paths.templates.post.empty() )
-        throw std::runtime_error( "No post page template file found." );
-    if( index->_paths.templates.index.empty() )
-        throw std::runtime_error( "No index page template file found." );
-    if( index->_paths.templates.tag_list.empty() )
-        throw std::runtime_error( "No index tag list page template file found." );
-    if( index->_paths.templates.index_entry.empty() )
-        throw std::runtime_error( "No index entry template file found." );
-    if( index->_articles.empty() )
-        throw  std::runtime_error( "No files to index found." );
+    if( index._articles.empty() )
+        throw exception::failed_expectation( "No articles (posts) to index found." );
 
     //Add any *_index html files to their respective articles index entry path if found
     if( !index_entry_files.empty() )
-        for( auto &article : index->_articles ) {
+        for( auto &article : index._articles ) {
             auto entry_it = index_entry_files.find( article._paths.src_html.filename().stem().string() );
             if( entry_it != index_entry_files.end() )
                 article._paths.entry_html = entry_it->second;
         }
 
-    sortChronologically( index->_articles );
-    generateDateIndexTargets( *index, *global_options );
-    generateTagIndexTargets( *index, *global_options );
-
-    return std::move( index );
+    //Get the list of ordered Articles featured on the landing page
+    index._featured = feat_aggregator.getFeaturedArticles();
 }
 
 /**
@@ -151,7 +226,7 @@ void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem:
  * Sort the articles in chronological order from newest to oldest (via the DateStamp)
  * @param articles Collection of articles
  */
-void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t & articles ) {
+void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t &articles ) {
 
     std::sort( articles.begin(),
                articles.end(),
@@ -203,6 +278,31 @@ void blogator::indexer::generateTagIndexTargets( blogator::dto::Index &master_in
                     tag.second.file_names.emplace_back( makeFileName( tag.second.tag_id, p ) );
             }
         }
+    }
+}
+
+/**
+ * Generates an ordered (desc) top tags used by the articles in the index
+ * @param master_index   Master index
+ * @param global_options Global blogator options
+ */
+void blogator::indexer::generateTopTags( blogator::dto::Index &master_index,
+                                         const blogator::dto::Options &global_options )
+{
+    auto compare  = []( auto &a, auto &b ) { return a.first < b.first; };
+    auto max_heap = std::priority_queue<std::pair<size_t, std::string>,
+                                        std::vector<std::pair<size_t, std::string>>,
+                                        decltype( compare )
+                                       >( compare );
+
+    for( const auto &t : master_index._indices.byTag.tags )
+        max_heap.push( std::make_pair( t.second.article_indices.size(), t.first ) );
+
+    size_t i = 0;
+    while( !max_heap.empty() && i < global_options._landing_page.top_tags ) {
+        master_index._indices.byTag.top_tags.emplace_back( max_heap.top().second );
+        max_heap.pop();
+        ++i;
     }
 }
 
@@ -316,7 +416,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
  * @param global_paths Global paths set in dto::Options
  * @param article      Article to create an output path for
  */
-void blogator::indexer::addOutputPath( const dto::Options::Paths &global_paths,
+void blogator::indexer::addOutputPath( const dto::Options::AbsPaths &global_paths,
                                        blogator::dto::Article &article )
 {
     auto abs_path = global_paths.posts_dir / article._paths.src_html.filename();

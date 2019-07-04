@@ -31,15 +31,18 @@ bool blogator::fs::setupEnvironment( const std::shared_ptr<dto::Options> &global
 
         std::cout << "Purged " << purge_count << " file(s)/folder(s)" << std::endl;
 
+        if( !std::filesystem::exists( global_options->_paths.template_dir ) )
+            std::filesystem::create_directories( global_options->_paths.template_dir ); //TODO generate missing templates if none are found
+
         if( !std::filesystem::create_directories( global_options->_paths.posts_dir ) )
             std::cerr << "Could not create directories: " << global_options->_paths.posts_dir.string() << std::endl;
         if( !std::filesystem::create_directories( global_options->_paths.index_dir ) )
             std::cerr << "Could not create directories: " << global_options->_paths.index_dir.string() << std::endl;
 
-        if( !std::filesystem::create_directories( global_options->_paths.index_dir / global_options->_paths.index_sub_dirs.by_date ) )
-            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_sub_dirs.by_date.string() << std::endl;
-        if( !std::filesystem::create_directories( global_options->_paths.index_dir / global_options->_paths.index_sub_dirs.by_tag ) )
-            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_sub_dirs.by_tag.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options->_paths.index_date_dir ) )
+            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_date_dir.string() << std::endl;
+        if( !std::filesystem::create_directories( global_options->_paths.index_tag_dir ) )
+            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_tag_dir.string() << std::endl;
 
         return true;
     } catch( std::exception &e ) {
@@ -56,13 +59,17 @@ bool blogator::fs::setupEnvironment( const std::shared_ptr<dto::Options> &global
 std::shared_ptr<blogator::dto::Template> blogator::fs::importTemplates( const dto::Index &master_index ) {
     auto templates = std::make_shared<dto::Template>();
 
+    std::cout << "> Loading template html...\n";
     templates->_start.html       = fs::importHTML( master_index._paths.templates.start );
+    templates->_start_entry.html = fs::importHTML( master_index._paths.templates.start_entry );
     templates->_post.html        = fs::importHTML( master_index._paths.templates.post );
     templates->_index.html       = fs::importHTML( master_index._paths.templates.index );
     templates->_tag_list.html    = fs::importHTML( master_index._paths.templates.tag_list );
     templates->_index_entry.html = fs::importHTML( master_index._paths.templates.index_entry );
 
+    std::cout << "> Finding insert positions in templates...\n"; //TODO progress bar in here as it take a little time...
     html::reader::findInsertPositions( *templates->_start.html, templates->_start.div_write_pos );
+    html::reader::findInsertPositions( *templates->_start_entry.html, templates->_start_entry.div_write_pos );
     html::reader::findInsertPositions( *templates->_post.html, templates->_post.div_write_pos );
     html::reader::findInsertPositions( *templates->_index.html, templates->_index.div_write_pos );
     html::reader::findInsertPositions( *templates->_tag_list.html, templates->_tag_list.div_write_pos );

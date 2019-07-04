@@ -83,7 +83,9 @@ set(SOURCE_FILES
         src/generator/RSS.cpp
         src/generator/RSS.h
         src/generator/LandingMaker.cpp
-        src/generator/LandingMaker.h)
+        src/generator/LandingMaker.h
+        src/indexer/FeatAggregator.cpp
+        src/indexer/FeatAggregator.h)
 
 #####################
 # Google Unit-Tests #

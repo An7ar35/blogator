@@ -22,29 +22,35 @@ blogator::generator::RSS::RSS( std::shared_ptr<const dto::Index>    master_index
 /**
  * Initialise RSS feed creator
  * @return Success
- * @throws exception::file_access_failure when access to the RSS feed file presented problems
  */
 bool blogator::generator::RSS::init() {
-    auto path = _options->_paths.root_dir / _options->_rss.file_name;
+    try {
+        auto path = _options->_paths.root_dir / _options->_rss.file_name;
 
-    if( std::filesystem::exists( path ) )
-        throw exception::file_access_failure(
-            "Old RSS feed file was not purged: " + path.string()
-        );
+        if( std::filesystem::exists( path ) )
+            throw exception::file_access_failure(
+                "Old RSS feed file was not purged: " + path.string()
+            );
 
-    std::ofstream out( path );
+        std::ofstream out( path );
 
-    if( !out.is_open() )
-        throw exception::file_access_failure(
-            "Could not open the RSS feed's output file: " + path.string()
-        );
+        if( !out.is_open() )
+            throw exception::file_access_failure(
+                "Could not open the RSS feed's output file: " + path.string()
+            );
 
-    writeHead( out );
-    writeItems( out );
-    writeFoot( out );
+        writeHead( out );
+        writeItems( out );
+        writeFoot( out );
 
-    out.flush();
-    out.close();
+        out.flush();
+        out.close();
+
+    } catch( std::exception &e ) {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
+
     return true;
 }
 
@@ -76,7 +82,7 @@ void blogator::generator::RSS::writeHead( std::ofstream &file ) const {
          << "\t\t<description>" << _options->_rss.description << "</description>\n"
          << "\t\t<copyright>" << _options->_rss.copyright << "</copyright>\n"
          << "\t\t<lastBuildDate>" << _options->getRunTimeStamp() << "</lastBuildDate>\n"
-         << "\t\t<generator>" << _options->PROG_NAME << " " << _options->PROG_VERSION << "</generator>\n";
+         << "\t\t<generator>" << _options->BLOGATOR_NAME << " " << _options->BLOGATOR_VERSION << "</generator>\n";
 }
 
 /**

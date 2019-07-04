@@ -1,7 +1,6 @@
 //TODO
 ======
 · Find/replace tags inside any <span class="tag">..</span> with hyperlinked versions (<a></a>)
-· RSS feed
 · Testing with emojis and weird char sets (accents, etc..) and check insert points still work as well as ordering in the index (tag names)
 
 Source material
