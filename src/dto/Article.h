@@ -14,7 +14,7 @@ namespace blogator::dto {
               << "\tNumber.............: " << article._number << "\n"
               << "\tTitle/Heading......: \"" << article._heading << "\"\n"
               << "\tAuthor(s) .........: \"" << article._author << "\"\n"
-              << "\tDate-stamp.........: '" << article._datestamp << "'\n"
+              << "\tDate-stamp.........: " << article._datestamp << "\n"
               << "\tSource file path...: " << article._paths.src_html.string() << "\n"
               << "\tRelative html link.: " << article._paths.out_html.string() << "\n"
               << "\tIndex entry html...: " << article._paths.entry_html.string() << "\n"

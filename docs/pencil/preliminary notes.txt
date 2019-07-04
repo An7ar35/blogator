@@ -2,6 +2,7 @@
 ======
 · Find/replace tags inside any <span class="tag">..</span> with hyperlinked versions (<a></a>)
 · Testing with emojis and weird char sets (accents, etc..) and check insert points still work as well as ordering in the index (tag names)
+· Have the readers optionally work with RegEx in cases where multiple tags sources are on the same line //TEST this assumptions?
 
 Source material
 ===============
@@ -18,6 +19,11 @@ Source material
   "Template file must keep to 1 insertion tag per line. No more.*"
     "*If and when I get time in the future I might do something about continuous insertion points on a single line"
 · Index entries are nested into a <a></a> tag that links back to the post
+
+things you cannot do in the source posts/templates
+· HTML Tag nesting in source and injection points. keep it clean
+· multi-line, multi-classed blogator source tags in source posts
+· Unclosed tags
 
 
 Running the generator
@@ -41,6 +47,7 @@ Future
 · Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
 · Use collation (http://userguide.icu-project.org/collation/api) for sorting in the future along with wstring?
 · RSS articles: <description>, <guid>
+· Index/Landing page entries <description> support (first n lines with '...' added?, special summary file?, optional summary comment line in source post?)
 
 
 Sources
