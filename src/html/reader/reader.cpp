@@ -3,61 +3,29 @@
 #include <regex>
 
 /**
- * Gets the text between heading (h1) tags
+ * Gets any content between 2 strings on a line
+ * @param from Starting string
+ * @param to   Finishing string
  * @param line Line of html text
- * @return Heading found
+ * @return Content found
  */
-std::string blogator::html::reader::getHeading( const std::string &line ) {
-    static const std::string h1_tag_open = "<h1>";
-
-    std::string heading;
-    auto i_begin = line.find( h1_tag_open );
-
-    if( i_begin!= std::string::npos ) {
-        auto i_end = line.find( "</h1>", i_begin + h1_tag_open.length() );
-        heading = line.substr( i_begin + h1_tag_open.length(), i_end - h1_tag_open.length() );
-    }
-
-    return heading;
-}
-
-/**
- * Gets the first date found in the line
- * @param line Line of html text
- * @return Date found
- */
-std::string blogator::html::reader::getDate( const std::string &line ) {
-    static const std::string time_tag_open = "<time datetime=\"";
-
-    std::string date;
-    auto        i_begin = line.find( time_tag_open );
+std::string blogator::html::reader::getContentBetween( const std::string &from,
+                                                       const std::string &to,
+                                                       const std::string &line )
+{
+    std::string content;
+    auto i_begin = line.find( from );
 
     if( i_begin != std::string::npos ) {
-        auto i_end = line.find( '\"', i_begin + time_tag_open.length() );
-        date = line.substr( i_begin + time_tag_open.length(), i_end - time_tag_open.length() );
+        auto range_begin = i_begin + from.length();
+        auto i_end       = line.find( to, range_begin );
+        if( i_end != std::string::npos ) {
+            auto range_end = i_end - ( i_begin + from.length() );
+            content = line.substr( range_begin, range_end );
+        }
     }
 
-    return date;
-}
-
-/**
- * Gets the author found in the line
- * @param line Line of html text
- * @return Author(s) found
- */
-std::string blogator::html::reader::getAuthor( const std::string & line ) {
-    static const std::string span_tag_open  = "<span class=\"author\">";
-    static const std::string span_tag_close = "</span>";
-
-    std::string author;
-    auto        i_begin = line.find( span_tag_open );
-
-    if( i_begin != std::string::npos ) {
-        auto i_end = line.find( span_tag_close, i_begin + span_tag_open.length() );
-        author = line.substr( i_begin + span_tag_open.length(), i_end - span_tag_open.length() );
-    }
-
-    return author;
+    return content;
 }
 
 /**

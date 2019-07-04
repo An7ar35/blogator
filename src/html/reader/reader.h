@@ -10,9 +10,7 @@
 #include "../../dto/Template.h"
 
 namespace blogator::html::reader {
-    std::string getHeading( const std::string &line );
-    std::string getDate( const std::string &line );
-    std::string getAuthor( const std::string &line );
+    std::string getContentBetween( const std::string &from, const std::string &to, const std::string &line );
     std::vector<std::string> getTags( const std::string &line );
     size_t findLineOfTag( const std::string &tag, const dto::HTML &html );
     dto::Template::DivWritePositions_t & findInsertPositions( const dto::HTML &html, dto::Template::DivWritePositions_t &divs );

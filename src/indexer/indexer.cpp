@@ -353,6 +353,10 @@ blogator::dto::DateStamp blogator::indexer::convertDate( const std::string & dat
  * @throws blogator::exception::file_parsing_failure when issues are raised during content parsing
  */
 blogator::dto::Article blogator::indexer::readFileProperties( const std::filesystem::path &path ) {
+    const static auto heading_tag = std::make_pair<std::string, std::string>( "<h1>", "</h1>" );
+    const static auto author_tag  = std::make_pair<std::string, std::string>( "<span class=\"author\">", "</span>" );
+    const static auto date_tag    = std::make_pair<std::string, std::string>( "<time datetime=\"", "\"" );
+
     auto article       = blogator::dto::Article();
     bool heading_found = false;
     bool author_found  = false;
@@ -364,6 +368,9 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
     std::ifstream html_file( path.string() );
 
     try {
+        using html::reader::getContentBetween;
+        using html::reader::getTags;
+
         if( html_file.is_open() ) {
             while( getline( html_file, line ) ) {
                 auto trim_begin = line.begin();
@@ -373,24 +380,24 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                 line.erase( trim_begin, trim_end );
 
                 if( !heading_found ) {
-                    article._heading = html::reader::getHeading( line );
+                    article._heading = getContentBetween( heading_tag.first, heading_tag.second, line );
                     heading_found = !article._heading.empty();
                 }
 
                 if( !author_found ) {
-                    article._author = html::reader::getAuthor( line );
+                    article._author = getContentBetween( author_tag.first, author_tag.second, line );
                     author_found = !article._author.empty();
                 }
 
                 if( !date_found ) {
-                    auto date = html::reader::getDate( line );
+                    auto date = getContentBetween( date_tag.first, date_tag.second, line );
                     if( !date.empty() ) {
                         article._datestamp = convertDate( date );
                         date_found = true;
                     }
                 }
 
-                auto tags = html::reader::getTags( line );
+                auto tags = getTags( line );
 
                 std::copy( tags.begin(), tags.end(),
                            std::inserter( article._tags, article._tags.begin() ) );
