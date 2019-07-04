@@ -41,6 +41,26 @@ std::string blogator::html::reader::getDate( const std::string &line ) {
 }
 
 /**
+ * Gets the author found in the line
+ * @param line Line of html text
+ * @return Author(s) found
+ */
+std::string blogator::html::reader::getAuthor( const std::string & line ) {
+    static const std::string span_tag_open  = "<span class=\"author\">";
+    static const std::string span_tag_close = "</span>";
+
+    std::string author;
+    auto        i_begin = line.find( span_tag_open );
+
+    if( i_begin != std::string::npos ) {
+        auto i_end = line.find( span_tag_close, i_begin + span_tag_open.length() );
+        author = line.substr( i_begin + span_tag_open.length(), i_end - span_tag_open.length() );
+    }
+
+    return author;
+}
+
+/**
  * Gets the first set of tags found in the line
  * @param line Line of html text
  * @return Set of tags found

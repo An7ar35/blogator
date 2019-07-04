@@ -355,6 +355,7 @@ blogator::dto::DateStamp blogator::indexer::convertDate( const std::string & dat
 blogator::dto::Article blogator::indexer::readFileProperties( const std::filesystem::path &path ) {
     auto article       = blogator::dto::Article();
     bool heading_found = false;
+    bool author_found  = false;
     bool date_found    = false;
 
     article._paths.src_html = path;
@@ -374,6 +375,11 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                 if( !heading_found ) {
                     article._heading = html::reader::getHeading( line );
                     heading_found = !article._heading.empty();
+                }
+
+                if( !author_found ) {
+                    article._author = html::reader::getAuthor( line );
+                    author_found = !article._author.empty();
                 }
 
                 if( !date_found ) {

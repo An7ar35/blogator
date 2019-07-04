@@ -388,6 +388,9 @@ void blogator::generator::IndexMaker::writeTemplateIndexEntry( std::ofstream &pa
             } else if( insert_point->second == "heading" ) {
                 page << indent << sub_indent << "\t" << article._heading << "\n";
 
+            } else if( insert_point->second == "author" ) {
+                page << indent << sub_indent << "\t" << article._author << "\n";
+
             } else if( insert_point->second == "tags" ) {
                 for( const auto & tag : article._tags ) {
                     page << indent << sub_indent

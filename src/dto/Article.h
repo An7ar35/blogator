@@ -13,6 +13,7 @@ namespace blogator::dto {
             s << "Article={ \n"
               << "\tNumber.............: " << article._number << "\n"
               << "\tTitle/Heading......: \"" << article._heading << "\"\n"
+              << "\tAuthor(s) .........: \"" << article._author << "\"\n"
               << "\tDate-stamp.........: '" << article._datestamp << "'\n"
               << "\tSource file path...: " << article._paths.src_html.string() << "\n"
               << "\tRelative html link.: " << article._paths.out_html.string() << "\n"
@@ -35,6 +36,7 @@ namespace blogator::dto {
 
         size_t                _number;
         std::string           _heading;
+        std::string           _author;
         DateStamp             _datestamp;
         std::set<std::string> _tags;
     };

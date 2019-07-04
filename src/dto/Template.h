@@ -76,6 +76,7 @@ namespace blogator::dto {
             DivWritePositions_t   div_write_pos = {
                 { "post-number", std::vector<InsertPosition>() },
                 { "heading",     std::vector<InsertPosition>() },
+                { "author",      std::vector<InsertPosition>() },
                 { "tags",        std::vector<InsertPosition>() },
                 { "date-stamp",  std::vector<InsertPosition>() }
             };
@@ -103,6 +104,7 @@ namespace blogator::dto {
             DivWritePositions_t   div_write_pos = {
                 { "post-number", std::vector<InsertPosition>() },
                 { "heading",     std::vector<InsertPosition>() },
+                { "author",      std::vector<InsertPosition>() },
                 { "tags",        std::vector<InsertPosition>() },
                 { "date-stamp",  std::vector<InsertPosition>() }
             };

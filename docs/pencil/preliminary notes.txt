@@ -40,7 +40,6 @@ Future
 ======
 · Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
 · Use collation (http://userguide.icu-project.org/collation/api) for sorting in the future along with wstring?
-· Article indexer/RSS: article author
 · RSS articles: <description>, <guid>
 
 

@@ -104,8 +104,13 @@ void blogator::generator::RSS::writeItems( std::ofstream &file ) const {
              << "\t\t\t<pubDate>" << article_it->_datestamp._day << " "
                                   << _options->_months.at( article_it->_datestamp._month ) << " "
                                   << article_it->_datestamp._year
-                                  << "</pubDate>\n"
-             << "\t\t</item>\n";
+                                  << "</pubDate>\n";
+
+        for( const auto &tag : article_it->_tags ) {
+            file << "\t\t\t<category>" << tag << "</category>\n";
+        }
+
+        file << "\t\t</item>\n";
 
         ++article_it;
         ++item_count;
