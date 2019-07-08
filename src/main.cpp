@@ -19,8 +19,8 @@ int main() {
      * */
     try {
         std::cout << "> Reading configuration file...\n";
-        auto options = fs::importOptions( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/blogator.cfg" );
-        options->setupAbsolutePaths( std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog" ) );
+        auto options = fs::importOptions( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blogator.cfg" );
+        options->setupAbsolutePaths( std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io" ) );
                                     //TODO pass ^^^^ from cmd line args
         std::cout << "> Setting up environment";
         fs::setupEnvironment( options );

@@ -12,7 +12,7 @@ namespace blogator::fs {
         static void generateBlankConfigFile( const std::filesystem::path & file_path );
 
       private:
-        enum class Type { INTEGER, STRING, STRING_ARRAY };
+        enum class Type { BOOLEAN, INTEGER, STRING, STRING_ARRAY };
 
         struct Value {
             Value( size_t l, Type t, std::string v ) :
@@ -26,6 +26,7 @@ namespace blogator::fs {
         };
 
         const std::regex COMMENT_RX       = std::regex( R"(^(?:\s*//.*?|\s*)$)" );
+        const std::regex KV_BOOL_VAL_RX   = std::regex( R"(\s*([a-zA-Z-]+)\s*=\s*(true|false)\s*;)" );
         const std::regex KV_STR_VAL_RX    = std::regex( "^\\s*([a-zA-Z-]+)\\s*=\\s*\"(.*)\"\\s*;" );
         const std::regex KV_INT_VAL_RX    = std::regex( R"(\s*([a-zA-Z-]+)\s*=\s*(\d+)\s*;)" );
         const std::regex KV_STR_ARR_RX    = std::regex( R"(\s*([a-zA-Z-]+)\s*=\s*\[(.*)\]\s*;)" );
@@ -37,6 +38,7 @@ namespace blogator::fs {
         const std::regex FILE_PATH        = std::regex( R"(^[^/]{1}[a-zA-Z-_\d\/]+\.[a-zA-Z\d_]{3,4}$)" );
 
         void loadConfigurationFile( const std::filesystem::path &path, std::unordered_map<std::string, Value> &map ) const;
+        void processPostsOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processMonthsOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processIndexOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processLandingPageOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;

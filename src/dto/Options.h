@@ -1,3 +1,5 @@
+#include <memory>
+
 #ifndef BLOGATOR_DTO_OPTIONS_H
 #define BLOGATOR_DTO_OPTIONS_H
 
@@ -7,6 +9,8 @@
 #include <filesystem>
 #include <chrono>
 #include <ctime>
+
+#include "DateStamp.h"
 
 namespace blogator::dto {
     struct Options {
@@ -55,6 +59,12 @@ namespace blogator::dto {
             } css;
 
         } _folders;
+
+        struct Posts {
+            bool build_future = false; //TODO
+            bool safe_purge   = true;  //TODO
+
+        } _posts;
 
         struct Index {
             bool   show_post_numbers { false }; //show post number flag
@@ -140,6 +150,22 @@ namespace blogator::dto {
             std::stringstream ss;
             ss << std::put_time( std::localtime( &now ), "%a, %d %b %Y %T %z" ); //RFC 822
             return ss.str();
+        }
+
+        /**
+         * Gets the program's runtime date-stamp (dd/mm/yyyy)
+         * @return Reference to DateStamp DTO
+         */
+        const DateStamp & getRuntimeDateStamp() const {
+            static std::unique_ptr<DateStamp> datestamp;
+
+            if( !datestamp ) {
+                auto now   = std::chrono::system_clock::to_time_t( RUN_TIMESTAMP );
+                auto local = std::localtime( &now );
+                datestamp  = std::make_unique<DateStamp>( local->tm_year + 1900, local->tm_mon, local->tm_mday );
+            }
+
+            return *datestamp;
         }
 
       private:

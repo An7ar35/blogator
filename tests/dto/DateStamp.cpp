@@ -39,3 +39,20 @@ TEST( DateStamp_tests, concatYYYYMM2 ) {
     auto a = DateStamp( 1999, 12, 30 );
     ASSERT_EQ( 199912, DateStamp::concatYYYYMM( a ) );
 }
+
+TEST( DateStamp_tests, equal_operator ) {
+    using blogator::dto::DateStamp;
+    auto a = DateStamp( 2000, 01, 30 );
+    auto b = DateStamp( 2000, 02, 01 );
+    ASSERT_TRUE( a == a );
+    ASSERT_FALSE( a == b );
+}
+
+TEST( DateStamp_tests, greater_operator ) {
+    using blogator::dto::DateStamp;
+    auto a = DateStamp( 2000, 01, 30 );
+    auto b = DateStamp( 2000, 02, 01 );
+    ASSERT_TRUE( b > a );
+    ASSERT_FALSE( a > b );
+    ASSERT_FALSE( a > a );
+}

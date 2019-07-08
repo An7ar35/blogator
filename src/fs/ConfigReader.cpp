@@ -25,11 +25,17 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
     }
 
     try {
+        processPostsOptions( map, *options );
+    } catch( exception::file_parsing_failure &e ) {
+        std::cerr << e.what() << std::endl; //TODO
+    }
+
+    try {
         processIndexOptions( map, *options );
         processLandingPageOptions( map, *options );
         processPageNavOptions( map, *options );
         processBreadcrumbOptions( map, *options );
-    } catch( exception::file_parsing_failure & e ) {
+    } catch( exception::file_parsing_failure &e ) {
         std::cerr << e.what() << std::endl; //TODO
     }
 
@@ -42,11 +48,11 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
 
     try {
         processRssOptions( map, *options );
-    } catch( exception::file_parsing_failure & e ) {
+    } catch( exception::file_parsing_failure &e ) {
         options->_rss.generate = false;
         std::cerr << e.what() << std::endl;
         std::cerr << "  RSS feed will *not* be generated." << std::endl;
-    } catch( exception::failed_expectation & e ) {
+    } catch( exception::failed_expectation &e ) {
         options->_rss.generate = false;
         std::cerr << e.what() << std::endl;
         std::cerr << "  RSS feed will *not* be generated." << std::endl;
@@ -69,11 +75,15 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "//Month strings\n"
        << "months = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"];\n"
        << "\n"
+       << "//Posts settings\n"
+       << "build-future = false;\n"
+       << "safe-purge   = true;\n"
+       << "\n"
        << "//Index settings\n"
-       << "show-post-numbers = 1;\n"
+       << "show-post-numbers = true;\n"
        << "items-per-page    = 10;\n"
-       << "index-by-tag      = 1;\n"
-       << "index-by-author   = 0;\n"
+       << "index-by-tag      = true;\n"
+       << "index-by-author   = false;\n"
        << "\n"
        << "//Per-Page navigation DIV contents\n"
        << "page-nav-separator = \" / \";\n"
@@ -95,7 +105,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "landing-featured    = [\"0.html\", \"1.html\"];\n"
        << "\n"
        << "//RSS header settings\n"
-       << "rss             = 1;\n"
+       << "rss             = true;\n"
        << "rss-title       = \"website title\";\n"
        << "rss-description = \"site description\";\n"
        << "rss-copyright   = \"site copyright\";\n"
@@ -140,8 +150,9 @@ void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::p
     while( getline( config_file, line ) ) {
         ++line_number;
         std::smatch matches;
-
-        if( std::regex_search( line, matches, KV_STR_VAL_RX ) && matches.length() >= 3 ) {
+        if( std::regex_search( line, matches, KV_BOOL_VAL_RX) && matches.length() >= 3 ) {
+            map.emplace( std::make_pair( matches[1], Value( line_number, Type::BOOLEAN, matches[2] ) ) );
+        } else if( std::regex_search( line, matches, KV_STR_VAL_RX ) && matches.length() >= 3 ) {
             map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING, matches[2] ) ) );
         } else if( std::regex_search( line, matches, KV_INT_VAL_RX ) && matches.length() >= 3 ) {
             map.emplace( std::make_pair( matches[1], Value( line_number, Type::INTEGER, matches[2] ) ) );
@@ -156,13 +167,53 @@ void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::p
 }
 
 /**
+ * Process all Post pages specific options
+ * @param map     Raw {K,V} map of options parsed from configuration file
+ * @param options Options DTO
+ * @throws exception::file_parsing_failure when parsing failed
+ */
+void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::string, ConfigReader::Value> &map,
+                                                      dto::Options &options ) const
+{
+    static const std::string build_future = "build-future";
+    static const std::string safe_purge   = "safe-purge";
+
+    auto build_future_it = map.find( build_future );
+    auto safe_purge_it   = map.find( safe_purge );
+
+    if( build_future_it != map.end() ) {
+        if( build_future_it->second.type == Type::BOOLEAN ) {
+            options._posts.build_future = ( build_future_it->second.value == "true" );
+            build_future_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + build_future + "' value to boolean "
+                "(line #" + std::to_string( build_future_it->second.line ) + "): " + build_future_it->second.value
+            );
+        }
+    }
+
+    if( safe_purge_it != map.end() ) {
+        if( safe_purge_it->second.type == Type::BOOLEAN ) {
+            options._posts.safe_purge = ( safe_purge_it->second.value == "true" );
+            safe_purge_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + safe_purge + "' value to boolean "
+                "(line #" + std::to_string( safe_purge_it->second.line ) + "): " + safe_purge_it->second.value
+            );
+        }
+    }
+}
+
+/**
  * Process Months string replacements
  * @param map     Raw {K,V} map of options parsed from configuration file
  * @param options Options DTO
  * @throws exception::file_parsing_failure when parsing failed
  */
 void blogator::fs::ConfigReader::processMonthsOptions( std::unordered_map<std::string, ConfigReader::Value> &map,
-                                                       blogator::dto::Options &options ) const
+                                                       dto::Options &options ) const
 {
     std::unordered_map<unsigned, std::string> month_map;
 
@@ -224,36 +275,36 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
     }
 
     if( show_post_numbers_it != map.end() ) {
-        try {
-            options._index.show_post_numbers = ( std::stoi( show_post_numbers_it->second.value ) != 0 );
+        if( show_post_numbers_it->second.type == Type::BOOLEAN ) {
+            options._index.show_post_numbers = ( show_post_numbers_it->second.value == "true" );
             show_post_numbers_it->second.validated = true;
-        } catch( std::exception &e ) {
+        } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + show_post_numbers + "' value to integer "
+                "Error converting '" + show_post_numbers + "' value to boolean "
                 "(line #" + std::to_string( show_post_numbers_it->second.line ) + "): " + show_post_numbers_it->second.value
             );
         }
     }
 
     if( index_by_tag_it != map.end() ) {
-        try {
-            options._index.index_by_tag = ( std::stoi( index_by_tag_it->second.value ) != 0 );
+        if( index_by_tag_it->second.type == Type::BOOLEAN ) {
+            options._index.index_by_tag = ( index_by_tag_it->second.value == "true" );
             index_by_tag_it->second.validated = true;
-        } catch( std::exception &e ) {
+        } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + show_post_numbers + "' value to integer "
+                "Error converting '" + show_post_numbers + "' value to boolean "
                 "(line #" + std::to_string( index_by_tag_it->second.line ) + "): " + index_by_tag_it->second.value
             );
         }
     }
 
     if( index_by_author_it != map.end() ) {
-        try {
-            options._index.index_by_author = ( std::stoi( index_by_author_it->second.value ) != 0 );
+        if( index_by_author_it->second.type == Type::BOOLEAN ) {
+            options._index.index_by_author = ( index_by_author_it->second.value == "true" );
             index_by_author_it->second.validated = true;
-        } catch( std::exception &e ) {
+        } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + show_post_numbers + "' value to integer "
+                "Error converting '" + show_post_numbers + "' value to boolean "
                 "(line #" + std::to_string( index_by_author_it->second.line ) + "): " + index_by_author_it->second.value
             );
         }
@@ -312,8 +363,7 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
                 options._landing_page.featured.emplace( std::make_pair( it->str( 1 ), i ) );
             else
                 throw exception::file_parsing_failure(
-                    "Malformed file name in '" + featured + "' array "
-                                                            "(line #" +
+                    "Malformed file name in '" + featured + "' array (line #" +
                     std::to_string( featured_it->second.line ) + "): " + it->str()
                 );
 
@@ -452,12 +502,12 @@ void blogator::fs::ConfigReader::processRssOptions( std::unordered_map<std::stri
     auto img_alt_it     = map.find( img_alt );
 
     if( generate_it != map.end() ) {
-        try {
-            options._rss.generate = ( std::stoi( generate_it->second.value ) != 0 );
+        if( generate_it->second.type == Type::BOOLEAN ) {
+            options._rss.generate = ( generate_it->second.value == "true" );
             generate_it->second.validated = true;
-        } catch( std::exception &e ) {
+        } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + generate + "' value to integer "
+                "Error converting '" + generate + "' value to boolean "
                 "(line #" + std::to_string( generate_it->second.line ) + "): " + generate_it->second.value
             );
         }

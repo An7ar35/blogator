@@ -11,14 +11,21 @@ namespace blogator::dto {
             _day( day )
         {}
 
+        unsigned _year;
+        unsigned _month;
+        unsigned _day;
+
         friend std::ostream &operator <<( std::ostream &s, const DateStamp &stamp ) {
             s << stamp._day << "/" << stamp._month << "/" << stamp._year;
             return s;
         }
 
-        unsigned _year;
-        unsigned _month;
-        unsigned _day;
+        bool operator ==( const DateStamp &rhs ) const { return compare( *this, rhs ) == 0; };
+        bool operator !=( const DateStamp &rhs ) const { return !( *this == rhs ); };
+        bool operator <( const DateStamp &rhs ) const  { return rhs < *this; };
+        bool operator >( const DateStamp &rhs ) const  { return compare( *this, rhs ) > 0; };
+        bool operator <=( const DateStamp &rhs ) const { return !( *this > rhs ); };
+        bool operator >=( const DateStamp &rhs ) const { return !( *this < rhs ); };
 
         static int compare( const DateStamp &a, const DateStamp &b ) {
             if( a._year < b._year )

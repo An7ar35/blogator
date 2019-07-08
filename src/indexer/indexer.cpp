@@ -187,11 +187,18 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
                     );
             } else if( std::regex_match( path, html_rx ) ) {
                 index._articles.emplace_back( readFileProperties( p.path() ) );
-                addTags( global_options, index._articles.back(), index );
-                addAuthors( global_options, index._articles.back(), index );
-                addCSS( css_cache, index._articles.back() );
-                addOutputPath( global_options._paths, index._articles.back() );
-                feat_aggregator.addArticleIfFeatured( index._articles.back() );
+
+                if( !global_options._posts.build_future &&
+                    index._articles.back()._datestamp > global_options.getRuntimeDateStamp() )
+                {
+                    index._articles.erase( std::prev( index._articles.end() ) );
+                } else {
+                    addTags( global_options, index._articles.back(), index );
+                    addAuthors( global_options, index._articles.back(), index );
+                    addCSS( css_cache, index._articles.back() );
+                    addOutputPath( global_options._paths, index._articles.back() );
+                    feat_aggregator.addArticleIfFeatured( index._articles.back() );
+                }
             }
         }
     }
