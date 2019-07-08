@@ -5,6 +5,7 @@
 #include "../html/html.h"
 #include "../exception/file_access_failure.h"
 #include "../exception/failed_expectation.h"
+#include "../cli/MsgInterface.h"
 
 /**
  * Constructor
@@ -26,6 +27,9 @@ blogator::generator::LandingMaker::LandingMaker( std::shared_ptr<const dto::Inde
  * @throws exception::failed_expectation when insert points could not be found in the landing page template
  */
 bool blogator::generator::LandingMaker::init() const {
+    auto &display              = cli::MsgInterface::getInstance();
+    display.begin( "Generating landing page", 1, "..." );
+
     auto page_write_positions  = dto::Template::getConsecutiveWritePositions( _templates->_start.div_write_pos );
     auto entry_write_positions = dto::Template::getConsecutiveWritePositions( _templates->_start_entry.div_write_pos );
 
@@ -44,6 +48,7 @@ bool blogator::generator::LandingMaker::init() const {
         return false;
     }
 
+    display.progress( "DONE" );
     return true;
 }
 
@@ -226,8 +231,15 @@ void blogator::generator::LandingMaker::writeArticleEntry( std::ofstream & page,
             } else if( insert_point->second == "heading" ) {
                 page << indent << sub_indent << "\t" << article._heading << "\n";
 
-            } else if( insert_point->second == "author" ) {
-                page << indent << sub_indent << "\t" << article._author << "\n";
+            } else if( insert_point->second == "authors" ) {
+                page << indent << sub_indent << "\t";
+                size_t i = 1;
+                for( const auto & author : article._authors ) {
+                    page << author;
+                    if( i < article._authors.size() )
+                        page << ", ";
+                    ++i;
+                }
 
             } else if( insert_point->second == "tags" ) {
                 for( const auto & tag : article._tags ) {
@@ -238,6 +250,11 @@ void blogator::generator::LandingMaker::writeArticleEntry( std::ofstream & page,
             } else if( insert_point->second == "date-stamp" ) {
                 page << indent << sub_indent << "\t"
                      << html::createDateTime( article._datestamp, _options->_months ) << "\n";
+
+            } else if( insert_point->second == "summary" ) { //TODO
+                std::cerr << "[generator::LandingMaker::writeArticleEntry(..)] "
+                          << "TODO: implement 'summary' insertion point"
+                          << std::endl;
 
             } else {
                 std::cerr << "[generator::LandingMaker::writeArticleEntry(..)] "

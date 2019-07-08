@@ -14,6 +14,7 @@
 #include "../exception/file_access_failure.h"
 #include "../exception/file_parsing_failure.h"
 #include "../exception/failed_expectation.h"
+#include "../cli/MsgInterface.h"
 
 /**
  * Initialise the index
@@ -25,14 +26,28 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     auto index           = std::make_shared<dto::Index>();
     auto css_cache       = std::unordered_map<std::string, std::filesystem::path>(); //(K=filename, V=absolute path)
     auto feat_aggregator = indexer::FeatAggregator( global_options );
+    auto &display        = cli::MsgInterface::getInstance();
 
+    display.begin( "Indexing", 5, "CSS" );
     indexStylesheets( *global_options, *index, css_cache );
+    display.progress( "Templates" );
     indexTemplates( *global_options, *index );
+    display.progress( "Posts" );
     indexPosts( *global_options, *index, css_cache, feat_aggregator );
+    display.progress( "sorting articles by date" );
     sortChronologically( index->_articles );
+    display.progress( "generating targets" );
     generateDateIndexTargets( *index, *global_options );
-    generateTagIndexTargets( *index, *global_options );
-    generateTopTags( *index, *global_options );
+    if( global_options->_index.index_by_tag ) {
+        index->_indices.byTag.page_count += 1; //tag list page
+        generateTagIndexTargets( *index, *global_options );
+        generateTopTags( *index, *global_options );
+    }
+    if( global_options->_index.index_by_author ) {
+        index->_indices.byAuthor.page_count += 1; //author list page
+        generateAuthorIndexTargets( *index, *global_options );
+    }
+    display.progress( "DONE" );
 
     return std::move( index );
 }
@@ -85,6 +100,7 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
     static const std::regex post_rx          = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
     static const std::regex index_rx         = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
     static const std::regex tag_list_rx      = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
+    static const std::regex author_list_rx   = std::regex( "^.*(template_author_list)\\.(?:html|htm)$" );
     static const std::regex index_entry_rx   = std::regex( "^.*(template_index_entry)\\.(?:html|htm)$" );
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.template_dir ) ) {
@@ -100,13 +116,15 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
                 index._paths.templates.start_entry = p.path();
             } else if( std::regex_match( path, tag_list_rx ) ) {
                 index._paths.templates.tag_list = p.path();
+            } else if( std::regex_match( path, author_list_rx ) ) {
+                index._paths.templates.author_list = p.path();
             } else if( std::regex_match( path, index_entry_rx ) ) {
                 index._paths.templates.index_entry = p.path();
             }
         }
     }
 
-    size_t errors { 0 };
+    size_t errors { 0 }; //TODO pass msgs to MsgInterface instead of cerr? or redirect cerr to it;
 
     if( index._paths.templates.start.empty() ) {
         std::cerr << "Template missing: landing page" << std::endl;
@@ -124,8 +142,12 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
         std::cerr << "Template missing: index page" << std::endl;
         ++errors;
     }
-    if( index._paths.templates.tag_list.empty() ) {
+    if( global_options._index.index_by_tag && index._paths.templates.tag_list.empty() ) {
         std::cerr << "Template missing: tag list page" << std::endl;
+        ++errors;
+    }
+    if( global_options._index.index_by_author && index._paths.templates.author_list.empty() ) {
+        std::cerr << "Template missing: author list page" << std::endl;
         ++errors;
     }
     if( index._paths.templates.index_entry.empty() ) {
@@ -166,6 +188,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
             } else if( std::regex_match( path, html_rx ) ) {
                 index._articles.emplace_back( readFileProperties( p.path() ) );
                 addTags( global_options, index._articles.back(), index );
+                addAuthors( global_options, index._articles.back(), index );
                 addCSS( css_cache, index._articles.back() );
                 addOutputPath( global_options._paths, index._articles.back() );
                 feat_aggregator.addArticleIfFeatured( index._articles.back() );
@@ -190,7 +213,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
 
 /**
  * Adds new tags found in article into the index's global Tag set along with
- * their corresponding tag directories
+ * their corresponding tag directories IDs
  * @param global_options Global blogator options
  * @param article        Article from which to extract tags to add to the global set
  * @param master_index   Master index file
@@ -202,6 +225,24 @@ void blogator::indexer::addTags( const dto::Options &global_options,
     for( const auto &tag : article._tags ) {
         master_index._indices.byTag.tags.insert(
             std::make_pair( tag, std::to_string( master_index._indices.byTag.tags.size() ) )
+        );
+    }
+}
+
+/**
+ * Adds new authors found in article into the index's global Author set along with
+ * their corresponding author directories IDs
+ * @param global_options Global blogator options
+ * @param article        Article from which to extract authors to add to the global set
+ * @param master_index   Master index file
+ */
+void blogator::indexer::addAuthors( const dto::Options &global_options,
+                                    const dto::Article &article,
+                                    dto::Index &master_index )
+{
+    for( const auto &author : article._authors ) {
+        master_index._indices.byAuthor.authors.insert(
+            std::make_pair( author, std::to_string( master_index._indices.byAuthor.authors.size() ) )
         );
     }
 }
@@ -247,12 +288,12 @@ void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t &a
  * @param master_index   Master index
  * @param global_options Global blogator options
  */
-void blogator::indexer::generateTagIndexTargets( blogator::dto::Index &master_index,
-                                                 const blogator::dto::Options &global_options )
+void blogator::indexer::generateTagIndexTargets( dto::Index &master_index,
+                                                 const dto::Options &global_options )
 {
     { //TAG ARTICLE INDEX MAPPING
         auto & map = master_index._indices.byTag.tags;
-        size_t i = 0;
+        size_t i   = 0;
 
         for( const auto & article : master_index._articles ) {
 
@@ -275,7 +316,50 @@ void blogator::indexer::generateTagIndexTargets( blogator::dto::Index &master_in
                                                          tag.second.article_indices.size() );
 
                 for( size_t p = 0; p < page_count; ++p )
-                    tag.second.file_names.emplace_back( makeFileName( tag.second.tag_id, p ) );
+                    tag.second.file_names.emplace_back( makeFileName( tag.second.prefix_id, p ) );
+
+                master_index._indices.byTag.page_count += page_count;
+            }
+        }
+    }
+}
+
+/**
+ * Generates all author index targets (output index file names and article indices for each)
+ * @param master_index   Master index
+ * @param global_options Global blogator options
+ */
+void blogator::indexer::generateAuthorIndexTargets( dto::Index& master_index,
+                                                    const dto::Options &global_options )
+{
+    { //AUTHOR ARTICLE INDEX MAPPING
+        auto & map = master_index._indices.byAuthor.authors;
+        size_t i   = 0;
+
+        for( const auto & article : master_index._articles ) {
+
+            for( const auto & author : article._authors ) {
+                auto author_it = map.find( author );
+
+                if( author_it != map.end() )
+                    author_it->second.article_indices.emplace_back( i );
+
+            }
+
+            ++i;
+        }
+    }
+
+    { //AUTHOR INDEX FILE NAMES
+        for( auto &author : master_index._indices.byAuthor.authors ) {
+            if( !author.second.article_indices.empty() ) {
+                const size_t page_count = calcPageCount( global_options._index.items_per_page,
+                                                         author.second.article_indices.size() );
+
+                for( size_t p = 0; p < page_count; ++p )
+                    author.second.file_names.emplace_back( makeFileName( author.second.prefix_id, p ) );
+
+                master_index._indices.byAuthor.page_count += page_count;
             }
         }
     }
@@ -314,10 +398,10 @@ void blogator::indexer::generateTopTags( blogator::dto::Index &master_index,
 void blogator::indexer::generateDateIndexTargets( blogator::dto::Index &master_index,
                                                   const blogator::dto::Options &global_options )
 {
-    const size_t page_count = calcPageCount( global_options._index.items_per_page,
-                                             master_index._articles.size() );
+    master_index._indices.byDate.page_count = calcPageCount( global_options._index.items_per_page,
+                                                             master_index._articles.size() );
 
-    for( size_t p = 0; p < page_count; ++p )
+    for( size_t p = 0; p < master_index._indices.byDate.page_count; ++p )
         master_index._indices.byDate.page_file_names.emplace_back( makeFileName( p ) );
 }
 
@@ -359,7 +443,6 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
 
     auto article       = blogator::dto::Article();
     bool heading_found = false;
-    bool author_found  = false;
     bool date_found    = false;
 
     article._paths.src_html = path;
@@ -369,6 +452,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
 
     try {
         using html::reader::getContentBetween;
+        using html::reader::getContentsBetween;
         using html::reader::getTags;
 
         if( html_file.is_open() ) {
@@ -384,11 +468,6 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                     heading_found = !article._heading.empty();
                 }
 
-                if( !author_found ) {
-                    article._author = getContentBetween( author_tag.first, author_tag.second, line );
-                    author_found = !article._author.empty();
-                }
-
                 if( !date_found ) {
                     auto date = getContentBetween( date_tag.first, date_tag.second, line );
                     if( !date.empty() ) {
@@ -397,10 +476,15 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                     }
                 }
 
-                auto tags = getTags( line );
+                auto authors = getContentsBetween( "<span class=\"author\">", "</span>", line );
+                auto tags    = getTags( line ); //TODO look into modifying this to getContentsBetween
 
+                std::copy( authors.begin(), authors.end(),
+                           std::inserter( article._authors, article._authors.begin() )
+                );
                 std::copy( tags.begin(), tags.end(),
-                           std::inserter( article._tags, article._tags.begin() ) );
+                           std::inserter( article._tags, article._tags.begin() )
+                );
             }
 
             html_file.close();

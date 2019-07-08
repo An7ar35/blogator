@@ -85,7 +85,11 @@ set(SOURCE_FILES
         src/generator/LandingMaker.cpp
         src/generator/LandingMaker.h
         src/indexer/FeatAggregator.cpp
-        src/indexer/FeatAggregator.h)
+        src/indexer/FeatAggregator.h
+        src/cli/MsgInterface.cpp
+        src/cli/MsgInterface.h
+        src/cli/MsgDisplay.cpp
+        src/cli/MsgDisplay.h)
 
 #####################
 # Google Unit-Tests #

@@ -16,8 +16,13 @@ blogator::generator::RSS::RSS( std::shared_ptr<const dto::Index>    master_index
                                std::shared_ptr<const dto::Options>  global_options ) :
     _master_index( std::move( master_index ) ),
     _templates( std::move( templates ) ),
-    _options( std::move( global_options ) )
-{}
+    _options( std::move( global_options ) ),
+    _display( cli::MsgInterface::getInstance() )
+{
+    _feed_item_count = _options->_rss.item_count > _master_index->_articles.size()
+                       ? _master_index->_articles.size()
+                       : _options->_rss.item_count;
+}
 
 /**
  * Initialise RSS feed creator
@@ -51,6 +56,7 @@ bool blogator::generator::RSS::init() {
         return false;
     }
 
+    _display.progress( "DONE" );
     return true;
 }
 
@@ -59,6 +65,8 @@ bool blogator::generator::RSS::init() {
  * @param file RSS feed file
  */
 void blogator::generator::RSS::writeHead( std::ofstream &file ) const {
+    _display.begin( "Generating RSS", _feed_item_count + 2, "header" );
+
     file << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
          << "<rss version=\"2.0\">\n"
          << "\t<channel>\n"
@@ -90,12 +98,14 @@ void blogator::generator::RSS::writeHead( std::ofstream &file ) const {
  * @param file RSS feed file
  */
 void blogator::generator::RSS::writeItems( std::ofstream &file ) const {
-    size_t item_count = 0;
-    auto   article_it = _master_index->_articles.cbegin();
+    size_t item_count  = 0;
+    auto   article_it  = _master_index->_articles.cbegin();
 
     while( article_it != _master_index->_articles.cend() &&
            item_count < _options->_rss.item_count )
     {
+        _display.progress( "feed item " + std::to_string( item_count + 1 ) + "/" + std::to_string( _feed_item_count ) );
+
         auto rel_path = ( _options->_paths.posts_dir / article_it->_paths.out_html ).lexically_relative( _options->_paths.root_dir );
 
         file << "\t\t<item>\n"
@@ -122,6 +132,7 @@ void blogator::generator::RSS::writeItems( std::ofstream &file ) const {
  * @param file RSS feed file
  */
 void blogator::generator::RSS::writeFoot( std::ofstream & file ) const {
+    _display.progress( "footer" );
     file << "\t</channel>\n"
          << "</rss>";
 }

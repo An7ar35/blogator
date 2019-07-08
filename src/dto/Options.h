@@ -18,14 +18,15 @@ namespace blogator::dto {
         const std::string BLOGATOR_SIGNATURE = "<!-- Generated with " + BLOGATOR_NAME + " " + BLOGATOR_VERSION + " (" + BLOGATOR_URL + ") -->";
 
         struct AbsPaths { //Absolute directory paths
-            std::filesystem::path root_dir;       //site's root directory (used to create absolute paths)
-            std::filesystem::path source_dir;     //input directory for generating posts from
-            std::filesystem::path template_dir;   //input directory for generating posts from
-            std::filesystem::path posts_dir;      //output directory for generated posts
-            std::filesystem::path css_dir;        //CSS directory where all required stylesheets exist
-            std::filesystem::path index_dir;      //output directory for the blog/news index
-            std::filesystem::path index_date_dir; //output directory for the blog/news index
-            std::filesystem::path index_tag_dir;  //output directory for the blog/news index
+            std::filesystem::path root_dir;         //site's root directory (used to create absolute paths)
+            std::filesystem::path source_dir;       //input directory for generating posts from
+            std::filesystem::path template_dir;     //input directory for generating posts from
+            std::filesystem::path posts_dir;        //output directory for generated posts
+            std::filesystem::path css_dir;          //CSS directory where all required stylesheets exist
+            std::filesystem::path index_dir;        //output directory for the blog/news index
+            std::filesystem::path index_date_dir;   //output directory for the blog/news index by dates
+            std::filesystem::path index_tag_dir;    //output directory for the blog/news index by tags
+            std::filesystem::path index_author_dir; //output directory for the blog/news index by authors
 
         } _paths;
 
@@ -38,10 +39,11 @@ namespace blogator::dto {
                 const std::filesystem::path root    = "templates";
             } templates;
 
-            struct Index { //OUT of all indices (date/tag/tag list)
-                const std::filesystem::path root    = "index";
-                const std::filesystem::path by_date = "index/by_date";
-                const std::filesystem::path by_tag  = "index/by_tag";
+            struct Index { //OUT of all indices (date/tag/tag list/authors)
+                const std::filesystem::path root      = "index";
+                const std::filesystem::path by_date   = "index/by_date";
+                const std::filesystem::path by_tag    = "index/by_tag";
+                const std::filesystem::path by_author = "index/by_author";
             } index;
 
             struct Posts { //OUT of processed posts
@@ -57,6 +59,8 @@ namespace blogator::dto {
         struct Index {
             bool   show_post_numbers { false }; //show post number flag
             size_t items_per_page    { 10 };    //number of posts-per-page in the indices
+            bool   index_by_tag      { true };  //create a tag based index flag
+            bool   index_by_author   { false }; //create a author based index flag
 
         } _index;
 
@@ -77,10 +81,11 @@ namespace blogator::dto {
         } _page_nav;
 
         struct Breadcrumb {
-            std::string start   = "Start";
-            std::string by_tag  = "Tag list";
-            std::string by_date = "Index";
-            std::string page    = "Page #";
+            std::string start     = "Start";
+            std::string by_tag    = "Tag list";
+            std::string by_date   = "Index";
+            std::string by_author = "Author list";
+            std::string page      = "Page #";
 
         } _breadcrumb;
 
@@ -115,14 +120,15 @@ namespace blogator::dto {
          * @param root_path Root directory path
          */
         void setupAbsolutePaths( const std::filesystem::path & root_path ) {
-            _paths.root_dir       = root_path;
-            _paths.template_dir   = _paths.root_dir / _folders.templates.root;
-            _paths.source_dir     = _paths.root_dir / _folders.source.root;
-            _paths.posts_dir      = _paths.root_dir / _folders.posts.root;
-            _paths.css_dir        = _paths.root_dir / _folders.css.root;
-            _paths.index_dir      = _paths.root_dir / _folders.index.root;
-            _paths.index_date_dir = _paths.root_dir / _folders.index.by_date;
-            _paths.index_tag_dir  = _paths.root_dir / _folders.index.by_tag;
+            _paths.root_dir         = root_path;
+            _paths.template_dir     = _paths.root_dir / _folders.templates.root;
+            _paths.source_dir       = _paths.root_dir / _folders.source.root;
+            _paths.posts_dir        = _paths.root_dir / _folders.posts.root;
+            _paths.css_dir          = _paths.root_dir / _folders.css.root;
+            _paths.index_dir        = _paths.root_dir / _folders.index.root;
+            _paths.index_date_dir   = _paths.root_dir / _folders.index.by_date;
+            _paths.index_tag_dir    = _paths.root_dir / _folders.index.by_tag;
+            _paths.index_author_dir = _paths.root_dir / _folders.index.by_author;
         }
 
         /**

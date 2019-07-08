@@ -10,7 +10,6 @@
 #include "IndexMaker.h"
 #include "../exception/failed_expectation.h"
 
-
 /**
  * Constructor
  * @param master_index   Master index
@@ -41,21 +40,10 @@ bool blogator::generator::Generator::init( const dto::Index &master_index,
                                            LandingMaker     &landing_maker,
                                            RSS              &rss_maker )
 {
-    std::cout << "> Generating posts ";
-    auto posts_ok   = post_maker.init();
-    std::cout << ( posts_ok ? "[OK]" : "[ERROR]" ) << std::endl;
-
-    std::cout << "> Generating indices ";
+    auto posts_ok   = post_maker.init(); //TODO maybe do an if( !.. ) then throw a fit/exception on each inits?
     auto index_ok   = index_maker.init();
-    std::cout << ( index_ok ? "[OK]" : "[ERROR]" ) << std::endl;
-
-    std::cout << "> Generating landing page ";
     auto landing_ok = landing_maker.init();
-    std::cout << ( landing_ok ? "[OK]" : "[ERROR]" ) << std::endl;
-
-    std::cout << "> Generating RSS feed ";
     auto rss_ok     = rss_maker.init();
-    std::cout << ( rss_ok ? "[OK]" : "[ERROR]" ) << std::endl;
 
     return ( index_ok && posts_ok && rss_ok && landing_ok );
 }

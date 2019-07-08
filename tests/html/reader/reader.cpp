@@ -2,24 +2,24 @@
 #include "../../../src/html/reader/reader.h"
 #include "../../../src/html/reader/reader.cpp"
 
-TEST( html_reader_tests, getContentBetween ) {
+TEST( html_reader_tests, getContentBetween_string_0 ) {
     using blogator::html::reader::getContentBetween;
     ASSERT_EQ( "", getContentBetween( "<h1>", "</h1>", "" ) );
 }
 
-TEST( html_reader_tests, getContentBetween1 ) {
+TEST( html_reader_tests, getContentBetween_string_1 ) {
     using blogator::html::reader::getContentBetween;
     ASSERT_EQ( "", getContentBetween( "<h1>", "</h1>", "<h1></h1>" ) );
     ASSERT_EQ( "", getContentBetween( "<time datetime=\"", "\"", "<time>5 Juin 2019</time>" ) );
 }
 
-TEST( html_reader_tests, getContentBetween2 ) {
+TEST( html_reader_tests, getContentBetween_string_2 ) {
     using blogator::html::reader::getContentBetween;
     ASSERT_EQ( "", getContentBetween( "<h1>", "</h1>", "<h1> some tests...." ) );
     ASSERT_EQ( "", getContentBetween( "<h1>", "</h1>", "some tests....<h1>" ) );
 }
 
-TEST( html_reader_tests, getContentBetween3 ) {
+TEST( html_reader_tests, getContentBetween_string_3 ) {
     using blogator::html::reader::getContentBetween;
     ASSERT_EQ( "heading", getContentBetween( "<h1>", "</h1>", "<h1>heading</h1>" ) );
     ASSERT_EQ( "heading", getContentBetween( "<h1>", "</h1>", "some text <h1>heading</h1>" ) );
@@ -27,10 +27,92 @@ TEST( html_reader_tests, getContentBetween3 ) {
     ASSERT_EQ( "2019-05-05", getContentBetween( "<time datetime=\"", "\"", "<time datetime=\"2019-05-05\">5 Juin 2019</time>" ) );
 }
 
-TEST( html_reader_tests, getContentBetween4 ) {
+TEST( html_reader_tests, getContentBetween_string_4 ) {
     using blogator::html::reader::getContentBetween;
     ASSERT_EQ( "     heading      ", getContentBetween( "<h1>", "</h1>", "<h1>     heading      </h1>" ) );
     ASSERT_EQ( "\n\t  heading h1 \n", getContentBetween( "<h1>", "</h1>", "some text <h1>\n\t  heading h1 \n</h1> some text" ) );
+}
+
+TEST( html_reader_tests, getContentBetween_HTML_0 ) {
+    using blogator::dto::HTML;
+    using blogator::html::reader::getContentBetween;
+    auto html = HTML();
+    html._lines.emplace_back( "some text <p>text to grab</p> some text" );
+    auto expected = HTML();
+    expected._lines.emplace_back( "text to grab" );
+    ASSERT_EQ( expected, getContentBetween( "<p>", "</p>", html ) );
+}
+
+TEST( html_reader_tests, getContentBetween_HTML_1 ) {
+    using blogator::dto::HTML;
+    using blogator::html::reader::getContentBetween;
+    auto html = HTML();
+    html._lines.emplace_back( "some text" );
+    html._lines.emplace_back( "    <p>" );
+    html._lines.emplace_back( "        text to grab line1" );
+    html._lines.emplace_back( "        text to grab line2" );
+    html._lines.emplace_back( "        text to grab line3" );
+    html._lines.emplace_back( "     </p>" );
+    html._lines.emplace_back( "some text" );
+    auto expected = HTML();
+    expected._lines.emplace_back( "" );
+    expected._lines.emplace_back( "        text to grab line1" );
+    expected._lines.emplace_back( "        text to grab line2" );
+    expected._lines.emplace_back( "        text to grab line3" );
+    expected._lines.emplace_back( "     " );
+    ASSERT_EQ( expected, getContentBetween( "<p>", "</p>", html ) );
+}
+
+TEST( html_reader_tests, getContentBetween_HTML_2 ) {
+    using blogator::dto::HTML;
+    using blogator::html::reader::getContentBetween;
+    auto html = HTML();
+    html._lines.emplace_back( "some text <p>" );
+    html._lines.emplace_back( "        text to grab line1" );
+    html._lines.emplace_back( "        text to grab line2" );
+    html._lines.emplace_back( "        text to grab line3" );
+    html._lines.emplace_back( "     </p> some text" );
+    auto expected = HTML();
+    expected._lines.emplace_back( "" );
+    expected._lines.emplace_back( "        text to grab line1" );
+    expected._lines.emplace_back( "        text to grab line2" );
+    expected._lines.emplace_back( "        text to grab line3" );
+    expected._lines.emplace_back( "     " );
+    ASSERT_EQ( expected, getContentBetween( "<p>", "</p>", html ) );
+}
+
+TEST( html_reader_tests, getContentBetween_HTML_3 ) {
+    using blogator::dto::HTML;
+    using blogator::html::reader::getContentBetween;
+    auto html = HTML();
+    html._lines.emplace_back( "some </p> text <p>" );
+    html._lines.emplace_back( "        text to grab line1" );
+    html._lines.emplace_back( "        text to grab line2" );
+    html._lines.emplace_back( "        text to grab line3" );
+    html._lines.emplace_back( "     </p> some <p> text" );
+    auto expected = HTML();
+    expected._lines.emplace_back( "" );
+    expected._lines.emplace_back( "        text to grab line1" );
+    expected._lines.emplace_back( "        text to grab line2" );
+    expected._lines.emplace_back( "        text to grab line3" );
+    expected._lines.emplace_back( "     " );
+    ASSERT_EQ( expected, getContentBetween( "<p>", "</p>", html ) );
+}
+
+TEST( html_reader_tests, getContentsBetween_0 ) {
+    using blogator::dto::HTML;
+    using blogator::html::reader::getContentsBetween;
+    auto expected = std::vector<std::string>( { "some text" } );
+    auto text     = "text text text <p class=\"author\">some text</p> more...";
+    ASSERT_EQ( expected, getContentsBetween( "<p class=\"author\">", "</p>", text ) );
+}
+
+TEST( html_reader_tests, getContentsBetween_1 ) {
+    using blogator::dto::HTML;
+    using blogator::html::reader::getContentsBetween;
+    auto expected = std::vector<std::string>( { "some text" , "", "text3" } );
+    auto text     = R"(text text text <p class="author">some text</p> more...<p class="author"></p>  <p class="author">text3</p>)";
+    ASSERT_EQ( expected, getContentsBetween( "<p class=\"author\">", "</p>", text ) );
 }
 
 TEST( html_reader_tests, getTags0 ) {

@@ -12,15 +12,15 @@ namespace blogator::dto {
         typedef std::vector<std::filesystem::path> PagePaths_t;
         typedef std::vector<dto::Article>          Articles_t;
 
-        struct TagIndexContent {
-            explicit TagIndexContent( std::string id ) : tag_id( std::move( id ) ) {};
+        struct ListIndexContent {
+            explicit ListIndexContent( std::string id ) : prefix_id( std::move( id ) ) {};
 
-            std::string           tag_id;          //tag's prefix id
+            std::string           prefix_id;       //item's prefix id
             std::vector<size_t>   article_indices; //indices to the master Article index
-            PagePaths_t           file_names;      //page file name(s) in the tag's sub-directory
+            PagePaths_t           file_names;      //page file name(s) in the list's sub-directory
         };
 
-        typedef std::map<std::string, TagIndexContent> TagIndexPaths_t;
+        typedef std::map<std::string, ListIndexContent> ListIndexPaths_t;
 
         struct Paths {
             struct Templates {
@@ -29,6 +29,7 @@ namespace blogator::dto {
                 std::filesystem::path post;
                 std::filesystem::path index;
                 std::filesystem::path tag_list;
+                std::filesystem::path author_list;
                 std::filesystem::path index_entry;
             } templates;
 
@@ -40,14 +41,22 @@ namespace blogator::dto {
         } _paths;
 
         struct Indices {
+            struct ByDate {
+                size_t      page_count { 0 };
+                PagePaths_t page_file_names;
+            } byDate;
+
             struct ByTag {
-                TagIndexPaths_t          tags;
+                size_t                   page_count { 0 };
+                ListIndexPaths_t         tags;
                 std::vector<std::string> top_tags; //size='landing-top-tags' in blogator.cfg
             } byTag;
 
-            struct ByDate {
-                PagePaths_t page_file_names;
-            } byDate;
+            struct ByAuthor {
+                size_t                   page_count { 0 };
+                ListIndexPaths_t         authors;
+                std::vector<std::string> top_authors; //TODO implement in the future
+            } byAuthor;
 
         } _indices;
 
@@ -83,10 +92,10 @@ namespace blogator::dto {
 //                s << "}\n";
 //            }
 //
-            s << "\n=================================ARTICLES START=================================\n";
-            for( const auto &a : index._articles )
-                s << a << std::endl;
-            s << "==================================ARTICLES END==================================\n";
+//            s << "\n=================================ARTICLES START=================================\n";
+//            for( const auto &a : index._articles )
+//                s << a << std::endl;
+//            s << "==================================ARTICLES END==================================\n";
             return s;
         }
     };

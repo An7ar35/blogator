@@ -9,6 +9,7 @@
 #include "../dto/HTML.h"
 #include "../dto/Options.h"
 #include "../dto/Template.h"
+#include "../cli/MsgInterface.h"
 
 namespace blogator::generator {
     class IndexMaker {
@@ -20,9 +21,16 @@ namespace blogator::generator {
         bool init();
 
       private:
+        struct ParentPage {
+            std::string           _name;
+            std::filesystem::path _path;
+        };
+
         std::shared_ptr<const dto::Index>    _master_index;
         std::shared_ptr<const dto::Template> _templates;
         std::shared_ptr<const dto::Options>  _options;
+        size_t                               _total_jobs;
+        cli::MsgInterface                   &_display;
 
         void generateDateIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                      const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
@@ -30,8 +38,14 @@ namespace blogator::generator {
         void writeTagListPage( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
 
+        void writeAuthorListPage( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+                                  const dto::Template::ConsecutiveWritePositions_t &item_insert_points );
+
         void generateTagIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                     const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
+
+        void generateAuthorIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+                                       const dto::Template::ConsecutiveWritePositions_t &item_insert_points );
 
         void writeDateIndexPage( std::ofstream &page,
                                  const dto::Index::PagePaths_t::const_iterator &path_it,
@@ -39,12 +53,13 @@ namespace blogator::generator {
                                  const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                  const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
 
-        void writeTagIndexPage( std::ofstream &page,
-                                const dto::Index::TagIndexPaths_t::const_iterator &tag_it,
-                                const dto::Index::PagePaths_t::const_iterator &page_path_it,
-                                std::vector<size_t>::const_iterator &article_i_it,
-                                const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
-                                const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
+        void writeCategoryIndexPage( std::ofstream &page,
+                                     const ParentPage &parent,
+                                     const dto::Index::ListIndexPaths_t::const_iterator &cat_it,
+                                     const dto::Index::PagePaths_t::const_iterator &page_path_it,
+                                     std::vector<size_t>::const_iterator &article_i_it,
+                                     const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+                                     const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const;
 
         void writeIndexEntry( std::ofstream &page,
                               const std::string &indent,
@@ -65,17 +80,17 @@ namespace blogator::generator {
 
         void writeTagList( std::ofstream &page, const std::string &indent ) const;
         void writeTagListHierarchy( std::ofstream &page, const std::string &indent ) const;
+        void writeAuthorList( std::ofstream &page, const std::string &indent ) const;
 
-        void writeDateIndexBreadcrumb( std::ofstream &page,
+        void writeIndexPageBreadcrumb(  std::ofstream &page,
+                                        const std::string &indent,
+                                        const std::string &parent_name,
+                                        const std::filesystem::path &parent_path,
+                                        const std::string &page_name ) const;
+
+        void writeIndexListBreadcrumb( std::ofstream &page,
                                        const std::string &indent,
-                                       const size_t &page_number ) const;
-
-        void writeTagIndexBreadcrumb( std::ofstream &page,
-                                      const std::string &indent,
-                                      const std::string &tag ) const;
-
-        void writeTagListBreadcrumb( std::ofstream &page,
-                                     const std::string &indent ) const;
+                                       const std::string & list_name ) const;
     };
 }
 

@@ -1,0 +1,31 @@
+Reading sources: posts
+[============|       ]  60%
+
+Reading sources: templates
+[===============|    ]  80%
+
+Reading sources: Done
+[====================] 100%
+
+> Reading sources:
+[==========55%|      ] templates
+
+
+> Reading sources
+
+
+
+    parent         child msg
+       |             |
+Reading sources: templates
+[===============|    ]  80%
+
+
+
+Reading sources: Error
+[==================  ] 92%
+
+
+
+
+use color for types of message?

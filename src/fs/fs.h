@@ -11,7 +11,7 @@
 
 namespace blogator::fs {
     std::shared_ptr<dto::Options> importOptions( const std::filesystem::path &file_path );
-    bool setupEnvironment( const std::shared_ptr<dto::Options>& global_options );
+    void setupEnvironment( const std::shared_ptr<dto::Options>& global_options );
     std::shared_ptr<dto::Template> importTemplates( const dto::Index &master_index );
     std::unique_ptr<dto::HTML> importHTML( const std::filesystem::path &file_path );
 }

@@ -10,6 +10,7 @@
 #include "../html/html.h"
 #include "../exception/file_access_failure.h"
 #include "../exception/failed_expectation.h"
+#include "../cli/MsgInterface.h"
 
 /**
  * Constructor
@@ -22,8 +23,13 @@ blogator::generator::IndexMaker::IndexMaker( std::shared_ptr<const dto::Index>  
                                              std::shared_ptr<const dto::Options>  global_options ) :
     _master_index( std::move( master_index ) ),
     _templates( std::move( templates ) ),
-    _options( std::move( global_options ) )
-{}
+    _options( std::move( global_options ) ),
+    _display( cli::MsgInterface::getInstance() )
+{
+    _total_jobs = _master_index->_indices.byDate.page_count
+                  + _master_index->_indices.byTag.page_count
+                  + _master_index->_indices.byAuthor.page_count;
+}
 
 /**
  * Initialize HTML index pages generation
@@ -31,23 +37,44 @@ blogator::generator::IndexMaker::IndexMaker( std::shared_ptr<const dto::Index>  
  * @throws exception::failed_expectation when insert points could not be found in 1 or more of the index templates
  */
 bool blogator::generator::IndexMaker::init() {
-    auto index_write_positions       = dto::Template::getConsecutiveWritePositions( _templates->_index.div_write_pos );
-    auto tag_list_write_positions    = dto::Template::getConsecutiveWritePositions( _templates->_tag_list.div_write_pos );
-    auto index_entry_write_positions = dto::Template::getConsecutiveWritePositions( _templates->_index_entry.div_write_pos );
-
-    if( index_write_positions.empty() || tag_list_write_positions.empty() || index_entry_write_positions.empty() ) {
-        throw exception::failed_expectation(
-            "Missing insertion points in one or more index templates "
-            "(Found: index page=" + std::to_string( index_write_positions.size() ) +
-            ", tag list=" + std::to_string( tag_list_write_positions.size() ) +
-            ", index entry=" + std::to_string( index_entry_write_positions.size() ) + ")."
-        );
-    }
-
     try {
+        auto index_write_positions       = dto::Template::getConsecutiveWritePositions( _templates->_index.div_write_pos );
+        auto index_entry_write_positions = dto::Template::getConsecutiveWritePositions( _templates->_index_entry.div_write_pos );
+
+        if( index_write_positions.empty() || index_entry_write_positions.empty() ) {
+            throw exception::failed_expectation(
+                "Missing insertion points in one or more index templates "
+                "(Found: index page=" + std::to_string( index_write_positions.size() ) +
+                ", index entry=" + std::to_string( index_entry_write_positions.size() ) + ")."
+            );
+        }
+
         generateDateIndexPages( index_write_positions, index_entry_write_positions );
-        generateTagIndexPages( index_write_positions, index_entry_write_positions );
-        writeTagListPage( tag_list_write_positions, index_entry_write_positions );
+
+        //Tag list index
+        if( _options->_index.index_by_tag ) {
+            auto tag_list_write_positions = dto::Template::getConsecutiveWritePositions( _templates->_tag_list.div_write_pos );
+
+            if( tag_list_write_positions.empty() )
+                throw exception::failed_expectation( "Missing insertion points in the tag list template." );
+
+            generateTagIndexPages( index_write_positions, index_entry_write_positions );
+            writeTagListPage( tag_list_write_positions, index_entry_write_positions );
+        }
+
+        //Author list index
+        if( _options->_index.index_by_author ) {
+            auto author_list_write_positions = dto::Template::getConsecutiveWritePositions( _templates->_author_list.div_write_pos );
+
+            if( author_list_write_positions.empty() )
+                throw exception::failed_expectation( "Missing insertion points in the author list template." );
+
+            generateAuthorIndexPages( index_write_positions, index_entry_write_positions );
+            writeAuthorListPage( author_list_write_positions, index_entry_write_positions );
+        }
+
+        _display.progress( "DONE" );
+
     } catch( std::exception &e ) {
         std::cerr << e.what() << std::endl;
         return false;
@@ -67,10 +94,16 @@ bool blogator::generator::IndexMaker::init() {
 void blogator::generator::IndexMaker::generateDateIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
                                                               const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const
 {
+    auto &display     = cli::MsgInterface::getInstance();
     auto article_it   = _master_index->_articles.cbegin();
     auto page_path_it = _master_index->_indices.byDate.page_file_names.cbegin();
 
     while( article_it != _master_index->_articles.cend() ) {
+        if( article_it == _master_index->_articles.cbegin() )
+            _display.begin( "Generating indices", _total_jobs, _options->_folders.index.by_date.filename() / article_it->_paths.out_html );
+        else
+            _display.progress( _options->_folders.index.by_date.filename() / article_it->_paths.out_html );
+
         if( page_path_it == _master_index->_indices.byDate.page_file_names.cend() )
             throw std::invalid_argument(
                 "Page paths found for the index pages are not sufficient for the number of articles."
@@ -114,6 +147,8 @@ void blogator::generator::IndexMaker::writeTagListPage( const dto::Template::Con
             "File '" + abs_file_path.string() + "' could not be opened for writing."
         );
 
+    _display.progress( _options->_folders.index.by_tag.filename() / _templates->_tag_list.file_name );
+
     page_out << _options->BLOGATOR_SIGNATURE << "\n";
 
     size_t curr_src_line = 0;
@@ -125,7 +160,7 @@ void blogator::generator::IndexMaker::writeTagListPage( const dto::Template::Con
             page_out << template_line.substr( 0, insert_point->first.col ) << std::endl;
 
             if( insert_point->second == "breadcrumb" ) {
-                writeTagListBreadcrumb( page_out, indent + "\t" );
+                writeIndexListBreadcrumb( page_out, indent + "\t", _options->_breadcrumb.by_tag );
 
             } else if( insert_point->second == "tag-list" ) {
                 writeTagList( page_out, indent + "\t" );
@@ -135,6 +170,60 @@ void blogator::generator::IndexMaker::writeTagListPage( const dto::Template::Con
 
             } else {
                 std::cerr << "[generator::IndexMaker::writeTagListPage(..)] "
+                          << "HTML Div class '" << insert_point->second << "' not recognised."
+                          << std::endl;
+            }
+
+            page_out << indent << template_line.substr( insert_point->first.col ) << std::endl;
+            ++insert_point;
+
+        } else {
+            page_out << template_line << "\n";
+        }
+
+        ++curr_src_line;
+    }
+
+    page_out.close();
+}
+
+/**
+ * Generates the master author list index page
+ * @param page_insert_points Consecutive insert points in the index list template
+ * @param item_insert_points Item template insertion point locations
+ * @throws exception::file_access_failure when access issues where encountered
+ */
+void blogator::generator::IndexMaker::writeAuthorListPage( const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+                                                           const dto::Template::ConsecutiveWritePositions_t &item_insert_points )
+{
+    auto abs_file_path = _options->_paths.index_author_dir / _templates->_author_list.file_name;
+    auto page_out      = std::ofstream( abs_file_path );
+
+    if( !page_out.is_open() )
+        throw exception::file_access_failure(
+            "File '" + abs_file_path.string() + "' could not be opened for writing."
+        );
+
+    _display.progress( _options->_folders.index.by_author.filename() / _templates->_author_list.file_name );
+
+    page_out << _options->BLOGATOR_SIGNATURE << "\n";
+
+    size_t curr_src_line = 0;
+    auto   insert_point  = page_insert_points.cbegin();
+
+    for( const auto &template_line : _templates->_author_list.html->_lines ) {
+        if( insert_point != page_insert_points.cend() && insert_point->first.line == curr_src_line ) {
+            const auto indent = html::reader::getIndent( template_line );
+            page_out << template_line.substr( 0, insert_point->first.col ) << std::endl;
+
+            if( insert_point->second == "breadcrumb" ) {
+                writeIndexListBreadcrumb( page_out, indent + "\t", _options->_breadcrumb.by_author );
+
+            } else if( insert_point->second == "author-list" ) {
+                writeAuthorList( page_out, indent + "\t" );
+
+            } else {
+                std::cerr << "[generator::IndexMaker::writeAuthorListPage(..)] "
                           << "HTML Div class '" << insert_point->second << "' not recognised."
                           << std::endl;
             }
@@ -175,6 +264,8 @@ void blogator::generator::IndexMaker::generateTagIndexPages( const dto::Template
 
             auto abs_file_path = _options->_paths.index_tag_dir / *page_path_it;
 
+            _display.progress( _options->_folders.index.by_tag.filename() / *page_path_it );
+
             if( std::filesystem::exists( abs_file_path ) )
                 throw exception::file_access_failure(
                     "File '" + abs_file_path.string() + "' already exists."
@@ -187,12 +278,63 @@ void blogator::generator::IndexMaker::generateTagIndexPages( const dto::Template
                     "File '" + abs_file_path.string() + "' could not be opened for writing."
                 );
 
-            writeTagIndexPage( page_out, tag_it, page_path_it, article_i_it, page_insert_points, item_insert_points );
+            ParentPage parent_page = { _options->_breadcrumb.by_tag, _templates->_tag_list.file_name };
+            writeCategoryIndexPage( page_out, parent_page, tag_it, page_path_it, article_i_it,
+                                    page_insert_points, item_insert_points );
 
             page_out.close();
             ++page_path_it;
         }
+
         ++tag_it;
+    }
+}
+
+/**
+ * Generates 'by author' index pages
+ * @param page_insert_points Consecutive insert points in the index template
+ * @param item_insert_points Item template insertion point locations
+ * @throws std::invalid_argument          when page path could not be generated for author index
+ * @throws exception::file_access_failure when access issues where encountered
+ */
+void blogator::generator::IndexMaker::generateAuthorIndexPages( const dto::Template::ConsecutiveWritePositions_t &page_insert_points, //TODO
+                                                                const dto::Template::ConsecutiveWritePositions_t &item_insert_points )
+{
+    auto author_it = _master_index->_indices.byAuthor.authors.cbegin();
+    while( author_it != _master_index->_indices.byAuthor.authors.cend() ) {
+        auto article_i_it = author_it->second.article_indices.cbegin();
+        auto page_path_it = author_it->second.file_names.cbegin();
+
+        while( article_i_it != author_it->second.article_indices.cend() ) {
+            if( page_path_it == author_it->second.file_names.cend() )
+                throw std::invalid_argument(
+                    "Page paths found for the index pages are not sufficient for the number of articles."
+                );
+
+            auto abs_file_path = _options->_paths.index_author_dir / *page_path_it;
+
+            _display.progress( _options->_folders.index.by_author.filename() / *page_path_it );
+
+            if( std::filesystem::exists( abs_file_path ) )
+                throw exception::file_access_failure(
+                    "File '" + abs_file_path.string() + "' already exists."
+                );
+
+            auto page_out = std::ofstream( abs_file_path );
+
+            if( !page_out.is_open() )
+                throw exception::file_access_failure(
+                    "File '" + abs_file_path.string() + "' could not be opened for writing."
+                );
+
+            ParentPage parent_page = { _options->_breadcrumb.by_author, _templates->_author_list.file_name };
+            writeCategoryIndexPage( page_out, parent_page, author_it, page_path_it, article_i_it,
+                                    page_insert_points, item_insert_points );
+
+            page_out.close();
+            ++page_path_it;
+        }
+        ++author_it;
     }
 }
 
@@ -223,7 +365,8 @@ void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream &page,
             page << template_line.substr( 0, insert_point->first.col ) << std::endl;
 
             if( insert_point->second == "breadcrumb" ) {
-                writeDateIndexBreadcrumb( page, indent + "\t", std::distance( paths.cbegin(), path_it ) + 1 );
+                auto page_num = _options->_breadcrumb.page + std::to_string( std::distance( paths.cbegin(), path_it ) + 1 );
+                writeIndexPageBreadcrumb( page, indent + "\t", _options->_breadcrumb.by_date, "0.html", page_num );
 
             } else if( insert_point->second == "page-nav" ) {
                 writePageNavDiv( page, indent + "\t", paths, path_it );
@@ -259,25 +402,27 @@ void blogator::generator::IndexMaker::writeDateIndexPage( std::ofstream &page,
 /**
  * Writes a page of entries
  * @param page               Page file
- * @param tag_it             Iterator to the current tag
+ * @param parent             Parent page info in the blog's structure
+ * @param cat_it             Iterator to the current category
  * @param page_path_it       Iterator to the current page path
  * @param article_i_it       Index position of the current Article to be processed
  * @param page_insert_points Index template insertion point locations
  * @param item_insert_points Item template insertion point locations
  */
-void blogator::generator::IndexMaker::writeTagIndexPage( std::ofstream &page,
-                                                         const dto::Index::TagIndexPaths_t::const_iterator &tag_it,
-                                                         const dto::Index::PagePaths_t::const_iterator &page_path_it,
-                                                         std::vector<size_t>::const_iterator &article_i_it,
-                                                         const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
-                                                         const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const
+void blogator::generator::IndexMaker::writeCategoryIndexPage( std::ofstream &page,
+                                                              const ParentPage &parent,
+                                                              const dto::Index::ListIndexPaths_t::const_iterator &cat_it,
+                                                              const dto::Index::PagePaths_t::const_iterator &page_path_it,
+                                                              std::vector<size_t>::const_iterator &article_i_it,
+                                                              const dto::Template::ConsecutiveWritePositions_t &page_insert_points,
+                                                              const dto::Template::ConsecutiveWritePositions_t &item_insert_points ) const
 {
     page << _options->BLOGATOR_SIGNATURE << "\n";
 
     size_t entry_counter   = 0;
     size_t curr_src_line   = 0;
     auto   insert_point    = page_insert_points.cbegin();
-    auto  &article_indices = tag_it->second.article_indices;
+    auto  &article_indices = cat_it->second.article_indices;
 
     for( const auto &template_line : _templates->_index.html->_lines ) {
         if( insert_point != page_insert_points.cend() && insert_point->first.line == curr_src_line ) {
@@ -285,14 +430,14 @@ void blogator::generator::IndexMaker::writeTagIndexPage( std::ofstream &page,
 
             page << template_line.substr( 0, insert_point->first.col ) << std::endl;
             if( insert_point->second == "breadcrumb" ) {
-                writeTagIndexBreadcrumb( page, indent + "\t", tag_it->first );
+                writeIndexPageBreadcrumb( page, indent + "\t", parent._name, parent._path, cat_it->first );
 
             } else if( insert_point->second == "page-nav" ) {
-                writePageNavDiv( page, indent + "\t", tag_it->second.file_names, page_path_it );
+                writePageNavDiv( page, indent + "\t", cat_it->second.file_names, page_path_it );
 
             } else if( insert_point->second == "index-entries" ) {
 
-                while( article_i_it != tag_it->second.article_indices.cend() &&
+                while( article_i_it != cat_it->second.article_indices.cend() &&
                        entry_counter < _options->_index.items_per_page )
                 {
                     auto abs_path = _options->_paths.index_date_dir / page_path_it->parent_path();
@@ -306,7 +451,7 @@ void blogator::generator::IndexMaker::writeTagIndexPage( std::ofstream &page,
                 }
 
             } else {
-                std::cerr << "[generator::IndexMaker::writeTagIndexPage(..)] "
+                std::cerr << "[generator::IndexMaker::writeCategoryIndexPage(..)] "
                           << "HTML Div class '" << insert_point->second << "' not recognised."
                           << std::endl;
             }
@@ -388,8 +533,15 @@ void blogator::generator::IndexMaker::writeTemplateIndexEntry( std::ofstream &pa
             } else if( insert_point->second == "heading" ) {
                 page << indent << sub_indent << "\t" << article._heading << "\n";
 
-            } else if( insert_point->second == "author" ) {
-                page << indent << sub_indent << "\t" << article._author << "\n";
+            } else if( insert_point->second == "authors" ) {
+                page << indent << sub_indent << "\t";
+                size_t i = 1;
+                for( const auto & author : article._authors ) {
+                    page << author;
+                    if( i < article._authors.size() )
+                        page << ", ";
+                    ++i;
+                }
 
             } else if( insert_point->second == "tags" ) {
                 for( const auto & tag : article._tags ) {
@@ -400,6 +552,11 @@ void blogator::generator::IndexMaker::writeTemplateIndexEntry( std::ofstream &pa
             } else if( insert_point->second == "date-stamp" ) {
                 page << indent << sub_indent << "\t"
                      << html::createDateTime( article._datestamp, _options->_months ) << "\n";
+
+            } else if( insert_point->second == "summary" ) { //TODO
+                std::cerr << "[generator::IndexMaker::writeTemplateIndexEntry(..)] "
+                          << "TODO: implement 'summary' insertion point"
+                          << std::endl;
 
             } else {
                 std::cerr << "[generator::IndexMaker::writeIndexEntry(..)] "
@@ -509,56 +666,63 @@ void blogator::generator::IndexMaker::writeTagListHierarchy( std::ofstream &page
 }
 
 /**
- * Writes the breadcrumb html to a index 'by date' file
+ * Writes a complete flat-level author list
+ * @param page   Target file
+ * @param indent Space to place before the output line (i.e.: html indent)
+ */
+void blogator::generator::IndexMaker::writeAuthorList( std::ofstream &page,
+                                                       const std::string &indent ) const
+{
+    if( !_master_index->_indices.byAuthor.authors.empty() ) {
+        auto tag_it = _master_index->_indices.byAuthor.authors.cbegin();
+        page << indent << "<ul>\n";
+
+        while( tag_it != _master_index->_indices.byAuthor.authors.cend() ) {
+            page << indent << "\t<li>"
+                 << html::createHyperlink( tag_it->second.file_names.front(), tag_it->first ) << "</li>\n";
+            ++tag_it;
+        }
+
+        page << indent << "</ul>" << std::endl;
+    }
+}
+
+/**
+ * Writes the breadcrumb html to an index category file
  * @param page        Target file
  * @param indent      Space to place before the output line (i.e.: html indent)
- * @param page_number Page number
+ * @param parent_name Name of parent page
+ * @param parent_path Path of parent page
+ * @param page_name   Name of current page
  */
-void blogator::generator::IndexMaker::writeDateIndexBreadcrumb( std::ofstream &page,
+void blogator::generator::IndexMaker::writeIndexPageBreadcrumb( std::ofstream &page,
                                                                 const std::string &indent,
-                                                                const size_t &page_number ) const
-{
-    const auto landing_page = std::filesystem::path( "../.." / _templates->_start.file_name );
-
-    page << indent << "<ul>\n"
-         << indent << "\t<li>" << html::createHyperlink( landing_page, _options->_breadcrumb.start ) << "</li>\n"
-         << indent << "\t<li>" << html::createHyperlink( "0.html", _options->_breadcrumb.by_date ) << "</li>\n"
-         << indent << "\t<li>" << _options->_breadcrumb.page << page_number << "</li>\n"
-         << indent << "</ul>\n";
-}
-
-/**
- * Writes the breadcrumb html to a index 'by tag' file
- * @param page   Target file
- * @param indent Space to place before the output line (i.e.: html indent)
- * @param tag    Tag string
- */
-void blogator::generator::IndexMaker::writeTagIndexBreadcrumb( std::ofstream &page,
-                                                               const std::string &indent,
-                                                               const std::string &tag ) const
+                                                                const std::string &parent_name,
+                                                                const std::filesystem::path &parent_path,
+                                                                const std::string &page_name ) const
 {
     const auto  landing_page = std::filesystem::path( "../.." / _templates->_start.file_name );
-    const auto &tag_page     = std::filesystem::path( _templates->_tag_list.file_name );
 
     page << indent << "<ul>\n"
          << indent << "\t<li>" << html::createHyperlink( landing_page, _options->_breadcrumb.start ) << "</li>\n"
-         << indent << "\t<li>" << html::createHyperlink( tag_page, _options->_breadcrumb.by_tag ) << "</li>\n"
-         << indent << "\t<li>" << tag << "</li>\n"
+         << indent << "\t<li>" << html::createHyperlink( parent_path, parent_name ) << "</li>\n"
+         << indent << "\t<li>" << page_name << "</li>\n"
          << indent << "</ul>\n";
 }
 
 /**
- * Writes the breadcrumb html to the tag list index file
+ * Writes the breadcrumb html to any index lists (categories) file
  * @param page   Target file
  * @param indent Space to place before the output line (i.e.: html indent)
  */
-void blogator::generator::IndexMaker::writeTagListBreadcrumb( std::ofstream &page,
-                                                              const std::string &indent ) const
+void blogator::generator::IndexMaker::writeIndexListBreadcrumb( std::ofstream &page,
+                                                                const std::string &indent,
+                                                                const std::string &list_name ) const
 {
     const auto landing_page = std::filesystem::path( "../.." / _templates->_start.file_name );
 
     page << indent << "<ul>\n"
          << indent << "\t<li>" << html::createHyperlink( landing_page, _options->_breadcrumb.start ) << "</li>\n"
-         << indent << "\t<li>" << _options->_breadcrumb.by_tag << "</li>\n"
+         << indent << "\t<li>" << list_name << "</li>\n"
          << indent << "</ul>\n";
 }

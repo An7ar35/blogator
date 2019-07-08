@@ -12,6 +12,7 @@
 #include "../html/html.h"
 #include "../exception/failed_expectation.h"
 #include "../exception/file_access_failure.h"
+#include "../cli/MsgInterface.h"
 
 /**
  * Constructor
@@ -33,6 +34,9 @@ blogator::generator::PostMaker::PostMaker( std::shared_ptr<const dto::Index>    
  * @throws exception::failed_expectation when no insertion points are found in the post template
  */
 bool blogator::generator::PostMaker::init() {
+    auto       &display       = cli::MsgInterface::getInstance();
+    const auto total_articles = '/' + std::to_string( _master_index->_articles.size() );
+
     auto insert_points = dto::Template::getConsecutiveWritePositions( _templates->_post.div_write_pos );
 
     if( insert_points.empty() )
@@ -52,6 +56,11 @@ bool blogator::generator::PostMaker::init() {
         size_t     curr_article_i  = 0;
 
         for( const auto &article : _master_index->_articles ) {
+            if( curr_article_i == 0 )
+                display.begin( "Generating posts", _master_index->_articles.size(), std::to_string( curr_article_i + 1 ) + total_articles );
+            else
+                display.progress( std::to_string( curr_article_i + 1 ) + total_articles );
+
             const auto html_out    = ( _options->_paths.posts_dir / article._paths.out_html );
             const auto css_link    = html::createStylesheetLink( article._paths.css, html_out );
 
@@ -115,6 +124,7 @@ bool blogator::generator::PostMaker::init() {
         return false;
     }
 
+    display.progress( "DONE" );
     return true;
 }
 
@@ -213,7 +223,7 @@ void blogator::generator::PostMaker::writeContentDiv( const std::filesystem::pat
 
     if( !in.is_open() )
         throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
-//    <span class="post_number"></span>
+//    <span class="post_number"></span> //TODO what the hell is this comment for? if bs then remove
     std::string line;
     while( getline( in, line ) )
         out << indent << "\t" << line << std::endl;

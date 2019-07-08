@@ -6,6 +6,7 @@
 #include "../dto/Index.h"
 #include "../dto/Options.h"
 #include "../dto/Template.h"
+#include "../cli/MsgInterface.h"
 
 namespace blogator::generator {
     class RSS {
@@ -17,9 +18,11 @@ namespace blogator::generator {
         bool init();
 
       private:
-        std::shared_ptr<const dto::Index> _master_index;
+        std::shared_ptr<const dto::Index>    _master_index;
         std::shared_ptr<const dto::Template> _templates;
-        std::shared_ptr<const dto::Options> _options;
+        std::shared_ptr<const dto::Options>  _options;
+        size_t                               _feed_item_count;
+        cli::MsgInterface                   &_display;
 
         void writeHead( std::ofstream &file ) const;
         void writeItems( std::ofstream &file ) const;

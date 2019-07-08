@@ -19,10 +19,8 @@ void blogator::indexer::FeatAggregator::addArticleIfFeatured( const blogator::dt
 {
     const auto it = _options->_landing_page.featured.find( article._paths.out_html );
 
-    if( it != _options->_landing_page.featured.cend() ) {
-        std::cout << "Article '" << article._heading << "' is in the feature list at pos=" << it->second << std::endl;
+    if( it != _options->_landing_page.featured.cend() )
         _max_heap.push( std::make_pair( it->second, article ) );
-    }
 }
 
 /**

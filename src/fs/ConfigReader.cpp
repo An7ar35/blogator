@@ -37,7 +37,7 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
         processMonthsOptions( map, *options );
     } catch( exception::file_parsing_failure &e ) { //TODO
         std::cerr << e.what() << std::endl;
-        std::cout << "Using default month strings (eng)." << std::endl;
+        std::cout << "  Using default month strings (eng)." << std::endl;
     }
 
     try {
@@ -45,11 +45,11 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
     } catch( exception::file_parsing_failure & e ) {
         options->_rss.generate = false;
         std::cerr << e.what() << std::endl;
-        std::cerr << "RSS feed will *not* be generated." << std::endl;
+        std::cerr << "  RSS feed will *not* be generated." << std::endl;
     } catch( exception::failed_expectation & e ) {
         options->_rss.generate = false;
         std::cerr << e.what() << std::endl;
-        std::cerr << "RSS feed will *not* be generated." << std::endl;
+        std::cerr << "  RSS feed will *not* be generated." << std::endl;
     }
 
     return std::move( options );
@@ -72,6 +72,8 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "//Index settings\n"
        << "show-post-numbers = 1;\n"
        << "items-per-page    = 10;\n"
+       << "index-by-tag      = 1;\n"
+       << "index-by-author   = 0;\n"
        << "\n"
        << "//Per-Page navigation DIV contents\n"
        << "page-nav-separator = \" / \";\n"
@@ -81,10 +83,11 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "page-nav-last      = \"last\";\n"
        << "\n"
        << "//breadcrumb navigation DIV contents\n"
-       << "breadcrumb-landing-page = \"Home\";\n"
-       << "breadcrumb-by-tag-page  = \"Categories\";\n"
-       << "breadcrumb-by-date-page = \"Index\";\n"
-       << "breadcrumb-index-page   = \"Page #\";\n"
+       << "breadcrumb-landing-page   = \"Home\";\n"
+       << "breadcrumb-by-date-page   = \"Index\";\n"
+       << "breadcrumb-by-tag-page    = \"Categories\";\n"
+       << "breadcrumb-by-author-page = \"Authors\";\n"
+       << "breadcrumb-index-page     = \"Page #\";\n"
        << "\n"
        << "//Landing page (i.e.: start page)\n"
        << "landing-most-recent = 5;\n"
@@ -145,7 +148,7 @@ void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::p
         } else if( std::regex_search( line, matches, KV_STR_ARR_RX ) && matches.length() >= 3 ) {
             map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING_ARRAY, matches[2] ) ) );
         } else if( !std::regex_search( line, COMMENT_RX ) ) {
-            std::cerr << "Configuration line #" << line_number << " could not be parsed." << std::endl;
+            std::cerr << "Configuration line #" << line_number << " could not be parsed." << std::endl; //TODO pass to display interface as error message
         }
     }
 
@@ -200,9 +203,13 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
 {
     static const std::string items_per_page    = "items-per-page";
     static const std::string show_post_numbers = "show-post-numbers";
+    static const std::string index_by_tag      = "index-by-tag";
+    static const std::string index_by_author   = "index-by-author";
 
     auto items_per_page_it    = map.find( items_per_page );
     auto show_post_numbers_it = map.find( show_post_numbers );
+    auto index_by_tag_it      = map.find( index_by_tag );
+    auto index_by_author_it   = map.find( index_by_author );
 
     if( items_per_page_it != map.end() ) {
         try {
@@ -224,6 +231,30 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
             throw exception::file_parsing_failure(
                 "Error converting '" + show_post_numbers + "' value to integer "
                 "(line #" + std::to_string( show_post_numbers_it->second.line ) + "): " + show_post_numbers_it->second.value
+            );
+        }
+    }
+
+    if( index_by_tag_it != map.end() ) {
+        try {
+            options._index.index_by_tag = ( std::stoi( index_by_tag_it->second.value ) != 0 );
+            index_by_tag_it->second.validated = true;
+        } catch( std::exception &e ) {
+            throw exception::file_parsing_failure(
+                "Error converting '" + show_post_numbers + "' value to integer "
+                "(line #" + std::to_string( index_by_tag_it->second.line ) + "): " + index_by_tag_it->second.value
+            );
+        }
+    }
+
+    if( index_by_author_it != map.end() ) {
+        try {
+            options._index.index_by_author = ( std::stoi( index_by_author_it->second.value ) != 0 );
+            index_by_author_it->second.validated = true;
+        } catch( std::exception &e ) {
+            throw exception::file_parsing_failure(
+                "Error converting '" + show_post_numbers + "' value to integer "
+                "(line #" + std::to_string( index_by_author_it->second.line ) + "): " + index_by_author_it->second.value
             );
         }
     }
@@ -348,19 +379,26 @@ void blogator::fs::ConfigReader::processPageNavOptions( std::unordered_map<std::
 void blogator::fs::ConfigReader::processBreadcrumbOptions( std::unordered_map<std::string, ConfigReader::Value> & map,
                                                            dto::Options & options ) const
 {
-    static const std::string landing_page = "breadcrumb-landing-page";
-    static const std::string by_tag_page  = "breadcrumb-by-tag-page";
-    static const std::string by_date_page = "breadcrumb-by-date-page";
-    static const std::string index_page   = "breadcrumb-index-page";
+    static const std::string landing_page   = "breadcrumb-landing-page";
+    static const std::string by_date_page   = "breadcrumb-by-date-page";
+    static const std::string by_tag_page    = "breadcrumb-by-tag-page";
+    static const std::string by_author_page = "breadcrumb-by-author-page";
+    static const std::string index_page     = "breadcrumb-index-page";
 
-    auto landing_page_it = map.find( landing_page );
-    auto by_tag_page_it  = map.find( by_tag_page );
-    auto by_date_page_it = map.find( by_date_page );
-    auto index_page_it   = map.find( index_page );
+    auto landing_page_it   = map.find( landing_page );
+    auto by_date_page_it   = map.find( by_date_page );
+    auto by_tag_page_it    = map.find( by_tag_page );
+    auto by_author_page_it = map.find( by_author_page );
+    auto index_page_it     = map.find( index_page );
 
     if( landing_page_it != map.end() && !landing_page_it->second.value.empty() ) {
         options._breadcrumb.start = landing_page_it->second.value;
         landing_page_it->second.validated = true;
+    }
+
+    if( by_date_page_it != map.end() && !by_date_page_it->second.value.empty() ) {
+        options._breadcrumb.by_date = by_date_page_it->second.value;
+        by_date_page_it->second.validated = true;
     }
 
     if( by_tag_page_it != map.end() && !by_tag_page_it->second.value.empty() ) {
@@ -368,9 +406,9 @@ void blogator::fs::ConfigReader::processBreadcrumbOptions( std::unordered_map<st
         by_tag_page_it->second.validated = true;
     }
 
-    if( by_date_page_it != map.end() && !by_date_page_it->second.value.empty() ) {
-        options._breadcrumb.by_date = by_date_page_it->second.value;
-        by_date_page_it->second.validated = true;
+    if( by_author_page_it != map.end() && !by_author_page_it->second.value.empty() ) {
+        options._breadcrumb.by_author = by_author_page_it->second.value;
+        by_author_page_it->second.validated = true;
     }
 
     if( index_page_it != map.end() && !index_page_it->second.value.empty() ) {

@@ -69,6 +69,18 @@ namespace blogator::dto {
         } _tag_list;
 
         /**
+         * Author list (authors.html) page template
+         */
+        struct AuthorListIndexPage {
+            const std::filesystem::path file_name = "authors.html";
+            std::unique_ptr<HTML>       html;
+            DivWritePositions_t         div_write_pos = {
+                { "breadcrumb",         std::vector<InsertPosition>() },
+                { "author-list",        std::vector<InsertPosition>() }
+            };
+        } _author_list;
+
+        /**
          * Index entry template
          */
         struct IndexEntry {
@@ -76,9 +88,10 @@ namespace blogator::dto {
             DivWritePositions_t   div_write_pos = {
                 { "post-number", std::vector<InsertPosition>() },
                 { "heading",     std::vector<InsertPosition>() },
-                { "author",      std::vector<InsertPosition>() },
+                { "authors",     std::vector<InsertPosition>() },
                 { "tags",        std::vector<InsertPosition>() },
-                { "date-stamp",  std::vector<InsertPosition>() }
+                { "date-stamp",  std::vector<InsertPosition>() },
+                { "summary",     std::vector<InsertPosition>() }
             };
         } _index_entry;
 
@@ -104,9 +117,10 @@ namespace blogator::dto {
             DivWritePositions_t   div_write_pos = {
                 { "post-number", std::vector<InsertPosition>() },
                 { "heading",     std::vector<InsertPosition>() },
-                { "author",      std::vector<InsertPosition>() },
+                { "authors",     std::vector<InsertPosition>() },
                 { "tags",        std::vector<InsertPosition>() },
-                { "date-stamp",  std::vector<InsertPosition>() }
+                { "date-stamp",  std::vector<InsertPosition>() },
+                { "summary",     std::vector<InsertPosition>() }
             };
         } _start_entry;
 

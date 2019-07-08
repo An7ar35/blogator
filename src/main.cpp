@@ -22,26 +22,18 @@ int main() {
         auto options = fs::importOptions( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog/blogator.cfg" );
         options->setupAbsolutePaths( std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io/blog" ) );
                                     //TODO pass ^^^^ from cmd line args
-        std::cout << "> Setting up environment...\n";
-        if( fs::setupEnvironment( options ) ) {
-            std::cout << "> Indexing sources...\n";
-            auto index     = indexer::index( options );
-            std::cout << *index << std::endl;
-            std::cout << "> Importing templates\n";
-            auto templates = fs::importTemplates( *index );
+        std::cout << "> Setting up environment";
+        fs::setupEnvironment( options );
+        auto index         = indexer::index( options );
+//            std::cout << *index << std::endl;
+        auto templates     = fs::importTemplates( *index );
+        auto post_maker    = generator::PostMaker( index, templates, options );
+        auto index_maker   = generator::IndexMaker( index, templates, options );
+        auto landing_maker = generator::LandingMaker( index, templates, options );
+        auto rss           = generator::RSS( index, templates, options );
+        auto generator     = generator::Generator( index, templates, options );
 
-            auto post_maker    = generator::PostMaker( index, templates, options );
-            auto index_maker   = generator::IndexMaker( index, templates, options );
-            auto landing_maker = generator::LandingMaker( index, templates, options );
-            auto rss           = generator::RSS( index, templates, options );
-            auto generator     = generator::Generator( index, templates, options );
-
-            std::cout << "> Generating html...\n";
-            generator.init( *index, post_maker, index_maker, landing_maker, rss );
-
-        } else {
-            std::cerr << "Environment setup failed." << std::endl;
-        }
+        generator.init( *index, post_maker, index_maker, landing_maker, rss );
 
     } catch( std::exception &e ) {
         std::cerr << e.what() << std::endl;
