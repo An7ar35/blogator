@@ -26,6 +26,7 @@ namespace blogator::indexer {
     void generateTagIndexTargets( dto::Index &master_index, const dto::Options &global_options );
     void generateAuthorIndexTargets( dto::Index &master_index, const dto::Options &global_options );
     void generateTopTags( dto::Index &master_index, const dto::Options &global_options );
+    void generateTopAuthors( dto::Index &master_index, const dto::Options &global_options );
     void generateDateIndexTargets( blogator::dto::Index & master_index, const dto::Options & global_options );
 
     dto::DateStamp convertDate( const std::string &date );

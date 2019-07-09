@@ -85,6 +85,8 @@ void blogator::generator::LandingMaker::generateLandingPage( const dto::Template
                 writeNewestPosts( page_out, indent + "\t", entry_insert_points );
             } else if( insert_point->second == "top-tags" ) {
                 writeTopTags( page_out, indent + "\t" );
+            } else if( insert_point->second == "top-authors" ) {
+                writeTopAuthors( page_out, indent + "\t" );
             } else if( insert_point->second == "featured-posts" ) {
                 writeFeatured( page_out, indent + "\t", entry_insert_points );
             } else {
@@ -148,6 +150,42 @@ void blogator::generator::LandingMaker::writeTopTags( std::ofstream &page,
             else
                 std::cerr << "[generator::LandingMaker::writeTopTags(..)] "
                           << "Tag '" << tag << "' doesn't not have any index page path(s) in its specifications."
+                          << std::endl;
+        }
+    }
+
+    page << indent << "</ul>\n";
+}
+
+/**
+ * Write the top authors (as defined in the landing page options) to the landing page
+ * @param page   Target file
+ * @param indent Space to place before the output line (i.e.: html indent)
+ */
+void blogator::generator::LandingMaker::writeTopAuthors( std::ofstream &page,
+                                                         const std::string &indent ) const
+{
+    page << indent << "<ul>\n";
+
+    for( const auto &author : _master_index->_indices.byAuthor.top_authors ) {
+        try {
+            const auto       &specs     = _master_index->_indices.byAuthor.authors.at( author );
+            const std::string str       = author + " (" + std::to_string( specs.article_indices.size() ) + ')';
+            const auto       &file_name = specs.file_names.at( 0 );
+            const auto        rel_path  = _options->_paths.index_author_dir.lexically_relative( _options->_paths.root_dir );
+
+            page << indent << "\t<li>"
+                 << html::createHyperlink( rel_path / file_name , str )
+                 << "</li>\n";
+
+        } catch( std::out_of_range &e ) {
+            if( _master_index->_indices.byTag.tags.find( author ) == _master_index->_indices.byTag.tags.end() )
+                std::cerr << "[generator::LandingMaker::writeTopAuthors(..)] "
+                          << "Author '" << author << "' does not seem to exist in the master index."
+                          << std::endl;
+            else
+                std::cerr << "[generator::LandingMaker::writeTopAuthors(..)] "
+                          << "Author '" << author << "' doesn't not have any index page path(s) in its specifications."
                           << std::endl;
         }
     }
@@ -232,13 +270,9 @@ void blogator::generator::LandingMaker::writeArticleEntry( std::ofstream & page,
                 page << indent << sub_indent << "\t" << article._heading << "\n";
 
             } else if( insert_point->second == "authors" ) {
-                page << indent << sub_indent << "\t";
-                size_t i = 1;
                 for( const auto & author : article._authors ) {
-                    page << author;
-                    if( i < article._authors.size() )
-                        page << ", ";
-                    ++i;
+                    page << indent << sub_indent
+                         << "\t<span class=\"author\">" << author << "</span>\n";
                 }
 
             } else if( insert_point->second == "tags" ) {

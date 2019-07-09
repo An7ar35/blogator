@@ -35,6 +35,31 @@ std::string blogator::html::createHyperlink( const std::filesystem::path &href,
 }
 
 /**
+ * Creates a hyperlink tag
+ * @param href      Link path/address
+ * @param link_text Text to use in between <a></a> tags
+ * @param css_class CSS class to use (optional)
+ * @param rel       'rel' attribute
+ * @return Formatted html hyperlink tag
+ */
+std::string blogator::html::createHyperlink( const std::filesystem::path &href,
+                                             const std::string &link_text,
+                                             const std::string &css_class,
+                                             const std::string &rel )
+{
+    std::stringstream ss;
+
+    ss << "<a ";
+    if( !css_class.empty() )
+        ss << "class=\"" << css_class << "\" ";
+    if( !rel.empty() )
+        ss << "rel=\"" << rel << "\" ";
+    ss << "href=\"" << href.string() << "\">" << link_text << "</a>";
+
+    return ss.str();
+}
+
+/**
  * Create a time tag
  * @param date_stamp DateStamp DTO
  * @param months     Month string lookup map

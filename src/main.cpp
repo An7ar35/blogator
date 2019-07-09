@@ -2,7 +2,6 @@
 #include <dirent.h>
 #include <regex>
 #include <filesystem>
-#include <eadlib/cli/parser/Parser.h>
 
 #include "indexer/indexer.h"
 #include "generator/Generator.h"
@@ -16,6 +15,7 @@ int main() {
      * -p (--preview) do a 'dump' collation for a post (create in a /tmp folder inside the root path and add a 'preview' in the file name)
      * -c (--create-config) generate a bog standard config file in the root of the site (see {path})
      * {path} : root of site, if not use running path as root
+     * -h (--help) show options descriptions
      * */
     try {
         std::cout << "> Reading configuration file...\n";
@@ -25,7 +25,6 @@ int main() {
         std::cout << "> Setting up environment";
         fs::setupEnvironment( options );
         auto index         = indexer::index( options );
-//            std::cout << *index << std::endl;
         auto templates     = fs::importTemplates( *index );
         auto post_maker    = generator::PostMaker( index, templates, options );
         auto index_maker   = generator::IndexMaker( index, templates, options );

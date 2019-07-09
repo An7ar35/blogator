@@ -102,6 +102,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "//Landing page (i.e.: start page)\n"
        << "landing-most-recent = 5;\n"
        << "landing-top-tags    = 3;\n"
+       << "landing-top_authors = 3;\n"
        << "landing-featured    = [\"0.html\", \"1.html\"];\n"
        << "\n"
        << "//RSS header settings\n"
@@ -322,10 +323,12 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
 {
     static const std::string most_recent = "landing-most-recent";
     static const std::string top_tags    = "landing-top-tags";
+    static const std::string top_authors = "landing-top_authors";
     static const std::string featured    = "landing-featured";
 
     auto most_recent_it = map.find( most_recent );
     auto top_tags_it    = map.find( top_tags );
+    auto top_authors_it    = map.find( top_authors );
     auto featured_it    = map.find( featured );
 
     if( most_recent_it != map.end() ) {
@@ -340,6 +343,18 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
         }
     }
 
+    if( top_authors_it != map.end() ) {
+        try {
+            options._landing_page.top_authors = std::stoi( top_authors_it->second.value );
+            top_authors_it->second.validated = true;
+        } catch( std::exception &e ) {
+            throw exception::file_parsing_failure(
+                "Error converting '" + top_authors + "' value to integer "
+                "(line #" + std::to_string( top_authors_it->second.line ) + "): " + top_authors_it->second.value
+            );
+        }
+    }
+
     if( top_tags_it != map.end() ) {
         try {
             options._landing_page.top_tags = std::stoi( top_tags_it->second.value );
@@ -347,7 +362,7 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
         } catch( std::exception &e ) {
             throw exception::file_parsing_failure(
                 "Error converting '" + top_tags + "' value to integer "
-                "(line #" + std::to_string( top_tags_it->second.line ) + "): " + top_tags_it->second.value
+                                                  "(line #" + std::to_string( top_tags_it->second.line ) + "): " + top_tags_it->second.value
             );
         }
     }

@@ -46,6 +46,7 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     if( global_options->_index.index_by_author ) {
         index->_indices.byAuthor.page_count += 1; //author list page
         generateAuthorIndexTargets( *index, *global_options );
+        generateTopAuthors( *index, *global_options );
     }
     display.progress( "DONE" );
 
@@ -95,13 +96,13 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options,
  * @throws exception::failed_expectation when detecting missing template file(s)
  */
 void blogator::indexer::indexTemplates( const dto::Options &global_options, dto::Index &index ) {
-    static const std::regex landing_rx       = std::regex( "^.*(template_start)\\.(?:html|htm)$" );
-    static const std::regex landing_entry_rx = std::regex( "^.*(template_start_entry)\\.(?:html|htm)$" );
-    static const std::regex post_rx          = std::regex( "^.*(template_post)\\.(?:html|htm)$" );
-    static const std::regex index_rx         = std::regex( "^.*(template_index)\\.(?:html|htm)$" );
-    static const std::regex tag_list_rx      = std::regex( "^.*(template_tag_list)\\.(?:html|htm)$" );
-    static const std::regex author_list_rx   = std::regex( "^.*(template_author_list)\\.(?:html|htm)$" );
-    static const std::regex index_entry_rx   = std::regex( "^.*(template_index_entry)\\.(?:html|htm)$" );
+    static const std::regex landing_rx       = std::regex( "^.*(landing)\\.(?:html|htm)$" );
+    static const std::regex landing_entry_rx = std::regex( "^.*(landing_entry)\\.(?:html|htm)$" );
+    static const std::regex post_rx          = std::regex( "^.*(post)\\.(?:html|htm)$" );
+    static const std::regex index_rx         = std::regex( "^.*(index)\\.(?:html|htm)$" );
+    static const std::regex tag_list_rx      = std::regex( "^.*(tag_list)\\.(?:html|htm)$" );
+    static const std::regex author_list_rx   = std::regex( "^.*(author_list)\\.(?:html|htm)$" );
+    static const std::regex index_entry_rx   = std::regex( "^.*(index_entry)\\.(?:html|htm)$" );
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.template_dir ) ) {
         if( p.is_regular_file() ) {
@@ -111,9 +112,9 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
             } else if( std::regex_match( path, index_rx ) ) {
                 index._paths.templates.index = p.path();
             } else if( std::regex_match( path, landing_rx ) ) {
-                index._paths.templates.start = p.path();
+                index._paths.templates.landing = p.path();
             } else if( std::regex_match( path, landing_entry_rx ) ) {
-                index._paths.templates.start_entry = p.path();
+                index._paths.templates.landing_entry = p.path();
             } else if( std::regex_match( path, tag_list_rx ) ) {
                 index._paths.templates.tag_list = p.path();
             } else if( std::regex_match( path, author_list_rx ) ) {
@@ -126,11 +127,11 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
 
     size_t errors { 0 }; //TODO pass msgs to MsgInterface instead of cerr? or redirect cerr to it;
 
-    if( index._paths.templates.start.empty() ) {
+    if( index._paths.templates.landing.empty() ) {
         std::cerr << "Template missing: landing page" << std::endl;
         ++errors;
     }
-    if( index._paths.templates.start_entry.empty() ) {
+    if( index._paths.templates.landing_entry.empty() ) {
         std::cerr << "Template missing: landing entry" << std::endl;
         ++errors;
     }
@@ -392,6 +393,31 @@ void blogator::indexer::generateTopTags( blogator::dto::Index &master_index,
     size_t i = 0;
     while( !max_heap.empty() && i < global_options._landing_page.top_tags ) {
         master_index._indices.byTag.top_tags.emplace_back( max_heap.top().second );
+        max_heap.pop();
+        ++i;
+    }
+}
+
+/**
+ * Generates an ordered (desc) top authors mentioned in the author tags in theindex articles
+ * @param master_index   Master index
+ * @param global_options Global blogator options
+ */
+void blogator::indexer::generateTopAuthors( dto::Index &master_index,
+                                            const dto::Options &global_options )
+{
+    auto compare  = []( auto &a, auto &b ) { return a.first < b.first; };
+    auto max_heap = std::priority_queue<std::pair<size_t, std::string>,
+        std::vector<std::pair<size_t, std::string>>,
+        decltype( compare )
+    >( compare );
+
+    for( const auto &t : master_index._indices.byAuthor.authors )
+        max_heap.push( std::make_pair( t.second.article_indices.size(), t.first ) );
+
+    size_t i = 0;
+    while( !max_heap.empty() && i < global_options._landing_page.top_authors ) {
+        master_index._indices.byAuthor.top_authors.emplace_back( max_heap.top().second );
         max_heap.pop();
         ++i;
     }

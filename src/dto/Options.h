@@ -77,6 +77,7 @@ namespace blogator::dto {
         struct LandingPage {
             size_t                             most_recent = 5;
             size_t                             top_tags    = 3;
+            size_t                             top_authors = 3;
             std::map<std::string, size_t>      featured; //{K=path str, V=order position}
 
         } _landing_page;

@@ -1,31 +1,34 @@
-Reading sources: posts
-[============|       ]  60%
+=========
+|DISPLAY|
+=========
+· use colour for types of message?
 
-Reading sources: templates
-[===============|    ]  80%
+==========
+|INDEXING|
+==========
+· [LINK/PATHS] adapt 'href' and 'src' from template location's relative paths to target location's relative paths
+        > if template file is in '/templates/index/' and it's target location is '/index/' then
+          an href="../../pages/page.html" will become href="../pages/page.html"
 
-Reading sources: Done
-[====================] 100%
+        > NOTE: make it only work if href/src path is either relative or it's root is the website URL
+                Also, the paths need to be assumed correct from where they are
+                -> do a target file/path check to sanitise the sources before generating everything?
 
-> Reading sources:
-[==========55%|      ] templates
+        > This would allow for template preview will all the hyperlinks and css sources working and the
+          target's generation without having to manually change the paths prior
+          
+    -->Regular expresion for that shoudl be fine as limited to just the templates
 
+· [SUMMARY] Index/Landing page entries <description> support
+  (first n lines with '...' added?, special summary file?, optional summary comment line in source post?)
+· [SUMMARY] *_entry.html  class="summary" tag search and use in index item /start page item?
+  OR text taken in <p> tags in article source with n char length ('summary-length')
 
-> Reading sources
+=====
+|RSS|
+=====
+· RSS articles: <description>, <guid> (requires the 'summary' functionality to be implemented through)
 
-
-
-    parent         child msg
-       |             |
-Reading sources: templates
-[===============|    ]  80%
-
-
-
-Reading sources: Error
-[==================  ] 92%
-
-
-
-
-use color for types of message?
+//TODO
+======
+· Have the readers optionally work with RegEx in cases where multiple tags sources are on the same line //TEST this assumptions?

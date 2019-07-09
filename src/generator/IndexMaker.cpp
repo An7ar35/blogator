@@ -534,13 +534,9 @@ void blogator::generator::IndexMaker::writeTemplateIndexEntry( std::ofstream &pa
                 page << indent << sub_indent << "\t" << article._heading << "\n";
 
             } else if( insert_point->second == "authors" ) {
-                page << indent << sub_indent << "\t";
-                size_t i = 1;
                 for( const auto & author : article._authors ) {
-                    page << author;
-                    if( i < article._authors.size() )
-                        page << ", ";
-                    ++i;
+                    page << indent << sub_indent
+                         << "\t<span class=\"author\">" << author << "</span>\n";
                 }
 
             } else if( insert_point->second == "tags" ) {
@@ -599,12 +595,12 @@ void blogator::generator::IndexMaker::writePageNavDiv( std::ofstream &page,
               ? html::createHyperlink( *paths.cbegin(), _options->_page_nav.first, "disabled" )
               : html::createHyperlink( *paths.cbegin(), _options->_page_nav.first ) )
          << ( is_first
-              ? html::createHyperlink( *paths.cbegin(), _options->_page_nav.backward, "disabled" )
-              : html::createHyperlink( *std::prev( path_it ), _options->_page_nav.backward, "disabled" ) )
+              ? html::createHyperlink( *paths.cbegin(), _options->_page_nav.backward, "disabled", "prev" )
+              : html::createHyperlink( *std::prev( path_it ), _options->_page_nav.backward, "", "prev" ) )
          << std::to_string( page_number ) << _options->_page_nav.separator << std::to_string( paths.size() )
          << ( is_last
-              ? html::createHyperlink( *std::prev( paths.cend() ), _options->_page_nav.forward, "disabled" )
-              : html::createHyperlink( *std::next( path_it ), _options->_page_nav.forward ) )
+              ? html::createHyperlink( *std::prev( paths.cend() ), _options->_page_nav.forward, "disabled", "next" )
+              : html::createHyperlink( *std::next( path_it ), _options->_page_nav.forward, "", "next" ) )
          << ( is_last
               ? html::createHyperlink( *std::prev( paths.cend() ), _options->_page_nav.last, "disabled" )
               : html::createHyperlink( *std::prev( paths.cend() ), _options->_page_nav.last ) )

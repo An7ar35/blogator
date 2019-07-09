@@ -223,7 +223,7 @@ void blogator::generator::PostMaker::writeContentDiv( const std::filesystem::pat
 
     if( !in.is_open() )
         throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
-//    <span class="post_number"></span> //TODO what the hell is this comment for? if bs then remove
+//    <span class="post_number"></span> //TODO look into inserting number in the post?
     std::string line;
     while( getline( in, line ) )
         out << indent << "\t" << line << std::endl;
@@ -249,12 +249,12 @@ void blogator::generator::PostMaker::writePageNavDiv( std::ofstream &file,
               ? html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.first, "disabled" )
               : html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.first ) )
          << ( is_first
-              ? html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.backward, "disabled" )
-              : html::createHyperlink( _master_index->_articles.at( article_pos - 1 )._paths.out_html, _options->_page_nav.backward, "disabled" ) )
+              ? html::createHyperlink( _master_index->_articles.at( 0 )._paths.out_html, _options->_page_nav.backward, "disabled", "prev" )
+              : html::createHyperlink( _master_index->_articles.at( article_pos - 1 )._paths.out_html, _options->_page_nav.backward, "", "prev" ) )
          << std::to_string( article_pos + 1 ) << _options->_page_nav.separator << std::to_string( _master_index->_articles.size() )
          << ( is_last
-              ? html::createHyperlink( _master_index->_articles.at( _master_index->_articles.size() - 1 )._paths.out_html, _options->_page_nav.forward, "disabled" )
-              : html::createHyperlink( _master_index->_articles.at( article_pos + 1 )._paths.out_html, _options->_page_nav.forward ) )
+              ? html::createHyperlink( _master_index->_articles.at( _master_index->_articles.size() - 1 )._paths.out_html, _options->_page_nav.forward, "disabled", "next" )
+              : html::createHyperlink( _master_index->_articles.at( article_pos + 1 )._paths.out_html, _options->_page_nav.forward, "", "next" ) )
          << ( is_last
               ? html::createHyperlink( _master_index->_articles.at( _master_index->_articles.size() - 1 )._paths.out_html, _options->_page_nav.last, "disabled" )
               : html::createHyperlink( _master_index->_articles.at( _master_index->_articles.size() - 1 )._paths.out_html, _options->_page_nav.last ) )

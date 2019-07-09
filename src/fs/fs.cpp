@@ -66,9 +66,9 @@ std::shared_ptr<blogator::dto::Template> blogator::fs::importTemplates( const dt
     auto templates = std::make_shared<dto::Template>();
 
     display.begin( "Loading templates", 7, "landing page" );
-    templates->_start.html       = fs::importHTML( master_index._paths.templates.start );
+    templates->_start.html       = fs::importHTML( master_index._paths.templates.landing );
     display.progress( "landing page entry" );
-    templates->_start_entry.html = fs::importHTML( master_index._paths.templates.start_entry );
+    templates->_start_entry.html = fs::importHTML( master_index._paths.templates.landing_entry );
     display.progress( "post page" );
     templates->_post.html        = fs::importHTML( master_index._paths.templates.post );
     display.progress( "index page" );

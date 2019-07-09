@@ -24,8 +24,8 @@ namespace blogator::dto {
 
         struct Paths {
             struct Templates {
-                std::filesystem::path start;
-                std::filesystem::path start_entry;
+                std::filesystem::path landing;
+                std::filesystem::path landing_entry;
                 std::filesystem::path post;
                 std::filesystem::path index;
                 std::filesystem::path tag_list;
@@ -70,8 +70,8 @@ namespace blogator::dto {
          * @return output stream
          */
         friend std::ostream &operator <<( std::ostream &s, const Index &index ) {
-            s << "(Template) Landing page .: " << index._paths.templates.start.string() << "\n";
-            s << "(Template) Landing entry : " << index._paths.templates.start_entry.string() << "\n";
+            s << "(Template) Landing page .: " << index._paths.templates.landing.string() << "\n";
+            s << "(Template) Landing entry : " << index._paths.templates.landing_entry.string() << "\n";
             s << "(Template) Post page ....: " << index._paths.templates.post.string() << "\n";
             s << "(Template) Index page  ..: " << index._paths.templates.index.string() << "\n";
             s << "(Template) Index entry ..: " << index._paths.templates.index_entry.string() << "\n";

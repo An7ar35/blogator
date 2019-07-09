@@ -27,6 +27,7 @@ namespace blogator::generator {
         void writeBreadcrumb( std::ofstream &page, const std::string &indent ) const;
 
         void writeTopTags( std::ofstream &page, const std::string &indent ) const;
+        void writeTopAuthors( std::ofstream &page, const std::string &indent ) const;
 
         void writeNewestPosts( std::ofstream &page,
                                const std::string &indent,

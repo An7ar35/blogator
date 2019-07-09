@@ -105,6 +105,7 @@ namespace blogator::dto {
                 { "breadcrumb",     std::vector<InsertPosition>() },
                 { "newest-posts",   std::vector<InsertPosition>() },
                 { "top-tags",       std::vector<InsertPosition>() },
+                { "top-authors",    std::vector<InsertPosition>() },
                 { "featured-posts", std::vector<InsertPosition>() }
             };
         } _start;
