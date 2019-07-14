@@ -7,7 +7,7 @@
 #include "../../dto/IndexDateTree.h"
 #include "../../dto/IndexTagTree.h"
 #include "../../dto/DateStamp.h"
-#include "../../dto/Template.h"
+#include "../../dto/Templates.h"
 
 namespace blogator::html::writer {
     void openTree( dto::IndexDateTree &date_tree );

@@ -35,9 +35,10 @@ namespace blogator::fs {
         const std::regex WEB_URL_RX       = std::regex( R"((https:[/][/]|http:[/][/]|www.)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._?\,'/\+&amp;%\$#\=~])*$)" );
         const std::regex CSS_DIMENSION_RX = std::regex( R"((\d+\.{0,1}\d*\s*(?:cm|mm|in|px|pt|pc|em|ex|ch|rem|vw|vh|vmin|vmax|%)))" );
         const std::regex IMG_FILENAME     = std::regex( R"(([a-zA-Z-_\d]+\.(?:jpg|jpeg|jpe|jif|jfif|jfi|gif|png|apng|svg|svgz|bmp|dib|webp|ico)))" );
-        const std::regex FILE_PATH        = std::regex( R"(^[^/]{1}[a-zA-Z-_\d\/]+\.[a-zA-Z\d_]{3,4}$)" );
+        const std::regex FILE_PATH        = std::regex( R"(^[^/]{1}[a-zA-Z\-_\d\/]+\.[a-zA-Z\d_]{2,4}$)" );
 
         void loadConfigurationFile( const std::filesystem::path &path, std::unordered_map<std::string, Value> &map ) const;
+        void processTemplateOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processPostsOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processMonthsOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processIndexOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;

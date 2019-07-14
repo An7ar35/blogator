@@ -1,25 +1,25 @@
-#ifndef BLOGATOR_GENERATOR_RSS_H
-#define BLOGATOR_GENERATOR_RSS_H
+#ifndef BLOGATOR_OUTPUT_FEED_RSS_H
+#define BLOGATOR_OUTPUT_FEED_RSS_H
 
 #include <memory>
 
-#include "../dto/Index.h"
-#include "../dto/Options.h"
-#include "../dto/Template.h"
-#include "../cli/MsgInterface.h"
+#include "../../dto/Index.h"
+#include "../../dto/Options.h"
+#include "../../dto/Templates.h"
+#include "../../cli/MsgInterface.h"
 
-namespace blogator::generator {
+namespace blogator::output::feed {
     class RSS {
       public:
         RSS( std::shared_ptr<const dto::Index> master_index,
-             std::shared_ptr<const dto::Template> templates,
+             std::shared_ptr<const dto::Templates> templates,
              std::shared_ptr<const dto::Options> global_options );
 
         bool init();
 
       private:
         std::shared_ptr<const dto::Index>    _master_index;
-        std::shared_ptr<const dto::Template> _templates;
+        std::shared_ptr<const dto::Templates> _templates;
         std::shared_ptr<const dto::Options>  _options;
         size_t                               _feed_item_count;
         cli::MsgInterface                   &_display;
@@ -31,4 +31,4 @@ namespace blogator::generator {
     };
 }
 
-#endif //BLOGATOR_GENERATOR_RSS_H
+#endif //BLOGATOR_OUTPUT_FEED_RSS_H

@@ -29,39 +29,54 @@ namespace blogator::dto {
             std::filesystem::path css_dir;          //CSS directory where all required stylesheets exist
             std::filesystem::path index_dir;        //output directory for the blog/news index
             std::filesystem::path index_date_dir;   //output directory for the blog/news index by dates
+            std::filesystem::path index_year_dir;   //output directory for the blog/news index by years
             std::filesystem::path index_tag_dir;    //output directory for the blog/news index by tags
             std::filesystem::path index_author_dir; //output directory for the blog/news index by authors
 
         } _paths;
 
-        struct RelPaths { //[HARD-CODED] Relative directory i/o paths structure
+        struct RelPaths { //Relative directory i/o paths structure
             struct Source { //IN for all posts and templates
-                const std::filesystem::path root    = "source";
+                const std::filesystem::path root = "source";
             } source;
 
             struct Templates { //IN for templates
-                const std::filesystem::path root    = "templates";
+                const std::filesystem::path root = "templates";
             } templates;
 
             struct Index { //OUT of all indices (date/tag/tag list/authors)
                 const std::filesystem::path root      = "index";
                 const std::filesystem::path by_date   = "index/by_date";
+                const std::filesystem::path by_year   = "index/by_year";
                 const std::filesystem::path by_tag    = "index/by_tag";
                 const std::filesystem::path by_author = "index/by_author";
             } index;
 
             struct Posts { //OUT of processed posts
-                const std::filesystem::path root    = "posts";
+                const std::filesystem::path root = "posts";
             } posts;
 
             struct CSS { //IN for stylesheets
-                const std::filesystem::path root    = "css";
+                const std::filesystem::path root = "css";
             } css;
 
         } _folders;
 
+        struct FileNames {
+            const std::filesystem::path landing     = "index.html";
+            const std::filesystem::path year_list   = "years.html";
+            const std::filesystem::path tag_list    = "tags.html";
+            const std::filesystem::path author_list = "authors.html";
+
+        } _filenames;
+
+        struct Templates {
+            bool adapt_rel_paths = false; //TODO
+
+        } _templates;
+
         struct Posts {
-            bool build_future = false; //TODO
+            bool build_future = false;
             bool safe_purge   = true;  //TODO
 
         } _posts;
@@ -69,8 +84,9 @@ namespace blogator::dto {
         struct Index {
             bool   show_post_numbers { false }; //show post number flag
             size_t items_per_page    { 10 };    //number of posts-per-page in the indices
-            bool   index_by_tag      { true };  //create a tag based index flag
-            bool   index_by_author   { false }; //create a author based index flag
+            bool   index_by_year     { false }; //flag to create a year based index
+            bool   index_by_tag      { true  }; //flag to create a tag based index
+            bool   index_by_author   { false }; //flag to create a author based index
 
         } _index;
 
@@ -93,8 +109,9 @@ namespace blogator::dto {
 
         struct Breadcrumb {
             std::string start     = "Start";
-            std::string by_tag    = "Tag list";
             std::string by_date   = "Index";
+            std::string by_year   = "Year list";
+            std::string by_tag    = "Tag list";
             std::string by_author = "Author list";
             std::string page      = "Page #";
 
@@ -138,6 +155,7 @@ namespace blogator::dto {
             _paths.css_dir          = _paths.root_dir / _folders.css.root;
             _paths.index_dir        = _paths.root_dir / _folders.index.root;
             _paths.index_date_dir   = _paths.root_dir / _folders.index.by_date;
+            _paths.index_year_dir   = _paths.root_dir / _folders.index.by_year;
             _paths.index_tag_dir    = _paths.root_dir / _folders.index.by_tag;
             _paths.index_author_dir = _paths.root_dir / _folders.index.by_author;
         }

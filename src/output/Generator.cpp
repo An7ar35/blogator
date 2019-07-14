@@ -6,8 +6,8 @@
 #include <stack>
 #include <functional>
 
-#include "PostMaker.h"
-#include "IndexMaker.h"
+#include "page/Posts.h"
+#include "page/Indices.h"
 #include "../exception/failed_expectation.h"
 
 /**
@@ -16,9 +16,9 @@
  * @param templates      Templates
  * @param global_options Global blogator options
  */
-blogator::generator::Generator::Generator( std::shared_ptr<const dto::Index>    master_index,
-                                           std::shared_ptr<const dto::Template> templates,
-                                           std::shared_ptr<const dto::Options>  global_options ) :
+blogator::output::Generator::Generator( std::shared_ptr<const dto::Index>     master_index,
+                                        std::shared_ptr<const dto::Templates> templates,
+                                        std::shared_ptr<const dto::Options>   global_options ) :
     _master_index( std::move( master_index ) ),
     _templates( std::move( templates ) ),
     _options( std::move( global_options ) )
@@ -26,7 +26,6 @@ blogator::generator::Generator::Generator( std::shared_ptr<const dto::Index>    
 
 /**
  * Initialize HTML page generation
- * @param master_index  Master index of all posts/articles
  * @param post_maker    PostMaker instance
  * @param index_maker   IndexMaker instance
  * @param landing_maker LandingMaker instance
@@ -34,11 +33,10 @@ blogator::generator::Generator::Generator( std::shared_ptr<const dto::Index>    
  * @return Success
  * @throws exception::failed_expectation when a maker cannot generate its targets
  */
-bool blogator::generator::Generator::init( const dto::Index &master_index,
-                                           PostMaker        &post_maker,
-                                           IndexMaker       &index_maker,
-                                           LandingMaker     &landing_maker,
-                                           RSS              &rss_maker )
+bool blogator::output::Generator::init( page::Posts   &post_maker,
+                                        page::Indices   &index_maker,
+                                        page::Landing &landing_maker,
+                                        feed::RSS     &rss_maker ) const
 {
     auto posts_ok   = post_maker.init(); //TODO maybe do an if( !.. ) then throw a fit/exception on each inits?
     auto index_ok   = index_maker.init();

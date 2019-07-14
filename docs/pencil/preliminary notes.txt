@@ -6,7 +6,7 @@ Source material
 · All posts have a <h1> heading, <span class="tag">..</span>, and <time timedate="YYY-MM-DD...">..</time>
 
 · There can only be 1 Insertion tags per line in the templates
-  "Template file must keep to 1 insertion tag per line. No more.*"
+  "Templates file must keep to 1 insertion tag per line. No more.*"
     "*If and when I get time in the future I might do something about continuous insertion points on a single line"
 · Index entries are nested into a <a></a> tag that links back to the post
 

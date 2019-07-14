@@ -1,6 +1,7 @@
 #include "html.h"
 
 #include <filesystem>
+#include <iostream>
 
 /**
  * Creates a stylesheet link for a html <head>
@@ -105,4 +106,90 @@ blogator::dto::HTML blogator::html::createBreadcrumb( const blogator::html::Brea
     html._lines.emplace_back( "</ul>" );
 
     return html;
+}
+
+/**
+ * Generates the HTML for the By-Date section of the index pane
+ * @param master_index Index DTO
+ * @param options      Options DTO
+ * @return IndexDateTree DTO
+ */
+std::unique_ptr<blogator::dto::IndexDateTree>
+    blogator::html::generateIndexDateTreeHTML( const blogator::dto::Index & master_index,
+                                               const blogator::dto::Options & options )
+{
+    auto tree = std::make_unique<dto::IndexDateTree>();
+
+    auto article = master_index._articles.cbegin();
+    if( article != master_index._articles.cend() ) {
+        size_t curr_i    = 0; //article position in master index
+        auto   curr_date = article->_datestamp;
+
+        html::writer::openTree( *tree );
+        html::writer::openYearNode( article->_datestamp, *tree );
+        html::writer::openMonthNode( article->_datestamp, options._months, *tree );
+
+        while( article != master_index._articles.cend() ) {
+
+            if( article->_datestamp._year != curr_date._year ) {
+                html::writer::closeMonthNode( *tree );
+                html::writer::closeYearNode( *tree );
+                html::writer::openYearNode( article->_datestamp, *tree );
+                html::writer::openMonthNode( article->_datestamp, options._months, *tree );
+
+            } else if( article->_datestamp._month != curr_date._month ) {
+                html::writer::closeMonthNode( *tree );
+                html::writer::openMonthNode( article->_datestamp, options._months, *tree );
+            }
+
+            html::writer::addArticleLeaf( *article, curr_i, *tree );
+
+            curr_date = article->_datestamp;
+            ++curr_i;
+            ++article;
+        }
+
+        html::writer::closeMonthNode( *tree );
+        html::writer::closeYearNode( *tree );
+        html::writer::closeTree( *tree );
+    }
+
+    return std::move( tree );
+}
+
+/**
+ * Generates the HTML for the By-Tag section of the index pane
+ * @param master_index Index DTO
+ * @param options      Options DTO
+ * @return IndexTagTree DTO
+ */
+std::unique_ptr<blogator::dto::IndexTagTree>
+    blogator::html::generateIndexTagTreeHTML( const blogator::dto::Index   &master_index,
+                                              const blogator::dto::Options &options )
+{
+    auto tree = std::make_unique<dto::IndexTagTree>();
+
+    html::writer::openTree( *tree );
+
+    for( const auto &tag : master_index._indices.byTag.cats ) {
+        html::writer::openTagNode( tag.first, *tree );
+
+        for( auto article_i : tag.second.article_indices ) {
+            try {
+                html::writer::addArticleLeaf( master_index._articles.at( article_i ),
+                                              article_i,
+                                              *tree );
+
+            } catch( std::out_of_range &e ) {
+                std::cerr << "Could not find article in i=" << article_i << " referenced in tag '"
+                          << tag.first << "'. Skipping." << std::endl;
+            }
+        }
+
+        html::writer::closeTagNode( *tree );
+    }
+
+    html::writer::closeTree( *tree );
+
+    return std::move( tree );
 }

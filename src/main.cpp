@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #include "indexer/indexer.h"
-#include "generator/Generator.h"
+#include "output/Generator.h"
 #include "fs/fs.h"
 
 int main() {
@@ -23,16 +23,19 @@ int main() {
         options->setupAbsolutePaths( std::filesystem::path( "/home/alwyn/git_repos/corbreuse/preservons-corbreuse.bitbucket.io" ) );
                                     //TODO pass ^^^^ from cmd line args
         std::cout << "> Setting up environment";
+
         fs::setupEnvironment( options );
         auto index         = indexer::index( options );
-        auto templates     = fs::importTemplates( *index );
-        auto post_maker    = generator::PostMaker( index, templates, options );
-        auto index_maker   = generator::IndexMaker( index, templates, options );
-        auto landing_maker = generator::LandingMaker( index, templates, options );
-        auto rss           = generator::RSS( index, templates, options );
-        auto generator     = generator::Generator( index, templates, options );
+        auto templates     = fs::importTemplates( *index, *options );
+        auto post_maker    = output::page::Posts( index, templates, options );
+        auto index_maker   = output::page::Indices( index, templates, options );
+        auto landing_maker = output::page::Landing( index, templates, options );
+        auto rss           = output::feed::RSS( index, templates, options );
+        auto generator     = output::Generator( index, templates, options );
 
-        generator.init( *index, post_maker, index_maker, landing_maker, rss );
+        generator.init( post_maker, index_maker, landing_maker, rss );
+
+        fs::checkTemplateRelPaths( *index, *templates, *options );
 
     } catch( std::exception &e ) {
         std::cerr << e.what() << std::endl;

@@ -17,17 +17,19 @@ namespace blogator::indexer {
     void indexTemplates( const dto::Options &global_options, dto::Index &index );
     void indexPosts( const dto::Options &global_options, dto::Index &index, std::unordered_map<std::string, std::filesystem::path> &css_cache, FeatAggregator &feat_aggregator );
 
+    void addYear( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
     void addTags( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
     void addAuthors( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
     void addCSS( std::unordered_map<std::string, std::filesystem::path> &found_stylesheets, dto::Article &article );
     void addOutputPath( const dto::Options::AbsPaths &global_paths, dto::Article &article );
 
     void sortChronologically( dto::Index::Articles_t &articles );
+    void generateYearIndexTargets( dto::Index &master_index, const dto::Options &global_options );
     void generateTagIndexTargets( dto::Index &master_index, const dto::Options &global_options );
     void generateAuthorIndexTargets( dto::Index &master_index, const dto::Options &global_options );
     void generateTopTags( dto::Index &master_index, const dto::Options &global_options );
     void generateTopAuthors( dto::Index &master_index, const dto::Options &global_options );
-    void generateDateIndexTargets( blogator::dto::Index & master_index, const dto::Options & global_options );
+    void generateChronologicalIndexTargets( blogator::dto::Index & master_index, const dto::Options & global_options );
 
     dto::DateStamp convertDate( const std::string &date );
     dto::Article readFileProperties( const std::filesystem::path &path );

@@ -25,6 +25,9 @@ namespace blogator::cli {
         void progress( const std::string &next_step );
         void progress( const std::string &next_step, const unsigned &step_count );
         void resetLinePos();
+        void log( const std::string  &msg );
+        void msg( const std::string &msg );
+        void warning( const std::string &msg );
         void error( const std::string &msg );
 
       private:

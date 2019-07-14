@@ -7,6 +7,7 @@
 #include <queue>
 #include <list>
 #include <unordered_map>
+#include <numeric>
 
 #include "FeatAggregator.h"
 #include "../html/html.h"
@@ -37,7 +38,11 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     display.progress( "sorting articles by date" );
     sortChronologically( index->_articles );
     display.progress( "generating targets" );
-    generateDateIndexTargets( *index, *global_options );
+    generateChronologicalIndexTargets( *index, *global_options );
+    if( global_options->_index.index_by_year ) {
+        index->_indices.byYear.page_count += 1; //year list page
+        generateYearIndexTargets( *index, *global_options );
+    }
     if( global_options->_index.index_by_tag ) {
         index->_indices.byTag.page_count += 1; //tag list page
         generateTagIndexTargets( *index, *global_options );
@@ -70,7 +75,7 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options,
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.css_dir ) ) {
         if( p.is_regular_file() ) {
             if( std::regex_match( p.path().string(), blog_css_regex ) ) {
-                index._paths.css.blog = p.path();
+                index._paths.css.blog  = p.path();
             } else if( std::regex_match( p.path().string(), index_css_regex ) ) {
                 index._paths.css.index = p.path();
             } else if( std::regex_match( p.path().string(), posts_css_regex ) ) {
@@ -100,6 +105,8 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
     static const std::regex landing_entry_rx = std::regex( "^.*(landing_entry)\\.(?:html|htm)$" );
     static const std::regex post_rx          = std::regex( "^.*(post)\\.(?:html|htm)$" );
     static const std::regex index_rx         = std::regex( "^.*(index)\\.(?:html|htm)$" );
+    static const std::regex index_list_rx    = std::regex( "^.*(index_list)\\.(?:html|htm)$" );
+    static const std::regex year_list_rx     = std::regex( "^.*(year_list)\\.(?:html|htm)$" );
     static const std::regex tag_list_rx      = std::regex( "^.*(tag_list)\\.(?:html|htm)$" );
     static const std::regex author_list_rx   = std::regex( "^.*(author_list)\\.(?:html|htm)$" );
     static const std::regex index_entry_rx   = std::regex( "^.*(index_entry)\\.(?:html|htm)$" );
@@ -115,6 +122,10 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
                 index._paths.templates.landing = p.path();
             } else if( std::regex_match( path, landing_entry_rx ) ) {
                 index._paths.templates.landing_entry = p.path();
+            } else if( std::regex_match( path, index_list_rx ) ) {
+                index._paths.templates.index_list = p.path();
+            } else if( std::regex_match( path, year_list_rx ) ) {
+                index._paths.templates.year_list = p.path();
             } else if( std::regex_match( path, tag_list_rx ) ) {
                 index._paths.templates.tag_list = p.path();
             } else if( std::regex_match( path, author_list_rx ) ) {
@@ -143,12 +154,8 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
         std::cerr << "Template missing: index page" << std::endl;
         ++errors;
     }
-    if( global_options._index.index_by_tag && index._paths.templates.tag_list.empty() ) {
-        std::cerr << "Template missing: tag list page" << std::endl;
-        ++errors;
-    }
-    if( global_options._index.index_by_author && index._paths.templates.author_list.empty() ) {
-        std::cerr << "Template missing: author list page" << std::endl;
+    if( index._paths.templates.index_list.empty() ) {
+        std::cerr << "Template missing: index list page" << std::endl;
         ++errors;
     }
     if( index._paths.templates.index_entry.empty() ) {
@@ -194,6 +201,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
                 {
                     index._articles.erase( std::prev( index._articles.end() ) );
                 } else {
+                    addYear( global_options, index._articles.back(), index );
                     addTags( global_options, index._articles.back(), index );
                     addAuthors( global_options, index._articles.back(), index );
                     addCSS( css_cache, index._articles.back() );
@@ -220,6 +228,23 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
 }
 
 /**
+ * Adds year of the article if new to the index's global Year set along with
+ * their corresponding year directory IDs
+ * @param global_options Global blogator options
+ * @param article        Article from which to extract tags to add to the global set
+ * @param master_index   Master index file
+ */
+void blogator::indexer::addYear( const dto::Options &global_options,
+                                 const dto::Article &article,
+                                 dto::Index &master_index )
+{
+    auto year = std::to_string( article._datestamp._year );
+    master_index._indices.byYear.cats.insert(
+        std::make_pair( year, std::to_string( master_index._indices.byYear.cats.size() ) )
+    );
+}
+
+/**
  * Adds new tags found in article into the index's global Tag set along with
  * their corresponding tag directories IDs
  * @param global_options Global blogator options
@@ -231,8 +256,8 @@ void blogator::indexer::addTags( const dto::Options &global_options,
                                  blogator::dto::Index &master_index )
 {
     for( const auto &tag : article._tags ) {
-        master_index._indices.byTag.tags.insert(
-            std::make_pair( tag, std::to_string( master_index._indices.byTag.tags.size() ) )
+        master_index._indices.byTag.cats.insert(
+            std::make_pair( tag, std::to_string( master_index._indices.byTag.cats.size() ) )
         );
     }
 }
@@ -249,8 +274,8 @@ void blogator::indexer::addAuthors( const dto::Options &global_options,
                                     dto::Index &master_index )
 {
     for( const auto &author : article._authors ) {
-        master_index._indices.byAuthor.authors.insert(
-            std::make_pair( author, std::to_string( master_index._indices.byAuthor.authors.size() ) )
+        master_index._indices.byAuthor.cats.insert(
+            std::make_pair( author, std::to_string( master_index._indices.byAuthor.cats.size() ) )
         );
     }
 }
@@ -296,11 +321,49 @@ void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t &a
  * @param master_index   Master index
  * @param global_options Global blogator options
  */
+void blogator::indexer::generateYearIndexTargets( dto::Index &master_index,
+                                                  const dto::Options &global_options )
+{
+    { //YEARLY ARTICLE INDEX MAPPING
+        auto & map = master_index._indices.byYear.cats;
+        size_t i   = 0;
+
+        for( const auto & article : master_index._articles ) {
+            auto year = std::to_string( article._datestamp._year );
+            auto year_it = map.find( year );
+
+            if( year_it != map.end() )
+                year_it->second.article_indices.emplace_back( i );
+
+            ++i;
+        }
+    }
+
+    { //YEARLY INDEX FILE NAMES
+        for( auto &tag : master_index._indices.byYear.cats ) {
+            if( !tag.second.article_indices.empty() ) {
+                const size_t page_count = calcPageCount( global_options._index.items_per_page,
+                                                         tag.second.article_indices.size() );
+
+                for( size_t p = 0; p < page_count; ++p )
+                    tag.second.file_names.emplace_back( makeFileName( tag.second.prefix_id, p ) );
+
+                master_index._indices.byYear.page_count += page_count;
+            }
+        }
+    }
+}
+
+/**
+ * Generates all tag index targets (output index file names and article indices for each)
+ * @param master_index   Master index
+ * @param global_options Global blogator options
+ */
 void blogator::indexer::generateTagIndexTargets( dto::Index &master_index,
                                                  const dto::Options &global_options )
 {
     { //TAG ARTICLE INDEX MAPPING
-        auto & map = master_index._indices.byTag.tags;
+        auto & map = master_index._indices.byTag.cats;
         size_t i   = 0;
 
         for( const auto & article : master_index._articles ) {
@@ -318,7 +381,7 @@ void blogator::indexer::generateTagIndexTargets( dto::Index &master_index,
     }
 
     { //TAG INDEX FILE NAMES
-        for( auto &tag : master_index._indices.byTag.tags ) {
+        for( auto &tag : master_index._indices.byTag.cats ) {
             if( !tag.second.article_indices.empty() ) {
                 const size_t page_count = calcPageCount( global_options._index.items_per_page,
                                                          tag.second.article_indices.size() );
@@ -341,7 +404,7 @@ void blogator::indexer::generateAuthorIndexTargets( dto::Index& master_index,
                                                     const dto::Options &global_options )
 {
     { //AUTHOR ARTICLE INDEX MAPPING
-        auto & map = master_index._indices.byAuthor.authors;
+        auto & map = master_index._indices.byAuthor.cats;
         size_t i   = 0;
 
         for( const auto & article : master_index._articles ) {
@@ -359,7 +422,7 @@ void blogator::indexer::generateAuthorIndexTargets( dto::Index& master_index,
     }
 
     { //AUTHOR INDEX FILE NAMES
-        for( auto &author : master_index._indices.byAuthor.authors ) {
+        for( auto &author : master_index._indices.byAuthor.cats ) {
             if( !author.second.article_indices.empty() ) {
                 const size_t page_count = calcPageCount( global_options._index.items_per_page,
                                                          author.second.article_indices.size() );
@@ -387,12 +450,12 @@ void blogator::indexer::generateTopTags( blogator::dto::Index &master_index,
                                         decltype( compare )
                                        >( compare );
 
-    for( const auto &t : master_index._indices.byTag.tags )
+    for( const auto &t : master_index._indices.byTag.cats )
         max_heap.push( std::make_pair( t.second.article_indices.size(), t.first ) );
 
     size_t i = 0;
     while( !max_heap.empty() && i < global_options._landing_page.top_tags ) {
-        master_index._indices.byTag.top_tags.emplace_back( max_heap.top().second );
+        master_index._indices.byTag.top.emplace_back( max_heap.top().second );
         max_heap.pop();
         ++i;
     }
@@ -412,30 +475,31 @@ void blogator::indexer::generateTopAuthors( dto::Index &master_index,
         decltype( compare )
     >( compare );
 
-    for( const auto &t : master_index._indices.byAuthor.authors )
+    for( const auto &t : master_index._indices.byAuthor.cats )
         max_heap.push( std::make_pair( t.second.article_indices.size(), t.first ) );
 
     size_t i = 0;
     while( !max_heap.empty() && i < global_options._landing_page.top_authors ) {
-        master_index._indices.byAuthor.top_authors.emplace_back( max_heap.top().second );
+        master_index._indices.byAuthor.top.emplace_back( max_heap.top().second );
         max_heap.pop();
         ++i;
     }
 }
 
 /**
- * Generates date index filenames
+ * Generates chronological index filenames
  * @param master_index   Master index
  * @param global_options Global blogator options
  */
-void blogator::indexer::generateDateIndexTargets( blogator::dto::Index &master_index,
-                                                  const blogator::dto::Options &global_options )
+void blogator::indexer::generateChronologicalIndexTargets( dto::Index & master_index,
+                                                           const dto::Options & global_options )
 {
-    master_index._indices.byDate.page_count = calcPageCount( global_options._index.items_per_page,
-                                                             master_index._articles.size() );
+    master_index._indices.chronological.page_count = calcPageCount( global_options._index.items_per_page,
+                                                                  master_index._articles.size() );
 
-    for( size_t p = 0; p < master_index._indices.byDate.page_count; ++p )
-        master_index._indices.byDate.page_file_names.emplace_back( makeFileName( p ) );
+    for( size_t p = 0; p < master_index._indices.chronological.page_count; ++p ) {
+        master_index._indices.chronological.file_names.emplace_back( makeFileName( p ) );
+    }
 }
 
 /**

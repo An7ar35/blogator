@@ -157,25 +157,33 @@ size_t blogator::html::reader::findLineOfTag( const std::string &tag, const blog
 }
 
 /**
- * Finds insert positions in an HTML structure
- * @param html HTML DTO to search in
- * @param divs Map of div class names to find
- * @return Reference to the modified DivWritePositions_t
+ * Gets all insertion points for a list of blocks (css classes) in an HTML document
+ * @param html   HTML DTO
+ * @param blocks List of css classes used to flag insertion points in the HTML
+ * @return Consecutive insert points with their respective css classes
  */
-blogator::dto::Template::DivWritePositions_t &
-    blogator::html::reader::findInsertPositions( const blogator::dto::HTML &html,
-                                                 blogator::dto::Template::DivWritePositions_t &divs )
+blogator::dto::Template::ConsecutiveWritePositions_t
+    blogator::html::reader::getConsecutiveWritePositions( const blogator::dto::HTML &html,
+                                                          blogator::dto::Template::BlockInsertClasses_t &blocks )
 {
+    auto   write_pos   = dto::Template::ConsecutiveWritePositions_t();
     size_t line_number = 0;
 
     for( const auto &line : html._lines ) {
-        for( auto &div : divs ) {
-            auto s  = R"(^(.*<\s*[a-zA-Z\d]+\s*class\s*=\s*"[a-zA-Z-_\s]*)" + div.first + R"((?:\s[a-zA-Z-_\s]*"|")>\s*)(?:</[a-zA-Z\d]+>))";
+        for( auto &css_class : blocks ) {
+            auto s  = R"(^(.*<\s*[a-zA-Z\d]+\s*class\s*=\s*"[a-zA-Z-_\s]*)" + css_class.first + R"((?:\s[a-zA-Z-_\s]*"|")>\s*)(?:</[a-zA-Z\d]+>))";
             auto rx = std::regex( s );
             auto it = std::sregex_iterator( line.begin(), line.end(), rx );
 
+            if( it != std::sregex_iterator() )
+                css_class.second = true; //class is used
+
             while( it != std::sregex_iterator() ) {
-                div.second.emplace_back( line_number, it->str( 1 ).length() );
+                write_pos.insert(
+                    std::make_pair( dto::Template::InsertPosition( line_number, it->str( 1 ).length() ),
+                                    css_class.first
+                    )
+                );
                 ++it;
             }
         }
@@ -183,7 +191,7 @@ blogator::dto::Template::DivWritePositions_t &
         ++line_number;
     }
 
-    return divs;
+    return write_pos;
 }
 
 /**

@@ -25,6 +25,12 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
     }
 
     try {
+        processTemplateOptions( map, *options );
+    } catch( exception::file_parsing_failure &e ) {
+        std::cerr << e.what() << std::endl; //TODO
+    }
+
+    try {
         processPostsOptions( map, *options );
     } catch( exception::file_parsing_failure &e ) {
         std::cerr << e.what() << std::endl; //TODO
@@ -75,6 +81,9 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "//Month strings\n"
        << "months = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"];\n"
        << "\n"
+       << "//Templates\n"
+       << "template-change-paths = false;\n"
+        << "\n"
        << "//Posts settings\n"
        << "build-future = false;\n"
        << "safe-purge   = true;\n"
@@ -82,6 +91,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "//Index settings\n"
        << "show-post-numbers = true;\n"
        << "items-per-page    = 10;\n"
+       << "index-by-year     = false;\n"
        << "index-by-tag      = true;\n"
        << "index-by-author   = false;\n"
        << "\n"
@@ -95,6 +105,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "//breadcrumb navigation DIV contents\n"
        << "breadcrumb-landing-page   = \"Home\";\n"
        << "breadcrumb-by-date-page   = \"Index\";\n"
+       << "breadcrumb-by-year-page   = \"Year\";\n"
        << "breadcrumb-by-tag-page    = \"Categories\";\n"
        << "breadcrumb-by-author-page = \"Authors\";\n"
        << "breadcrumb-index-page     = \"Page #\";\n"
@@ -165,6 +176,32 @@ void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::p
     }
 
     config_file.close();
+}
+
+/**
+ * Process all Template specific options
+ * @param map     Raw {K,V} map of options parsed from configuration file
+ * @param options Options DTO
+ * @throws exception::file_parsing_failure when parsing failed
+ */
+void blogator::fs::ConfigReader::processTemplateOptions( std::unordered_map<std::string, ConfigReader::Value> &map,
+                                                         dto::Options &options ) const
+{
+    static const std::string adapt_rel_paths = "template-change-paths";
+
+    auto adapt_rel_paths_it = map.find( adapt_rel_paths );
+
+    if( adapt_rel_paths_it != map.end() ) {
+        if( adapt_rel_paths_it->second.type == Type::BOOLEAN ) {
+            options._templates.adapt_rel_paths = ( adapt_rel_paths_it->second.value == "true" );
+            adapt_rel_paths_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + adapt_rel_paths + "' value to boolean "
+                "(line #" + std::to_string( adapt_rel_paths_it->second.line ) + "): " + adapt_rel_paths_it->second.value
+            );
+        }
+    }
 }
 
 /**
@@ -255,11 +292,13 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
 {
     static const std::string items_per_page    = "items-per-page";
     static const std::string show_post_numbers = "show-post-numbers";
+    static const std::string index_by_year     = "index-by-year";
     static const std::string index_by_tag      = "index-by-tag";
     static const std::string index_by_author   = "index-by-author";
 
     auto items_per_page_it    = map.find( items_per_page );
     auto show_post_numbers_it = map.find( show_post_numbers );
+    auto index_by_year_it     = map.find( index_by_year );
     auto index_by_tag_it      = map.find( index_by_tag );
     auto index_by_author_it   = map.find( index_by_author );
 
@@ -287,13 +326,25 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
         }
     }
 
+    if( index_by_year_it != map.end() ) {
+        if( index_by_year_it->second.type == Type::BOOLEAN ) {
+            options._index.index_by_year = ( index_by_year_it->second.value == "true" );
+            index_by_year_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + index_by_year + "' value to boolean "
+                "(line #" + std::to_string( index_by_year_it->second.line ) + "): " + index_by_year_it->second.value
+            );
+        }
+    }
+
     if( index_by_tag_it != map.end() ) {
         if( index_by_tag_it->second.type == Type::BOOLEAN ) {
             options._index.index_by_tag = ( index_by_tag_it->second.value == "true" );
             index_by_tag_it->second.validated = true;
         } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + show_post_numbers + "' value to boolean "
+                "Error converting '" + index_by_tag + "' value to boolean "
                 "(line #" + std::to_string( index_by_tag_it->second.line ) + "): " + index_by_tag_it->second.value
             );
         }
@@ -305,7 +356,7 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
             index_by_author_it->second.validated = true;
         } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + show_post_numbers + "' value to boolean "
+                "Error converting '" + index_by_author + "' value to boolean "
                 "(line #" + std::to_string( index_by_author_it->second.line ) + "): " + index_by_author_it->second.value
             );
         }
@@ -446,12 +497,14 @@ void blogator::fs::ConfigReader::processBreadcrumbOptions( std::unordered_map<st
 {
     static const std::string landing_page   = "breadcrumb-landing-page";
     static const std::string by_date_page   = "breadcrumb-by-date-page";
+    static const std::string by_year_page   = "breadcrumb-by-year-page";
     static const std::string by_tag_page    = "breadcrumb-by-tag-page";
     static const std::string by_author_page = "breadcrumb-by-author-page";
     static const std::string index_page     = "breadcrumb-index-page";
 
     auto landing_page_it   = map.find( landing_page );
     auto by_date_page_it   = map.find( by_date_page );
+    auto by_year_page_it   = map.find( by_year_page );
     auto by_tag_page_it    = map.find( by_tag_page );
     auto by_author_page_it = map.find( by_author_page );
     auto index_page_it     = map.find( index_page );
@@ -464,6 +517,11 @@ void blogator::fs::ConfigReader::processBreadcrumbOptions( std::unordered_map<st
     if( by_date_page_it != map.end() && !by_date_page_it->second.value.empty() ) {
         options._breadcrumb.by_date = by_date_page_it->second.value;
         by_date_page_it->second.validated = true;
+    }
+
+    if( by_year_page_it != map.end() && !by_year_page_it->second.value.empty() ) {
+        options._breadcrumb.by_year = by_year_page_it->second.value;
+        by_year_page_it->second.validated = true;
     }
 
     if( by_tag_page_it != map.end() && !by_tag_page_it->second.value.empty() ) {

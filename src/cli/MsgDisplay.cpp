@@ -19,7 +19,9 @@ blogator::cli::MsgDisplay::~MsgDisplay() {
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
     using eadlib::cli::format;
-    std::cout << format<FGColour::RED, Decoration::BOLD>( _err_buffer.str() ) << std::endl;
+    std::cout << "\033[2B" << "\n"
+              << format<FGColour::RED, Decoration::BOLD>( _err_buffer.str() )
+              << std::endl;
     std::cerr.rdbuf( _old_cerr_buffer );
 }
 
@@ -58,15 +60,39 @@ void blogator::cli::MsgDisplay::done() {
     std::cout << "\033[2B";
 }
 
+void blogator::cli::MsgDisplay::log( const std::string & msg ) {
+    using eadlib::cli::FGColour;
+    using eadlib::cli::Decoration;
+    _err_buffer << eadlib::cli::format<FGColour::MAGENTA, Decoration::BOLD>( "[LOG] " )
+                << eadlib::cli::format<FGColour::MAGENTA, Decoration::FAINT>( msg ) << "\33[31;1m\n";
+}
+
+void blogator::cli::MsgDisplay::message( const std::string & msg ) {
+    using eadlib::cli::FGColour;
+    using eadlib::cli::Decoration;
+    _err_buffer << eadlib::cli::format<FGColour::CYAN, Decoration::BOLD>( "[MESSAGE] " )
+                << eadlib::cli::format<FGColour::CYAN>( msg ) << "\33[31;1m\n";
+}
+
+void blogator::cli::MsgDisplay::warning( const std::string & msg ) {
+    using eadlib::cli::FGColour;
+    using eadlib::cli::Decoration;
+    _err_buffer << eadlib::cli::format<FGColour::YELLOW, Decoration::BOLD>( "[WARNING] " )
+                << eadlib::cli::format<FGColour::YELLOW, Decoration::BOLD>( msg ) << "\33[31;1m\n";
+}
+
 void blogator::cli::MsgDisplay::error( const std::string & msg ) {
-    _err_buffer << msg;
+    using eadlib::cli::FGColour;
+    using eadlib::cli::Decoration;
+    _err_buffer << eadlib::cli::format<FGColour::RED, Decoration::BOLD>( "[ERROR] " )
+                << eadlib::cli::format<FGColour::RED, Decoration::BOLD>( msg ) << "\33[31;1m\n";
 }
 
 void blogator::cli::MsgDisplay::flushErrorsToDisplay() {
     using eadlib::cli::BGColour;
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
-    std::cout << eadlib::cli::format<FGColour::RED, Decoration::BOLD>( _err_buffer.str() ) << std::endl;
+    std::cout << _err_buffer.str() << std::endl;
 }
 
 /**

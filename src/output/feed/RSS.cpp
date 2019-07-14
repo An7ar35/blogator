@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "RSS.h"
-#include "../exception/file_access_failure.h"
+#include "../../exception/file_access_failure.h"
 
 /**
  * Constructor
@@ -11,9 +11,9 @@
  * @param templates      Templates
  * @param global_options Global blogator options
  */
-blogator::generator::RSS::RSS( std::shared_ptr<const dto::Index>    master_index,
-                               std::shared_ptr<const dto::Template> templates,
-                               std::shared_ptr<const dto::Options>  global_options ) :
+blogator::output::feed::RSS::RSS( std::shared_ptr<const dto::Index>    master_index,
+                                  std::shared_ptr<const dto::Templates> templates,
+                                  std::shared_ptr<const dto::Options>  global_options ) :
     _master_index( std::move( master_index ) ),
     _templates( std::move( templates ) ),
     _options( std::move( global_options ) ),
@@ -28,7 +28,7 @@ blogator::generator::RSS::RSS( std::shared_ptr<const dto::Index>    master_index
  * Initialise RSS feed creator
  * @return Success
  */
-bool blogator::generator::RSS::init() {
+bool blogator::output::feed::RSS::init() {
     try {
         auto path = _options->_paths.root_dir / _options->_rss.file_name;
 
@@ -64,7 +64,7 @@ bool blogator::generator::RSS::init() {
  * Writes the feed's header tags
  * @param file RSS feed file
  */
-void blogator::generator::RSS::writeHead( std::ofstream &file ) const {
+void blogator::output::feed::RSS::writeHead( std::ofstream &file ) const {
     _display.begin( "Generating RSS", _feed_item_count + 2, "header" );
 
     file << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -97,7 +97,7 @@ void blogator::generator::RSS::writeHead( std::ofstream &file ) const {
  * Writes all article items into the feed
  * @param file RSS feed file
  */
-void blogator::generator::RSS::writeItems( std::ofstream &file ) const {
+void blogator::output::feed::RSS::writeItems( std::ofstream &file ) const {
     size_t item_count  = 0;
     auto   article_it  = _master_index->_articles.cbegin();
 
@@ -131,7 +131,7 @@ void blogator::generator::RSS::writeItems( std::ofstream &file ) const {
  * Write the feed's footer closing tags
  * @param file RSS feed file
  */
-void blogator::generator::RSS::writeFoot( std::ofstream & file ) const {
+void blogator::output::feed::RSS::writeFoot( std::ofstream & file ) const {
     _display.progress( "footer" );
     file << "\t</channel>\n"
          << "</rss>";

@@ -3,7 +3,7 @@
 ## What is this?
 
 It's a static blog/news template-driven site generator sans-javascript requirements and 
-with minimal software library dependencies (written in C++).
+with minimal software library dependencies (written in C++ &#128150;).
 
 It will produce a blog/news site whose navigation works just fine with js disabled at the 
 cost of a bit of duplication in the HTML (that amount can range from minimal 
@@ -14,7 +14,7 @@ to hog-wild based on your requirements/options set).
 If you:
 
 * still enjoys crafting their website by hand-coding it old-school but just wish you
-  could have an easier way to publish blog posts statically.
+  could have an easier way to publish a blog next to it statically.
 
 * are targeting a reader-base that runs a script blocker by default on their browser.
   
@@ -30,7 +30,7 @@ then keep reading.
 * Master indices broken up into pages,
 * Custom number of posts per page in the indices,
 * Per-page navigation,
-* Breadcrumbs!,
+* Breadcrumbs (&#127838; nom nom nom),
 * Optional post-specific custom stylesheets,
 * Custom month strings for dates (to "localise" month names on the index),
 
@@ -52,49 +52,81 @@ __Blogator will not hold your hand.__
 
 To use when hyperlinks to the different files need to be added in user created html in the site.
 
-| Description               | Path                              | Notes                                                                     |
+| Description               | File Path                         | Notes                                                                     |
 | ------------------------- | --------------------------------- | ------------------------------------------------------------------------- |
 | Landing page              | `/index.html`                     |                                                                           |
 | Index by date             | `/index/by_date/0.html`           | first page of the chronological index of all posts                        |
-| Index by tags             | `/index/by_tags/tags.html`        | generated if `index-by-tag = true;` is set in the configuration file      |
+| Index by tags             | `/index/by_tag/tags.html`         | generated if `index-by-tag = true;` is set in the configuration file      |
 | Index by authors          | `/index/by_author/authors.html`   | generated if `index-by-author = true;` is set in the configuration file   |
 | Blog-wide stylesheet      | `/css/blog.css`                   |                                                                           |
 | Index-specific stylesheet | `/css/index.css`                  |                                                                           |
 
 ## Templates
 
-| File Name             | Description                                   |
-|-----------------------| --------------------------------------------- |
-| `landing.html`        | Landing/start page of the site/blog           |
-| `landing_entry.html`  | Landing page's entry for a post/article       |
-| `post.html`           | Blog post/Article                             |
-| `index.html`          | Index page used for all indices except lists  |
-| `tag_list.html`       | Index list of post categories/tags            |
-| `author_list.html`    | Index list of post authors                    |
-| `index_entry.html`    | Index page's entry for a post/article         |
+| File Name             | Description                                   | Target directory path(s)                              |
+|-----------------------| --------------------------------------------- | ----------------------------------------------------- |
+| `landing.html`        | Landing/start page of the site/blog           | `/`                                                   |
+| `landing_entry.html`  | Landing page's entry for a post/article       | `/`                                                   |
+| `post.html`           | Blog post/Article                             | `/posts`                                              |
+| `index.html`          | Index page used for all indices except lists  | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+| `tag_list.html`       | Index list of post categories/tags            | `/index/by_tag`                                       |
+| `author_list.html`    | Index list of post authors                    | `/index/by_author`                                    |
+| `index_entry.html`    | Index page's entry for a post/article         | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
 
-## Template tags
+## Template tag classes
 
 #### Landing page
 
-* `breadcrumb`: self explanatory really. Provides a visual cue as to where in the blog hierarchy the user is currently
-* `newest-posts`: Most recent posts (entry count can be set in the configuration file) 
-* `top-tags`: Most used categories/tags (entry count can be set in the configuration file)
-* `top-authors` //NOT IMPLEMENTED
-* `featured-posts`: List of feature posts (source HTML file can be set in the configuration file)
+* `breadcrumb`
+
+> Provides a visual cue as to where in the blog hierarchy the user is currently.
+
+* `newest-posts`
+
+> Most recent posts (entry count can be set in the configuration file's `landing-most-recent`) 
+
+* `top-tags`
+
+> Most used categories/tags (list item count can be set in the configuration file's `landing-top-tags`)
+
+* `top-authors`
+
+> Most prolific authors  (list item count can be set in the configuration file's `landing-top_authors`)
+
+* `featured-posts`
+
+> List of feature posts (source HTML files can be set in the configuration file's `landing-featured`)
 
 #### Landing page entry
 
-* `post-number`: Number of the article when arranged by date (`1..n` where `n` is the newest)
-* `heading`: Title of the article
-* `authors`: Authors (each author will be inserted in its own generated `<span class="author"></span>` html tag)
-* `tags`: Tags/Categories (each tag will be inserted in its own generated `<span class="tag"></span>` html tag)
-* `date-stamp`: Date for the post
+* `post-number`
+
+> Number of the article when arranged by date (`1..n` where `n` is the newest).
+
+* `heading`
+
+> Title of the article.
+
+* `authors`
+
+> Authors (each author will be inserted in its own generated `<span class="author"></span>` html tag)
+
+* `tags`
+
+> Tags/Categories (each tag will be inserted in its own generated `<span class="tag"></span>` html tag)
+
+* `date-stamp`
+
+> Date for the post
+
 * `summary` //NOT IMPLEMENTED
 
 #### Post/Article page
 
 * `breadcrumb`
+
+> Provides a visual cue as to where in the blog hierarchy the user is currently.
+
 * `page-nav`
 * `post-content`
 * `index-pane-dates`
@@ -103,28 +135,60 @@ To use when hyperlinks to the different files need to be added in user created h
 #### Index page
 
 * `breadcrumb`
+
+> Provides a visual cue as to where in the blog hierarchy the user is currently.
+
 * `page-nav`
 * `index-entries`
 
 #### Tag/Category list page
 
 * `breadcrumb`
+
+> Provides a visual cue as to where in the blog hierarchy the user is currently.
+
 * `tag-list`
+
+> Plain and flat `<ul></ul>` list of tags arranged in alphabetical order.
+
 * `tag-list-hierarchy`
+
+> Hierarchy list `<ul></ul>` of tags arranged grouped by their first alphabetical letter.
 
 #### Author list page
 
 * `breadcrumb`
+
+> Provides a visual cue as to where in the blog hierarchy the user is currently.
+
 * `author-list`
+
+> Plain and flat `<ul></ul>` list of authors arranged in alphabetical order.
+
 * `author-list-hierarchy` //NOT IMPLEMENTED
 
 #### Index entry
 
 * `post-number`
+
+> Number of the article when arranged by date (`1..n` where `n` is the newest).
+
 * `heading`
+
+> Title of the article.
+
 * `authors`
+
+> Authors (each author will be inserted in its own generated `<span class="author"></span>` html tag)
+
 * `tags`
+
+> Tags/Categories (each tag will be inserted in its own generated `<span class="tag"></span>` html tag)
+
 * `date-stamp`
+
+> Date for the post
+
 * `summary` //NOT IMPLEMENTED
 
 ## Configuration file
@@ -138,17 +202,24 @@ the root of the target site's root folder. //NOT YET IMPLEMENTED
 
 #### General settings
 
-    //General settings
     site-url       = "http://www.domain.com";
     canonify-urls  = false; //TODO 0: relative paths, 1: absolute paths with the site's URL as root, 
     log-file       = "";    //TODO Save path of the log file. If empty then no log file will be created
+
+#### Templates
+
+    template-change-paths = false;
+    
+> Switch to `true` if you are using working relative paths in the templates for development/preview 
+  purposes. This will modify them based on the target html file location it is used to generate.
+  Absolute paths (inc those that start with a `/`) will not be touched.
 
 #### Month strings
     
     months = ["January", "February", "Mars", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 > Used on the tree indices on the post pages and indices. If it's not given or the array is not
-  complete (12 months -> 12 strings), blogator will default to english names
+  complete (12 strings for the 12 months), blogator will default to english names.
 
 #### Posts
     
@@ -159,17 +230,38 @@ is after the day of the build (i.e. when generator is run).
 
     safe-purge = true;  //TODO
     
-> Flag enabling deletion in the output post folder (`/posts`) of just html files only whilst 
-  leaving any other file types and folders in the structure intact. Good when resources are 
-  placed in there for x reasons by the user.
+> Flag enabling deletion in the output post folder (`/posts`) of just html files (`*.htm` and 
+  `*.html`) only whilst leaving any other file types and folders in the structure intact. 
+  Good when resources are placed in there for whatever reasons and you don't want them to get 
+  nuked during the built process.
     
 #### Index
 
-    show-post-numbers = true;  //flag for displaying post numbers in the index
-    items-per-page    = 10;    //Number of posts per page in the index
-    index-by-tag      = true;  //flag to create an extra index that groups posts by tags/categories 
-    index-by-author   = false; //flag to create an extra index that groups posts by authors
-    summary-length    = 200;   //TODO Number of characters for the summaries (taken from the first <p class=summary></p> inside the source posts
+    show-post-numbers = true;
+    
+> Flag to enable the insertion of the post's publication number in the index entries.
+    
+    items-per-page = 10;
+    
+> Sets the Number of post entries per page in the index
+
+    index-by-year = true;
+
+> Flag to enable the creation of an extra index that groups posts by year
+
+    index-by-tag = true;
+    
+> Flag to enable the creation of an extra index that groups posts by tags/categories
+ 
+    index-by-author = false;
+    
+> Flag to enable the creation of an extra index that groups posts by authors
+
+    summary-length = 200;   //TODO
+
+> Number of characters for the summaries (taken from the first `<p class=summary></p>`
+  inside the source posts). Set to `0` to disable completely. Note that there is a 
+  substantial performance hit correlated with the number of posts to process. 
 
 #### Page navigation
     
@@ -198,7 +290,8 @@ __absolute__ path for it to work across all generated pages.
     
 > Used for the breadcrumb navigation on the generated html. These strings will be copied verbatim
   into their respective `<a></a>` so custom html tags can be written inside these string values 
-  for more flexibility. e.g.:  `breadcrumb-landing-page = "<img src="img/start.png" alt="landing page">";`
+  if you want to get creative.  
+  **e.g.:**  `breadcrumb-landing-page = "<img src="img/start.png" alt="landing page">";`
   
 ###### Note:
 
@@ -246,15 +339,18 @@ Officially only english is supported for the moment but your mileage in differen
 languages/character sets may vary. I had no problem generating for a french language 
 based site with all the wonderful `é` `ê` `è` `ç` types of characters that come with it. :)
 
-I welcome any feedback in that regard. 
+**TL/DR: `UTF-8` should not pose a problem but `UTF-16` will.** 
+
+`UTF-16` is something that might be supported in version `2.0` if it gets to that. I do not 
+plan to deal with this for any `1.x` versions.
 
 #### Platform
 
-Linux and a compiler that supports C++20. 
+Officially, Linux and a compiler that supports C++20. 
 
 > As the software doesnt't use any exotic libraries aside from C++'s STL it should be compilable 
-  on other platforms (Windows/Mac) as long as you have that C++20 complient compiler on the 
-  machine. 
+  on other platforms (Windows/Mac) as long as you have that C++20 compliant compiler on the 
+  machine and are willing to put in a bit of elbow grease.
 
 ## Contributing
 
@@ -266,13 +362,7 @@ I'm open to:
 * bug reports (source html files that can reproduce the issue would be appreciated when relevant), 
 * suggestions for improvements.
 
-## Contact
-
-You can email me. Please make sure to add `Blogator: ` + what it's about in the subject line. 
-This way it's much less likely to be sent in the spam/trash by my filters. 
-
-My email can be found on my site.
-
 ## License
 
-Software is provided as-is. I.e.: {insert std disclaimer here}, backup you sh*t __before__ running the software, etc...
+Software is provided as-is (i.e.: {*insert std. disclaimer here*}, backup you sh*t __before__ 
+running the software, etc...).

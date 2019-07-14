@@ -51,17 +51,30 @@ endif()
 ##########################
 set(SOURCE_FILES
         src/main.cpp
+        src/cli/MsgInterface.cpp
+        src/cli/MsgInterface.h
+        src/cli/MsgDisplay.cpp
+        src/cli/MsgDisplay.h
         src/dto/Article.h
         src/dto/DateStamp.h
+        src/dto/Template.h
+        src/dto/Template.cpp
+        src/dto/Templates.h
+        src/dto/Templates.cpp
         src/dto/Options.h
         src/dto/Index.h
         src/dto/HTML.h
         src/dto/IndexDateTree.h
         src/dto/IndexTagTree.h
-        src/dto/Template.h
+        src/dto/Page.h
+        src/dto/Line.h
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
+        src/fs/fs.cpp
+        src/fs/fs.h
+        src/fs/ConfigReader.cpp
+        src/fs/ConfigReader.h
         src/html/html.cpp
         src/html/html.h
         src/html/writer/writer.cpp
@@ -70,26 +83,43 @@ set(SOURCE_FILES
         src/html/reader/reader.h
         src/indexer/indexer.cpp
         src/indexer/indexer.h
-        src/fs/fs.cpp
-        src/fs/fs.h
-        src/fs/ConfigReader.cpp
-        src/fs/ConfigReader.h
-        src/generator/Generator.cpp
-        src/generator/Generator.h
-        src/generator/PostMaker.cpp
-        src/generator/PostMaker.h
-        src/generator/IndexMaker.cpp
-        src/generator/IndexMaker.h
-        src/generator/RSS.cpp
-        src/generator/RSS.h
-        src/generator/LandingMaker.cpp
-        src/generator/LandingMaker.h
         src/indexer/FeatAggregator.cpp
         src/indexer/FeatAggregator.h
-        src/cli/MsgInterface.cpp
-        src/cli/MsgInterface.h
-        src/cli/MsgDisplay.cpp
-        src/cli/MsgDisplay.h)
+        src/output/Generator.cpp
+        src/output/Generator.h
+        src/output/abstract/Breadcrumb.cpp
+        src/output/abstract/Breadcrumb.h
+        src/output/abstract/Page.cpp
+        src/output/abstract/Page.h
+        src/output/abstract/IndexList.cpp
+        src/output/abstract/IndexList.h
+        src/output/abstract/Lister.cpp
+        src/output/abstract/Lister.h
+        src/output/generic/EntryWriter.cpp
+        src/output/generic/EntryWriter.h
+        src/output/generic/CategoryLister.cpp
+        src/output/generic/CategoryLister.h
+        src/output/generic/ChronoIndexLister.cpp
+        src/output/generic/ChronoIndexLister.h
+        src/output/page/Posts.cpp
+        src/output/page/Posts.h
+        src/output/page/Indices.cpp
+        src/output/page/Indices.h
+        src/output/page/Landing.cpp
+        src/output/page/Landing.h
+        src/output/page/ByYearList.cpp
+        src/output/page/ByYearList.h
+        src/output/page/ByTagList.cpp
+        src/output/page/ByTagList.h
+        src/output/page/ByAuthorList.cpp
+        src/output/page/ByAuthorList.h
+        src/output/feed/RSS.cpp
+        src/output/feed/RSS.h
+
+#        src/sitemap/Sitemap.cpp src/sitemap/Sitemap.h
+#        src/sitemap/SiteNode.cpp
+#        src/sitemap/SiteNode.h
+)
 
 #####################
 # Google Unit-Tests #
@@ -116,7 +146,7 @@ endif()
 set(TEST_FILES
         tests/main.cpp
         tests/html/reader/reader.cpp
-        tests/dto/DateStamp.cpp)
+        tests/dto/DateStamp.cpp tests/dto/Templates.cpp tests/fs/fs.cpp)
 
 enable_testing()
 

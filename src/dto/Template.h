@@ -1,14 +1,18 @@
 #ifndef BLOGATOR_DTO_TEMPLATE_H
 #define BLOGATOR_DTO_TEMPLATE_H
 
-#include <map>
 #include <memory>
-#include <functional>
+#include <filesystem>
+#include <map>
 
 #include "HTML.h"
 
 namespace blogator::dto {
     struct Template {
+        enum class Type {
+            LANDING, LANDING_ENTRY, POST, INDEX, INDEX_ENTRY, INDEX_LIST
+        };
+
         struct InsertPosition {
             InsertPosition( HTML::LineIndex_t l, HTML::CharIndex_t c ) :
                 line( l ), col( c )
@@ -16,6 +20,11 @@ namespace blogator::dto {
 
             HTML::LineIndex_t line;
             HTML::CharIndex_t col;
+
+            friend std::ostream &operator <<( std::ostream &s, const InsertPosition &insert_pos ) {
+                s << insert_pos.line + 1 << ":" << insert_pos.col + 1;
+                return s;
+            }
 
             bool operator==( const InsertPosition &rhs ) const {
                 return line == rhs.line  && col == rhs.col;
@@ -26,121 +35,24 @@ namespace blogator::dto {
             }
         };
 
-        typedef std::map<std::string, std::vector<InsertPosition>> DivWritePositions_t;
-        typedef std::map<InsertPosition, std::string>              ConsecutiveWritePositions_t;
+        explicit Template( Type template_type );
 
-        /**
-         * Post/Article page template
-         */
-        struct PostPage {
-            std::unique_ptr<HTML> html;
-            DivWritePositions_t div_write_pos = {
-                { "breadcrumb",       std::vector<InsertPosition>() },
-                { "page-nav",         std::vector<InsertPosition>() },
-                { "post-content",     std::vector<InsertPosition>() },
-                { "index-pane-dates", std::vector<InsertPosition>() },
-                { "index-pane-tags",  std::vector<InsertPosition>() }
-            };
-        } _post;
+        typedef std::map<std::string, bool>                     BlockInsertClasses_t;
+        typedef std::map<InsertPosition, std::string>           ConsecutiveWritePositions_t;
+        typedef std::map<InsertPosition, std::filesystem::path> ConsecutivePathPositions_t;
 
-        /**
-         * Index page template
-         */
-        struct IndexPage {
-            std::unique_ptr<HTML> html;
-            DivWritePositions_t   div_write_pos = {
-                { "breadcrumb",    std::vector<InsertPosition>() },
-                { "page-nav",      std::vector<InsertPosition>() },
-                { "index-entries", std::vector<InsertPosition>() }
-            };
-        } _index;
-
-        /**
-         * Tag list (tags.html) page template
-         */
-        struct TagListIndexPage {
-            const std::filesystem::path file_name = "tags.html";
-            std::unique_ptr<HTML>       html;
-            DivWritePositions_t         div_write_pos = {
-                { "breadcrumb",         std::vector<InsertPosition>() },
-                { "tag-list",           std::vector<InsertPosition>() },
-                { "tag-list-hierarchy", std::vector<InsertPosition>() }
-            };
-        } _tag_list;
-
-        /**
-         * Author list (authors.html) page template
-         */
-        struct AuthorListIndexPage {
-            const std::filesystem::path file_name = "authors.html";
-            std::unique_ptr<HTML>       html;
-            DivWritePositions_t         div_write_pos = {
-                { "breadcrumb",         std::vector<InsertPosition>() },
-                { "author-list",        std::vector<InsertPosition>() }
-            };
-        } _author_list;
-
-        /**
-         * Index entry template
-         */
-        struct IndexEntry {
-            std::unique_ptr<HTML> html;
-            DivWritePositions_t   div_write_pos = {
-                { "post-number", std::vector<InsertPosition>() },
-                { "heading",     std::vector<InsertPosition>() },
-                { "authors",     std::vector<InsertPosition>() },
-                { "tags",        std::vector<InsertPosition>() },
-                { "date-stamp",  std::vector<InsertPosition>() },
-                { "summary",     std::vector<InsertPosition>() }
-            };
-        } _index_entry;
-
-        /**
-         * Blog landing page (start) template
-         */
-        struct LandingPage {
-            const std::filesystem::path file_name = "index.html";
-            std::unique_ptr<HTML>       html;
-            DivWritePositions_t         div_write_pos = {
-                { "breadcrumb",     std::vector<InsertPosition>() },
-                { "newest-posts",   std::vector<InsertPosition>() },
-                { "top-tags",       std::vector<InsertPosition>() },
-                { "top-authors",    std::vector<InsertPosition>() },
-                { "featured-posts", std::vector<InsertPosition>() }
-            };
-        } _start;
-
-        /**
-         * Landing page newest/featured posts entry template
-         */
-        struct LandingPageEntry {
-            std::unique_ptr<HTML> html;
-            DivWritePositions_t   div_write_pos = {
-                { "post-number", std::vector<InsertPosition>() },
-                { "heading",     std::vector<InsertPosition>() },
-                { "authors",     std::vector<InsertPosition>() },
-                { "tags",        std::vector<InsertPosition>() },
-                { "date-stamp",  std::vector<InsertPosition>() },
-                { "summary",     std::vector<InsertPosition>() }
-            };
-        } _start_entry;
-
-        /**
-         * Gets a map of write positions ordered consecutively
-         * @param positions Tag->insert location map
-         * @return Consecutive write positions
-         */
-        static std::map<InsertPosition, std::string> getConsecutiveWritePositions( const DivWritePositions_t &positions ) {
-            auto cons_writes = std::map<InsertPosition, std::string>();
-
-            for( const auto &t : positions ) {
-                for( auto p : t.second )
-                    cons_writes.emplace( p, t.first );
-            }
-
-            return cons_writes;
+        struct WritePosIterators {
+            ConsecutiveWritePositions_t::const_iterator block;
+            ConsecutivePathPositions_t::const_iterator  path;
         };
+
+        Type                        type;
+        std::filesystem::path       src;
+        std::unique_ptr<HTML>       html;
+        ConsecutivePathPositions_t  path_write_pos;
+        ConsecutiveWritePositions_t block_write_pos;
+        BlockInsertClasses_t        block_classes;
     };
 }
 
-#endif //BLOGATOR_DTO_TEMPLATE_H
+#endif //BLOGATOR_TEMPLATE_H

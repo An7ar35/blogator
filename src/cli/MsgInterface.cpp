@@ -110,6 +110,18 @@ void blogator::cli::MsgInterface::resetLinePos() {
     _display_out->done();
 }
 
+void blogator::cli::MsgInterface::log( const std::string & msg ) {
+    _display_out->log( msg );
+}
+
+void blogator::cli::MsgInterface::msg( const std::string & msg ) {
+    _display_out->message( msg );
+}
+
 void blogator::cli::MsgInterface::error( const std::string & msg ) {
     _display_out->error( msg );
+}
+
+void blogator::cli::MsgInterface::warning( const std::string & msg ) {
+    _display_out->warning( msg );
 }
