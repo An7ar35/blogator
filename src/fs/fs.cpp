@@ -16,6 +16,7 @@
  * @return
  */
 std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path ) { //TODO error control?
+    //TODO display progress?
     auto reader = ConfigReader();
     return reader.init( file_path );
 }
@@ -26,39 +27,72 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::
  * @throws std::runtime_error when a filesystem call has thrown an exception
  */
 void blogator::fs::setupEnvironment( const std::shared_ptr<dto::Options> &global_options ) {
+    auto &display = cli::MsgInterface::getInstance();
+
     try {
-        std::uintmax_t purge_count = 0;
-        purge_count += std::filesystem::remove_all( global_options->_paths.posts_dir );
-        purge_count += std::filesystem::remove_all( global_options->_paths.index_dir );
-        purge_count += std::filesystem::remove( global_options->_paths.root_dir / global_options->_rss.file_name ) ? 1 : 0;
+        auto purged_count = purge( *global_options );
+        std::cout << " (" << purged_count << " file(s)/folder(s) purged)" << std::endl;
 
-        std::cout << " (" << purge_count << " file(s)/folder(s) purged)" << std::endl;
-
-        if( !std::filesystem::exists( global_options->_paths.template_dir ) )
+        if( !std::filesystem::exists( global_options->_paths.template_dir ) ) {
             std::filesystem::create_directories( global_options->_paths.template_dir ); //TODO generate missing templates if none are found
-
-        if( !std::filesystem::create_directories( global_options->_paths.posts_dir ) )
-            std::cerr << "Could not create directories: " << global_options->_paths.posts_dir.string() << std::endl;
-        if( !std::filesystem::create_directories( global_options->_paths.index_dir ) )
-            std::cerr << "Could not create directories: " << global_options->_paths.index_dir.string() << std::endl;
-
-        if( !std::filesystem::create_directories( global_options->_paths.index_date_dir ) )
-            std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_date_dir.string() << std::endl;
-        if( global_options->_index.index_by_year )
+        }
+        if( !global_options->_posts.safe_purge && !std::filesystem::create_directories( global_options->_paths.posts_dir ) ) {
+            display.error( "Could not create directories: " + global_options->_paths.posts_dir.string() );
+        }
+        if( !std::filesystem::create_directories( global_options->_paths.index_dir ) ) {
+            display.error( "Could not create directories: " + global_options->_paths.index_dir.string() );
+        }
+        if( !std::filesystem::create_directories( global_options->_paths.index_date_dir ) ) {
+            display.error( "Could not create index sub-directory: " + global_options->_paths.index_date_dir.string() );
+        }
+        if( global_options->_index.index_by_year ) {
             if( !std::filesystem::create_directories( global_options->_paths.index_year_dir ) )
-                std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_year_dir.string() << std::endl;
-        if( global_options->_index.index_by_tag )
+                display.error( "Could not create index sub-directory: " + global_options->_paths.index_year_dir.string() );
+        }
+        if( global_options->_index.index_by_tag ) {
             if( !std::filesystem::create_directories( global_options->_paths.index_tag_dir ) )
-                std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_tag_dir.string() << std::endl;
-        if( global_options->_index.index_by_author )
+                display.error( "Could not create index sub-directory: " + global_options->_paths.index_tag_dir.string() );
+        }
+        if( global_options->_index.index_by_author ) {
             if( !std::filesystem::create_directories( global_options->_paths.index_author_dir ) )
-                std::cerr << "Could not create index sub-directory: " << global_options->_paths.index_tag_dir.string() << std::endl;
-
+                display.error( "Could not create index sub-directory: " + global_options->_paths.index_tag_dir.string() );
+        }
     } catch( std::exception &e ) {
         std::stringstream ss;
         ss << "Environment setup failed: " << e.what();
         throw std::runtime_error( ss.str() );
     }
+}
+
+/**
+ * Purges all generated folders
+ * @param options Global Options DTO
+ * @return Number of file/folders purged
+ */
+uintmax_t blogator::fs::purge( const blogator::dto::Options &options ) {
+    auto &display = cli::MsgInterface::getInstance();
+    std::uintmax_t purge_count = 0;
+
+    purge_count += std::filesystem::remove_all( options._paths.index_dir );
+    purge_count += std::filesystem::remove( options._paths.root_dir / options._rss.file_name ) ? 1 : 0;
+
+    if( options._posts.safe_purge ) {
+        display.msg( "Safe purge: ON" );
+        auto file_list = std::list<std::filesystem::path>();
+        for( auto &p: std::filesystem::recursive_directory_iterator( options._paths.posts_dir ) ) {
+            if( p.is_regular_file() && ( p.path().extension().string() == ".html" || p.path().extension().string() == ".htm" ) )
+                file_list.emplace_back( p.path() );
+        }
+
+        for( const auto &p : file_list )
+            purge_count += std::filesystem::remove( p ) ? 1 : 0;
+
+    } else {
+        display.msg( "Safe purge: OFF" );
+        purge_count += std::filesystem::remove_all( options._paths.posts_dir );
+    }
+
+    return purge_count;
 }
 
 /**
@@ -112,7 +146,7 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._year_list       = std::make_shared<dto::Template>( dto::Template::Type::INDEX_LIST );
         templates._year_list->src  = master_index._paths.templates.year_list;
         templates._year_list->html = fs::importHTML( templates._year_list->src );
-        display.log( "Custom index year list template was found" );
+        display.debug( "Custom index year list template was found" );
     } else {
         templates._year_list = templates._index_list;
     }
@@ -122,7 +156,7 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._tag_list       = std::make_shared<dto::Template>( dto::Template::Type::INDEX_LIST );
         templates._tag_list->src  = master_index._paths.templates.tag_list;
         templates._tag_list->html = fs::importHTML( templates._tag_list->src );
-        display.log( "Custom index tag list template was found" );
+        display.debug( "Custom index tag list template was found" );
     } else {
         templates._tag_list = templates._index_list;
     }
@@ -132,7 +166,7 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._author_list       = std::make_shared<dto::Template>( dto::Template::Type::INDEX_LIST );
         templates._author_list->src  = master_index._paths.templates.author_list;
         templates._author_list->html = fs::importHTML( templates._author_list->src );
-        display.log( "Custom index author list template was found" );
+        display.debug( "Custom index author list template was found" );
     } else {
         templates._author_list = templates._index_list;
     }
@@ -280,7 +314,10 @@ std::filesystem::path blogator::fs::adaptRelPath( const std::filesystem::path & 
         return target_rel;
 
     } catch( std::exception &e ) {
-        std::cerr << "[fs::adaptRelPath(..)] " << e.what() << std::endl; //TODO?
+        std::stringstream ss;
+        ss << "[fs::adaptRelPath(..)] " << e.what();
+        auto &display = cli::MsgInterface::getInstance();
+        display.error( ss.str() );
         return rel_path;
     }
 }

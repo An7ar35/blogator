@@ -36,7 +36,7 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     display.progress( "Posts" );
     indexPosts( *global_options, *index, css_cache, feat_aggregator );
     display.progress( "sorting articles by date" );
-    sortChronologically( index->_articles );
+    sortChronologically( index->_articles, *global_options );
     display.progress( "generating targets" );
     generateChronologicalIndexTargets( *index, *global_options );
     if( global_options->_index.index_by_year ) {
@@ -68,6 +68,8 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options,
                                           dto::Index &index,
                                           std::unordered_map<std::string, std::filesystem::path> &css_cache )
 {
+    auto &display = cli::MsgInterface::getInstance();
+
     static const std::regex blog_css_regex  = std::regex( "^.*(blog)\\.(css)$" );
     static const std::regex index_css_regex = std::regex( "^.*(index)\\.(css)$" );
     static const std::regex posts_css_regex = std::regex( "^.*\\.(css)$" );
@@ -86,11 +88,11 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options,
 
     if( index._paths.css.blog.empty() ) {
         std::ofstream output( index._paths.css.blog = global_options._paths.css_dir / "blog.css" );
-        std::cerr << "No master stylesheet was found for the articles. A blank one was created." << std::endl;
+        display.msg( "No master stylesheet was found for the articles. A blank one was created." );
     }
     if( index._paths.css.index.empty() ) {
         std::ofstream output( index._paths.css.index = global_options._paths.css_dir / "index.css" );
-        std::cerr << "No master stylesheet was found for the indices. A blank one was created." << std::endl;
+        display.msg( "No master stylesheet was found for the indices. A blank one was created." );
     }
 }
 
@@ -136,30 +138,31 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
         }
     }
 
-    size_t errors { 0 }; //TODO pass msgs to MsgInterface instead of cerr? or redirect cerr to it;
+    auto &display = cli::MsgInterface::getInstance();
+    size_t errors { 0 };
 
     if( index._paths.templates.landing.empty() ) {
-        std::cerr << "Template missing: landing page" << std::endl;
+        display.error( "Template missing: landing page" );
         ++errors;
     }
     if( index._paths.templates.landing_entry.empty() ) {
-        std::cerr << "Template missing: landing entry" << std::endl;
+        display.error( "Template missing: landing entry" );
         ++errors;
     }
     if( index._paths.templates.post.empty() ) {
-        std::cerr << "Template missing: post page" << std::endl;
+        display.error( "Template missing: post page" );
         ++errors;
     }
     if( index._paths.templates.index.empty() ) {
-        std::cerr << "Template missing: index page" << std::endl;
+        display.error( "Template missing: index page" );
         ++errors;
     }
     if( index._paths.templates.index_list.empty() ) {
-        std::cerr << "Template missing: index list page" << std::endl;
+        display.error( "Template missing: index list page" );
         ++errors;
     }
     if( index._paths.templates.index_entry.empty() ) {
-        std::cerr << "Template missing: index entry" << std::endl;
+        display.error( "Template missing: index entry" );
         ++errors;
     }
 
@@ -179,7 +182,9 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
                                     std::unordered_map<std::string, std::filesystem::path> &css_cache,
                                     FeatAggregator &feat_aggregator )
 {
-    static const std::regex index_entry_html_rx = std::regex( "^(?:.*\\/)(.+)(?:_index)\\.(?:htm|html)$" );
+    auto &display = cli::MsgInterface::getInstance();
+
+    static const std::regex index_entry_html_rx = std::regex( R"(^(.*[\/\\].+)(?:_index)\.(?:htm|html)$)" );
     static const std::regex html_rx             = std::regex( "^.+\\.(?:htm|html)$" );
 
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
@@ -194,19 +199,21 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
                         std::make_pair( index_entry_match[1].str(), p.path() )
                     );
             } else if( std::regex_match( path, html_rx ) ) {
-                index._articles.emplace_back( readFileProperties( p.path() ) );
+                try {
+                    index._articles.emplace_back( readFileProperties( p.path() ) );
 
-                if( !global_options._posts.build_future &&
-                    index._articles.back()._datestamp > global_options.getRuntimeDateStamp() )
-                {
-                    index._articles.erase( std::prev( index._articles.end() ) );
-                } else {
-                    addYear( global_options, index._articles.back(), index );
-                    addTags( global_options, index._articles.back(), index );
-                    addAuthors( global_options, index._articles.back(), index );
-                    addCSS( css_cache, index._articles.back() );
-                    addOutputPath( global_options._paths, index._articles.back() );
-                    feat_aggregator.addArticleIfFeatured( index._articles.back() );
+                    if( !global_options._posts.build_future &&
+                        index._articles.back()._datestamp > global_options.getRuntimeDateStamp() ) {
+                        index._articles.erase( std::prev( index._articles.end() ) );
+                    } else {
+                        addYear( global_options, index._articles.back(), index );
+                        addTags( global_options, index._articles.back(), index );
+                        addAuthors( global_options, index._articles.back(), index );
+                        addCSS( css_cache, index._articles.back() );
+                        feat_aggregator.addArticleIfFeatured( index._articles.back() );
+                    }
+                } catch( std::exception &e ) {
+                    display.error( e.what() );
                 }
             }
         }
@@ -216,12 +223,31 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
         throw exception::failed_expectation( "No articles (posts) to index found." );
 
     //Add any *_index html files to their respective articles index entry path if found
-    if( !index_entry_files.empty() )
-        for( auto &article : index._articles ) {
-            auto entry_it = index_entry_files.find( article._paths.src_html.filename().stem().string() );
-            if( entry_it != index_entry_files.end() )
+    if( !index_entry_files.empty() ) {
+        for( auto & article : index._articles ) {
+            auto file_root = article._paths.src_html.parent_path() / article._paths.src_html.filename().stem();
+            auto file_rel  = global_options._folders.posts.root / article._paths.src_html.lexically_relative( global_options._paths.source_dir );
+            auto entry_it  = index_entry_files.find( file_root.string() );
+
+            if( entry_it != index_entry_files.end() ) {
+                display.debug(
+                    "Found custom index entry: " + file_rel.string() + " -> " +
+                    ( global_options._folders.posts.root / entry_it->second.lexically_relative( global_options._paths.source_dir ) ).string()
+                );
                 article._paths.entry_html = entry_it->second;
+                index_entry_files.erase( entry_it );
+            }
         }
+
+        if( !index_entry_files.empty() ) {
+            for( const auto &e : index_entry_files ) {
+                display.warning(
+                    "Found orphaned custom index entry: " +
+                    ( global_options._folders.posts.root / e.second.lexically_relative( global_options._paths.source_dir ) ).string()
+                );
+            }
+        }
+    }
 
     //Get the list of ordered Articles featured on the landing page
     index._featured = feat_aggregator.getFeaturedArticles();
@@ -297,10 +323,11 @@ void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem:
 }
 
 /**
- * Sort the articles in chronological order from newest to oldest (via the DateStamp)
- * @param articles Collection of articles
+ * Sort the articles in chronological order from newest to oldest (via the DateStamp) + creates the individual filenames
+ * @param articles       Collection of articles
+ * @param global_options Global blogator options
  */
-void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t &articles ) {
+void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t &articles, const dto::Options &global_options ) {
 
     std::sort( articles.begin(),
                articles.end(),
@@ -312,6 +339,7 @@ void blogator::indexer::sortChronologically( blogator::dto::Index::Articles_t &a
     size_t i = 0;
     for( auto &article : articles ) {
         article._number = ( articles.size() - i );
+        addOutputPath( global_options._paths, article );
         ++i;
     }
 }
@@ -462,7 +490,7 @@ void blogator::indexer::generateTopTags( blogator::dto::Index &master_index,
 }
 
 /**
- * Generates an ordered (desc) top authors mentioned in the author tags in theindex articles
+ * Generates an ordered (desc) top authors mentioned in the author tags in the index articles
  * @param master_index   Master index
  * @param global_options Global blogator options
  */
@@ -613,7 +641,8 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
 void blogator::indexer::addOutputPath( const dto::Options::AbsPaths &global_paths,
                                        blogator::dto::Article &article )
 {
-    auto abs_path = global_paths.posts_dir / article._paths.src_html.filename();
+    auto file_name = std::to_string( article._number ) + article._paths.src_html.filename().extension().string();
+    auto abs_path  = global_paths.posts_dir / file_name;
     article._paths.out_html = abs_path.lexically_relative( global_paths.posts_dir );
 }
 

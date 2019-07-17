@@ -13,6 +13,7 @@ namespace blogator::fs {
     std::shared_ptr<dto::Options> importOptions( const std::filesystem::path &file_path );
     void setupEnvironment( const std::shared_ptr<dto::Options>& global_options );
 
+    uintmax_t purge( const dto::Options &options );
     std::shared_ptr<dto::Templates> importTemplates( const dto::Index &master_index, const dto::Options &options );
     void importTemplateHTML( const dto::Index &master_index, dto::Templates &templates );
     void extractTemplateRelPaths( const dto::Index &master_index, dto::Templates &templates );

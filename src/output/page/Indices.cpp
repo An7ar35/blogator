@@ -30,8 +30,7 @@ blogator::output::page::Indices::Indices( std::shared_ptr<const dto::Index>     
           std::move( templates ),
           std::move( global_options )
     ),
-    _entry_maker( generic::EntryWriter( _templates->_index_entry, _options->_months ) ),
-    _display( cli::MsgInterface::getInstance() )
+    _entry_maker( generic::EntryWriter( _templates->_index_entry, _options->_months ) )
 {
     _breadcrumb_parents = BreadCrumb_t( { { _options->_breadcrumb.start, "../../index.html" } } );
 
@@ -65,7 +64,7 @@ bool blogator::output::page::Indices::init() const {
                 );
 
             const auto &first_file = *_index->_indices.chronological.file_names.cbegin();
-            _display.begin( "Generating indices", _total_jobs, _options->_paths.index_date_dir.filename() / first_file );
+            _display.begin( "Generating index pages", _total_jobs, _options->_paths.index_date_dir.filename() / first_file );
 
             auto entry_maker = generic::EntryWriter( _templates->_index_entry, _options->_months );
             auto index_maker = generic::ChronoIndexLister( _options, _index->_articles, *_templates->_index, entry_maker );
@@ -134,7 +133,7 @@ bool blogator::output::page::Indices::init() const {
         _display.progress( "DONE" );
 
     } catch( std::exception &e ) {
-        std::cerr << e.what() << std::endl;
+        _display.error( e.what() );
         return false;
     }
 

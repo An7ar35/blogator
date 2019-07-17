@@ -15,6 +15,7 @@
  */
 blogator::output::generic::EntryWriter::EntryWriter( std::shared_ptr<const dto::Template> entry_template,
                                                      const dto::Options::MonthStringLookup_t &months ) :
+    _display( cli::MsgInterface::getInstance() ),
     _template( std::move( entry_template ) ),
     _months( months )
 {}
@@ -145,13 +146,14 @@ void blogator::output::generic::EntryWriter::writeHtmlBlock( dto::Page &page,
                   << html::createDateTime( article._datestamp, _months ) << "\n";
 
     } else if( block_name == "summary" ) { //TODO
-        std::cerr << "[output::generic::EntryWriter::writeHtmlBlock(..)] "
-                  << "TODO: implement 'summary' insertion point"
-                  << std::endl;
-
+        _display.error(
+            "[output::generic::EntryWriter::writeHtmlBlock(..)] "
+            "//TODO: implement 'summary' insertion point"
+        );
     } else {
-        std::cerr << "[output::generic::EntryWriter::writeHtmlBlock(..)] "
-                  << "HTML element class '" << block_name << "' not recognised."
-                  << std::endl;
+        _display.error(
+            "[output::generic::EntryWriter::writeHtmlBlock(..)] "
+            "HTML element class '" + block_name + "' not recognised."
+        );
     }
 }

@@ -14,14 +14,22 @@
 
 namespace blogator::dto {
     struct Options {
+        static const char* BLOGATOR_NAME;
+        static const char* BLOGATOR_VERSION;
+        static const char* BLOGATOR_URL;
+        const std::string  BLOGATOR_SIGNATURE;
+
         typedef std::unordered_map<unsigned, std::string> MonthStringLookup_t;
 
-        const std::string BLOGATOR_NAME      = "Blogator";
-        const std::string BLOGATOR_VERSION   = "1.0a";
-        const std::string BLOGATOR_URL       = "https://an7ar35.bitbucket.io"; //TODO update when a proper 'Blogator' page is created
-        const std::string BLOGATOR_SIGNATURE = "<!-- Generated with " + BLOGATOR_NAME + " " + BLOGATOR_VERSION + " (" + BLOGATOR_URL + ") -->";
+        Options();
+
+        void setupAbsolutePaths( const std::filesystem::path & root_path );
+        void setTempPath( const std::filesystem::path &temp_path );
+        std::string getRunTimeStamp() const;
+        const DateStamp & getRuntimeDateStamp() const;
 
         struct AbsPaths { //Absolute directory paths
+            std::filesystem::path temp_dir;         //system's temporary directory path + /blogator
             std::filesystem::path root_dir;         //site's root directory (used to create absolute paths)
             std::filesystem::path source_dir;       //input directory for generating posts from
             std::filesystem::path template_dir;     //input directory for generating posts from
@@ -71,13 +79,13 @@ namespace blogator::dto {
         } _filenames;
 
         struct Templates {
-            bool adapt_rel_paths = false; //TODO
+            bool adapt_rel_paths = false;
 
         } _templates;
 
         struct Posts {
             bool build_future = false;
-            bool safe_purge   = true;  //TODO
+            bool safe_purge   = true;
 
         } _posts;
 
@@ -142,53 +150,8 @@ namespace blogator::dto {
             { 11, "November" }, { 12, "December" }
         } );
 
-
-        /**
-         * Sets the root path and generates all absolute paths from it
-         * @param root_path Root directory path
-         */
-        void setupAbsolutePaths( const std::filesystem::path & root_path ) {
-            _paths.root_dir         = root_path;
-            _paths.template_dir     = _paths.root_dir / _folders.templates.root;
-            _paths.source_dir       = _paths.root_dir / _folders.source.root;
-            _paths.posts_dir        = _paths.root_dir / _folders.posts.root;
-            _paths.css_dir          = _paths.root_dir / _folders.css.root;
-            _paths.index_dir        = _paths.root_dir / _folders.index.root;
-            _paths.index_date_dir   = _paths.root_dir / _folders.index.by_date;
-            _paths.index_year_dir   = _paths.root_dir / _folders.index.by_year;
-            _paths.index_tag_dir    = _paths.root_dir / _folders.index.by_tag;
-            _paths.index_author_dir = _paths.root_dir / _folders.index.by_author;
-        }
-
-        /**
-         * Gets the program's run time-stamp
-         * @return Timestamp as a RFC 822 compliant string
-         */
-        std::string getRunTimeStamp() const {
-            auto now = std::chrono::system_clock::to_time_t( RUN_TIMESTAMP );
-            std::stringstream ss;
-            ss << std::put_time( std::localtime( &now ), "%a, %d %b %Y %T %z" ); //RFC 822
-            return ss.str();
-        }
-
-        /**
-         * Gets the program's runtime date-stamp (dd/mm/yyyy)
-         * @return Reference to DateStamp DTO
-         */
-        const DateStamp & getRuntimeDateStamp() const {
-            static std::unique_ptr<DateStamp> datestamp;
-
-            if( !datestamp ) {
-                auto now   = std::chrono::system_clock::to_time_t( RUN_TIMESTAMP );
-                auto local = std::localtime( &now );
-                datestamp  = std::make_unique<DateStamp>( local->tm_year + 1900, local->tm_mon, local->tm_mday );
-            }
-
-            return *datestamp;
-        }
-
       private:
-        const std::chrono::system_clock::time_point RUN_TIMESTAMP = std::chrono::system_clock::now();
+        const std::chrono::system_clock::time_point RUN_TIMESTAMP;
     };
 }
 

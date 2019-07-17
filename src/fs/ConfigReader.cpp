@@ -5,6 +5,7 @@
 #include "../exception/file_access_failure.h"
 #include "../exception/file_parsing_failure.h"
 #include "../exception/failed_expectation.h"
+#include "../cli/MsgInterface.h"
 
 /**
  * Initialise configuration file reader/import
@@ -13,27 +14,30 @@
  * @throws exception::file_access_failure when config file could not be accessed
  */
 std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const std::filesystem::path &file_path ) const {
-    auto options = std::make_shared<blogator::dto::Options>();
-    auto map     = std::unordered_map<std::string, Value>();
+    auto &display = cli::MsgInterface::getInstance();
+    auto options  = std::make_shared<blogator::dto::Options>();
+    auto map      = std::unordered_map<std::string, Value>();
     std::stringstream ss;
 
     try {
         loadConfigurationFile( file_path, map );
     } catch( exception::file_access_failure &e ) {
-        std::cerr << "[blogator::fs::ConfigReader::init(..)] " << e.what() << std::endl;
+        display.error( "Configuration reader: " + std::string( e.what() ) );
         throw;
     }
 
     try {
         processTemplateOptions( map, *options );
     } catch( exception::file_parsing_failure &e ) {
-        std::cerr << e.what() << std::endl; //TODO
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        throw;
     }
 
     try {
         processPostsOptions( map, *options );
     } catch( exception::file_parsing_failure &e ) {
-        std::cerr << e.what() << std::endl; //TODO
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        throw;
     }
 
     try {
@@ -42,26 +46,27 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
         processPageNavOptions( map, *options );
         processBreadcrumbOptions( map, *options );
     } catch( exception::file_parsing_failure &e ) {
-        std::cerr << e.what() << std::endl; //TODO
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        throw;
     }
 
     try {
         processMonthsOptions( map, *options );
-    } catch( exception::file_parsing_failure &e ) { //TODO
-        std::cerr << e.what() << std::endl;
-        std::cout << "  Using default month strings (eng)." << std::endl;
+    } catch( exception::file_parsing_failure &e ) {
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        display.msg( "Using default month strings (eng)." );
     }
 
     try {
         processRssOptions( map, *options );
     } catch( exception::file_parsing_failure &e ) {
         options->_rss.generate = false;
-        std::cerr << e.what() << std::endl;
-        std::cerr << "  RSS feed will *not* be generated." << std::endl;
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        display.msg( "RSS feed will *not* be generated." );
     } catch( exception::failed_expectation &e ) {
         options->_rss.generate = false;
-        std::cerr << e.what() << std::endl;
-        std::cerr << "  RSS feed will *not* be generated." << std::endl;
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        display.msg( "RSS feed will *not* be generated." );
     }
 
     return std::move( options );
@@ -152,6 +157,8 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
 void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::path &path,
                                                         std::unordered_map<std::string, ConfigReader::Value> &map ) const
 {
+    auto &display = cli::MsgInterface::getInstance();
+
     std::string   line;
     std::ifstream config_file( path );
     size_t        line_number = 0;
@@ -171,7 +178,7 @@ void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::p
         } else if( std::regex_search( line, matches, KV_STR_ARR_RX ) && matches.length() >= 3 ) {
             map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING_ARRAY, matches[2] ) ) );
         } else if( !std::regex_search( line, COMMENT_RX ) ) {
-            std::cerr << "Configuration line #" << line_number << " could not be parsed." << std::endl; //TODO pass to display interface as error message
+            display.error( "Configuration line #" + std::to_string( line_number ) + " could not be parsed." );
         }
     }
 

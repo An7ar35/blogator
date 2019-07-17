@@ -12,12 +12,17 @@ namespace blogator::cli {
         void newProcess( const std::string &process, const std::string &next_step  );
         void update( const double &progress );
         void update( const std::string &next_step, const double &progress );
-        void log( const std::string&msg );
+
+        void debug( const std::string & msg );
         void message( const std::string &msg );
         void warning( const std::string &msg );
         void error( const std::string &msg );
+
+        void setVerbose( bool state );
+        void setDebug( bool state );
+        bool getDebugState() const;
+        void flushBuffer();
         void done();
-        void flushErrorsToDisplay();
 
       private:
         const size_t            BAR_WIDTH  { 50 };
@@ -28,8 +33,11 @@ namespace blogator::cli {
         std::string             _curr_process;
         std::string             _curr_step;
 
-        std::stringstream       _err_buffer;        //TODO maybe send error() and warning() to a linkedlist on the heap? might be a little safer
+        bool                    _verbose_flag;
+        bool                    _debug_flag;
+        std::stringstream       _err_buffer;
         std::streambuf         *_old_cerr_buffer;
+        std::queue<std::string> _msg_buffer;
 
         void updateDisplay( const double &progress );
     };

@@ -196,9 +196,10 @@ void blogator::output::generic::CategoryLister::writeHtmlBlock(
         }
 
     } else {
-        std::cerr << "[output::generic::CategoryLister::writeHtmlBlock(..)] "
-                  << "HTML Div class '" << block_name << "' not recognised."
-                  << std::endl;
+        _display.error(
+            "[output::generic::CategoryLister::writeHtmlBlock(..)] "
+            "HTML Div class '" + block_name + "' not recognised."
+        );
     }
 }
 
@@ -234,7 +235,7 @@ void blogator::output::generic::CategoryLister::writeIndexEntry(
             custom_entry_maker.write( page, indent, article );
 
         } catch( exception::file_access_failure &e ) {
-            std::cerr << e.what() << std::endl;
+            _display.error( e.what() );
             _entry_maker.write( page, indent, article );
         }
     }

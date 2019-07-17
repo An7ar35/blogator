@@ -23,6 +23,10 @@ blogator::cli::MsgInterface::MsgInterface() :
  */
 void blogator::cli::MsgInterface::begin( const std::string & process_name,
                                          const std::string & next_step ) {
+    if( _current_step < _total_steps )
+        _display_out->done();
+
+    _display_out->flushBuffer();
     _display_out->newProcess( process_name, next_step );
     _current_step = 0;
     _total_steps  = 0;
@@ -38,6 +42,10 @@ void blogator::cli::MsgInterface::begin( const std::string &process_name,
                                          const unsigned &steps,
                                          const std::string &next_step )
 {
+    if( _current_step < _total_steps )
+        _display_out->done();
+
+    _display_out->flushBuffer();
     _display_out->newProcess( process_name, next_step );
     _current_step = 0;
     _total_steps  = steps;
@@ -98,9 +106,7 @@ void blogator::cli::MsgInterface::progress( const std::string &next_step ) {
  * @param next_step  Step description
  * @param step_count Increment amount
  */
-void blogator::cli::MsgInterface::progress( const std::string & next_step,
-                                            const unsigned & step_count )
-{
+void blogator::cli::MsgInterface::progress( const std::string & next_step, const unsigned & step_count ) {
     _current_step += step_count;
     _display_out->update( next_step, (double) _current_step / (double) _total_steps );
 }
@@ -110,18 +116,23 @@ void blogator::cli::MsgInterface::resetLinePos() {
     _display_out->done();
 }
 
-void blogator::cli::MsgInterface::log( const std::string & msg ) {
-    _display_out->log( msg );
+void blogator::cli::MsgInterface::debug( const std::string & msg ) {
+    _display_out->debug( msg );
 }
 
 void blogator::cli::MsgInterface::msg( const std::string & msg ) {
     _display_out->message( msg );
 }
 
+void blogator::cli::MsgInterface::warning( const std::string & msg ) {
+    _display_out->warning( msg );
+}
+
 void blogator::cli::MsgInterface::error( const std::string & msg ) {
     _display_out->error( msg );
 }
 
-void blogator::cli::MsgInterface::warning( const std::string & msg ) {
-    _display_out->warning( msg );
+void blogator::cli::MsgInterface::setShowDebug( bool state ) {
+    _display_out->setDebug( state );
+    _display_out->message( std::string( "Show debug messages: " ) + ( state ? "ON" : "OFF" ) );
 }

@@ -19,6 +19,7 @@ blogator::output::abstract::IndexList::IndexList( std::shared_ptr<const dto::Opt
                                                   const dto::Template &entry_template,
                                                   BreadCrumb_t        breadcrumb,
                                                   std::string         page_name ) :
+    _display( cli::MsgInterface::getInstance() ),
     _options( std::move( global_options ) ),
     _template( entry_template ),
     _breadcrumb_parents( std::move( breadcrumb ) ),
@@ -129,8 +130,9 @@ void blogator::output::abstract::IndexList::writeHtmlBlock( blogator::dto::Page 
         writeHierarchyList( page, indent + "\t" );
 
     } else {
-        std::cerr << "[output::abstract::IndexList::writeHtmlBlock(..)] "
-                  << "HTML Div class '" << block_name << "' not recognised."
-                  << std::endl;
+        _display.error(
+            "[output::abstract::IndexList::writeHtmlBlock(..)] "
+            "HTML Div class '" + block_name + "' not recognised."
+        );
     }
 }

@@ -4,12 +4,13 @@
 #include <regex>
 #include <string>
 #include "../dto/Options.h"
+#include "../cli/MsgInterface.h"
 
 namespace blogator::fs {
     class ConfigReader {
       public:
         std::shared_ptr<blogator::dto::Options> init( const std::filesystem::path &file_path ) const;
-        static void generateBlankConfigFile( const std::filesystem::path & file_path );
+        static void generateBlankConfigFile( const std::filesystem::path &file_path );
 
       private:
         enum class Type { BOOLEAN, INTEGER, STRING, STRING_ARRAY };

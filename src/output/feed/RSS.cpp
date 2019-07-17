@@ -52,7 +52,7 @@ bool blogator::output::feed::RSS::init() {
         out.close();
 
     } catch( std::exception &e ) {
-        std::cerr << e.what() << std::endl;
+        _display.error( e.what() );
         return false;
     }
 
@@ -65,7 +65,7 @@ bool blogator::output::feed::RSS::init() {
  * @param file RSS feed file
  */
 void blogator::output::feed::RSS::writeHead( std::ofstream &file ) const {
-    _display.begin( "Generating RSS", _feed_item_count + 2, "header" );
+    _display.begin( "Generating RSS feed", _feed_item_count + 2, "header" );
 
     file << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
          << "<rss version=\"2.0\">\n"

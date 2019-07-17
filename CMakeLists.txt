@@ -51,6 +51,8 @@ endif()
 ##########################
 set(SOURCE_FILES
         src/main.cpp
+        src/cli/ArgParser.cpp
+        src/cli/ArgParser.h
         src/cli/MsgInterface.cpp
         src/cli/MsgInterface.h
         src/cli/MsgDisplay.cpp
@@ -62,6 +64,7 @@ set(SOURCE_FILES
         src/dto/Templates.h
         src/dto/Templates.cpp
         src/dto/Options.h
+        src/dto/Options.cpp
         src/dto/Index.h
         src/dto/HTML.h
         src/dto/IndexDateTree.h
@@ -85,8 +88,8 @@ set(SOURCE_FILES
         src/indexer/indexer.h
         src/indexer/FeatAggregator.cpp
         src/indexer/FeatAggregator.h
-        src/output/Generator.cpp
-        src/output/Generator.h
+        src/output/output.cpp
+        src/output/output.h
         src/output/abstract/Breadcrumb.cpp
         src/output/abstract/Breadcrumb.h
         src/output/abstract/Page.cpp
@@ -119,8 +122,8 @@ set(SOURCE_FILES
 #        src/sitemap/Sitemap.cpp src/sitemap/Sitemap.h
 #        src/sitemap/SiteNode.cpp
 #        src/sitemap/SiteNode.h
-)
-
+        src/html/editor/code/code.cpp
+        src/html/editor/code/code.h)
 #####################
 # Google Unit-Tests #
 #####################

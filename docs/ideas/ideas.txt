@@ -1,27 +1,18 @@
-=====
-|CLI|
-=====
-· Command line arguments passing, sanitization and processing
-
-==========
-|INDEXING|
-==========
-· [LINK/PATHS] Perhaps add special blogator tags like "{DATE-LIST-PAGE}", "{DATE-LATEST-PAGE}" and such as an injector option in href/src stuff?
-          Could be a cool way to inject up-to-date paths into links when generated files my not always have to the same names on every generation run
-          -> might need a special option like "blogator-tags = true" in the cfg file to enable that search?
-
-
 · [SUMMARY] Index/Landing page entries <description> support
-            (first n lines with '...' added?, special summary file?, optional summary comment line in source post?)
-· [SUMMARY] *_entry.html  class="summary" tag search and use in index item /start page item?
-            OR text taken in <p> tags in article source with n char length ('summary-length')
+        -> (first n lines with '...' added?, special summary file?, optional summary comment line in source post?)
+        -> *_entry.html  <p class="summary"></p> tag search and use in index item /start page item?
+           OR text taken in <p> tags in article source with n char length ('summary-length')
+        -> Summaries could be stored in temp file in the temp folder?
+           "{n}_summary.txt" where 'n' is the article number?
 
-=====
-|RSS|
-=====
-· RSS articles: <description>, <guid> (requires the 'summary' functionality to be implemented through)
+· [SYNTAX HIGHLIGHTER] Syntax highlighter for code snippets
+        -> Optional regex override from a string in the config file? if fail then fall back on default and print error msg + message for switching to default
+        -> Read at the same time as the summary in each posts
+        -> snippets could be stored in temp file in the temp folder?
+           "{n}_{i}_code.html" where 'n' is the article number and 'i' is the snippet number (in order)
 
-//TODO
-======
-· Have the readers optionally work with RegEx in cases where multiple tags sources are on the same line //TEST this assumptions?
-· !!! when display.begin(..) check whether the last job batch was completed properly and msg + reset line appropriatly
+· [RSS] RSS articles: <description>, <guid> (requires the 'summary' functionality to be implemented through)
+
+· [LINK/PATHS] Perhaps add special blogator tags like "{DATE-LIST-PAGE}", "{DATE-LATEST-PAGE}" and such as an injector option in href/src stuff?
+        Could be a cool way to inject up-to-date paths into links when generated files my not always have to the same names on every generation run
+        -> might need a special option like "blogator-tags = true" in the cfg file to enable that search?

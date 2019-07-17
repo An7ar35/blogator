@@ -21,6 +21,7 @@ namespace blogator::output::abstract {
         void write( dto::Page &page ) const;
 
       protected:
+        cli::MsgInterface                  &_display;
         std::shared_ptr<const dto::Options> _options;
 
         const dto::Template &_template;

@@ -6,6 +6,7 @@
 #include "../../dto/Article.h"
 #include "../../dto/Page.h"
 #include "../../dto/Line.h"
+#include "../../cli/MsgInterface.h"
 
 namespace blogator::output::generic {
     class EntryWriter {
@@ -18,6 +19,7 @@ namespace blogator::output::generic {
         dto::Template::Type getTemplateType() const;
 
       private:
+        cli::MsgInterface                       &_display;
         std::shared_ptr<const dto::Template>    _template;
         const dto::Options::MonthStringLookup_t &_months;
 

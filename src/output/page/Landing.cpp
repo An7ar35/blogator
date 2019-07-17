@@ -32,8 +32,7 @@ blogator::output::page::Landing::Landing( std::shared_ptr<const dto::Index>     
  * @throws exception::failed_expectation when insert points could not be found in the landing page template
  */
 bool blogator::output::page::Landing::init() const {
-    auto &display = cli::MsgInterface::getInstance();
-    display.begin( "Generating landing page", 1, "..." );
+    _display.begin( "Generating landing page", 1, "..." );
 
     if( _templates->_landing->block_write_pos.empty() ||  _templates->_landing_entry->block_write_pos.empty() ) {
         throw exception::failed_expectation(
@@ -46,11 +45,11 @@ bool blogator::output::page::Landing::init() const {
     try {
         generateLandingPage();
     } catch( std::exception &e ) {
-        std::cerr << e.what() << std::endl;
+        _display.error( e.what() );
         return false;
     }
 
-    display.progress( "DONE" );
+    _display.progress( "DONE" );
     return true;
 }
 
@@ -168,9 +167,10 @@ void blogator::output::page::Landing::writeHtmlBlock( dto::Page &page,
     } else if( block_class == "featured-posts" ) {
         writeFeatured( page, indent );
     } else {
-        std::cerr << "[output::page::Landing::writeHtmlBlock(..)] "
-                  << "HTML Div class '" << block_class << "' not recognised."
-                  << std::endl;
+        _display.error(
+            "[output::page::Landing::writeHtmlBlock(..)] "
+            "HTML Div class '" + block_class + "' not recognised."
+        );
     }
 }
 
@@ -197,13 +197,15 @@ void blogator::output::page::Landing::writeTopTags( std::ofstream     &page,
 
         } catch( std::out_of_range &e ) {
             if( _index->_indices.byTag.cats.find( tag ) == _index->_indices.byTag.cats.end() )
-                std::cerr << "[output::page::Landing::writeTopTags(..)] "
-                          << "Tag '" << tag << "' does not seem to exist in the master index."
-                          << std::endl;
+                _display.error(
+                    "[output::page::Landing::writeTopTags(..)] "
+                    "Tag '" + tag + "' does not seem to exist in the master index."
+                );
             else
-                std::cerr << "[output::page::Landing::writeTopTags(..)] "
-                          << "Tag '" << tag << "' doesn't not have any index page path(s) in its specifications."
-                          << std::endl;
+                _display.error(
+                    "[output::page::Landing::writeTopTags(..)] "
+                    "Tag '" + tag + "' doesn't not have any index page path(s) in its specifications."
+                );
         }
     }
 
@@ -233,13 +235,15 @@ void blogator::output::page::Landing::writeTopAuthors( std::ofstream     &page,
 
         } catch( std::out_of_range &e ) {
             if( _index->_indices.byTag.cats.find( author ) == _index->_indices.byTag.cats.end() )
-                std::cerr << "[output::page::Landing::writeTopAuthors(..)] "
-                          << "Author '" << author << "' does not seem to exist in the master index."
-                          << std::endl;
+                _display.error(
+                    "[output::page::Landing::writeTopAuthors(..)] "
+                    "Author '" + author + "' does not seem to exist in the master index."
+                );
             else
-                std::cerr << "[output::page::Landing::writeTopAuthors(..)] "
-                          << "Author '" << author << "' doesn't not have any index page path(s) in its specifications."
-                          << std::endl;
+                _display.error(
+                    "[output::page::Landing::writeTopAuthors(..)] "
+                    "Author '" + author + "' doesn't not have any index page path(s) in its specifications."
+                );
         }
     }
 

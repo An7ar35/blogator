@@ -1,4 +1,5 @@
 #include "html.h"
+#include "../cli/MsgInterface.h"
 
 #include <filesystem>
 #include <iostream>
@@ -167,6 +168,8 @@ std::unique_ptr<blogator::dto::IndexTagTree>
     blogator::html::generateIndexTagTreeHTML( const blogator::dto::Index   &master_index,
                                               const blogator::dto::Options &options )
 {
+    auto &display = cli::MsgInterface::getInstance();
+
     auto tree = std::make_unique<dto::IndexTagTree>();
 
     html::writer::openTree( *tree );
@@ -181,8 +184,10 @@ std::unique_ptr<blogator::dto::IndexTagTree>
                                               *tree );
 
             } catch( std::out_of_range &e ) {
-                std::cerr << "Could not find article in i=" << article_i << " referenced in tag '"
-                          << tag.first << "'. Skipping." << std::endl;
+                std::stringstream ss;
+                ss << "Could not find article in i=" << article_i
+                   << " referenced in tag '" << tag.first << "'. Skipping.";
+                display.error( ss.str() );
             }
         }
 

@@ -10,6 +10,7 @@
 #include "../../dto/Options.h"
 #include "../../dto/Templates.h"
 #include "../../dto/Line.h"
+#include "../../cli/MsgInterface.h"
 
 namespace blogator::output::page {
     class Posts : abstract::Page {

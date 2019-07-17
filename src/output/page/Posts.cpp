@@ -43,7 +43,6 @@ blogator::output::page::Posts::Posts( std::shared_ptr<const dto::Index>     mast
  * @throws exception::failed_expectation when no insertion points are found in the post template
  */
 bool blogator::output::page::Posts::init() const {
-    auto       &display       = cli::MsgInterface::getInstance();
     const auto total_articles = '/' + std::to_string( _index->_articles.size() );
 
     auto &insert_points = _templates->_post->block_write_pos;
@@ -57,9 +56,9 @@ bool blogator::output::page::Posts::init() const {
 
         for( const auto &article : _index->_articles ) {
             if( curr_article_i == 0 )
-                display.begin( "Generating posts", _index->_articles.size(), std::to_string( curr_article_i + 1 ) + total_articles );
+                _display.begin( "Generating post pages", _index->_articles.size(), std::to_string( curr_article_i + 1 ) + total_articles );
             else
-                display.progress( std::to_string( curr_article_i + 1 ) + total_articles );
+                _display.progress( std::to_string( curr_article_i + 1 ) + total_articles );
 
             const auto html_out = ( _options->_paths.posts_dir / article._paths.out_html );
 //            const auto css_link = html::createStylesheetLink( article._paths.css, html_out );//TODO
@@ -94,11 +93,11 @@ bool blogator::output::page::Posts::init() const {
         }
 
     } catch( std::exception &e ) {
-        std::cerr << e.what() << std::endl;
+        _display.error( e.what() );
         return false;
     }
 
-    display.progress( "DONE" );
+    _display.progress( "DONE" );
     return true;
 }
 
@@ -190,9 +189,10 @@ void blogator::output::page::Posts::writeHtmlBlock( dto::Page &page,
     } else if( block_class == "index-pane-tags" ) {
         writeIndexTagTree( page, indent, page_info.article, page_info.article_i );
     } else {
-        std::cerr << "output::page::Posts::init(..)] "
-                  << "HTML Div class '" << block_class << "' not recognised."
-                  << std::endl;
+        _display.error(
+            "[output::page::Posts::init(..)] "
+            "HTML Div class '" + block_class + "' not recognised."
+        );
     }
 }
 

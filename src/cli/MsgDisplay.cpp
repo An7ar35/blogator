@@ -1,4 +1,5 @@
 #include "MsgDisplay.h"
+
 #include <iostream>
 #include <unistd.h>
 #include <eadlib/cli/colour.h>
@@ -8,7 +9,9 @@
  */
 blogator::cli::MsgDisplay::MsgDisplay() :
     _progress_bar( BAR_WIDTH, CHAR_EMPTY ),
-    _old_cerr_buffer( std::cerr.rdbuf( _err_buffer.rdbuf() ) )
+    _old_cerr_buffer( std::cerr.rdbuf( _err_buffer.rdbuf() ) ),
+    _verbose_flag( true ),
+    _debug_flag( false )
 {}
 
 /**
@@ -19,9 +22,19 @@ blogator::cli::MsgDisplay::~MsgDisplay() {
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
     using eadlib::cli::format;
-    std::cout << "\033[2B" << "\n"
-              << format<FGColour::RED, Decoration::BOLD>( _err_buffer.str() )
-              << std::endl;
+
+    std::cout << "\033[2B" << "\n";
+    while( !_msg_buffer.empty() ) {
+        std::cout << _msg_buffer.front() << std::endl;
+        _msg_buffer.pop();
+    }
+
+    auto cerrors = _err_buffer.str();
+    if( !cerrors.empty() ) {
+        std::cout << "|==ERROR STREAM==|\n"
+                  << format<FGColour::RED, Decoration::BOLD>( _err_buffer.str() )
+                  << std::endl;
+    }
     std::cerr.rdbuf( _old_cerr_buffer );
 }
 
@@ -55,44 +68,101 @@ void blogator::cli::MsgDisplay::update( const std::string &next_step, const doub
     updateDisplay( progress );
 }
 
-
-void blogator::cli::MsgDisplay::done() {
-    std::cout << "\033[2B";
-}
-
-void blogator::cli::MsgDisplay::log( const std::string & msg ) {
+/**
+ * Sends a debug message to the buffer
+ * @param msg Message
+ */
+void blogator::cli::MsgDisplay::debug( const std::string & msg ) {
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
-    _err_buffer << eadlib::cli::format<FGColour::MAGENTA, Decoration::BOLD>( "[LOG] " )
-                << eadlib::cli::format<FGColour::MAGENTA, Decoration::FAINT>( msg ) << "\33[31;1m\n";
+    if( _verbose_flag && _debug_flag ) {
+        _msg_buffer.push(
+            eadlib::cli::format<FGColour::MAGENTA, Decoration::BOLD>( "|-DEBUG-| " ) +
+            eadlib::cli::format<FGColour::MAGENTA>( msg )
+        );
+    }
 }
 
+/**
+ * Sends a standard message to the buffer
+ * @param msg Message
+ */
 void blogator::cli::MsgDisplay::message( const std::string & msg ) {
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
-    _err_buffer << eadlib::cli::format<FGColour::CYAN, Decoration::BOLD>( "[MESSAGE] " )
-                << eadlib::cli::format<FGColour::CYAN>( msg ) << "\33[31;1m\n";
+    if( _verbose_flag ) {
+        _msg_buffer.push(
+            eadlib::cli::format<FGColour::CYAN, Decoration::BOLD>( "|MESSAGE| " ) +
+            eadlib::cli::format<FGColour::CYAN>( msg )
+        );
+    }
 }
 
+/**
+ * Sends a warning message to the buffer
+ * @param msg Message
+ */
 void blogator::cli::MsgDisplay::warning( const std::string & msg ) {
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
-    _err_buffer << eadlib::cli::format<FGColour::YELLOW, Decoration::BOLD>( "[WARNING] " )
-                << eadlib::cli::format<FGColour::YELLOW, Decoration::BOLD>( msg ) << "\33[31;1m\n";
+    _msg_buffer.push(
+        eadlib::cli::format<FGColour::YELLOW, Decoration::BOLD>( "|WARNING| " ) +
+        eadlib::cli::format<FGColour::YELLOW, Decoration::BOLD>( msg )
+    );
 }
 
+/**
+ * Sends an error message to the buffer
+ * @param msg Message
+ */
 void blogator::cli::MsgDisplay::error( const std::string & msg ) {
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
-    _err_buffer << eadlib::cli::format<FGColour::RED, Decoration::BOLD>( "[ERROR] " )
-                << eadlib::cli::format<FGColour::RED, Decoration::BOLD>( msg ) << "\33[31;1m\n";
+    _msg_buffer.push(
+        eadlib::cli::format<FGColour::RED, Decoration::BOLD>( "|-ERROR-| " ) +
+        eadlib::cli::format<FGColour::RED, Decoration::BOLD>( msg )
+    );
 }
 
-void blogator::cli::MsgDisplay::flushErrorsToDisplay() {
-    using eadlib::cli::BGColour;
-    using eadlib::cli::FGColour;
-    using eadlib::cli::Decoration;
-    std::cout << _err_buffer.str() << std::endl;
+/**
+ * Switches the state of the verbose messages on/off
+ * @param state State
+ */
+void blogator::cli::MsgDisplay::setVerbose( bool state ) {
+    _verbose_flag = state;
+}
+
+/**
+ * Switches the state of debug messages on/off
+ * @param state State
+ */
+void blogator::cli::MsgDisplay::setDebug( bool state ) {
+    _debug_flag = state;
+}
+
+/**
+ * Gets the debug message output state
+ * @return Output state for debug messages
+ */
+bool blogator::cli::MsgDisplay::getDebugState() const {
+    return _debug_flag;
+}
+
+/**
+ * Flush the linked-list buffer
+ */
+void blogator::cli::MsgDisplay::flushBuffer() {
+    if( !_msg_buffer.empty() ) {
+        std::cout << "\033[2B" << "\n";
+        while( !_msg_buffer.empty() ) {
+            std::cout << _msg_buffer.front() << std::endl;
+            _msg_buffer.pop();
+        }
+    }
+}
+
+void blogator::cli::MsgDisplay::done() {
+    std::cout << "\033[2B\n";
 }
 
 /**
@@ -100,10 +170,12 @@ void blogator::cli::MsgDisplay::flushErrorsToDisplay() {
  * @param progress Fractional progress of the workload
  */
 void blogator::cli::MsgDisplay::updateDisplay( const double & progress ) {
+    if( !_verbose_flag )
+        return;
+
     using eadlib::cli::BGColour;
     using eadlib::cli::FGColour;
     using eadlib::cli::Decoration;
-//    sleep( 1 ); //TODO remove (debug only)
     std::cout << "\r> " << _curr_process << ": "
               << eadlib::cli::format<FGColour::BLUE, Decoration::BOLD>( _curr_step )
               << "\033[K\n";

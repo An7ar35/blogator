@@ -11,5 +11,6 @@ blogator::output::abstract::Page::Page( std::shared_ptr<const blogator::dto::Ind
                                         std::shared_ptr<const blogator::dto::Options> global_options ) :
     _index( std::move( master_index ) ),
     _templates( std::move( templates ) ),
-    _options( std::move( global_options ) )
+    _options( std::move( global_options ) ),
+    _display( cli::MsgInterface::getInstance() )
 {}

@@ -10,6 +10,7 @@
 blogator::output::abstract::Lister::Lister( std::shared_ptr<const dto::Options> global_options,
                                             const dto::Index::Articles_t &articles,
                                             const dto::Template          &page_template ) :
+    _display( cli::MsgInterface::getInstance() ),
     _options( std::move( global_options ) ),
     _articles( articles ),
     _template( page_template )

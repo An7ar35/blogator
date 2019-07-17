@@ -1,4 +1,4 @@
-# BLOGATOR
+![alt text](docs/graphics/logo2.svg "Blogator logo")
 
 ## What is this?
 
@@ -7,18 +7,19 @@ with minimal software library dependencies (written in C++ &#128150;).
 
 It will produce a blog/news site whose navigation works just fine with js disabled at the 
 cost of a bit of duplication in the HTML (that amount can range from minimal 
-to hog-wild based on your requirements/options set).
+to hog-wild based on your requirements/options set). 
 
 #### Who is it for?
 
 If you:
 
 * still enjoys crafting their website by hand-coding it old-school but just wish you
-  could have an easier way to publish a blog next to it statically.
+  could have an easier way to publish a blog next to it statically,
 
-* are targeting a reader-base that runs a script blocker by default on their browser.
+* are targeting a reader-base that runs a script blocker by default on their browser 
+  (i.e.: security conscious types and anyone that can't stand ads and scroll wheel hijacking),
   
-* are someone that just cannot stand javascript anymore in you life.
+* are someone that just wants to keep things simple on your site
 
 then keep reading.
 
@@ -36,12 +37,26 @@ then keep reading.
 
 #### Fair Warning
 
-I've written this software basically for myself to help me automate things a little whilst 
-still keeping control. In short, I've built it with the assumption that the user can code 
-HTML/CSS completely by hand and is proficient in debugging their own HTML at the absolute 
-least.
+There is an expectation of a reasonable level of HTML/CSS proficiency from the operator as 
+well as some debugging skills. The software will not sanitise/check your HTML/CSS.
 
-__Blogator will not hold your hand.__
+
+## CLI arguments
+
+| Flag(s)                | Description |
+| ---------------------- | ----------- |
+|`-c`, `--create-config` | Creates a default configuration file in the working directory and then stops |
+|`-h`, `--help`          | Shows help and stops |
+|`-d`, `--debug`         | Turns on the debug messages and continues |
+
+| Argument(s) | Description       |
+| ----------- | ----------------- |
+| {path}      | Working directory |
+
+> **Example**  
+  `blogator -c`  
+  `blogator -l ~/mysite`
+
 
 ## Folder structure
 
@@ -56,6 +71,7 @@ To use when hyperlinks to the different files need to be added in user created h
 | ------------------------- | --------------------------------- | ------------------------------------------------------------------------- |
 | Landing page              | `/index.html`                     |                                                                           |
 | Index by date             | `/index/by_date/0.html`           | first page of the chronological index of all posts                        |
+| Index by year             | `/index/by_year/years.html`       | generated if `index-by-year = true;` is set in the configuration file     |
 | Index by tags             | `/index/by_tag/tags.html`         | generated if `index-by-tag = true;` is set in the configuration file      |
 | Index by authors          | `/index/by_author/authors.html`   | generated if `index-by-author = true;` is set in the configuration file   |
 | Blog-wide stylesheet      | `/css/blog.css`                   |                                                                           |
@@ -69,9 +85,13 @@ To use when hyperlinks to the different files need to be added in user created h
 | `landing_entry.html`  | Landing page's entry for a post/article       | `/`                                                   |
 | `post.html`           | Blog post/Article                             | `/posts`                                              |
 | `index.html`          | Index page used for all indices except lists  | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
-| `tag_list.html`       | Index list of post categories/tags            | `/index/by_tag`                                       |
-| `author_list.html`    | Index list of post authors                    | `/index/by_author`                                    |
+| `index_list.html`     | Index list page used for all index lists      | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+| `year_list.html`[^1]  | (Override) index list of post year            | `/index/by_year`                                       |
+| `tag_list.html`[^1]   | (Override) index list of post categories/tags | `/index/by_tag`                                       |
+| `author_list.html`[^1]| (Override) index list of post authors         | `/index/by_author`                                    |
 | `index_entry.html`    | Index page's entry for a post/article         | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+
+[^1]: Optional 
 
 ## Template tag classes
 
@@ -141,31 +161,19 @@ To use when hyperlinks to the different files need to be added in user created h
 * `page-nav`
 * `index-entries`
 
-#### Tag/Category list page
+#### Index List page (Years/Tags/Authors)
 
 * `breadcrumb`
 
 > Provides a visual cue as to where in the blog hierarchy the user is currently.
 
-* `tag-list`
+* `index-list`
 
-> Plain and flat `<ul></ul>` list of tags arranged in alphabetical order.
+> Plain and flat `<ul></ul>` list of categories arranged in numerical/alphabetical order.
 
-* `tag-list-hierarchy`
+* `index-list-hierarchy`
 
-> Hierarchy list `<ul></ul>` of tags arranged grouped by their first alphabetical letter.
-
-#### Author list page
-
-* `breadcrumb`
-
-> Provides a visual cue as to where in the blog hierarchy the user is currently.
-
-* `author-list`
-
-> Plain and flat `<ul></ul>` list of authors arranged in alphabetical order.
-
-* `author-list-hierarchy` //NOT IMPLEMENTED
+> Hierarchy list `<ul></ul>` of categories arranged grouped numerically/alphabetically
 
 #### Index entry
 
@@ -228,7 +236,7 @@ the root of the target site's root folder. //NOT YET IMPLEMENTED
 > Flag to enable inclusion of future dated posts in the build. Future means any time stamp whose day/month/year
 is after the day of the build (i.e. when generator is run).
 
-    safe-purge = true;  //TODO
+    safe-purge = true;
     
 > Flag enabling deletion in the output post folder (`/posts`) of just html files (`*.htm` and 
   `*.html`) only whilst leaving any other file types and folders in the structure intact. 
@@ -253,7 +261,7 @@ is after the day of the build (i.e. when generator is run).
     
 > Flag to enable the creation of an extra index that groups posts by tags/categories
  
-    index-by-author = false;
+    index-by-author = true;
     
 > Flag to enable the creation of an extra index that groups posts by authors
 
@@ -283,11 +291,12 @@ __absolute__ path for it to work across all generated pages.
 #### Breadcrumb
 
     breadcrumb-landing-page   = "Welcome page";
+    breadcrumb-by-date-page   = "Index";
+    breadcrumb-by-year-page   = "Years";
     breadcrumb-by-tag-page    = "Categories";
     breadcrumb-by-author-page = "Authors";
-    breadcrumb-by-date-page   = "Index";
     breadcrumb-index-page     = "Page ";
-    
+           
 > Used for the breadcrumb navigation on the generated html. These strings will be copied verbatim
   into their respective `<a></a>` so custom html tags can be written inside these string values 
   if you want to get creative.  
@@ -346,16 +355,21 @@ plan to deal with this for any `1.x` versions.
 
 #### Platform
 
-Officially, Linux and a compiler that supports C++20. 
+Officially, Linux and a compiler that supports C++17.
 
-> As the software doesnt't use any exotic libraries aside from C++'s STL it should be compilable 
-  on other platforms (Windows/Mac) as long as you have that C++20 compliant compiler on the 
-  machine and are willing to put in a bit of elbow grease.
+Note that I make heavy use of `std::filesystem` and some libraries 
+might not have a complete implantation of that yet. `GCC 1.9.0` on 
+Arch works fine for reference).
+
+## Ideas for the future
+
+Some ideas I've had for future versions of the software. May or may not happen depending on what 
+I need most and what goes on in my life. 
+
+* Code snippet support in posts (syntax highlighting)
+* 
 
 ## Contributing
-
-If/when I've got the time I'll update as I run into different use-cases / come 
-up with ideas on how to improve this and make it more flexible. 
 
 I'm open to:
 
@@ -366,3 +380,5 @@ I'm open to:
 
 Software is provided as-is (i.e.: {*insert std. disclaimer here*}, backup you sh*t __before__ 
 running the software, etc...).
+
+Licensed under [GNU AGPLv3](LICENSE.txt)

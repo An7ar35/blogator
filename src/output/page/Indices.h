@@ -27,7 +27,6 @@ namespace blogator::output::page {
         generic::EntryWriter _entry_maker;
         BreadCrumb_t         _breadcrumb_parents;
         size_t               _total_jobs;
-        cli::MsgInterface   &_display;
     };
 }
 

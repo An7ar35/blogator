@@ -5,6 +5,7 @@
 #include "../../dto/Index.h"
 #include "../../dto/Template.h"
 #include "../../dto/Options.h"
+#include "../../cli/MsgInterface.h"
 
 namespace blogator::output::abstract {
     class Lister : protected abstract::Breadcrumb {
@@ -13,11 +14,8 @@ namespace blogator::output::abstract {
                 const dto::Index::Articles_t &articles,
                 const dto::Template          &page_template );
 
-//        virtual void write( const dto::Index::Category  &cat_index,
-//                            const BreadCrumb_t          &breadcrumb,
-//                            const std::filesystem::path &root_dir ) = 0;
-
       protected:
+        cli::MsgInterface                  &_display;
         std::shared_ptr<const dto::Options> _options;
 
         const dto::Index::Articles_t &_articles;
