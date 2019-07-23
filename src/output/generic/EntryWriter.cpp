@@ -7,17 +7,18 @@
 #include "../../html/reader/reader.h"
 #include "../../dto/Line.h"
 #include "../../html/html.h"
+#include "../../exception/file_access_failure.h"
 
 /**
  * Constructor
+ * @param global_options Global blogator options
  * @param entry_template Template DTO for the entry
- * @param months         Lookup map for the months strings
  */
-blogator::output::generic::EntryWriter::EntryWriter( std::shared_ptr<const dto::Template> entry_template,
-                                                     const dto::Options::MonthStringLookup_t &months ) :
+blogator::output::generic::EntryWriter::EntryWriter( std::shared_ptr<const dto::Options> global_options,
+                                                     std::shared_ptr<const dto::Template> entry_template ) :
     _display( cli::MsgInterface::getInstance() ),
-    _template( std::move( entry_template ) ),
-    _months( months )
+    _options( std::move( global_options ) ),
+    _template( std::move( entry_template ) )
 {}
 
 /**
@@ -66,6 +67,7 @@ void blogator::output::generic::EntryWriter::writeTemplateLine( dto::Page &page,
     std::string::size_type col = 0;
     const auto sub_indent   = html::reader::getIndent( *line._it );
     const auto total_indent = indent + sub_indent;
+    bool  carriage_return   = true;
 
     //EARLY RETURN: when there's nothing to add/edit on the line
     if( !hasBlock() && !hasPath() ) {
@@ -75,9 +77,13 @@ void blogator::output::generic::EntryWriter::writeTemplateLine( dto::Page &page,
 
     while( hasBlock() && hasPath() ) {
         if( insert_its.block->first.col < insert_its.path->first.col ) { //do the block first
-            page._out << indent << line._it->substr( col, insert_its.block->first.col - col ) << "\n";
-            writeHtmlBlock( page, total_indent +"\t", insert_its.block->second, article );
-            page._out << total_indent;
+            if( carriage_return )
+                page._out << indent;
+
+            page._out << line._it->substr( col, insert_its.block->first.col - col );
+
+            if( ( carriage_return = writeHtmlBlock( page, total_indent +"\t", insert_its.block->second, article ) ) )
+                page._out << total_indent;
 
             col = insert_its.block->first.col;
             ++insert_its.block;
@@ -92,9 +98,13 @@ void blogator::output::generic::EntryWriter::writeTemplateLine( dto::Page &page,
     }
 
     while( hasBlock() ) { //just block(s) left to insert
-        page._out << indent << line._it->substr( col, insert_its.block->first.col - col ) << "\n";
-        writeHtmlBlock( page, total_indent + "\t", insert_its.block->second, article );
-        page._out << total_indent;
+        if( carriage_return )
+            page._out << indent;
+
+        page._out << line._it->substr( col, insert_its.block->first.col - col );
+
+        if( ( carriage_return = writeHtmlBlock( page, total_indent + "\t", insert_its.block->second, article ) ) )
+            page._out << total_indent;
 
         col = insert_its.block->first.col;
         ++insert_its.block;
@@ -117,43 +127,63 @@ void blogator::output::generic::EntryWriter::writeTemplateLine( dto::Page &page,
  * @param indent     Space to place before the output lines (i.e.: html indent)
  * @param block_name HTML block's name (i.e.: the tag's class)
  * @param article    Article DTO
+ * @return Line carriage return required
  */
-void blogator::output::generic::EntryWriter::writeHtmlBlock( dto::Page &page,
+bool blogator::output::generic::EntryWriter::writeHtmlBlock( dto::Page &page,
                                                              const std::string  &indent,
                                                              const std::string  &block_name,
                                                              const dto::Article &article ) const
 {
     if( block_name == "post-number" ) {
-        page._out << indent << article._number << "\n";
+        page._out << article._number;
+        return false;
 
     } else if( block_name == "heading" ) {
-        page._out << indent << article._heading << "\n";
+        page._out << article._heading;
+        return false;
 
     } else if( block_name == "authors" ) {
+        page._out  << "\n";
         for( const auto & author : article._authors ) {
             page._out << indent
                       << "<span class=\"author\">" << author << "</span>\n";
         }
+        return true;
 
     } else if( block_name == "tags" ) {
+        page._out << "\n";
         for( const auto & tag : article._tags ) {
             page._out << indent
                       << "<span class=\"tag\">" << tag << "</span>\n";
         }
+        return true;
 
     } else if( block_name == "date-stamp" ) {
-        page._out << indent
-                  << html::createDateTime( article._datestamp, _months ) << "\n";
+        page._out << html::createDateTime( article._datestamp, _options->_months );
+        return false;
 
-    } else if( block_name == "summary" ) { //TODO
-        _display.error(
-            "[output::generic::EntryWriter::writeHtmlBlock(..)] "
-            "//TODO: implement 'summary' insertion point"
-        );
+    } else if( block_name == "summary" ) {
+        try {
+            auto html = fs::importHTML( article._paths.src_html, article._summary_pos );
+
+            page._out << "\n";
+            for( const auto &line : html._lines ) {
+                page._out << indent << _options->_index.summary_pad_begin
+                          << line
+                          << _options->_index.summary_pad_end << "\n";
+            }
+
+            return true;
+
+        } catch( exception::file_access_failure &e ) {
+            _display.error( e.what() );
+        }
     } else {
         _display.error(
             "[output::generic::EntryWriter::writeHtmlBlock(..)] "
             "HTML element class '" + block_name + "' not recognised."
         );
     }
+
+    return false;
 }

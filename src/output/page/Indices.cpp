@@ -30,7 +30,7 @@ blogator::output::page::Indices::Indices( std::shared_ptr<const dto::Index>     
           std::move( templates ),
           std::move( global_options )
     ),
-    _entry_maker( generic::EntryWriter( _templates->_index_entry, _options->_months ) )
+    _entry_maker( generic::EntryWriter( _options, _templates->_index_entry ) )
 {
     _breadcrumb_parents = BreadCrumb_t( { { _options->_breadcrumb.start, "../../index.html" } } );
 
@@ -66,7 +66,7 @@ bool blogator::output::page::Indices::init() const {
             const auto &first_file = *_index->_indices.chronological.file_names.cbegin();
             _display.begin( "Generating index pages", _total_jobs, _options->_paths.index_date_dir.filename() / first_file );
 
-            auto entry_maker = generic::EntryWriter( _templates->_index_entry, _options->_months );
+            auto entry_maker = generic::EntryWriter( _options, _templates->_index_entry );
             auto index_maker = generic::ChronoIndexLister( _options, _index->_articles, *_templates->_index, entry_maker );
 
             auto breadcrumb = BreadCrumb_t( _breadcrumb_parents.cbegin(), _breadcrumb_parents.cend() );
@@ -81,8 +81,8 @@ bool blogator::output::page::Indices::init() const {
 
             auto list_page_maker = ByYearList( _index, _options, *_templates->_year_list );
             auto list_page_path  = std::filesystem::path( _options->_paths.index_year_dir / _options->_filenames.year_list );
-            auto entry_maker     = generic::EntryWriter( _templates->_index_entry, _options->_months );
-            auto cat_page_maker  = generic::CategoryLister( _options, _index->_articles, *_templates->_index, entry_maker );
+            auto entry_maker     = generic::EntryWriter( _options, _templates->_index_entry );
+            auto cat_page_maker  = generic::CategoryLister( _options, _index->_articles, *_templates->_year_index, entry_maker );
 
             auto breadcrumb      = BreadCrumb_t( _breadcrumb_parents.cbegin(), _breadcrumb_parents.cend() );
             breadcrumb.emplace_back( std::make_pair( _options->_breadcrumb.by_year, _options->_filenames.year_list ) );
@@ -100,8 +100,8 @@ bool blogator::output::page::Indices::init() const {
 
             auto list_page_maker = ByTagList( _index, _options, *_templates->_tag_list );
             auto list_page_path  = std::filesystem::path( _options->_paths.index_tag_dir / _options->_filenames.tag_list );
-            auto entry_maker     = generic::EntryWriter( _templates->_index_entry, _options->_months );
-            auto cat_page_maker  = generic::CategoryLister( _options, _index->_articles, *_templates->_index, entry_maker );
+            auto entry_maker     = generic::EntryWriter( _options, _templates->_index_entry );
+            auto cat_page_maker  = generic::CategoryLister( _options, _index->_articles, *_templates->_tag_index, entry_maker );
 
             auto breadcrumb      = BreadCrumb_t( _breadcrumb_parents.cbegin(), _breadcrumb_parents.cend() );
             breadcrumb.emplace_back( std::make_pair( _options->_breadcrumb.by_tag, _options->_filenames.tag_list ) );
@@ -119,8 +119,8 @@ bool blogator::output::page::Indices::init() const {
 
             auto list_page_maker = ByAuthorList( _index, _options, *_templates->_author_list );
             auto list_page_path  = std::filesystem::path( _options->_paths.index_author_dir / _options->_filenames.author_list );
-            auto entry_maker     = generic::EntryWriter( _templates->_index_entry, _options->_months );
-            auto cat_page_maker  = generic::CategoryLister( _options, _index->_articles, *_templates->_index, entry_maker );
+            auto entry_maker     = generic::EntryWriter( _options, _templates->_index_entry );
+            auto cat_page_maker  = generic::CategoryLister( _options, _index->_articles, *_templates->_author_index, entry_maker );
 
             auto breadcrumb      = BreadCrumb_t( _breadcrumb_parents.cbegin(), _breadcrumb_parents.cend() );
             breadcrumb.emplace_back( std::make_pair( _options->_breadcrumb.by_author, _options->_filenames.author_list ) );

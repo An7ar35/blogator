@@ -1,18 +1,13 @@
 #include "Options.h"
 #include "../cli/MsgInterface.h"
 
-const char* blogator::dto::Options::BLOGATOR_NAME    = "Blogator";
-const char* blogator::dto::Options::BLOGATOR_VERSION = "0.1a";
-const char* blogator::dto::Options::BLOGATOR_URL     = "https://an7ar35.bitbucket.io"; //TODO update when a proper 'Blogator' page is created
-
 /**
  * Constructor
+ * @param info Software information
  */
-blogator::dto::Options::Options() :
-    RUN_TIMESTAMP( std::chrono::system_clock::now() ),
-    BLOGATOR_SIGNATURE(
-        "<!-- Generated with " + std::string( BLOGATOR_NAME ) + " " + std::string( BLOGATOR_VERSION ) + " (" + std::string( BLOGATOR_URL ) + ") -->"
-    )
+blogator::dto::Options::Options( dto::BlogatorInfo info ) :
+    BLOGATOR_INFO( std::move( info ) ),
+    RUN_TIMESTAMP( std::chrono::system_clock::now() )
 {}
 
 /**
@@ -44,6 +39,31 @@ void blogator::dto::Options::setTempPath( const std::filesystem::path &temp_path
     display.debug( "Temporary directory .: " + temp_path.string() );
 
     _paths.temp_dir = temp_path;
+}
+
+/**
+ * Gets the software's name string
+ * @return Software name
+ */
+std::string blogator::dto::Options::getSoftwareNameStr() const {
+    return BLOGATOR_INFO._name;
+}
+
+/**
+ * Gets the software's version string
+ * @return Software version
+ */
+std::string blogator::dto::Options::getSoftwareVersionStr() const {
+    return BLOGATOR_INFO._version;
+}
+
+/**
+ * Gets the software's signature line for injecting into generated HTML files
+ * @return Signature string
+ */
+std::string blogator::dto::Options::getSoftwareSignatureStr() const {
+    static const auto str = "<!-- Generated with " + BLOGATOR_INFO._name + " " + BLOGATOR_INFO._version + " (" + BLOGATOR_INFO._url + ") -->";
+    return str;
 }
 
 /**

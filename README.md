@@ -14,7 +14,7 @@ to hog-wild based on your requirements/options set).
 If you:
 
 * still enjoys crafting their website by hand-coding it old-school but just wish you
-  could have an easier way to publish a blog next to it statically,
+  could have a blog in there too
 
 * are targeting a reader-base that runs a script blocker by default on their browser 
   (i.e.: security conscious types and anyone that can't stand ads and scroll wheel hijacking),
@@ -38,10 +38,19 @@ then keep reading.
 #### Fair Warning
 
 There is an expectation of a reasonable level of HTML/CSS proficiency from the operator as 
-well as some debugging skills. The software will not sanitise/check your HTML/CSS.
+well as some debugging skills. The software will not sanitise/check your HTML/CSS. That's on you.
 
+## Installing
+
+#### On Arch
+//TODO
+
+#### Other
+//TODO
 
 ## CLI arguments
+
+Run with: `blogator [options] <working directory path>`
 
 | Flag(s)                | Description |
 | ---------------------- | ----------- |
@@ -53,14 +62,67 @@ well as some debugging skills. The software will not sanitise/check your HTML/CS
 | ----------- | ----------------- |
 | {path}      | Working directory |
 
-> **Example**  
-  `blogator -c`  
-  `blogator -l ~/mysite`
+**Example**
+
+      blogator -c           //Creates a sample configuration file in the current directory
+      blogator -c ~/mysite  //Creates a sample configuration file in `~/mysite`  
+      blogator              //Runs Blogator to generate site in current directory
+      blogator -d ~/mysite  //Runs Blogator to generate site in `~/mysite` with debug messages enabled
 
 
-## Folder structure
+## Input/Output overview
 
-![folder structure](docs/pencil/planning.svg)
+Here's a quick bird's eye view of what Blogator takes in and what it outputs and where.
+Everything in **bold** in the Input section is a hard requirement.
+
+![Files](docs/pencil/files.png)
+
+### Posts/Articles
+
+All posts/articles must be placed in the source folder. The folder hierachy can be whatever you 
+want. The only hard restrictions are as follow:
+
+* A custom CSS stylesheet for a particular post must be named the same as its post and be in the 
+  same folder.  
+  i.e.: `{source/{filename}.html` and `source/{filename}.css`.  
+  The stylesheet will be copied and named based on the generated post's file name and a link will 
+  be inserted into the `<head></head>` section of the generated post.
+* A custom index-entry template (the file used as the index entry for the associated post) must be 
+  named the same as its associated post's file name + `_index` and be in the same folder.  
+  i.e.: `{source/{filename}.html` and `source/{filename}_index.html`.
+
+**Example:**
+
+    source/
+    ├── post1/
+    │   ├── post.html           //<time datetime="2019-01-15">
+    │   ├── post.css
+    │   └── post_index.html
+    ├── post2/
+    │   ├── awesome.html        //<time datetime="2019-03-15">
+    │   └── awesome_index.html
+    ├── post3/
+    │   ├── radical.html        //<time datetime="2019-02-15">
+    │   └── radical.css
+          
+The software recursively looks into the source folder for any `.html`/`.htm` files and their matching
+index entry and stylesheets if any. The posts, after processing, are named by their chronological 
+index number. So in the above example it will result with the following inside the post output folder:
+
+    posts/
+    ├── 1.html                  //i.e.: post1/post.html (15 January 2019)
+    ├── 1.css
+    ├── 2.html                  //i.e.: post3/radical.html (15 February 2019)
+    ├── 2.css
+    └── 3.html                  //i.e.: post2/awesome.html (15 March 2019)
+    
+    
+### CSS Stylesheets
+
+Globally, there are no hard requirements on stylesheets. The software will generate 2 blank files: 
+`css/blog.css` and `css/index.css` if one or both do not exist for convenience. It is not necessary
+to use either. CSS stylesheets can be declared for each templates like in any run-of-the-mill HTML
+file with the usual `<link rel="stylesheet" type="text/css" href="{your CSS file path}"/>`.
 
 
 ### Important file paths
@@ -70,26 +132,45 @@ To use when hyperlinks to the different files need to be added in user created h
 | Description               | File Path                         | Notes                                                                     |
 | ------------------------- | --------------------------------- | ------------------------------------------------------------------------- |
 | Landing page              | `/index.html`                     |                                                                           |
-| Index by date             | `/index/by_date/0.html`           | first page of the chronological index of all posts                        |
+| Index by date             | `/index/by_date/0.html`           | first page of the reverse chronological index of all posts                |
 | Index by year             | `/index/by_year/years.html`       | generated if `index-by-year = true;` is set in the configuration file     |
 | Index by tags             | `/index/by_tag/tags.html`         | generated if `index-by-tag = true;` is set in the configuration file      |
 | Index by authors          | `/index/by_author/authors.html`   | generated if `index-by-author = true;` is set in the configuration file   |
 | Blog-wide stylesheet      | `/css/blog.css`                   |                                                                           |
 | Index-specific stylesheet | `/css/index.css`                  |                                                                           |
 
+**A note on the indices:** Index files for categorised indices (year/tag/author) are names based
+on their category's ID and the page number.
+
+e.g.: Let's say a year is given an ID of `3`, there are 30 articles for that year and, 
+in the options, the number of entries per page is set to 10. The end result would be:
+
+    by_year/
+    ├── ...
+    ├── 3_0.html
+    ├── 3_1.html
+    ├── 3_2.html
+    └── ...
+    
+In the case of the chronological index (`by_date`), the files are named by their page number 
+starting from `0`.
+  
 ## Templates
 
-| File Name             | Description                                   | Target directory path(s)                              |
-|-----------------------| --------------------------------------------- | ----------------------------------------------------- |
-| `landing.html`        | Landing/start page of the site/blog           | `/`                                                   |
-| `landing_entry.html`  | Landing page's entry for a post/article       | `/`                                                   |
-| `post.html`           | Blog post/Article                             | `/posts`                                              |
-| `index.html`          | Index page used for all indices except lists  | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
-| `index_list.html`     | Index list page used for all index lists      | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
-| `year_list.html`[^1]  | (Override) index list of post year            | `/index/by_year`                                       |
-| `tag_list.html`[^1]   | (Override) index list of post categories/tags | `/index/by_tag`                                       |
-| `author_list.html`[^1]| (Override) index list of post authors         | `/index/by_author`                                    |
-| `index_entry.html`    | Index page's entry for a post/article         | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+| File Name               | Description                                     | Target directory path(s)                              |
+| ----------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| `landing.html`          | Landing/start page of the site/blog             | `/`                                                   |
+| `landing_entry.html`    | Landing page's entry for a post/article         | `/`                                                   |
+| `post.html`             | Blog post/Article                               | `/posts`                                              |
+| `index.html`            | Index page used for all indices except lists    | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+| `index_list.html`       | Index list page used for all index lists        | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+| `year_list.html`[^1]    | (Override) index list for post years            | `/index/by_year`                                      |
+| `year_index.html`[^1]   | (Override) index pages for post years           | `/index/by_year`                                      |
+| `tag_list.html`[^1]     | (Override) index list for post categories/tags  | `/index/by_tag`                                       |
+| `tag_index.html`[^1]    | (Override) index pages for post categories/tags | `/index/by_tag`                                       |
+| `author_list.html`[^1]  | (Override) index list for post authors          | `/index/by_author`                                    |
+| `author_index.html`[^1] | (Override) index pages for post authors         | `/index/by_author`                                    |
+| `index_entry.html`      | Index page's entry for a post/article           | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
 
 [^1]: Optional 
 
@@ -137,11 +218,75 @@ To use when hyperlinks to the different files need to be added in user created h
 
 * `date-stamp`
 
-> Date for the post
+> Date for the post.
 
-* `summary` //NOT IMPLEMENTED
+* `summary`
+
+> Summary text from the post
 
 #### Post/Article page
+
+##### Input tags
+
+* `<h1>/h1>`
+
+> Title of the post. Anything between the first occurrence of these tags will be used at the title. 
+
+* `<time datetime="yyyy-mm-dd"></time>`
+
+> Date stamp. The `yyyy-mm-dd` formatted date-time will be used as the date of the post. Visually, 
+  on the user side, that date can be expressed between the tags.   
+  e.g.: `<time datetime="2019-06-05">5 June 2019</time>`
+
+* `<span class="tag"></span>`
+
+> (Optional) If a tag index is required (see config file), then tag(s) must be given to each posts.
+  You can add as many per posts as required. So, for example, if the post is about a river in Italy
+  then you can have the following tags:  
+  `<span class="tag">Rivers</span>`  
+  `<span class="tag">Italy</span>`
+
+* `<span class="author"></span>`
+
+> (Optional) If an author index is required (see config file), then author(s) must be given to each
+  posts. Multiple authors per post is supported. Each author must be placed inside a tag.  
+  e.g.: `<span class="author">John Doe</span>`
+
+* `<span class="summary"></span>`
+
+> (Optional) Any text inside these tags will be used as a summary in the index entry for the post.
+  If the index entry text needs to be slightly different than the content text then one approach 
+  could be to put your entry text inside of a summary span and use CSS to hide it in posts.
+
+##### Sample source post example:
+
+    <div>
+        <h1>Lorem Ipsum Title</h1>
+        <time datetime="2019-06-05">5 Juin 2019</time>
+        <span class="tag">Sample text</span> 
+        <span class="tag">Ipsum</span>                      
+        <span class="author">L. Ipsum</span> 
+        <span class="author">J. Smith</span>
+    </div>
+    <div>
+        <p>
+            <span class="summary"> Lorem ipsum dolor sit amet consectetur 
+            adipiscing elit, non purus a etiam quam integer, maecenas 
+            habitasse neque quisque iaculis sollicitudin.</span> 
+            Luctus aliquam in maecenas quis cubilia urna vulputate 
+            fusce eros, nam mauris proin torquent pulvinar fringilla 
+            ultrices.
+        </p>
+        <p>
+            Condimentum viverra duis donec consectetur et morbi ac 
+            purus libero parturient turpis quisque torquent euismod 
+            amet, cubilia aenean sociosqu pharetra facilisis metus 
+            habitasse ante dictum sed magna vel convallis fermentum.
+        </p>
+    </div>
+
+
+##### Output template
 
 * `breadcrumb`
 
@@ -152,7 +297,11 @@ To use when hyperlinks to the different files need to be added in user created h
 * `index-pane-dates`
 * `index-pane-tags`
 
-#### Index page
+#### Index page (Chronological/Years/Tags/Authors)
+
+* `page-name`
+
+> Name of the page as specified in the configuration file's breadcrumb strings
 
 * `breadcrumb`
 
@@ -162,6 +311,10 @@ To use when hyperlinks to the different files need to be added in user created h
 * `index-entries`
 
 #### Index List page (Years/Tags/Authors)
+
+* `page-name`
+
+> Name of the page as specified in the configuration file's breadcrumb strings
 
 * `breadcrumb`
 
@@ -197,22 +350,24 @@ To use when hyperlinks to the different files need to be added in user created h
 
 > Date for the post
 
-* `summary` //NOT IMPLEMENTED
+* `summary` 
+
+> Summary text from the post.
 
 ## Configuration file
 
 **File:** `blogator.cfg`
 
 A default config file can be generated from the command line with `./blogator -c` in 
-the root of the target site's root folder. //NOT YET IMPLEMENTED
+the root of the target site's root folder (see CLI Arguments).
 
 > **Note:** all options keep to 1 line each and are terminated with a semi-colon `;`. 
 
 #### General settings
 
-    site-url       = "http://www.domain.com";
-    canonify-urls  = false; //TODO 0: relative paths, 1: absolute paths with the site's URL as root, 
-    log-file       = "";    //TODO Save path of the log file. If empty then no log file will be created
+    site-url = "http://www.domain.com";
+    
+> The root URL for the site Blogator is generating for.
 
 #### Templates
 
@@ -238,8 +393,9 @@ is after the day of the build (i.e. when generator is run).
 
     safe-purge = true;
     
-> Flag enabling deletion in the output post folder (`/posts`) of just html files (`*.htm` and 
-  `*.html`) only whilst leaving any other file types and folders in the structure intact. 
+> Flag enabling deletion in the output post folder (`/posts`) of just html and css files 
+  (`*.htm`, `*.html` and `.css`) only whilst leaving any other file types and folders in 
+  the structure intact.   
   Good when resources are placed in there for whatever reasons and you don't want them to get 
   nuked during the built process.
     
@@ -249,6 +405,17 @@ is after the day of the build (i.e. when generator is run).
     
 > Flag to enable the insertion of the post's publication number in the index entries.
     
+    show-summary = false;
+    
+> Enables/Disables showing summary snippets in the index entries for posts.
+
+    post-summary-pads = ["<p>", "</p>"];
+    
+> Pads any captured spans for the summary text with the given text when writing an
+  index entry.   
+  e.g.: if the summary text is _"Lorem ipsum dolor sit adipiscing."_ then , 
+  with the given padding above, the ouput would be `<p>Lorem ipsum dolor sit adipiscing.</p>` 
+      
     items-per-page = 10;
     
 > Sets the Number of post entries per page in the index
@@ -265,12 +432,6 @@ is after the day of the build (i.e. when generator is run).
     
 > Flag to enable the creation of an extra index that groups posts by authors
 
-    summary-length = 200;   //TODO
-
-> Number of characters for the summaries (taken from the first `<p class=summary></p>`
-  inside the source posts). Set to `0` to disable completely. Note that there is a 
-  substantial performance hit correlated with the number of posts to process. 
-
 #### Page navigation
     
     page-nav-separator = " / ";
@@ -279,7 +440,7 @@ is after the day of the build (i.e. when generator is run).
     page-nav-first     = "First";
     page-nav-last      = "Last";
     
-> Used for the per-page navigation on the generated html. These strings will be copied verbatim
+> Used for the per-page navigation on the generated html. These strings will be copied **verbatim**
   into their respective `<a></a>` so custom html tags can be written inside these string values 
   for more flexibility. e.g.:  `page-nav-forward = "<div class="fwd-button"></div>";`
   
@@ -298,13 +459,13 @@ __absolute__ path for it to work across all generated pages.
     breadcrumb-index-page     = "Page ";
            
 > Used for the breadcrumb navigation on the generated html. These strings will be copied verbatim
-  into their respective `<a></a>` so custom html tags can be written inside these string values 
-  if you want to get creative.  
-  **e.g.:**  `breadcrumb-landing-page = "<img src="img/start.png" alt="landing page">";`
+  into their respective `<a></a>`.
   
 ###### Note:
 
-If a path is given in a nesting tag for one or more of breadcrumb strings it must be an 
+Custom html tags can be written inside these string values if you want to get creative. 
+For example: `breadcrumb-landing-page = "<img src="img/start.png" alt="landing page">";`.
+Though, if a path is given in a nesting tag for one or more of breadcrumb strings it must be an 
 __absolute__ path for it to work across all generated pages.
   
 #### Landing page
@@ -314,9 +475,11 @@ __absolute__ path for it to work across all generated pages.
 > Number of entries to the most recent posts/articles to place inside the `newest-posts` section 
   of the page. 
 
-    landing-top-tags = 5;
+    landing-top-tags    = 5;
+    landing-top_authors = 5;
     
-> Top used tags in the posts/articles to display inside the `top-tags` section of the page. 
+> Top used tags/authors in the posts/articles to display inside the `top-tags` and `top-authors` 
+sections respectively of the page. 
       
     landing-featured = ["0.html", "1.html", "2.html"];
     
@@ -335,7 +498,6 @@ __absolute__ path for it to work across all generated pages.
     rss-img-height  = "50px";
     rss-img-alt     = "Site logo";
    
-
 ## Support
 
 #### Language/Character sets
@@ -353,28 +515,21 @@ based site with all the wonderful `é` `ê` `è` `ç` types of characters that c
 `UTF-16` is something that might be supported in version `2.0` if it gets to that. I do not 
 plan to deal with this for any `1.x` versions.
 
-#### Platform
+#### Platform/Requirements
 
 Officially, Linux and a compiler that supports C++17.
 
 Note that I make heavy use of `std::filesystem` and some libraries 
-might not have a complete implantation of that yet. `GCC 1.9.0` on 
-Arch works fine for reference).
-
-## Ideas for the future
-
-Some ideas I've had for future versions of the software. May or may not happen depending on what 
-I need most and what goes on in my life. 
-
-* Code snippet support in posts (syntax highlighting)
-* 
+might not have a complete implementation of that yet (`GCC 1.9.0` on 
+Arch linux works fine for reference).
 
 ## Contributing
 
 I'm open to:
 
-* bug reports (source html files that can reproduce the issue would be appreciated when relevant), 
-* suggestions for improvements.
+* bug reports including a copy of your terminal output with the `--debug` flag enabled 
+  (source html files that can reproduce the issue would be appreciated when relevant), 
+* suggestions for improvements (docs and features).
 
 ## License
 

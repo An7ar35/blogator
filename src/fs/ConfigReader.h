@@ -9,7 +9,9 @@
 namespace blogator::fs {
     class ConfigReader {
       public:
-        std::shared_ptr<blogator::dto::Options> init( const std::filesystem::path &file_path ) const;
+        std::shared_ptr<blogator::dto::Options> init( const std::filesystem::path &file_path,
+                                                      const dto::BlogatorInfo &info ) const;
+
         static void generateBlankConfigFile( const std::filesystem::path &file_path );
 
       private:
@@ -25,6 +27,8 @@ namespace blogator::fs {
             Type        type;
             std::string value;
         };
+
+        cli::MsgInterface &_display = cli::MsgInterface::getInstance();
 
         const std::regex COMMENT_RX       = std::regex( R"(^(?:\s*//.*?|\s*)$)" );
         const std::regex KV_BOOL_VAL_RX   = std::regex( R"(\s*([a-zA-Z-]+)\s*=\s*(true|false)\s*;)" );

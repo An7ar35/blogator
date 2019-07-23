@@ -22,7 +22,7 @@ namespace blogator::dto {
             HTML::CharIndex_t col;
 
             friend std::ostream &operator <<( std::ostream &s, const InsertPosition &insert_pos ) {
-                s << insert_pos.line + 1 << ":" << insert_pos.col + 1;
+                s << insert_pos.line << ":" << insert_pos.col;
                 return s;
             }
 

@@ -71,7 +71,7 @@ void blogator::output::generic::CategoryLister::write( const dto::Index::Categor
                     "File '" + abs_file_path.string() + "' could not be opened for writing: " + strerror(errno)
             );
 
-            page._out << _options->BLOGATOR_SIGNATURE << "\n";
+            page._out << _options->getSoftwareSignatureStr() << "\n";
 
             dto::Template::WritePosIterators insert_points = { _template.block_write_pos.cbegin(), _template.path_write_pos.cbegin() };
             dto::Line                        line          = { _template.html->_lines.cbegin(), 0 };
@@ -174,7 +174,10 @@ void blogator::output::generic::CategoryLister::writeHtmlBlock(
     const dto::Index::PagePaths_t::const_iterator      &page_path_it,
     std::vector<size_t>::const_iterator                &article_i_it )
 {
-    if( block_name == "breadcrumb" ) {
+    if( block_name == "page-name" ) {
+        page._out << cat_it->first;
+
+    } else if( block_name == "breadcrumb" ) {
         writeBreadcrumb( page, indent + "\t", _breadcrumb_parents, cat_it->first );
 
     } else if( block_name == "page-nav" ) {
@@ -230,7 +233,7 @@ void blogator::output::generic::CategoryLister::writeIndexEntry(
             entry->path_write_pos  = dto::Templates::extractRelativePaths( *entry->html );
 
             fs::checkTemplateRelPaths( *entry );
-            auto custom_entry_maker = generic::EntryWriter( entry, _options->_months );
+            auto custom_entry_maker = generic::EntryWriter( _options, entry );
 
             custom_entry_maker.write( page, indent, article );
 

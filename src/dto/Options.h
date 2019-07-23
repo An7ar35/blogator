@@ -11,22 +11,26 @@
 #include <ctime>
 
 #include "DateStamp.h"
+#include "BlogatorInfo.h"
 
 namespace blogator::dto {
     struct Options {
-        static const char* BLOGATOR_NAME;
-        static const char* BLOGATOR_VERSION;
-        static const char* BLOGATOR_URL;
-        const std::string  BLOGATOR_SIGNATURE;
-
         typedef std::unordered_map<unsigned, std::string> MonthStringLookup_t;
 
-        Options();
+        explicit Options( BlogatorInfo info );
 
         void setupAbsolutePaths( const std::filesystem::path & root_path );
         void setTempPath( const std::filesystem::path &temp_path );
+
+        std::string getSoftwareNameStr() const;
+        std::string getSoftwareVersionStr() const;
+        std::string getSoftwareSignatureStr() const;
         std::string getRunTimeStamp() const;
         const DateStamp & getRuntimeDateStamp() const;
+
+        //==========================================================================================
+
+        const BlogatorInfo BLOGATOR_INFO;
 
         struct AbsPaths { //Absolute directory paths
             std::filesystem::path temp_dir;         //system's temporary directory path + /blogator
@@ -84,17 +88,19 @@ namespace blogator::dto {
         } _templates;
 
         struct Posts {
-            bool build_future = false;
-            bool safe_purge   = true;
+            bool build_future   = false;
+            bool safe_purge     = true;
 
         } _posts;
 
         struct Index {
-            bool   show_post_numbers { false }; //show post number flag
-            size_t items_per_page    { 10 };    //number of posts-per-page in the indices
-            bool   index_by_year     { false }; //flag to create a year based index
-            bool   index_by_tag      { true  }; //flag to create a tag based index
-            bool   index_by_author   { false }; //flag to create a author based index
+            bool        show_summary      { false }; //show summaries in index entries
+            std::string summary_pad_begin { "" };
+            std::string summary_pad_end   { "" };
+            size_t      items_per_page    { 10 };    //number of posts-per-page in the indices
+            bool        index_by_year     { false }; //flag to create a year based index
+            bool        index_by_tag      { true  }; //flag to create a tag based index
+            bool        index_by_author   { false }; //flag to create a author based index
 
         } _index;
 

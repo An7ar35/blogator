@@ -22,7 +22,7 @@ blogator::output::page::Landing::Landing( std::shared_ptr<const dto::Index>     
     Page( std::move( master_index ),
                std::move( templates ),
                std::move( global_options ) ),
-    _entry_maker( generic::EntryWriter( _templates->_landing_entry, _options->_months ) ),
+    _entry_maker( generic::EntryWriter( _options, _templates->_landing_entry ) ),
     _breadcrumb_parents( BreadCrumb_t() )
 {}
 
@@ -70,7 +70,7 @@ void blogator::output::page::Landing::generateLandingPage() const {
             "File '" + page._abs_path.string() + "' could not be opened for writing."
         );
 
-    page._out << _options->BLOGATOR_SIGNATURE << "\n";
+    page._out << _options->getSoftwareSignatureStr() << "\n";
 
     Template::WritePosIterators insert_it = { _templates->_landing->block_write_pos.cbegin(),
                                               _templates->_landing->path_write_pos.cbegin() };

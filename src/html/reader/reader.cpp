@@ -1,27 +1,28 @@
 #include "reader.h"
 #include <iostream>
+#include <fstream>
 #include <regex>
 
 /**
- * Gets any content between 2 strings on a line
+ * Gets any content between 2 strings in a string
  * @param from Starting string
  * @param to   Finishing string
- * @param line Line of html text
+ * @param str Line of html text
  * @return Content found
  */
 std::string blogator::html::reader::getContentBetween( const std::string &from,
                                                        const std::string &to,
-                                                       const std::string &line )
+                                                       const std::string &str )
 {
     std::string content;
-    auto i_begin = line.find( from );
+    auto i_begin = str.find( from );
 
     if( i_begin != std::string::npos ) {
         auto range_begin = i_begin + from.length();
-        auto i_end       = line.find( to, range_begin );
+        auto i_end       = str.find( to, range_begin );
         if( i_end != std::string::npos ) {
             auto range_end = i_end - ( i_begin + from.length() );
-            content = line.substr( range_begin, range_end );
+            content = str.substr( range_begin, range_end );
         }
     }
 
@@ -72,64 +73,104 @@ blogator::dto::HTML blogator::html::reader::getContentBetween( const std::string
 }
 
 /**
- * Gets all the content between any repeating range on a line
+ * Gets all the content between any repeating range in a string
  * @param from Starting string
  * @param to   Finishing string
- * @param line Line of html text
+ * @param str Html text string
  * @return Set of content found
  */
 std::vector<std::string> blogator::html::reader::getContentsBetween( const std::string &from,
                                                                      const std::string &to,
-                                                                     const std::string &line )
+                                                                     const std::string &str )
 {
     std::vector<std::string> content;
-    auto i_begin = line.find( from );
+    auto i_begin = str.find( from );
 
     while( i_begin != std::string::npos ) {
         auto range_begin = i_begin + from.length();
-        auto i_end = line.find( to, range_begin );
+        auto i_end = str.find( to, range_begin );
 
         if( i_end != std::string::npos ) {
             auto range_end = i_end - ( i_begin + from.length() );
-            content.emplace_back( line.substr( range_begin, range_end ) );
+            content.emplace_back( str.substr( range_begin, range_end ) );
         }
 
-        i_begin = line.find( from, i_end );
+        i_begin = str.find( from, i_end );
     }
 
     return content;
 }
 
 /**
- * Gets the first set of tags found in the line
- * @param line Line of html text
+ * Gets the positions of the start and finish of a summary or summaries in a line
+ * @param line_number Current line number
+ * @param line        Line
+ * @param positions   Container for all positions found
+ */
+void blogator::html::reader::getSummaryPositions( const size_t & line_number,
+                                                  const std::string & line,
+                                                  std::deque<dto::Template::InsertPosition> &positions )
+{
+    const static auto tag = std::make_pair<std::string, std::string>( "<span class=\"summary\">", "</span>" );
+
+    bool end_of_line = { false };
+
+    while( !end_of_line ) {
+        if( positions.size() % 2 == 0 ) { //need to find opening tag
+            auto summary_begin = ( positions.empty() || positions.back().line != line_number )
+                                 ? line.find( tag.first )
+                                 : line.find( tag.first, positions.back().col );
+
+            if( summary_begin != std::string::npos ) {
+                positions.emplace_back( dto::Template::InsertPosition( line_number, ( summary_begin + tag.first.length() ) ) );
+            } else {
+                end_of_line = true;
+            }
+
+        } else { //need to find a closing tag
+            auto summary_end = ( positions.back().line != line_number )
+                               ? line.find( tag.second )
+                               : line.find( tag.second, positions.back().col );
+
+            if( summary_end != std::string::npos ) {
+                positions.emplace_back( dto::Template::InsertPosition( line_number, summary_end ) );
+            } else {
+                end_of_line = true;
+            }
+        }
+    }
+}
+
+/**
+ * Gets the first set of tags found in a string
+ * @param str Html text
  * @return Set of tags found
  */
-std::vector<std::string> blogator::html::reader::getTags( const std::string &line ) {
+std::vector<std::string> blogator::html::reader::getTags( const std::string &str ) {
     static const std::string span_tag_open = "<span class=\"tag\">";
     static const std::string span_tag_close = "</span>";
 
     auto tags = std::vector<std::string>();
 
-    auto i_begin = line.find( span_tag_open );
+    auto i_begin = str.find( span_tag_open );
 
     while( i_begin != std::string::npos ) {
-        auto i_end = line.find( span_tag_close, i_begin + span_tag_open.length() );
+        auto i_end = str.find( span_tag_close, i_begin + span_tag_open.length() );
         auto next = i_begin + span_tag_open.length();
 
         while( next < i_end ) {
             i_begin = next;
-            next = line.find( ',', i_begin + 1 );
+            next = str.find( ',', i_begin + 1 );
 
             if( next == std::string::npos ) {
-                tags.emplace_back( line.substr( i_begin, i_end - i_begin ) );
+                tags.emplace_back( str.substr( i_begin, i_end - i_begin ) );
             } else {
-                tags.emplace_back( line.substr( i_begin, next - i_begin ) );
-                next = line.find_first_not_of( " ,\t\n\v\f\r", next );
+                tags.emplace_back( str.substr( i_begin, next - i_begin ) );
+                next = str.find_first_not_of( " ,\t\n\v\f\r", next );
             }
         }
 
-        i_begin = line.find( span_tag_open, i_end );
+        i_begin = str.find( span_tag_open, i_end );
     }
 
     return tags;
@@ -199,7 +240,7 @@ blogator::dto::Template::ConsecutiveWritePositions_t
  * @param line String line
  * @return Indent string
  */
-std::string blogator::html::reader::getIndent( const std::string & line ) {
+std::string blogator::html::reader::getIndent( const std::string &line ) {
     if( line.empty() )
         return "";
 
@@ -208,31 +249,4 @@ std::string blogator::html::reader::getIndent( const std::string & line ) {
                                   []( char c ) { return !isspace( c ); } );
 
     return line.substr( 0, char_it - line.begin() );
-}
-
-std::vector<std::string> blogator::html::reader::getClassContent( const blogator::dto::HTML & html,
-                                                                  const std::string & css_class ) {
-
-    return std::vector<std::string>();
-}
-
-std::vector<std::string> blogator::html::reader::getTagContent( const blogator::dto::HTML &html,
-                                                                const std::string &html_tag ) {
-    const static auto rx = std::regex(
-        "<(" + html_tag + R"([\w]*)[^>]*>\s*(.*?)\s*</)" + html_tag + '>' );
-
-    auto v = std::vector<std::string>();
-    auto s = std::string();
-
-    {
-        std::stringstream ss;
-
-        for( const auto & line : html._lines )
-            ss << line;
-
-        s = ss.str();
-    }
-
-
-    return std::vector<std::string>();
 }

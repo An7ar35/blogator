@@ -10,12 +10,15 @@
 /**
  * Initialise configuration file reader/import
  * @param file_path Configuration file path
+ * @param info      Software information
  * @return Option DTO with all the config file options loaded in
  * @throws exception::file_access_failure when config file could not be accessed
  */
-std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const std::filesystem::path &file_path ) const {
+std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const std::filesystem::path &file_path,
+                                                                          const dto::BlogatorInfo &info ) const
+{
     auto &display = cli::MsgInterface::getInstance();
-    auto options  = std::make_shared<blogator::dto::Options>();
+    auto options  = std::make_shared<blogator::dto::Options>( info );
     auto map      = std::unordered_map<std::string, Value>();
     std::stringstream ss;
 
@@ -95,6 +98,8 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "\n"
        << "//Index settings\n"
        << "show-post-numbers = true;\n"
+       << "show-post-summary = false;\n"
+       << "post-summary-pads = [\"<p>\", \"</p>\"];\n"
        << "items-per-page    = 10;\n"
        << "index-by-year     = false;\n"
        << "index-by-tag      = true;\n"
@@ -298,13 +303,15 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
                                                       dto::Options &options ) const
 {
     static const std::string items_per_page    = "items-per-page";
-    static const std::string show_post_numbers = "show-post-numbers";
+    static const std::string show_post_summary = "show-post-summary";
+    static const std::string post_summary_pads = "post-summary-pads";
     static const std::string index_by_year     = "index-by-year";
     static const std::string index_by_tag      = "index-by-tag";
     static const std::string index_by_author   = "index-by-author";
 
     auto items_per_page_it    = map.find( items_per_page );
-    auto show_post_numbers_it = map.find( show_post_numbers );
+    auto show_post_summary_it = map.find( show_post_summary );
+    auto post_summary_pads_it = map.find( post_summary_pads );
     auto index_by_year_it     = map.find( index_by_year );
     auto index_by_tag_it      = map.find( index_by_tag );
     auto index_by_author_it   = map.find( index_by_author );
@@ -321,15 +328,58 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
         }
     }
 
-    if( show_post_numbers_it != map.end() ) {
-        if( show_post_numbers_it->second.type == Type::BOOLEAN ) {
-            options._index.show_post_numbers = ( show_post_numbers_it->second.value == "true" );
-            show_post_numbers_it->second.validated = true;
+    if( show_post_summary_it != map.end() ) {
+        if( show_post_summary_it->second.type == Type::BOOLEAN ) {
+            options._index.show_summary = ( show_post_summary_it->second.value == "true" );
+            show_post_summary_it->second.validated = true;
         } else {
             throw exception::file_parsing_failure(
-                "Error converting '" + show_post_numbers + "' value to boolean "
-                "(line #" + std::to_string( show_post_numbers_it->second.line ) + "): " + show_post_numbers_it->second.value
+                "Error converting '" + show_post_summary + "' value to boolean "
+                "(line #" + std::to_string( show_post_summary_it->second.line ) + "): " + show_post_summary_it->second.value
             );
+        }
+    }
+            /* ^^ look above ^^ */
+    if( options._index.show_summary && post_summary_pads_it != map.end() ) {
+        if( post_summary_pads_it->second.type == Type::STRING_ARRAY ) {
+            auto pads = std::vector<std::string>();
+
+            auto it = std::sregex_iterator( post_summary_pads_it->second.value.begin(),
+                                            post_summary_pads_it->second.value.end(),
+                                            QUOTED_STR_RX );
+            while( it != std::sregex_iterator() ) {
+                if( it->size() > 1 && !it->str( 1 ).empty() )
+                    pads.emplace_back( it->str( 1 ) );
+                else
+                    throw exception::file_parsing_failure(
+                        "Malformed padding string in '" + post_summary_pads + "' array "
+                        "(line #" + std::to_string( post_summary_pads_it->second.line ) + "): " + it->str()
+                    );
+
+                ++it;
+            }
+
+            if( pads.empty() )
+                _display.msg( "No index summary padding provided in config file. Default (none) will be used." );
+
+            if( pads.size() == 1 ) {
+                options._index.summary_pad_begin = pads.at( 0 );
+                post_summary_pads_it->second.validated = true;
+                _display.debug( "Index summary padding: \"" + options._index.summary_pad_begin + "\"." );
+            }
+            if( pads.size() > 1 ) {
+                options._index.summary_pad_begin = pads.at( 0 );
+                options._index.summary_pad_end   = pads.at( 1 );
+                post_summary_pads_it->second.validated = true;
+                _display.debug( "Index summary paddings: \"" +  options._index.summary_pad_begin + "\"/\"" + options._index.summary_pad_end + "\"." );
+            }
+        }
+
+        if( post_summary_pads_it->second.type == Type::STRING ) {
+            options._index.summary_pad_begin = post_summary_pads_it->second.value;
+            options._index.summary_pad_end   = post_summary_pads_it->second.value;
+            post_summary_pads_it->second.validated = true;
+            _display.debug( "Index summary padding \"" + post_summary_pads_it->second.value + "\"." );
         }
     }
 

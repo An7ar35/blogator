@@ -36,7 +36,7 @@ void blogator::output::abstract::IndexList::write( dto::Page &page ) const {
             "File '" + page._abs_path.string() + "' could not be opened for writing."
         );
 
-    page._out << _options->BLOGATOR_SIGNATURE << "\n";
+    page._out << _options->getSoftwareSignatureStr() << "\n";
 
     dto::Template::WritePosIterators insert_points = { _template.block_write_pos.cbegin(), _template.path_write_pos.cbegin() };
     dto::Line                        line          = { _template.html->_lines.cbegin(), 0 };

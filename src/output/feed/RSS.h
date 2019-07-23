@@ -11,18 +11,18 @@
 namespace blogator::output::feed {
     class RSS {
       public:
-        RSS( std::shared_ptr<const dto::Index> master_index,
+        RSS( std::shared_ptr<const dto::Index>     master_index,
              std::shared_ptr<const dto::Templates> templates,
-             std::shared_ptr<const dto::Options> global_options );
+             std::shared_ptr<const dto::Options>   global_options );
 
         bool init();
 
       private:
-        std::shared_ptr<const dto::Index>    _master_index;
+        std::shared_ptr<const dto::Index>     _master_index;
         std::shared_ptr<const dto::Templates> _templates;
-        std::shared_ptr<const dto::Options>  _options;
-        size_t                               _feed_item_count;
-        cli::MsgInterface                   &_display;
+        std::shared_ptr<const dto::Options>   _options;
+        size_t                                _feed_item_count;
+        cli::MsgInterface                    &_display;
 
         void writeHead( std::ofstream &file ) const;
         void writeItems( std::ofstream &file ) const;

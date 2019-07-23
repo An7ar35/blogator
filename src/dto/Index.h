@@ -39,8 +39,11 @@ namespace blogator::dto {
                 std::filesystem::path index;
                 std::filesystem::path index_list;
                 std::filesystem::path year_list;
+                std::filesystem::path year_index;
                 std::filesystem::path tag_list;
+                std::filesystem::path tag_index;
                 std::filesystem::path author_list;
+                std::filesystem::path author_index;
                 std::filesystem::path index_entry;
             } templates;
 
@@ -81,8 +84,11 @@ namespace blogator::dto {
             s << "(Template) Index entry .......: " << index._paths.templates.index_entry.string() << "\n";
             s << "(Template) Generic list page .: " << index._paths.templates.index_list.string() << "\n";
             s << "(Template) Year-list page ....: " << index._paths.templates.year_list.string() << "\n";
+            s << "(Template) Year-index page ...: " << index._paths.templates.year_index.string() << "\n";
             s << "(Template) Tag-list page .....: " << index._paths.templates.tag_list.string() << "\n";
+            s << "(Template) Tag-index page ....: " << index._paths.templates.year_index.string() << "\n";
             s << "(Template) Author-list page ..: " << index._paths.templates.author_list.string() << "\n";
+            s << "(Template) Author-index page .: " << index._paths.templates.author_index.string() << "\n";
             s << "(CSS) Blog stylesheet ........: " << index._paths.css.blog.string() << "\n";
             s << "(CSS) Index stylesheet .......: " << index._paths.css.index.string() << "\n";
             s << "Article (posts) count.........: " << index._articles.size() << " found.\n";

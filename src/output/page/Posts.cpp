@@ -60,8 +60,8 @@ bool blogator::output::page::Posts::init() const {
             else
                 _display.progress( std::to_string( curr_article_i + 1 ) + total_articles );
 
+            const auto css_path = copyStylesheet( article );
             const auto html_out = ( _options->_paths.posts_dir / article._paths.out_html );
-//            const auto css_link = html::createStylesheetLink( article._paths.css, html_out );//TODO
 
             if( std::filesystem::exists( html_out ) )
                 throw exception::file_access_failure(
@@ -75,13 +75,13 @@ bool blogator::output::page::Posts::init() const {
                     "File '" + html_out.string() + "' could not be opened for writing."
                 );
 
-            page._out << _options->BLOGATOR_SIGNATURE << "\n";
+            page._out << _options->getSoftwareSignatureStr() << "\n";
 
             dto::Template::WritePosIterators insert_it = { _templates->_post->block_write_pos.cbegin(),
                                                            _templates->_post->path_write_pos.cbegin() };
 
-            dto::Line line     = { _templates->_post->html->_lines.cbegin(), 0 };
-            PageInfo page_info = { article, curr_article_i, css_insert_line };
+            dto::Line line      = { _templates->_post->html->_lines.cbegin(), 0 };
+            PageInfo  page_info = { article, curr_article_i, css_insert_line, css_path };
 
             while( line._it != _templates->_post->html->_lines.cend() ) {
                 writeTemplateLine( page, line, page_info, insert_it );
@@ -99,6 +99,28 @@ bool blogator::output::page::Posts::init() const {
 
     _display.progress( "DONE" );
     return true;
+}
+
+/**
+ * Copies and renames the custom stylesheet for an article (if any) to the post output folder
+ * @param article Article DTO
+ * @return Final filename of copied stylesheet
+ */
+std::filesystem::path blogator::output::page::Posts::copyStylesheet( const dto::Article &article ) const {
+    if( article._paths.css.empty() )
+        return std::filesystem::path();
+
+    auto css_name   = article._paths.out_html.filename().stem().string() + article._paths.css.extension().string();
+    auto target_css = _options->_paths.posts_dir / css_name;
+    _display.debug( "Copying custom stylesheet: " + article._paths.css.string() + " -> " + target_css.string() );
+
+    try {
+        std::filesystem::copy_file( article._paths.css, target_css );
+    } catch( std::exception &e ) {
+        _display.error( std::string( e.what() ) + ": " + strerror(errno) );
+    }
+
+    return target_css.filename();
 }
 
 /**
@@ -120,7 +142,7 @@ void blogator::output::page::Posts::writeTemplateLine( dto::Page &page,
     const auto indent = html::reader::getIndent( *line._it );
 
     if( !page_info.article._paths.css.empty() && page_info.css_line == line._num )
-        page._out << html::createStylesheetLink( page_info.article._paths.css, page._abs_path ) << std::endl;
+        page._out << html::createStylesheetLink( page_info.css_path ) << std::endl;
 
     //EARLY RETURN: when there's nothing to add/edit on the line
     if( !hasBlock() && !hasPath() ) {

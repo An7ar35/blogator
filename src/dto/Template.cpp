@@ -41,6 +41,7 @@ blogator::dto::Template::Template( Template::Type template_type ) :
 
         case Type::INDEX:
             block_classes = Template::BlockInsertClasses_t( {
+                { "page-name",     false },
                 { "breadcrumb",    false },
                 { "page-nav",      false },
                 { "index-entries", false }
@@ -60,6 +61,7 @@ blogator::dto::Template::Template( Template::Type template_type ) :
 
         case Type::INDEX_LIST:
             block_classes = Template::BlockInsertClasses_t( {
+                { "page-name",            false },
                 { "breadcrumb",           false },
                 { "index-list-flat",      false },
                 { "index-list-hierarchy", false }

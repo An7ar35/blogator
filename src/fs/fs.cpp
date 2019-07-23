@@ -11,14 +11,16 @@
 #include "../exception/file_access_failure.h"
 
 /**
- *
- * @param file_path
- * @return
+ * Imports configuration options from config file to dto::Options object
+ * @param file_path Configuration file path
+ * @param info      Software information
+ * @return Options DTO
  */
-std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path ) { //TODO error control?
-    //TODO display progress?
+std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path,
+                                                                     const dto::BlogatorInfo &info ) {
+    //TODO error control?
     auto reader = ConfigReader();
-    return reader.init( file_path );
+    return reader.init( file_path, info );
 }
 
 /**
@@ -80,8 +82,14 @@ uintmax_t blogator::fs::purge( const blogator::dto::Options &options ) {
         display.msg( "Safe purge: ON" );
         auto file_list = std::list<std::filesystem::path>();
         for( auto &p: std::filesystem::recursive_directory_iterator( options._paths.posts_dir ) ) {
-            if( p.is_regular_file() && ( p.path().extension().string() == ".html" || p.path().extension().string() == ".htm" ) )
-                file_list.emplace_back( p.path() );
+            if( p.is_regular_file() ) {
+                if( p.path().extension().string() == ".html" ||
+                    p.path().extension().string() == ".htm"  ||
+                    p.path().extension().string() == ".css" )
+                {
+                    file_list.emplace_back( p.path() );
+                }
+            }
         }
 
         for( const auto &p : file_list )
@@ -125,7 +133,7 @@ std::shared_ptr<blogator::dto::Templates> blogator::fs::importTemplates( const d
 void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Templates &templates ) {
     auto &display  = cli::MsgInterface::getInstance();
 
-    display.begin( "Loading templates", 9, "landing page" );
+    display.begin( "Loading templates", 12, "landing page" );
     templates._landing->src        = master_index._paths.templates.landing;
     templates._landing->html       = fs::importHTML( templates._landing->src );
     display.progress( "landing page entry" );
@@ -146,9 +154,19 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._year_list       = std::make_shared<dto::Template>( dto::Template::Type::INDEX_LIST );
         templates._year_list->src  = master_index._paths.templates.year_list;
         templates._year_list->html = fs::importHTML( templates._year_list->src );
-        display.debug( "Custom index year list template was found" );
+        display.debug( "Custom index year-list template was found" );
     } else {
         templates._year_list = templates._index_list;
+    }
+
+    display.progress( "year index page" );
+    if( !master_index._paths.templates.year_index.empty() ) {
+        templates._year_index       = std::make_shared<dto::Template>( dto::Template::Type::INDEX );
+        templates._year_index->src  = master_index._paths.templates.year_index;
+        templates._year_index->html = fs::importHTML( templates._year_index->src );
+        display.debug( "Custom index year-index template was found" );
+    } else {
+        templates._year_index = templates._index;
     }
 
     display.progress( "tag list page" );
@@ -156,9 +174,19 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._tag_list       = std::make_shared<dto::Template>( dto::Template::Type::INDEX_LIST );
         templates._tag_list->src  = master_index._paths.templates.tag_list;
         templates._tag_list->html = fs::importHTML( templates._tag_list->src );
-        display.debug( "Custom index tag list template was found" );
+        display.debug( "Custom index tag-list template was found" );
     } else {
         templates._tag_list = templates._index_list;
+    }
+
+    display.progress( "tag index page" );
+    if( !master_index._paths.templates.tag_index.empty() ) {
+        templates._tag_index       = std::make_shared<dto::Template>( dto::Template::Type::INDEX );
+        templates._tag_index->src  = master_index._paths.templates.tag_index;
+        templates._tag_index->html = fs::importHTML( templates._tag_index->src );
+        display.debug( "Custom index tag-index template was found" );
+    } else {
+        templates._tag_index = templates._index;
     }
 
     display.progress( "author list page" );
@@ -166,9 +194,19 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._author_list       = std::make_shared<dto::Template>( dto::Template::Type::INDEX_LIST );
         templates._author_list->src  = master_index._paths.templates.author_list;
         templates._author_list->html = fs::importHTML( templates._author_list->src );
-        display.debug( "Custom index author list template was found" );
+        display.debug( "Custom index author-list template was found" );
     } else {
         templates._author_list = templates._index_list;
+    }
+
+    display.progress( "author index page" );
+    if( !master_index._paths.templates.author_index.empty() ) {
+        templates._author_index       = std::make_shared<dto::Template>( dto::Template::Type::INDEX );
+        templates._author_index->src  = master_index._paths.templates.author_index;
+        templates._author_index->html = fs::importHTML( templates._author_index->src );
+        display.debug( "Custom index author-index template was found" );
+    } else {
+        templates._author_index = templates._index;
     }
 
     display.progress( "index page entry" );
@@ -186,7 +224,7 @@ void blogator::fs::extractTemplateRelPaths( const dto::Index &master_index, dto:
     auto &display = cli::MsgInterface::getInstance();
     size_t total  = 0;
 
-    display.begin( "Extracting template rel. paths", 9, "landing page" );
+    display.begin( "Extracting template rel. paths", 12, "landing page" );
     templates._landing->path_write_pos = dto::Templates::extractRelativePaths( *templates._landing->html );
     total += templates._landing->path_write_pos.size();
 
@@ -212,16 +250,34 @@ void blogator::fs::extractTemplateRelPaths( const dto::Index &master_index, dto:
         total += templates._year_list->path_write_pos.size();
     }
 
+    display.progress( "year index page" );
+    if( !master_index._paths.templates.year_index.empty() ) {
+        templates._year_index->path_write_pos = dto::Templates::extractRelativePaths( *templates._year_index->html );
+        total += templates._year_index->path_write_pos.size();
+    }
+
     display.progress( "tag list page" );
     if( !master_index._paths.templates.tag_list.empty() ) {
         templates._tag_list->path_write_pos = dto::Templates::extractRelativePaths( *templates._tag_list->html );
         total += templates._tag_list->path_write_pos.size();
     }
 
+    display.progress( "tag index page" );
+    if( !master_index._paths.templates.tag_index.empty() ) {
+        templates._tag_index->path_write_pos = dto::Templates::extractRelativePaths( *templates._tag_index->html );
+        total += templates._tag_index->path_write_pos.size();
+    }
+
     display.progress( "author list page" );
     if( !master_index._paths.templates.author_list.empty() ) {
         templates._author_list->path_write_pos = dto::Templates::extractRelativePaths( *templates._author_list->html );
         total += templates._author_list->path_write_pos.size();
+    }
+
+    display.progress( "author index page" );
+    if( !master_index._paths.templates.author_index.empty() ) {
+        templates._author_index->path_write_pos = dto::Templates::extractRelativePaths( *templates._author_index->html );
+        total += templates._author_index->path_write_pos.size();
     }
 
     display.progress( "index page entry" );
@@ -240,7 +296,7 @@ void blogator::fs::getConsecutiveWritePositions( const dto::Index &master_index,
     using html::reader::getConsecutiveWritePositions;
     auto &display = cli::MsgInterface::getInstance();
 
-    display.begin( "Locating insertion points", 9, "landing page" );
+    display.begin( "Locating insertion points", 12, "landing page" );
     templates._landing->block_write_pos = getConsecutiveWritePositions( *templates._landing->html, templates._landing->block_classes );
 
     display.progress( "landing page entry" );
@@ -255,22 +311,54 @@ void blogator::fs::getConsecutiveWritePositions( const dto::Index &master_index,
     display.progress( "index list page" );
     templates._index_list->block_write_pos = getConsecutiveWritePositions( *templates._index_list->html, templates._index_list->block_classes );
 
-    display.progress( "date list page" );
+    display.progress( "year list page" );
     if( !master_index._paths.templates.year_list.empty() )
         templates._year_list->block_write_pos = getConsecutiveWritePositions( *templates._year_list->html, templates._year_list->block_classes );
+
+    display.progress( "year index page" );
+    if( !master_index._paths.templates.year_index.empty() )
+        templates._year_index->block_write_pos = getConsecutiveWritePositions( *templates._year_index->html, templates._year_index->block_classes );
 
     display.progress( "tag list page" );
     if( !master_index._paths.templates.tag_list.empty() )
         templates._tag_list->block_write_pos = getConsecutiveWritePositions( *templates._tag_list->html, templates._tag_list->block_classes );
 
+    display.progress( "tag index page" );
+    if( !master_index._paths.templates.tag_index.empty() )
+        templates._tag_index->block_write_pos = getConsecutiveWritePositions( *templates._tag_index->html, templates._tag_index->block_classes );
+
     display.progress( "author list page" );
     if( !master_index._paths.templates.author_list.empty() )
         templates._author_list->block_write_pos = getConsecutiveWritePositions( *templates._author_list->html, templates._author_list->block_classes );
+
+    display.progress( "author index page" );
+    if( !master_index._paths.templates.author_index.empty() )
+        templates._author_index->block_write_pos = getConsecutiveWritePositions( *templates._author_index->html, templates._author_index->block_classes );
 
     display.progress( "index page entry" );
     templates._index_entry->block_write_pos = getConsecutiveWritePositions( *templates._index_entry->html, templates._index_entry->block_classes );
 
     display.progress( "DONE" );
+}
+
+/**
+ * Reads in the content of a file into a string
+ * @param path Path of file to read
+ * @return Content as a string
+ * @throws exception::file_access_failure when reading failed
+ */
+std::string blogator::fs::readFileContent( const std::filesystem::path & path ) {
+    try {
+        auto file = std::ifstream( path );
+        auto ss = std::stringstream();
+        ss << file.rdbuf();
+        return ss.str();
+
+    } catch( std::exception & e ) {
+        auto &display = cli::MsgInterface::getInstance();
+        display.debug( "fs::readFileContent( " + path.string() + ")] " + e.what() + ": " + strerror( errno ) );
+        throw exception::file_access_failure( "Could not fetch content of: " + path.string() );
+    }
 }
 
 /**
@@ -295,6 +383,71 @@ std::unique_ptr<blogator::dto::HTML> blogator::fs::importHTML( const std::filesy
     file.close();
 
     return std::move( html );
+}
+
+/**
+ * Imports lines from na HTML file
+ * @param file_path Path of file
+ * @param positions Range(s) of content to import
+ * @return HTML DTO object
+ * @throws blogator::exception::file_access_failure when access to source file fails
+ */
+blogator::dto::HTML blogator::fs::importHTML( const std::filesystem::path &file_path,
+                                              const std::list<dto::Article::SeekRange> &positions )
+{
+    auto   html          = dto::HTML();
+    size_t curr_line     = 0;
+    bool   stay_on_line  = false;
+    auto   post          = std::ifstream( file_path );
+
+    if( !post.is_open() )
+        throw exception::file_access_failure( "Could not open: " + file_path.string() );
+
+    std::string line;
+
+    auto pos_it = positions.cbegin();
+    while( pos_it != positions.cend() ) {
+        std::stringstream ss;
+
+        for( ; curr_line < pos_it->_from.line; ++curr_line ) {
+            post.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
+        }
+
+        auto tmp_curr_line = curr_line;
+        while( tmp_curr_line <= pos_it->_to.line ) {
+            if( !stay_on_line ) {
+                getline( post, line );
+            }
+
+            if( pos_it->_from.line == pos_it->_to.line ) { //range on same line
+                ss << line.substr( pos_it->_from.col, pos_it->_to.col - pos_it->_from.col );
+                html._lines.emplace_back( ss.str() );
+                stay_on_line = ( std::next( pos_it ) != positions.cend() && std::next( pos_it )->_from.line == tmp_curr_line );
+
+            } else if( pos_it->_from.line == tmp_curr_line ) { //start line
+                ss << line.substr( pos_it->_from.col );
+                stay_on_line = false;
+
+            } else if( pos_it->_to.line == tmp_curr_line ) { //end line
+                ss << line.substr( 0, pos_it->_to.col );
+                html._lines.emplace_back( ss.str() );
+                stay_on_line = ( std::next( pos_it ) != positions.cend() && std::next( pos_it )->_from.line == tmp_curr_line );
+
+            } else { //line between the range
+                ss << line;
+                stay_on_line = false;
+            }
+
+            ++tmp_curr_line;
+        }
+
+        if( !stay_on_line )
+            curr_line = tmp_curr_line;
+
+        ++pos_it;
+    }
+
+    return html;
 }
 
 /**
@@ -336,7 +489,7 @@ void blogator::fs::checkTemplateRelPaths( const dto::Index     &master_index,
         size_t total_count = 0;
         size_t valid_count = 0;
 
-        display.begin( "Validating template rel. paths", 9, "landing page" );
+        display.begin( "Validating template rel. paths", 12, "landing page" );
         valid_count += checkTemplateRelPaths( *templates._landing );
         total_count += templates._landing->path_write_pos.size();
 
@@ -356,10 +509,16 @@ void blogator::fs::checkTemplateRelPaths( const dto::Index     &master_index,
         valid_count += checkTemplateRelPaths( *templates._index_list );
         total_count += templates._index_list->path_write_pos.size();
 
-        display.progress( "date list page" );
+        display.progress( "year list page" );
         if( !master_index._paths.templates.year_list.empty() ) {
             valid_count += checkTemplateRelPaths( *templates._year_list );
             total_count += templates._year_list->path_write_pos.size();
+        }
+
+        display.progress( "year index page" );
+        if( !master_index._paths.templates.year_index.empty() ) {
+            valid_count += checkTemplateRelPaths( *templates._year_index );
+            total_count += templates._year_index->path_write_pos.size();
         }
 
         display.progress( "tag list page" );
@@ -368,10 +527,22 @@ void blogator::fs::checkTemplateRelPaths( const dto::Index     &master_index,
             total_count += templates._tag_list->path_write_pos.size();
         }
 
+        display.progress( "tag index page" );
+        if( !master_index._paths.templates.tag_index.empty() ) {
+            valid_count += checkTemplateRelPaths( *templates._tag_index );
+            total_count += templates._tag_index->path_write_pos.size();
+        }
+
         display.progress( "author list page" );
         if( !master_index._paths.templates.author_list.empty() ) {
             valid_count += checkTemplateRelPaths( *templates._author_list );
             total_count += templates._author_list->path_write_pos.size();
+        }
+
+        display.progress( "author index page" );
+        if( !master_index._paths.templates.author_index.empty() ) {
+            valid_count += checkTemplateRelPaths( *templates._author_index );
+            total_count += templates._author_index->path_write_pos.size();
         }
 
         display.progress( "index page entry" );

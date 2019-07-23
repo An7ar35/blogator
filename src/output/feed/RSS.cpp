@@ -11,9 +11,9 @@
  * @param templates      Templates
  * @param global_options Global blogator options
  */
-blogator::output::feed::RSS::RSS( std::shared_ptr<const dto::Index>    master_index,
+blogator::output::feed::RSS::RSS( std::shared_ptr<const dto::Index>     master_index,
                                   std::shared_ptr<const dto::Templates> templates,
-                                  std::shared_ptr<const dto::Options>  global_options ) :
+                                  std::shared_ptr<const dto::Options>   global_options ) :
     _master_index( std::move( master_index ) ),
     _templates( std::move( templates ) ),
     _options( std::move( global_options ) ),
@@ -90,7 +90,7 @@ void blogator::output::feed::RSS::writeHead( std::ofstream &file ) const {
          << "\t\t<description>" << _options->_rss.description << "</description>\n"
          << "\t\t<copyright>" << _options->_rss.copyright << "</copyright>\n"
          << "\t\t<lastBuildDate>" << _options->getRunTimeStamp() << "</lastBuildDate>\n"
-         << "\t\t<generator>" << _options->BLOGATOR_NAME << " " << _options->BLOGATOR_VERSION << "</generator>\n";
+         << "\t\t<generator>" << _options->getSoftwareNameStr() << " " << _options->getSoftwareVersionStr() << "</generator>\n";
 }
 
 /**

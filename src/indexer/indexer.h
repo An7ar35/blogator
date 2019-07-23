@@ -13,14 +13,13 @@
 
 namespace blogator::indexer {
     std::shared_ptr<dto::Index> index( const std::shared_ptr<dto::Options> &global_options );
-    void indexStylesheets( const dto::Options &global_options, dto::Index &index, std::unordered_map<std::string, std::filesystem::path> &css_cache );
+    void indexStylesheets( const dto::Options &global_options, dto::Index &index );
     void indexTemplates( const dto::Options &global_options, dto::Index &index );
-    void indexPosts( const dto::Options &global_options, dto::Index &index, std::unordered_map<std::string, std::filesystem::path> &css_cache, FeatAggregator &feat_aggregator );
+    void indexPosts( const dto::Options &global_options, dto::Index &index, FeatAggregator &feat_aggregator );
 
     void addYear( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
     void addTags( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
     void addAuthors( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
-    void addCSS( std::unordered_map<std::string, std::filesystem::path> &found_stylesheets, dto::Article &article );
     void addOutputPath( const dto::Options::AbsPaths &global_paths, dto::Article &article );
 
     void sortChronologically( dto::Index::Articles_t &articles, const dto::Options &global_options );
@@ -32,7 +31,7 @@ namespace blogator::indexer {
     void generateChronologicalIndexTargets( blogator::dto::Index & master_index, const dto::Options & global_options );
 
     dto::DateStamp convertDate( const std::string &date );
-    dto::Article readFileProperties( const std::filesystem::path &path );
+    dto::Article readFileProperties( const dto::Options &options, const std::filesystem::path &path );
 
     std::filesystem::path makeFileName( const size_t &n );
     std::filesystem::path makeFileName( const std::string &prefix, const size_t &n );

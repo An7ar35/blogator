@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "indexer.h"
 
 #include <iostream>
@@ -12,10 +14,12 @@
 #include "FeatAggregator.h"
 #include "../html/html.h"
 #include "../dto/DateStamp.h"
+#include "../dto/Line.h"
+#include "../cli/MsgInterface.h"
 #include "../exception/file_access_failure.h"
 #include "../exception/file_parsing_failure.h"
 #include "../exception/failed_expectation.h"
-#include "../cli/MsgInterface.h"
+#include "../fs/fs.h"
 
 /**
  * Initialise the index
@@ -30,11 +34,11 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     auto &display        = cli::MsgInterface::getInstance();
 
     display.begin( "Indexing", 5, "CSS" );
-    indexStylesheets( *global_options, *index, css_cache );
+    indexStylesheets( *global_options, *index );
     display.progress( "Templates" );
     indexTemplates( *global_options, *index );
     display.progress( "Posts" );
-    indexPosts( *global_options, *index, css_cache, feat_aggregator );
+    indexPosts( *global_options, *index, feat_aggregator );
     display.progress( "sorting articles by date" );
     sortChronologically( index->_articles, *global_options );
     display.progress( "generating targets" );
@@ -62,17 +66,12 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
  * Indexes the stylesheets (CSS) files
  * @param global_options Options DTO
  * @param index          Index DTO
- * @param css_cache      Container for caching the post-specific css files
  */
-void blogator::indexer::indexStylesheets( const dto::Options &global_options,
-                                          dto::Index &index,
-                                          std::unordered_map<std::string, std::filesystem::path> &css_cache )
-{
+void blogator::indexer::indexStylesheets( const dto::Options &global_options, dto::Index &index ) {
     auto &display = cli::MsgInterface::getInstance();
 
     static const std::regex blog_css_regex  = std::regex( "^.*(blog)\\.(css)$" );
     static const std::regex index_css_regex = std::regex( "^.*(index)\\.(css)$" );
-    static const std::regex posts_css_regex = std::regex( "^.*\\.(css)$" );
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.css_dir ) ) {
         if( p.is_regular_file() ) {
@@ -80,8 +79,6 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options,
                 index._paths.css.blog  = p.path();
             } else if( std::regex_match( p.path().string(), index_css_regex ) ) {
                 index._paths.css.index = p.path();
-            } else if( std::regex_match( p.path().string(), posts_css_regex ) ) {
-                css_cache.emplace( std::make_pair( p.path().stem().string(), p.path() ) );
             }
         }
     }
@@ -103,15 +100,18 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options,
  * @throws exception::failed_expectation when detecting missing template file(s)
  */
 void blogator::indexer::indexTemplates( const dto::Options &global_options, dto::Index &index ) {
-    static const std::regex landing_rx       = std::regex( "^.*(landing)\\.(?:html|htm)$" );
-    static const std::regex landing_entry_rx = std::regex( "^.*(landing_entry)\\.(?:html|htm)$" );
-    static const std::regex post_rx          = std::regex( "^.*(post)\\.(?:html|htm)$" );
-    static const std::regex index_rx         = std::regex( "^.*(index)\\.(?:html|htm)$" );
-    static const std::regex index_list_rx    = std::regex( "^.*(index_list)\\.(?:html|htm)$" );
-    static const std::regex year_list_rx     = std::regex( "^.*(year_list)\\.(?:html|htm)$" );
-    static const std::regex tag_list_rx      = std::regex( "^.*(tag_list)\\.(?:html|htm)$" );
-    static const std::regex author_list_rx   = std::regex( "^.*(author_list)\\.(?:html|htm)$" );
-    static const std::regex index_entry_rx   = std::regex( "^.*(index_entry)\\.(?:html|htm)$" );
+    static const std::regex landing_rx       = std::regex( R"(^.*[\/\\]landing\.(?:html|htm)$)" );
+    static const std::regex landing_entry_rx = std::regex( R"(^.*[\/\\]landing_entry\.(?:html|htm)$)" );
+    static const std::regex post_rx          = std::regex( R"(^.*[\/\\]post\.(?:html|htm)$)" );
+    static const std::regex index_rx         = std::regex( R"(^.*[\/\\]index\.(?:html|htm)$)" );
+    static const std::regex index_list_rx    = std::regex( R"(^.*[\/\\]index_list\.(?:html|htm)$)" );
+    static const std::regex year_list_rx     = std::regex( R"(^.*[\/\\]year_list\.(?:html|htm)$)" );
+    static const std::regex year_index_rx    = std::regex( R"(^.*[\/\\]year_index\.(?:html|htm)$)" );
+    static const std::regex tag_list_rx      = std::regex( R"(^.*[\/\\]tag_list\.(?:html|htm)$)" );
+    static const std::regex tag_index_rx     = std::regex( R"(^.*[\/\\]tag_index\.(?:html|htm)$)" );
+    static const std::regex author_list_rx   = std::regex( R"(^.*[\/\\]author_list\.(?:html|htm)$)" );
+    static const std::regex author_index_rx  = std::regex( R"(^.*[\/\\]author_index\.(?:html|htm)$)" );
+    static const std::regex index_entry_rx   = std::regex( R"(^.*[\/\\]index_entry\.(?:html|htm)$)" );
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.template_dir ) ) {
         if( p.is_regular_file() ) {
@@ -128,10 +128,16 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
                 index._paths.templates.index_list = p.path();
             } else if( std::regex_match( path, year_list_rx ) ) {
                 index._paths.templates.year_list = p.path();
+            } else if( std::regex_match( path, year_index_rx ) ) {
+                index._paths.templates.year_index = p.path();
             } else if( std::regex_match( path, tag_list_rx ) ) {
                 index._paths.templates.tag_list = p.path();
+            } else if( std::regex_match( path, tag_index_rx ) ) {
+                index._paths.templates.tag_index = p.path();
             } else if( std::regex_match( path, author_list_rx ) ) {
                 index._paths.templates.author_list = p.path();
+            } else if( std::regex_match( path, author_index_rx ) ) {
+                index._paths.templates.author_index = p.path();
             } else if( std::regex_match( path, index_entry_rx ) ) {
                 index._paths.templates.index_entry = p.path();
             }
@@ -171,24 +177,25 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
 }
 
 /**
- * Indexes the posts (articles)
+ * Indexes the posts (articles) along with any custom index entries and stylesheets
  * @param global_options Options DTO
  * @param index          Master index
- * @param css_cache      Cached post-specific css files
  * @throws exception::failed_expectation when no source post files were found to index
  */
 void blogator::indexer::indexPosts( const dto::Options &global_options,
                                     dto::Index &index,
-                                    std::unordered_map<std::string, std::filesystem::path> &css_cache,
                                     FeatAggregator &feat_aggregator )
 {
-    auto &display = cli::MsgInterface::getInstance();
+    static auto &display = cli::MsgInterface::getInstance();
 
     static const std::regex index_entry_html_rx = std::regex( R"(^(.*[\/\\].+)(?:_index)\.(?:htm|html)$)" );
     static const std::regex html_rx             = std::regex( "^.+\\.(?:htm|html)$" );
+    static const std::regex css_rx              = std::regex( R"(^(.*[\/\\].+)\.(css)$)" );
 
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
+    auto custom_css_files  = std::unordered_map<std::string, std::filesystem::path>();
     auto index_entry_match = std::smatch();
+    auto custom_css_match  = std::smatch();
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.source_dir ) ) {
         if( p.is_regular_file() ) {
@@ -196,22 +203,32 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
             if( std::regex_match( path, index_entry_match, index_entry_html_rx ) ) {
                 if( index_entry_match.size() > 1 )
                     index_entry_files.emplace(
-                        std::make_pair( index_entry_match[1].str(), p.path() )
+                        std::make_pair( index_entry_match[ 1 ].str(), p.path() )
+                    );
+            } else if( std::regex_match( path, custom_css_match, css_rx ) ) {
+                if( custom_css_match.size() > 1 )
+                    custom_css_files.emplace(
+                        std::make_pair( custom_css_match[ 1 ].str(), p.path() )
                     );
             } else if( std::regex_match( path, html_rx ) ) {
                 try {
-                    index._articles.emplace_back( readFileProperties( p.path() ) );
+                    auto &article = index._articles.emplace_back( readFileProperties( global_options, p.path() ) );
 
                     if( !global_options._posts.build_future &&
-                        index._articles.back()._datestamp > global_options.getRuntimeDateStamp() ) {
+                        article._datestamp > global_options.getRuntimeDateStamp() )
+                    {
                         index._articles.erase( std::prev( index._articles.end() ) );
+
                     } else {
-                        addYear( global_options, index._articles.back(), index );
-                        addTags( global_options, index._articles.back(), index );
-                        addAuthors( global_options, index._articles.back(), index );
-                        addCSS( css_cache, index._articles.back() );
-                        feat_aggregator.addArticleIfFeatured( index._articles.back() );
+                        addYear( global_options, article, index );
+                        addTags( global_options, article, index );
+                        addAuthors( global_options, article, index );
+                        feat_aggregator.addArticleIfFeatured( article );
+
+                        if( global_options._index.show_summary && article._summary_pos.empty() )
+                            display.debug( "No summary found in: " + article._paths.src_html.string() );
                     }
+
                 } catch( std::exception &e ) {
                     display.error( e.what() );
                 }
@@ -222,12 +239,14 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
     if( index._articles.empty() )
         throw exception::failed_expectation( "No articles (posts) to index found." );
 
-    //Add any *_index html files to their respective articles index entry path if found
-    if( !index_entry_files.empty() ) {
-        for( auto & article : index._articles ) {
+    //Add any * css files to their respective articles css path if found and
+    //add any *_index html files to their respective articles index entry path if found
+    if( !index_entry_files.empty() || !custom_css_files.empty() ) {
+        for( auto &article : index._articles ) {
             auto file_root = article._paths.src_html.parent_path() / article._paths.src_html.filename().stem();
             auto file_rel  = global_options._folders.posts.root / article._paths.src_html.lexically_relative( global_options._paths.source_dir );
             auto entry_it  = index_entry_files.find( file_root.string() );
+            auto css_it    = custom_css_files.find( file_root.string() );
 
             if( entry_it != index_entry_files.end() ) {
                 display.debug(
@@ -236,6 +255,24 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
                 );
                 article._paths.entry_html = entry_it->second;
                 index_entry_files.erase( entry_it );
+            }
+
+            if( css_it != custom_css_files.end() ) {
+                display.debug(
+                    "Found custom stylesheet entry: " + file_rel.string() + " -> " +
+                    ( global_options._folders.posts.root / css_it->second.lexically_relative( global_options._paths.source_dir ) ).string()
+                );
+                article._paths.css = css_it->second;
+                custom_css_files.erase( css_it );
+            }
+        }
+
+        if( !custom_css_files.empty() ) {
+            for( const auto &e : custom_css_files ) {
+                display.warning(
+                    "Found orphaned custom css entry: " +
+                    ( global_options._folders.posts.root / e.second.lexically_relative( global_options._paths.source_dir ) ).string()
+                );
             }
         }
 
@@ -303,22 +340,6 @@ void blogator::indexer::addAuthors( const dto::Options &global_options,
         master_index._indices.byAuthor.cats.insert(
             std::make_pair( author, std::to_string( master_index._indices.byAuthor.cats.size() ) )
         );
-    }
-}
-
-/**
- * Adds the path of any stylesheets matching the file name of the article source HTML
- * @param found_stylesheets Collection of stylesheets found in the Options' "css" folder
- * @param article Article to amend its stylesheet to if found
- */
-void blogator::indexer::addCSS( std::unordered_map<std::string, std::filesystem::path> &found_stylesheets,
-                                blogator::dto::Article &article )
-{
-    auto it = found_stylesheets.find( article._paths.src_html.stem().string() );
-
-    if( it != found_stylesheets.end() ) {
-        article._paths.css = it->second;
-        found_stylesheets.erase( it );
     }
 }
 
@@ -523,7 +544,7 @@ void blogator::indexer::generateChronologicalIndexTargets( dto::Index & master_i
                                                            const dto::Options & global_options )
 {
     master_index._indices.chronological.page_count = calcPageCount( global_options._index.items_per_page,
-                                                                  master_index._articles.size() );
+                                                                    master_index._articles.size() );
 
     for( size_t p = 0; p < master_index._indices.chronological.page_count; ++p ) {
         master_index._indices.chronological.file_names.emplace_back( makeFileName( p ) );
@@ -558,35 +579,43 @@ blogator::dto::DateStamp blogator::indexer::convertDate( const std::string & dat
 /**
  * Gets all the properties (heading, tags, date) from an html post
  * @param path Path of the html file
+ * @param global_options Global Options DTO
  * @return Article DTO
  * @throws blogator::exception::file_parsing_failure when issues are raised during content parsing
  */
-blogator::dto::Article blogator::indexer::readFileProperties( const std::filesystem::path &path ) {
+blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options &options, const std::filesystem::path &path ) {
+    static auto &display = cli::MsgInterface::getInstance();
+
     const static auto heading_tag = std::make_pair<std::string, std::string>( "<h1>", "</h1>" );
     const static auto author_tag  = std::make_pair<std::string, std::string>( "<span class=\"author\">", "</span>" );
     const static auto date_tag    = std::make_pair<std::string, std::string>( "<time datetime=\"", "\"" );
+    const static auto tag_tag     = std::make_pair<std::string, std::string>( "<span class=\"tag\">", "</span>" );
+    const static auto code_tag    = std::make_pair<std::string, std::string>( "<code", "</code>" );
 
-    auto article       = blogator::dto::Article();
-    bool heading_found = false;
-    bool date_found    = false;
+//    const static auto heading_rx = std::regex( "<h1>\\s*(.*)\\s*</h1>" );
+//    const static auto date_rx    = std::regex( "<time datetime=\"(\\d{4})-(\\d{2})-(\\d{2})\">" );
+//    const static auto tag_rx     = std::regex( R"(<span class="tag">\s*(.*)\s*</span>)" );
+//    const static auto author_rx  = std::regex( R"(<span class="author">\s*(.*)\s*</span>)" );
+
+    auto article           = blogator::dto::Article();
+    bool heading_found     = false;
+    bool date_found        = false;
+    auto summary_positions = std::deque<dto::Template::InsertPosition>();
 
     article._paths.src_html = path;
 
     std::string   line;
+    size_t        line_count = 0;
     std::ifstream html_file( path.string() );
 
     try {
         using html::reader::getContentBetween;
         using html::reader::getContentsBetween;
+        using html::reader::getSummaryPositions;
         using html::reader::getTags;
 
         if( html_file.is_open() ) {
             while( getline( html_file, line ) ) {
-                auto trim_begin = line.begin();
-                auto trim_end = std::find_if( trim_begin, line.end(),
-                                              ( []( int c ) { return !isspace( c ); } ) );
-
-                line.erase( trim_begin, trim_end );
 
                 if( !heading_found ) {
                     article._heading = getContentBetween( heading_tag.first, heading_tag.second, line );
@@ -601,8 +630,11 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                     }
                 }
 
-                auto authors = getContentsBetween( "<span class=\"author\">", "</span>", line );
-                auto tags    = getTags( line ); //TODO look into modifying this to getContentsBetween
+                if( options._index.show_summary )
+                    getSummaryPositions( line_count, line, summary_positions );
+
+                auto authors = getContentsBetween( author_tag.first, author_tag.second, line );
+                auto tags    = getContentsBetween( tag_tag.first, tag_tag.second, line );
 
                 std::copy( authors.begin(), authors.end(),
                            std::inserter( article._authors, article._authors.begin() )
@@ -610,9 +642,19 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
                 std::copy( tags.begin(), tags.end(),
                            std::inserter( article._tags, article._tags.begin() )
                 );
+
+                ++line_count;
             }
 
             html_file.close();
+
+            while( summary_positions.size() >= 2 ) {
+                auto start  = summary_positions.front();
+                summary_positions.pop_front();
+                auto finish =  summary_positions.front();
+                summary_positions.pop_front();
+                article._summary_pos.emplace_back( dto::Article::SeekRange( start, finish ) );
+            }
 
         } else {
             throw exception::file_access_failure( "Could not open: " + path.string() );
@@ -626,6 +668,8 @@ blogator::dto::Article blogator::indexer::readFileProperties( const std::filesys
         throw exception::file_parsing_failure( "No heading (h1) found in post: " + path.string() );
     if( !date_found )
         throw exception::file_parsing_failure( "No date (<time>) found in post: " + path.string() );
+    if( summary_positions.size() % 2 > 0 )
+        display.error( "Missing open/close 'summary' tag detected in: " + path.string() );
 
     if( article._tags.empty() )
         article._tags.emplace( "no tag" );

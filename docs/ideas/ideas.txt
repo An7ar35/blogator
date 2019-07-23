@@ -1,9 +1,5 @@
-· [SUMMARY] Index/Landing page entries <description> support
-        -> (first n lines with '...' added?, special summary file?, optional summary comment line in source post?)
-        -> *_entry.html  <p class="summary"></p> tag search and use in index item /start page item?
-           OR text taken in <p> tags in article source with n char length ('summary-length')
-        -> Summaries could be stored in temp file in the temp folder?
-           "{n}_summary.txt" where 'n' is the article number?
+· [INDEXING] Would hoovering the entire post into a string then using regex be faster?
+
 
 · [SYNTAX HIGHLIGHTER] Syntax highlighter for code snippets
         -> Optional regex override from a string in the config file? if fail then fall back on default and print error msg + message for switching to default
@@ -16,3 +12,10 @@
 · [LINK/PATHS] Perhaps add special blogator tags like "{DATE-LIST-PAGE}", "{DATE-LATEST-PAGE}" and such as an injector option in href/src stuff?
         Could be a cool way to inject up-to-date paths into links when generated files my not always have to the same names on every generation run
         -> might need a special option like "blogator-tags = true" in the cfg file to enable that search?
+
+
+
+//TODO redo the folder structure diagram (pencil) to reflect all the changes
+
+blogator-tags  = false; //TODO special tag->relative path replacer based on certain key pages expressed in {TAG} form (e.g.: "{DATE-LATEST-PAGE}"
+canonify-urls  = false; //TODO true: modify all relative URLs found in the posts/templates to absolute paths with the site's URL as root,

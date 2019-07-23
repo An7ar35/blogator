@@ -23,14 +23,17 @@ namespace blogator::output::page {
 
       private:
         struct PageInfo {
-            const dto::Article &article;
-            const size_t       article_i;
-            const size_t       css_line;
+            const dto::Article          &article;
+            const size_t                article_i;
+            const size_t                css_line;
+            const std::filesystem::path css_path;
         };
 
         std::unique_ptr<const dto::IndexDateTree> _html_date_tree;
         std::unique_ptr<const dto::IndexTagTree>  _html_tag_tree;
-        Breadcrumb::BreadCrumb_t                              _breadcrumb_parents;
+        Breadcrumb::BreadCrumb_t                  _breadcrumb_parents;
+
+        std::filesystem::path copyStylesheet( const dto::Article &article ) const;
 
         void writeTemplateLine( dto::Page       &page,
                                 const dto::Line &line,

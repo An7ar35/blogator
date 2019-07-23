@@ -6,7 +6,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 set(CMAKE_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/external")
-set(CMAKE_RESOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resource")
+set(CMAKE_RESOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resource")
 set(CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(TEMP_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tmp")
 
@@ -118,12 +118,9 @@ set(SOURCE_FILES
         src/output/page/ByAuthorList.h
         src/output/feed/RSS.cpp
         src/output/feed/RSS.h
-
-#        src/sitemap/Sitemap.cpp src/sitemap/Sitemap.h
-#        src/sitemap/SiteNode.cpp
-#        src/sitemap/SiteNode.h
         src/html/editor/code/code.cpp
-        src/html/editor/code/code.h)
+        src/html/editor/code/code.h src/dto/BlogatorInfo.h)
+
 #####################
 # Google Unit-Tests #
 #####################
@@ -149,7 +146,9 @@ endif()
 set(TEST_FILES
         tests/main.cpp
         tests/html/reader/reader.cpp
-        tests/dto/DateStamp.cpp tests/dto/Templates.cpp tests/fs/fs.cpp)
+        tests/dto/DateStamp.cpp
+        tests/dto/Templates.cpp
+        tests/fs/fs.cpp)
 
 enable_testing()
 

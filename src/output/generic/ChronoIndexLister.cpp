@@ -70,7 +70,7 @@ void blogator::output::generic::ChronoIndexLister::write(
                 "File '" + abs_file_path.string() + "' could not be opened for writing: " + strerror(errno)
             );
 
-        page._out << _options->BLOGATOR_SIGNATURE << "\n";
+        page._out << _options->getSoftwareSignatureStr() << "\n";
 
         dto::Template::WritePosIterators insert_points = { _template.block_write_pos.cbegin(), _template.path_write_pos.cbegin() };
         dto::Line                        line          = { _template.html->_lines.cbegin(), 0 };
@@ -170,7 +170,10 @@ void blogator::output::generic::ChronoIndexLister::writeHtmlBlock(
     const dto::Index::PagePaths_t::const_iterator  &page_path_it,
     dto::Index::Articles_t::const_iterator         &article_it )
 {
-    if( block_name == "breadcrumb" ) {
+    if( block_name == "page-name" ) {
+        page._out << _options->_breadcrumb.by_date;
+
+    } else if( block_name == "breadcrumb" ) {
         auto page_desc = _options->_breadcrumb.page + std::to_string( _page_num );
         writeBreadcrumb( page, indent + "\t", _breadcrumb_parents, page_desc );
 
@@ -224,7 +227,7 @@ void blogator::output::generic::ChronoIndexLister::writeIndexEntry(
             entry->path_write_pos  = dto::Templates::extractRelativePaths( *entry->html );
 
             fs::checkTemplateRelPaths( *entry );
-            auto custom_entry_maker = generic::EntryWriter( entry, _options->_months );
+            auto custom_entry_maker = generic::EntryWriter( _options, entry );
 
             custom_entry_maker.write( page, indent, article );
 

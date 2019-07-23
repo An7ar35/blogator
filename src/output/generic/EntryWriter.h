@@ -11,17 +11,17 @@
 namespace blogator::output::generic {
     class EntryWriter {
       public:
-        EntryWriter( std::shared_ptr<const dto::Template> entry_template,
-                     const dto::Options::MonthStringLookup_t &months );
+        EntryWriter( std::shared_ptr<const dto::Options> global_options,
+                     std::shared_ptr<const dto::Template> entry_template );
 
         void write( dto::Page &page, const std::string &indent, const dto::Article &article ) const;
 
         dto::Template::Type getTemplateType() const;
 
       private:
-        cli::MsgInterface                       &_display;
-        std::shared_ptr<const dto::Template>    _template;
-        const dto::Options::MonthStringLookup_t &_months;
+        cli::MsgInterface                    &_display;
+        std::shared_ptr<const dto::Options>  _options;
+        std::shared_ptr<const dto::Template> _template;
 
         void writeTemplateLine( dto::Page            &page,
                                 const std::string    &indent,
@@ -29,7 +29,7 @@ namespace blogator::output::generic {
                                 const dto::Article   &article,
                                 dto::Template::WritePosIterators &insert_its ) const;
 
-        void writeHtmlBlock( dto::Page &page,
+        bool writeHtmlBlock( dto::Page &page,
                              const std::string &indent,
                              const std::string &block_name,
                              const dto::Article &article ) const;

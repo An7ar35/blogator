@@ -9,14 +9,15 @@
 #include "output/output.h"
 
 namespace blogator {
-    void printheader();
+    void printHeader( const dto::BlogatorInfo & info );
 }
 
 int main( int argc, char **argv ) {
     using namespace blogator;
     std::setlocale( LC_ALL, "" );
 
-    printheader();
+    const dto::BlogatorInfo info = { "Blogator", "An7ar35", "1.0b", "https://an7ar35.bitbucket.io" };
+    printHeader( info );
 
     auto &display = cli::MsgInterface::getInstance();
     auto parser   = cli::ArgParser();
@@ -29,7 +30,7 @@ int main( int argc, char **argv ) {
 
     try {
         std::cout << "> Reading configuration file...\n";
-        auto options = fs::importOptions( parser.getWorkingDirectory() / "blogator.cfg" );
+        auto options = fs::importOptions( parser.getWorkingDirectory() / "blogator.cfg", info );
         options->setupAbsolutePaths( parser.getWorkingDirectory() );
         options->setTempPath( parser.getTempDirectory() );
 
@@ -53,17 +54,20 @@ int main( int argc, char **argv ) {
 /**
  * Prints the Title of the application to the terminal
  */
-void blogator::printheader() {
-    auto title = std::string( dto::Options::BLOGATOR_NAME ) + " v" + std::string( dto::Options::BLOGATOR_VERSION );
-    auto left  = std::string( "|                 " );
-    auto right = std::string( "                 |" );
-    auto width = left.size() + title.size() + right.size();
+void blogator::printHeader( const dto::BlogatorInfo & info ) {
+    auto printBorder = []( size_t width ) {
+        std::cout << "·";
+        for( auto i = 0; i < width - 2; ++i )
+            std::cout << "~";
+        std::cout << "·\n";
+    };
 
-    std::stringstream ss;
-    ss << "·";
-    for( auto i = 0; i < width - 2; ++i ) ss << "-";
-    ss << "·";
-    std::cout << ss.str() << "\n"
-              << left << title << right << "\n"
-              << ss.str() << std::endl;
+    const auto title   = info._name + " v" + info._version;
+    const auto credit  = "by " + info._author + " - " + info._url;
+    const auto width   = std::max( title.size(), credit.size() ) + 2;
+
+    printBorder( width );
+    std::cout << " " << title << "\n"
+              << " " << credit << "\n";
+    printBorder( width );
 }
