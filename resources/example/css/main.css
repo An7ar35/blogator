@@ -1,0 +1,165 @@
+/*=========================================BASIC ELEMENTS==========================================*/
+* {
+    margin:  0;
+    padding: 0;
+}
+
+html {
+    background-color: whitesmoke;
+    height:           100%;
+}
+
+body {
+    font-family: Geneva, sans-serif;
+    color:       black;
+    padding:     0;
+    margin:      0 auto;
+    height:      100%;
+    max-width:   1200px;
+}
+
+p {
+    padding: 0.5em 1em;
+    text-align: justify;
+}
+
+h1 { }
+
+h2, h3, h4 { padding: 0.5em; }
+
+a                        {}
+a:hover, a:visited:hover {}
+a:visited                {}
+
+div {}
+
+/*===========================================GENERAL==============================================*/
+
+.header {
+    padding:    0.5em;
+    font-size:  3em;
+    text-align: center;
+    background: white;
+}
+
+.header h1 {
+    font-weight: lighter;
+}
+
+.content {
+    display:        flex;
+    flex-direction: row;
+}
+
+/*=====================================TOP NAVIGATION BAR=========================================*/
+.navbar {
+    overflow:         hidden;
+    margin:           0 auto;
+    padding:          0;
+    border-bottom:    solid 1px teal;
+    background-color: white;
+
+    -webkit-transition: all 300ms ease-in;
+    transition:         all 300ms ease-in;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin:     0;
+    padding:    0;
+    text-align: center;
+    alignment:  center;
+}
+
+.navbar li {
+    margin:  0;
+    padding: 0;
+    display: inline-flex;
+}
+
+.navbar a {
+    display:         block;
+    padding:         0.3em 0.5em;
+    margin:          0;
+    text-transform:  uppercase;
+    letter-spacing:  0.1em;
+    color:           black;
+    text-align:      center;
+    text-decoration: none;
+    font-size:       large;
+    border:          none;
+    outline:         none;
+}
+
+.navbar a:hover {
+    color: teal;
+    text-decoration: underline;
+}
+
+.navbar .active a {
+    background-color: teal;
+    color: white;
+    /*text-decoration: none;*/
+}
+
+/*=========================================LANDING PAGE===========================================*/
+
+.left-col {
+    margin: 1em 0.5em 1em 0;
+    width: 75%;
+}
+.right-col {
+    margin: 1em 0 1em 0.5em;
+    width: 25%;
+}
+
+.left-col > div, .right-col > div {
+    margin: 0 0 1em 0;
+    background-color: white;
+}
+
+.right-col h2 {
+    padding:          0.5em;
+    margin-bottom:    0.5em;
+    border-bottom:    1px solid black;
+    background-color: black;
+    text-transform:   uppercase;
+    letter-spacing:   0.1em;
+    font-size:        large;
+    font-weight:      normal;
+    color:            white;
+}
+
+#about-me img {
+    width:   80%;
+    height:  auto;
+    display: block;
+    margin:  auto;
+}
+
+.browse-posts {
+    display:          flex;
+    justify-content:  center;
+    background-color: white;
+    /*margin:           1em 0;*/
+}
+
+.browse-posts * {
+    display: inline-block;
+}
+
+.browse-posts ul li  {
+    padding: 0 0.5em;
+    text-transform:  uppercase;
+    letter-spacing:  0.1em;
+}
+
+.browse-posts a {
+    margin:          0.5em;
+    color:           teal;
+    text-decoration: none;
+}
+
+.browse-posts a:hover {
+    text-decoration: underline;
+}
