@@ -107,6 +107,7 @@ void blogator::output::generic::ChronoIndexLister::writeTemplateLine(
 
     std::string::size_type col = 0;
     const auto indent = html::reader::getIndent( *line._it );
+    bool carriage_return = false;
 
     //EARLY RETURN: when there's nothing to add/edit on the line
     if( !hasBlock() && !hasPath() ) {
@@ -116,9 +117,13 @@ void blogator::output::generic::ChronoIndexLister::writeTemplateLine(
 
     while( hasBlock() && hasPath() ) {
         if( insert_it.block->first.col < insert_it.path->first.col ) { //do the block first
-            page._out << line._it->substr( col, insert_it.block->first.col - col ) << "\n";
-            writeHtmlBlock( page, indent, insert_it.block->second, page_paths, page_path_it, article_it );
-            page._out << indent;
+            if( carriage_return )
+                page._out << indent;
+
+            page._out << line._it->substr( col, insert_it.block->first.col - col );
+
+            if( ( carriage_return = writeHtmlBlock( page, indent, insert_it.block->second, page_paths, page_path_it, article_it ) ) )
+                page._out << indent;
 
             col = insert_it.block->first.col;
             ++insert_it.block;
@@ -133,9 +138,13 @@ void blogator::output::generic::ChronoIndexLister::writeTemplateLine(
     }
 
     while( hasBlock() ) { //just block(s) left to insert
-        page._out << line._it->substr( col, insert_it.block->first.col - col ) << "\n";
-        writeHtmlBlock( page, indent, insert_it.block->second, page_paths, page_path_it, article_it );
-        page._out << indent;
+        if( carriage_return )
+            page._out << indent;
+
+        page._out << line._it->substr( col, insert_it.block->first.col - col );
+
+        if( ( carriage_return = writeHtmlBlock( page, indent, insert_it.block->second, page_paths, page_path_it, article_it ) ) )
+            page._out << indent;
 
         col = insert_it.block->first.col;
         ++insert_it.block;
@@ -161,8 +170,9 @@ void blogator::output::generic::ChronoIndexLister::writeTemplateLine(
  * @param page_paths   List of pages for the index
  * @param page_path_it Current page path iterator
  * @param article_it   Current article iterator
+ * @return Line carriage return required
  */
-void blogator::output::generic::ChronoIndexLister::writeHtmlBlock(
+bool blogator::output::generic::ChronoIndexLister::writeHtmlBlock(
     dto::Page &page,
     const std::string  &indent,
     const std::string  &block_name,
@@ -172,15 +182,21 @@ void blogator::output::generic::ChronoIndexLister::writeHtmlBlock(
 {
     if( block_name == "page-name" ) {
         page._out << _options->_breadcrumb.by_date;
+        return false;
 
     } else if( block_name == "breadcrumb" ) {
+        page._out  << "\n";
         auto page_desc = _options->_breadcrumb.page + std::to_string( _page_num );
         writeBreadcrumb( page, indent + "\t", _breadcrumb_parents, page_desc );
+        return true;
 
     } else if( block_name == "page-nav" ) {
+        page._out  << "\n";
         writePageNavDiv( page, indent + "\t", page_paths, page_path_it );
+        return true;
 
     } else if( block_name == "index-entries" ) {
+        page._out  << "\n";
 
         while( article_it != _articles.cend() && _entry_counter < _options->_index.items_per_page ) {
             auto abs_path        = page._abs_path.parent_path();
@@ -192,12 +208,16 @@ void blogator::output::generic::ChronoIndexLister::writeHtmlBlock(
             ++_entry_counter;
         }
 
+        return true;
+
     } else {
         _display.error(
             "[output::generic::ChronoIndexLister::writeHtmlBlock(..)] "
             "HTML Div class '" + block_name + "' not recognised."
         );
     }
+
+    return false;
 }
 
 /**

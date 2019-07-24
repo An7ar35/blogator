@@ -19,7 +19,7 @@ body {
 }
 
 p {
-    padding: 0.5em 1em;
+    padding: 0.5em 0.5em;
     text-align: justify;
 }
 
@@ -108,12 +108,13 @@ div {}
     margin: 1em 0.5em 1em 0;
     width: 75%;
 }
+
 .right-col {
     margin: 1em 0 1em 0.5em;
     width: 25%;
 }
 
-.left-col > div, .right-col > div {
+.right-col > div {
     margin: 0 0 1em 0;
     background-color: white;
 }

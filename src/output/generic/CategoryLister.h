@@ -33,7 +33,7 @@ namespace blogator::output::generic {
                                 std::vector<size_t>::const_iterator &article_i_it,
                                 dto::Template::WritePosIterators    &insert_it );
 
-        void writeHtmlBlock( dto::Page &page,
+        bool writeHtmlBlock( dto::Page &page,
                              const std::string  &indent,
                              const std::string  &block_name,
                              const dto::Index::ListIndexPaths_t::const_iterator &cat_it,

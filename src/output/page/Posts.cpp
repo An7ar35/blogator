@@ -260,20 +260,26 @@ void blogator::output::page::Posts::writePageNavDiv( dto::Page &page,
     const std::filesystem::path &prev  = ( is_first ? first : _index->_articles.at( article_pos - 1 )._paths.out_html );
     const std::filesystem::path &next  = ( is_last  ? last  : _index->_articles.at( article_pos + 1 )._paths.out_html );
 
-    page._out << indent << "\t"
-              << ( is_first
-                   ? html::createHyperlink( first, _options->_page_nav.first, "disabled" )
-                   : html::createHyperlink( first, _options->_page_nav.first ) )
-              << ( is_first
-                   ? html::createHyperlink( prev, _options->_page_nav.backward, "disabled", "prev" )
-                   : html::createHyperlink( prev, _options->_page_nav.backward, "", "prev" ) )
-              << std::to_string( article_pos + 1 ) << _options->_page_nav.separator << std::to_string( _index->_articles.size() )
-              << ( is_last
-                   ? html::createHyperlink( next, _options->_page_nav.forward, "disabled", "next" )
-                   : html::createHyperlink( next, _options->_page_nav.forward, "", "next" ) )
-              << ( is_last
-                   ? html::createHyperlink( last, _options->_page_nav.last, "disabled" )
-                   : html::createHyperlink( last, _options->_page_nav.last ) )
+    page._out << indent << "<ul>\n"
+              << indent << "\t<li class=\"first\">" << ( is_first
+                                                         ? html::createHyperlink( first, _options->_page_nav.first, "disabled" )
+                                                         : html::createHyperlink( first, _options->_page_nav.first ) )
+                        << "</li>\n"
+              << indent << "\t<li class=\"prev\">" << ( is_first
+                                                        ? html::createHyperlink( prev, _options->_page_nav.backward, "disabled", "prev" )
+                                                        : html::createHyperlink( prev, _options->_page_nav.backward, "", "prev" ) )
+                        << "</li>\n"
+              << indent << "\t<li class=\"curr\">" << std::to_string( article_pos + 1 ) << _options->_page_nav.separator << std::to_string( _index->_articles.size() )
+                        << "</li>\n"
+              << indent << "\t<li class=\"next\">" << ( is_last
+                                                        ? html::createHyperlink( next, _options->_page_nav.forward, "disabled", "next" )
+                                                        : html::createHyperlink( next, _options->_page_nav.forward, "", "next" ) )
+                        << "</li>\n"
+              << indent << "\t<li class=\"last\">" << ( is_last
+                                                        ? html::createHyperlink( last, _options->_page_nav.last, "disabled" )
+                                                        : html::createHyperlink( last, _options->_page_nav.last ) )
+                        << "</li>\n"
+              << indent << "</ul>"
               << std::endl;
 }
 

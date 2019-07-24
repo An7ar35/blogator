@@ -111,6 +111,7 @@ void blogator::output::generic::CategoryLister::writeTemplateLine(
 
     std::string::size_type col = 0;
     const auto indent = html::reader::getIndent( *line._it );
+    bool carriage_return = false;
 
     //EARLY RETURN: when there's nothing to add/edit on the line
     if( !hasBlock() && !hasPath() ) {
@@ -120,9 +121,13 @@ void blogator::output::generic::CategoryLister::writeTemplateLine(
 
     while( hasBlock() && hasPath() ) {
         if( insert_it.block->first.col < insert_it.path->first.col ) { //do the block first
-            page._out << line._it->substr( col, insert_it.block->first.col - col ) << "\n";
-            writeHtmlBlock( page, indent, insert_it.block->second, cat_it, page_path_it, article_i_it );
-            page._out << indent;
+            if( carriage_return )
+                page._out << indent;
+
+            page._out << line._it->substr( col, insert_it.block->first.col - col );
+
+            if( ( carriage_return = writeHtmlBlock( page, indent, insert_it.block->second, cat_it, page_path_it, article_i_it ) ) )
+                page._out << indent;
 
             col = insert_it.block->first.col;
             ++insert_it.block;
@@ -137,9 +142,13 @@ void blogator::output::generic::CategoryLister::writeTemplateLine(
     }
 
     while( hasBlock() ) { //just block(s) left to insert
-        page._out << line._it->substr( col, insert_it.block->first.col - col ) << "\n";
-        writeHtmlBlock( page, indent, insert_it.block->second, cat_it, page_path_it, article_i_it );
-        page._out << indent;
+        if( carriage_return )
+            page._out << indent;
+
+        page._out << line._it->substr( col, insert_it.block->first.col - col );
+
+        if( ( carriage_return = writeHtmlBlock( page, indent, insert_it.block->second, cat_it, page_path_it, article_i_it ) ) )
+            page._out << indent;
 
         col = insert_it.block->first.col;
         ++insert_it.block;
@@ -165,8 +174,9 @@ void blogator::output::generic::CategoryLister::writeTemplateLine(
  * @param cat_it       Iterator to the categories
  * @param page_path_it Iterator to the current page path
  * @param article_i_it Iterator to the article index position
+ * @return Line carriage return required
  */
-void blogator::output::generic::CategoryLister::writeHtmlBlock(
+bool blogator::output::generic::CategoryLister::writeHtmlBlock(
     blogator::dto::Page &page,
     const std::string   &indent,
     const std::string   &block_name,
@@ -176,14 +186,20 @@ void blogator::output::generic::CategoryLister::writeHtmlBlock(
 {
     if( block_name == "page-name" ) {
         page._out << cat_it->first;
+        return false;
 
     } else if( block_name == "breadcrumb" ) {
+        page._out  << "\n";
         writeBreadcrumb( page, indent + "\t", _breadcrumb_parents, cat_it->first );
+        return true;
 
     } else if( block_name == "page-nav" ) {
+        page._out  << "\n";
         writePageNavDiv( page, indent + "\t", cat_it->second.file_names, page_path_it );
+        return true;
 
     } else if( block_name == "index-entries" ) {
+        page._out  << "\n";
 
         while( article_i_it != cat_it->second.article_indices.cend() &&
                _entry_counter < _options->_index.items_per_page )
@@ -198,12 +214,16 @@ void blogator::output::generic::CategoryLister::writeHtmlBlock(
             ++_entry_counter;
         }
 
+        return true;
+
     } else {
         _display.error(
             "[output::generic::CategoryLister::writeHtmlBlock(..)] "
             "HTML Div class '" + block_name + "' not recognised."
         );
     }
+
+    return false;
 }
 
 /**

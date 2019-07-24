@@ -1,8 +1,9 @@
-/* BREADCRUMB (global) */
 
+
+/* =======================================BREADCRUMB ============================================ */
 .breadcrumb {
 	margin-right: auto;
-	padding:    0;
+	padding:      0;
 }
 
 .breadcrumb ul {
@@ -33,35 +34,167 @@
 	text-decoration: underline;
 }
 
-/* LANDING PAGE */
-.newest-posts { border: aqua solid 1px; }
+/* ======================================= LANDING PAGE ========================================= */
+/* Newest Posts Feed */
+.newest-posts							{ margin: 0 0 1em 0; }
+.newest-posts a div * 		 		  	{ padding: 0.5em; }
+.newest-posts > a 				      	{ margin: 1em 0;
+										  background-color: white; }
+.newest-posts > a .post-number 			{ font-size: x-large;
+									      text-align: center;
+									      padding: 0.5em; }
+.newest-posts > a .heading 			    { margin-right: auto;
+	   							          font-size: x-large; }
+.newest-posts > a .date-stamp 			{ margin-left: auto; }
+.newest-posts > a .tags					{ margin-left: auto;
+										  padding: 0;
+										  font-family: monospace;
+										  color: #0275d8; }
+.newest-posts > a .authors:before	    { content: "By ";
+										  padding-left: 0.5em; }
+.newest-posts > a .authors 				{ margin-right: auto;
+										  padding: 0;
+										  font-style: italic; }
+.newest-posts > a .summary 			  	{ display: block;
+										  border-top: whitesmoke solid 1px; }
+.newest-posts > a .summary > p 		  	{}
+.newest-posts > a:hover .heading,
+.newest-posts > a:hover .post-number,
+.newest-posts > a:hover > p 	 	  	{ color: teal; }
+.newest-posts > a:hover .summary 	  	{ border-top: solid 1px teal; }
+
+
+/* Pinned/Featured posts */
+.featured-posts 			 			{ border: darkgoldenrod solid 1px; }
+.featured-posts > a 			 		{ margin: 0.5em 0; }
+.featured-posts > a .post-number 		{ display: none; }
+.featured-posts > a .heading 	 		{ width: 100%; }
+.featured-posts > a .date-stamp  		{}
+.featured-posts > a .authors 	 		{}
+
+
+.newest-posts div,
+.featured-posts div {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: baseline;
+}
+
+.newest-posts a,
+.featured-posts a{
+	text-decoration: none;
+	color: black;
+	display: block;
+}
+
+.newest-posts .tags,
+.featured-posts .tags { margin-left: auto }
+
+
+
+.newest-posts > p {
+	display: inline-block;
+	margin: auto;
+}
+
 .top-tags { border: seagreen solid 1px; }
 .top-authors { border: indigo solid 1px; }
-.featured-posts { border: darkgoldenrod solid 1px; }
+
+
+
 
 /* POSTS */
-.page-nav { border: 1px solid Red; }
 .post-content {}
 .index-pane-dates {}
 .index-pane-tags {}
 
 /* INDEX */
 .page-name {}
-.page-nav { border: 1px solid Red; }
-.index-entries {}
+
 
 /* INDEX LIST */
 .page-name {}
 .index-list-flat {}
 .index-list-hierarchy {}
 
-/* LANDING/INDEX ENTRY */
-.post-number {}
-.heading {}
-.authors {}
-.tags {}
-.date-stamp {}
-.summary {}
+/* ============================== INDEX & POST PER-PAGE NAVIGATION ============================== */
+.page-nav ul {
+	padding:     0 0.5em;
+	margin:      0;
+	list-style:  none;
+	font-size:   large;
+	text-align:  center;
+}
+
+.page-nav ul li { display: inline; }
+
+.page-nav ul li a {
+	display: inline-block;
+	width:  1.5em;
+	height: 1.5em;
+	text-decoration: none;
+	margin: 0 0.1em;
+	font-size:  x-large;
+	color:      teal;;
+	background: white;
+	/*border: 1px solid teal;*/
+}
+
+.page-nav ul li a:hover {
+	color: black;
+	background: teal;
+}
+
+.page-nav ul li .curr {
+	display:     inline-block;
+	padding: 0 1em;
+	font-weight: bolder;
+}
+
+.page-nav ul li .disabled:hover {
+	color:      white;
+	background: teal;
+}
+
+/*================================ INDICES ==================================*/
+
+.index-entries {}
+
+.index-entries a {
+	text-decoration: none;
+	color: black;
+	display: block;
+}
+
+
+.index-entries .post-number {
+	font-size: x-large;
+	text-align: center;
+	padding: 0.5em;
+}
+
+.index-entries .heading {
+	margin-right: auto;
+	font-size: x-large;
+}
+
+.index-entries .date-stamp {
+	margin-left: auto
+}
+
+.index-entries .authors {
+	margin-right: auto
+}
+
+.index-entries .tags {
+	margin-left: auto
+}
+
+
+.index-entries .summary {
+	border-top: whitesmoke solid 1px;
+}
 
 
 /*.tree {*/
