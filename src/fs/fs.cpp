@@ -38,8 +38,10 @@ void blogator::fs::setupEnvironment( const std::shared_ptr<dto::Options> &global
         if( !std::filesystem::exists( global_options->_paths.template_dir ) ) {
             std::filesystem::create_directories( global_options->_paths.template_dir ); //TODO generate missing templates if none are found
         }
-        if( !global_options->_posts.safe_purge && !std::filesystem::create_directories( global_options->_paths.posts_dir ) ) {
-            display.error( "Could not create directories: " + global_options->_paths.posts_dir.string() );
+        if( !std::filesystem::exists( global_options->_paths.posts_dir ) ) {
+            if( !std::filesystem::create_directories( global_options->_paths.posts_dir ) ) {
+                display.error( "Could not create directories: " + global_options->_paths.posts_dir.string() );
+            }
         }
         if( !std::filesystem::create_directories( global_options->_paths.index_dir ) ) {
             display.error( "Could not create directories: " + global_options->_paths.index_dir.string() );
