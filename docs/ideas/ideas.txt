@@ -1,6 +1,5 @@
 · [INDEXING] Would hoovering the entire post into a string then using regex be faster?
 
-
 · [SYNTAX HIGHLIGHTER] Syntax highlighter for code snippets
         -> Optional regex override from a string in the config file? if fail then fall back on default and print error msg + message for switching to default
         -> Read at the same time as the summary in each posts

@@ -26,9 +26,12 @@ blogator::output::feed::RSS::RSS( std::shared_ptr<const dto::Index>     master_i
 
 /**
  * Initialise RSS feed creator
- * @return Success
+ * @return Errorless success
  */
 bool blogator::output::feed::RSS::init() {
+    if( !_options->_rss.generate )
+        return true;
+
     try {
         auto path = _options->_paths.root_dir / _options->_rss.file_name;
 

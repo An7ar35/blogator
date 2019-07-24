@@ -15,7 +15,8 @@ namespace blogator::indexer {
     std::shared_ptr<dto::Index> index( const std::shared_ptr<dto::Options> &global_options );
     void indexStylesheets( const dto::Options &global_options, dto::Index &index );
     void indexTemplates( const dto::Options &global_options, dto::Index &index );
-    void indexPosts( const dto::Options &global_options, dto::Index &index, FeatAggregator &feat_aggregator );
+    void indexPosts( const dto::Options &global_options, dto::Index &index );
+    void indexFeatured( FeatAggregator &feat_aggregator, dto::Index &index );
 
     void addYear( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );
     void addTags( const dto::Options &global_options, const dto::Article &article, dto::Index &master_index );

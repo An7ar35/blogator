@@ -120,7 +120,10 @@ void blogator::output::abstract::IndexList::writeHtmlBlock( blogator::dto::Page 
                                                            const std::string   &indent,
                                                            const std::string   &block_name ) const
 {
-    if( block_name == "breadcrumb" ) {
+    if( block_name == "page-name" ) {
+        page._out << _breadcrumb_page_str;
+
+    } else if( block_name == "breadcrumb" ) {
         writeBreadcrumb( page, indent + "\t", _breadcrumb_parents, _breadcrumb_page_str );
 
     } else if( block_name == "index-list-flat" ) {

@@ -26,7 +26,8 @@ blogator::output::page::Posts::Posts( std::shared_ptr<const dto::Index>     mast
     Page( std::move( master_index ),
                std::move( templates ),
                std::move( global_options ) ),
-    _breadcrumb_parents( { { _options->_breadcrumb.start, "../index.html" } } )
+    _breadcrumb_parents( { { _options->_breadcrumb.start, "../index.html" },
+                           { _options->_breadcrumb.by_date, "../index/by_date/0.html" } } )
 {
     auto date_tree_it = _templates->_post->block_classes.find( "index-pane-dates" );
     if( date_tree_it != _templates->_post->block_classes.end() && date_tree_it->second )

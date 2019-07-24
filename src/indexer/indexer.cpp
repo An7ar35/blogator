@@ -33,32 +33,57 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     auto feat_aggregator = indexer::FeatAggregator( global_options );
     auto &display        = cli::MsgInterface::getInstance();
 
-    display.begin( "Indexing", 5, "CSS" );
+    bool   doFeatured = !global_options->_landing_page.featured.empty();
+    bool   doByYear   = global_options->_index.index_by_year;
+    bool   doByTag    = global_options->_index.index_by_tag;
+    bool   doByAuthor = global_options->_index.index_by_author;
+
+    size_t optional = ( doFeatured ? 1 : 0 )
+                    + ( doByYear ? 1 : 0 )
+                    + ( doByTag ? 1 : 0 )
+                    + ( doByAuthor ? 1 : 0 );
+
+    display.begin( "Indexing", ( 5 + optional ), "CSS" );
     indexStylesheets( *global_options, *index );
+
     display.progress( "Templates" );
     indexTemplates( *global_options, *index );
+
     display.progress( "Posts" );
-    indexPosts( *global_options, *index, feat_aggregator );
+    indexPosts( *global_options, *index );
+
     display.progress( "sorting articles by date" );
     sortChronologically( index->_articles, *global_options );
-    display.progress( "generating targets" );
+
+    if( doFeatured ) {
+        display.progress( "generating featured targets" );
+        indexFeatured( feat_aggregator, *index );
+    }
+
+    display.progress( "generating chrono index targets" );
     generateChronologicalIndexTargets( *index, *global_options );
+
     if( global_options->_index.index_by_year ) {
+        display.progress( "generating 'by year' targets" );
         index->_indices.byYear.page_count += 1; //year list page
         generateYearIndexTargets( *index, *global_options );
     }
+
     if( global_options->_index.index_by_tag ) {
+        display.progress( "generating 'by tag' targets" );
         index->_indices.byTag.page_count += 1; //tag list page
         generateTagIndexTargets( *index, *global_options );
         generateTopTags( *index, *global_options );
     }
+
     if( global_options->_index.index_by_author ) {
+        display.progress( "generating 'by author' targets" );
         index->_indices.byAuthor.page_count += 1; //author list page
         generateAuthorIndexTargets( *index, *global_options );
         generateTopAuthors( *index, *global_options );
     }
-    display.progress( "DONE" );
 
+    display.progress( "DONE" );
     return std::move( index );
 }
 
@@ -70,26 +95,19 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
 void blogator::indexer::indexStylesheets( const dto::Options &global_options, dto::Index &index ) {
     auto &display = cli::MsgInterface::getInstance();
 
-    static const std::regex blog_css_regex  = std::regex( "^.*(blog)\\.(css)$" );
-    static const std::regex index_css_regex = std::regex( "^.*(index)\\.(css)$" );
+    static const std::regex blogator_css_rx  = std::regex( R"(^.*blogator\.css$)" );
 
     for( auto &p: std::filesystem::recursive_directory_iterator( global_options._paths.css_dir ) ) {
         if( p.is_regular_file() ) {
-            if( std::regex_match( p.path().string(), blog_css_regex ) ) {
+            if( std::regex_match( p.path().string(), blogator_css_rx ) ) {
                 index._paths.css.blog  = p.path();
-            } else if( std::regex_match( p.path().string(), index_css_regex ) ) {
-                index._paths.css.index = p.path();
             }
         }
     }
 
     if( index._paths.css.blog.empty() ) {
-        std::ofstream output( index._paths.css.blog = global_options._paths.css_dir / "blog.css" );
+        std::ofstream output( index._paths.css.blog = global_options._paths.css_dir / "blogator.css" );
         display.msg( "No master stylesheet was found for the articles. A blank one was created." );
-    }
-    if( index._paths.css.index.empty() ) {
-        std::ofstream output( index._paths.css.index = global_options._paths.css_dir / "index.css" );
-        display.msg( "No master stylesheet was found for the indices. A blank one was created." );
     }
 }
 
@@ -182,10 +200,7 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
  * @param index          Master index
  * @throws exception::failed_expectation when no source post files were found to index
  */
-void blogator::indexer::indexPosts( const dto::Options &global_options,
-                                    dto::Index &index,
-                                    FeatAggregator &feat_aggregator )
-{
+void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Index &index ) {
     static auto &display = cli::MsgInterface::getInstance();
 
     static const std::regex index_entry_html_rx = std::regex( R"(^(.*[\/\\].+)(?:_index)\.(?:htm|html)$)" );
@@ -223,7 +238,6 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
                         addYear( global_options, article, index );
                         addTags( global_options, article, index );
                         addAuthors( global_options, article, index );
-                        feat_aggregator.addArticleIfFeatured( article );
 
                         if( global_options._index.show_summary && article._summary_pos.empty() )
                             display.debug( "No summary found in: " + article._paths.src_html.string() );
@@ -285,8 +299,20 @@ void blogator::indexer::indexPosts( const dto::Options &global_options,
             }
         }
     }
+}
 
-    //Get the list of ordered Articles featured on the landing page
+/**
+ * Index featured posts for the landing page
+ * @param feat_aggregator Featured aggregator
+ * @param index           Index DTO
+ */
+void blogator::indexer::indexFeatured( indexer::FeatAggregator &feat_aggregator,
+                                       dto::Index &index )
+{
+    for( const auto &article : index._articles ) {
+        feat_aggregator.addArticleIfFeatured( article );
+    }
+
     index._featured = feat_aggregator.getFeaturedArticles();
 }
 

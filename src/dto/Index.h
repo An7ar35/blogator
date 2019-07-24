@@ -48,7 +48,6 @@ namespace blogator::dto {
             } templates;
 
             struct CSS {
-                std::filesystem::path index;
                 std::filesystem::path blog;
             } css;
 
@@ -90,7 +89,6 @@ namespace blogator::dto {
             s << "(Template) Author-list page ..: " << index._paths.templates.author_list.string() << "\n";
             s << "(Template) Author-index page .: " << index._paths.templates.author_index.string() << "\n";
             s << "(CSS) Blog stylesheet ........: " << index._paths.css.blog.string() << "\n";
-            s << "(CSS) Index stylesheet .......: " << index._paths.css.index.string() << "\n";
             s << "Article (posts) count.........: " << index._articles.size() << " found.\n";
             s << "Categories (tags) count ......: " << index._indices.byTag.cats.size() << " found." << std::endl;
 //            for( const auto &t : index._indices.byTag.tags )

@@ -17,7 +17,8 @@ blogator::indexer::FeatAggregator::FeatAggregator( std::shared_ptr<const blogato
  */
 void blogator::indexer::FeatAggregator::addArticleIfFeatured( const blogator::dto::Article &article )
 {
-    const auto it = _options->_landing_page.featured.find( article._paths.out_html );
+    const auto rel_path = article._paths.src_html.lexically_relative( _options->_paths.source_dir );
+    const auto it = _options->_landing_page.featured.find( rel_path );
 
     if( it != _options->_landing_page.featured.cend() )
         _max_heap.push( std::make_pair( it->second, article ) );
