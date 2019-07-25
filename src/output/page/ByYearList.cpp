@@ -60,17 +60,32 @@ void blogator::output::page::ByYearList::writeHierarchyList( dto::Page &page,
         while( year_it != _index->_indices.byYear.cats.cend() ) {
             const std::string current = year_it->first;
 
-            page._out << indent << "\t<li>" << year_it->first << "\n"
+            page._out << indent << "\t<li><h3>" << year_it->first << "</h3>\n"
                       << indent << "\t\t<ul>\n";
 
-            while( year_it != _index->_indices.byYear.cats.cend() && current == year_it->first ) {
-                page._out << indent << "\t\t\t<li>"
-                          << html::createHyperlink( year_it->second.file_names.front(), year_it->first ) << "</li>\n";
-                ++year_it;
+            for( size_t i : year_it->second.article_indices ) {
+
+                try {
+                    const auto &article = _index->_articles.at( i );
+                    const auto abs_path = page._abs_path.parent_path();
+                    const auto rel_path = ( _options->_paths.posts_dir / article._paths.out_html ).lexically_relative( abs_path );
+
+                    page._out << indent << "\t\t\t<li>"
+                              << html::createHyperlink( rel_path, article._heading )
+                              << "</li>\n";
+
+                } catch( std::out_of_range &e ) {
+                    _display.error(
+                        "[output::page::ByYearList::writeHierarchyList(..)] "
+                        "Article index (i: " + std::to_string( i ) + ") is not valid: " + e.what()
+                    );
+                }
             }
 
             page._out << indent << "\t\t</ul>\n"
                       << indent << "\t</li>\n";
+
+            ++year_it;
         }
 
         page._out << indent << "</ul>" << std::endl;

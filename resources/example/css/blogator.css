@@ -1,4 +1,8 @@
-
+/* ===[ Blogator example: blogator stylesheet ]=== */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* All the Blogator-specific class styles          */
+/* Written by An7ar35 (an7ar35.bitbucket.io)       */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* =======================================BREADCRUMB ============================================ */
 .breadcrumb {
@@ -24,101 +28,214 @@
 	content:     "/\00a0"; /* slash '/' symbol */
 }
 
-.breadcrumb ul li a {
-	color:           #0275d8;
-	text-decoration: none;
-}
-
-.breadcrumb ul li a:hover {
-	color:           #01447e;
-	text-decoration: underline;
-}
+.breadcrumb ul li a 	  { text-decoration: none; }
+.breadcrumb ul li a:hover { text-decoration: underline; }
 
 /* ======================================= LANDING PAGE ========================================= */
 /* Newest Posts Feed */
-.newest-posts							{ margin: 0 0 1em 0; }
-.newest-posts a div * 		 		  	{ padding: 0.5em; }
-.newest-posts > a 				      	{ margin: 1em 0;
-										  background-color: white; }
-.newest-posts > a .post-number 			{ font-size: x-large;
-									      text-align: center;
-									      padding: 0.5em; }
-.newest-posts > a .heading 			    { margin-right: auto;
-	   							          font-size: x-large; }
-.newest-posts > a .date-stamp 			{ margin-left: auto; }
-.newest-posts > a .tags					{ margin-left: auto;
-										  padding: 0;
-										  font-family: monospace;
-										  color: #0275d8; }
-.newest-posts > a .authors:before	    { content: "By ";
-										  padding-left: 0.5em; }
-.newest-posts > a .authors 				{ margin-right: auto;
-										  padding: 0;
-										  font-style: italic; }
-.newest-posts > a .summary 			  	{ display: block;
-										  border-top: whitesmoke solid 1px; }
-.newest-posts > a .summary > p 		  	{}
-.newest-posts > a:hover .heading,
-.newest-posts > a:hover .post-number,
-.newest-posts > a:hover > p 	 	  	{ color: teal; }
-.newest-posts > a:hover .summary 	  	{ border-top: solid 1px teal; }
+.newest-posts 		  { margin: 0 0 1em 0; }
+.newest-posts a div * { padding: 0.5em; }
+
+.newest-posts > a {
+	text-decoration:  none;
+	color: 			  black;
+	display: 		  block;
+	margin: 		  1em 0;
+	background-color: white;
+}
+
+.newest-posts > a > p {
+	display: inline-block;
+	margin:  auto;
+}
+
+.newest-posts > a div  {
+	display: 	    flex;
+	flex-direction: row;
+	flex-wrap: 	    wrap;
+	align-items: 	baseline;
+}
+
+.newest-posts > a .post-number {
+	font-size:  x-large;
+	text-align: center;
+	padding: 	0.5em;
+}
+
+.newest-posts > a .heading {
+	margin-right: auto;
+	font-size: 	  x-large;
+}
+
+.newest-posts > a .date-stamp { margin-left: auto; }
+
+.newest-posts > a .tags	{
+	margin-left: auto;
+	padding: 	 0;
+	font-family: monospace;
+	color: 		 #0275d8;
+}
+
+.newest-posts > a .authors:before {
+	content: 	  "By ";
+	padding-left: 0.5em;
+}
+
+.newest-posts > a .authors {
+	margin-right: auto;
+	padding: 	  0;
+	font-style:   italic;
+}
+
+.newest-posts > a .summary {
+	display: 	block;
+	border-top: whitesmoke solid 1px;
+}
+
+.newest-posts > a:hover .date-stamp,
+.newest-posts > a:hover .authors { color: black; }
+
+.newest-posts > a:hover > p { text-decoration: underline; }
+
+.newest-posts > a:hover .summary {
+	color: 	    black;
+	border-top: solid 1px teal;
+}
 
 
 /* Pinned/Featured posts */
-.featured-posts 			 			{ border: darkgoldenrod solid 1px; }
-.featured-posts > a 			 		{ margin: 0.5em 0; }
-.featured-posts > a .post-number 		{ display: none; }
-.featured-posts > a .heading 	 		{ width: 100%; }
-.featured-posts > a .date-stamp  		{}
-.featured-posts > a .authors 	 		{}
-
-
-.newest-posts div,
-.featured-posts div {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-items: baseline;
-}
-
-.newest-posts a,
-.featured-posts a{
+.featured-posts > a {
+	margin: 		 0 0.5em 0.5em 0.5em;
 	text-decoration: none;
-	color: black;
-	display: block;
+	color: 			 black;
+	display: 		 block;
 }
 
-.newest-posts .tags,
-.featured-posts .tags { margin-left: auto }
-
-
-
-.newest-posts > p {
-	display: inline-block;
-	margin: auto;
+.featured-posts > a div {
+	display: 	    flex;
+	flex-direction: row;
+	flex-wrap: 	    wrap;
+	align-items: 	baseline;
 }
 
-.top-tags { border: seagreen solid 1px; }
-.top-authors { border: indigo solid 1px; }
+.featured-posts > a .post-number { display: none; }
+.featured-posts > a .date-stamp  { padding: 0; }
+
+.featured-posts > a .heading {
+	width:   	   100%;
+	padding: 	   0 0 0.25em 0;
+	margin-bottom: 0.25em;
+	border-bottom: 1px solid whitesmoke;
+}
+
+.featured-posts > a .tags {
+	display:     none;
+	padding: 	 0;
+	margin-left: auto;
+	font-family: monospace;
+	color: 		 #0275d8;
+}
+
+.featured-posts > a .authors {
+	display:    none;
+	padding: 	0;
+	font-style: italic;
+}
+
+.featured-posts > a > p,
+.featured-posts > a .summary > p {
+	padding: 0.5em 0;
+	margin: 0;
+}
+
+.featured-posts > a:hover .date-stamp,
+.featured-posts > a:hover .summary { color: black; }
+
+.featured-posts > a:hover .heading,
+.featured-posts > a:hover .post-number,
+.featured-posts > a:hover > p { color: teal; }
+
+.featured-posts > a:hover > p 	   { text-decoration: underline; }
+.featured-posts > a:hover .heading { border-bottom: solid 1px teal; }
 
 
+/* Top lists */
+.top-tags ul, .top-authors ul {
+	padding:    0 0.5em;
+	list-style: none;
+}
 
 
-/* POSTS */
+/* ============================================ POSTS =========================================== */
 .post-content {}
 .index-pane-dates {}
 .index-pane-tags {}
 
-/* INDEX */
-.page-name {}
+
+/* ========================================== INDEX LIST ======================================== */
+.index-list-flat {
+	background-color: white;
+}
+
+.index-list-flat ul      { list-style: none; }
+.index-list-flat ul > li {}
+
+.index-list-flat ul > li:before {
+	content: "\25FE";
+	padding-right: 0.5em;
+}
+
+.index-list-hierarchy {
+	background-color: white;
+}
+
+.index-list-hierarchy ul {
+	column-count: 		  2;
+	column-gap: 		  4em;
+	list-style: 		  none;
+}
+
+.index-list-hierarchy ul > li,
+.index-list-hierarchy ul > li > ul > li { display: inline-block; }
+
+.index-list-hierarchy ul > li > a {
+	line-height: 2em;
+}
+
+.index-list-hierarchy ul > li > ul {
+	list-style:   none;
+	/*padding-left: 1em;*/
+	line-height: 2em;
+}
+
+.index-list-hierarchy ul > li > h3 {
+	width: auto;
+	background-color: black;
+	color: white;
+}
+
+.index-list-hierarchy ul > li > ul > li:before {
+	content: "\25FE";
+	padding-right: 0.5em;
+}
 
 
-/* INDEX LIST */
-.page-name {}
-.index-list-flat {}
-.index-list-hierarchy {}
+/* ================================ POST & INDEX LIST PAGE NAMES ================================ */
+.page-name {
+	/*font-size: x-large;*/
+	/*font-weight: bold;*/
+	/*display: block;*/
+	/*width:  100%;*/
+	background-color: white;
+	padding: 0.5em;
+	margin:  0.5em 0;
+	border-bottom: 1px solid black;
+}
+
 
 /* ============================== INDEX & POST PER-PAGE NAVIGATION ============================== */
+.page-nav { background-color: white; }
+
 .page-nav ul {
 	padding:     0 0.5em;
 	margin:      0;
@@ -156,6 +273,7 @@
 	color:      white;
 	background: teal;
 }
+
 
 /*================================ INDICES ==================================*/
 

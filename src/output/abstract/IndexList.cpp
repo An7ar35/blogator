@@ -64,6 +64,7 @@ void blogator::output::abstract::IndexList::writeTemplateLine( dto::Page       &
 
     std::string::size_type col = 0;
     const auto indent = html::reader::getIndent( *line._it );
+    bool carriage_return = false;
 
     //EARLY RETURN: when there's nothing to add/edit on the line
     if( !hasBlock() && !hasPath() ) {
@@ -73,9 +74,13 @@ void blogator::output::abstract::IndexList::writeTemplateLine( dto::Page       &
 
     while( hasBlock() && hasPath() ) {
         if( insert_it.block->first.col < insert_it.path->first.col ) { //do the block first
-            page._out << line._it->substr( col, insert_it.block->first.col - col ) << "\n";
-            writeHtmlBlock( page, indent, insert_it.block->second );
-            page._out << indent;
+            if( carriage_return )
+                page._out << indent;
+
+            page._out << line._it->substr( col, insert_it.block->first.col - col );
+
+            if( ( carriage_return = writeHtmlBlock( page, indent, insert_it.block->second ) ) )
+                page._out << indent;
 
             col = insert_it.block->first.col;
             ++insert_it.block;
@@ -90,9 +95,13 @@ void blogator::output::abstract::IndexList::writeTemplateLine( dto::Page       &
     }
 
     while( hasBlock() ) { //just block(s) left to insert
-        page._out << line._it->substr( col, insert_it.block->first.col - col ) << "\n";
-        writeHtmlBlock( page, indent, insert_it.block->second );
-        page._out << indent;
+        if( carriage_return )
+            page._out << indent;
+
+        page._out << line._it->substr( col, insert_it.block->first.col - col );
+
+        if( ( carriage_return = writeHtmlBlock( page, indent, insert_it.block->second ) ) )
+            page._out << indent;
 
         col = insert_it.block->first.col;
         ++insert_it.block;
@@ -115,22 +124,30 @@ void blogator::output::abstract::IndexList::writeTemplateLine( dto::Page       &
  * @param page         Output page DTO
  * @param indent       Space to place before the output lines (i.e.: html indent)
  * @param block_name   HTML block's name (i.e.: the tag's class)
+ * @return Line carriage return required
  */
-void blogator::output::abstract::IndexList::writeHtmlBlock( blogator::dto::Page &page,
+bool blogator::output::abstract::IndexList::writeHtmlBlock( blogator::dto::Page &page,
                                                            const std::string   &indent,
                                                            const std::string   &block_name ) const
 {
     if( block_name == "page-name" ) {
         page._out << _breadcrumb_page_str;
+        return false;
 
     } else if( block_name == "breadcrumb" ) {
+        page._out  << "\n";
         writeBreadcrumb( page, indent + "\t", _breadcrumb_parents, _breadcrumb_page_str );
+        return true;
 
     } else if( block_name == "index-list-flat" ) {
+        page._out  << "\n";
         writeFlatList( page, indent + "\t" );
+        return true;
 
     } else if( block_name == "index-list-hierarchy") {
+        page._out  << "\n";
         writeHierarchyList( page, indent + "\t" );
+        return true;
 
     } else {
         _display.error(
@@ -138,4 +155,6 @@ void blogator::output::abstract::IndexList::writeHtmlBlock( blogator::dto::Page 
             "HTML Div class '" + block_name + "' not recognised."
         );
     }
+
+    return false;
 }

@@ -32,7 +32,7 @@ namespace blogator::output::abstract {
                                 const dto::Line &line,
                                 dto::Template::WritePosIterators &insert_it ) const;
 
-        void writeHtmlBlock( dto::Page &page,
+        bool writeHtmlBlock( dto::Page &page,
                              const std::string  &indent,
                              const std::string  &block_name ) const;
 

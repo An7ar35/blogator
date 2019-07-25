@@ -1,3 +1,9 @@
+/* ============[ Blogator example: base stylesheet ]=============== */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* All the non-blogator-specific styles to help make things pretty  */
+/* Written by An7ar35 (an7ar35.bitbucket.io)                        */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 /*=========================================BASIC ELEMENTS==========================================*/
 * {
     margin:  0;
@@ -23,13 +29,12 @@ p {
     text-align: justify;
 }
 
-h1 { }
-
+h1         {}
 h2, h3, h4 { padding: 0.5em; }
 
-a                        {}
-a:hover, a:visited:hover {}
-a:visited                {}
+a                        { color: #007F7F; text-decoration: none; } /* a.k.a.: 'teal' */
+a:hover, a:visited:hover { color: #08966E; text-decoration: underline; }
+a:visited                { color: #078C41; text-decoration: none; }
 
 div {}
 
@@ -114,6 +119,17 @@ div {}
     width: 25%;
 }
 
+@media screen and ( max-width: 600px ) {
+    .content {
+        flex-direction: column;
+    }
+
+    .left-col, .right-col {
+        width: 100%;
+        padding: 0;
+    }
+}
+
 .right-col > div {
     margin: 0 0 1em 0;
     background-color: white;
@@ -132,10 +148,12 @@ div {}
 }
 
 #about-me img {
-    width:   80%;
-    height:  auto;
-    display: block;
-    margin:  auto;
+    width:      80%;
+    max-height: 350px;
+    max-width:  350px;
+    height:     auto;
+    display:    block;
+    margin:     auto;
 }
 
 .browse-posts {
@@ -163,4 +181,11 @@ div {}
 
 .browse-posts a:hover {
     text-decoration: underline;
+}
+
+.rss {
+    padding: 0 0.5em 0.5em 0.5em;
+    display: block;
+    width:   2em;
+    height:  2em;
 }

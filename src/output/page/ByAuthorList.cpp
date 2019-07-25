@@ -55,7 +55,7 @@ void blogator::output::page::ByAuthorList::writeHierarchyList( dto::Page & page,
         while( tag_it != _index->_indices.byAuthor.cats.cend() ) {
             const char sublist_letter = std::tolower( tag_it->first.at( 0 ) );
 
-            page._out << indent << "\t<li>" << char( std::toupper( sublist_letter ) ) << "\n"
+            page._out << indent << "\t<li><h3>" << char( std::toupper( sublist_letter ) ) << "</h3>\n"
                       << indent << "\t\t<ul>\n";
 
             while( tag_it != _index->_indices.byAuthor.cats.cend() &&
