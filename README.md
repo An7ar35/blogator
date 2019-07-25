@@ -40,6 +40,10 @@ then keep reading.
 There is an expectation of a reasonable level of HTML/CSS proficiency from the operator as 
 well as some debugging skills. The software will not sanitise/check your HTML/CSS. That's on you.
 
+## Example
+
+//TODO
+
 ## Installing
 
 #### On Arch
@@ -536,4 +540,9 @@ I'm open to:
 Software is provided as-is (i.e.: {*insert std. disclaimer here*}, backup you sh*t __before__ 
 running the software, etc...).
 
-Licensed under [GNU AGPLv3](LICENSE.txt)
+Blogator is licensed under [GNU AGPLv3](LICENSE.txt)
+
+The example templates (except anything in `img/*.*`) is licensed for **personal use only**. 
+You can also base your own template from it if you like as long as you don´t make money off it.
+
+The image of the cat (`img/me.png`) included in the template is under copyright @An7ar35 2017.

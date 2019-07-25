@@ -61,7 +61,7 @@ void blogator::output::page::ByYearList::writeHierarchyList( dto::Page &page,
             const std::string current = year_it->first;
 
             page._out << indent << "\t<li>"
-                      << "<h3>" << html::createHyperlink(  year_it->second.file_names.front(), year_it->first ) << "</h3>\n"
+                      << html::createHyperlink(  year_it->second.file_names.front(), "<h3>" + year_it->first + "</h3>" ) << "\n"
                       << indent << "\t\t<ul>\n";
 
             for( size_t i : year_it->second.article_indices ) {

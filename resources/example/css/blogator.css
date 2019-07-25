@@ -7,25 +7,25 @@
 /* =======================================BREADCRUMB ============================================ */
 .breadcrumb {
 	margin-right: auto;
-	padding:      0;
+		 padding: 0;
 }
 
 .breadcrumb ul {
-	padding:          0.5em;
-	list-style:       none;
+		     padding: 0.5em;
+		  list-style: none;
 	background-color: whitesmoke;
 }
 
 .breadcrumb ul li {
-	display:   inline;
+	  display: inline;
 	font-size: large;
 }
 
 .breadcrumb ul li+li:before {
-	padding:     0 0.2em;
-	color:       black;
+		padding: 0 0.2em;
+		  color: black;
 	font-weight: bolder;
-	content:     "/\00a0"; /* slash '/' symbol */
+		content: "/\00a0"; /* slash '/' symbol */
 }
 
 .breadcrumb ul li a 	  { text-decoration: none; }
@@ -37,58 +37,58 @@
 .newest-posts a div * { padding: 0.5em; }
 
 .newest-posts > a {
-	text-decoration:  none;
-	color: 			  black;
-	display: 		  block;
-	margin: 		  1em 0;
+	 text-decoration: none;
+			   color: black;
+			 display: block;
+			  margin: 1em 0;
 	background-color: white;
 }
 
 .newest-posts > a > p {
 	display: inline-block;
-	margin:  auto;
+	 margin: auto;
 }
 
 .newest-posts > a div  {
-	display: 	    flex;
+	       display: flex;
 	flex-direction: row;
-	flex-wrap: 	    wrap;
-	align-items: 	baseline;
+	     flex-wrap: wrap;
+	   align-items: baseline;
 }
 
 .newest-posts > a .post-number {
-	font-size:  x-large;
+	 font-size: x-large;
 	text-align: center;
-	padding: 	0.5em;
+	   padding: 0.5em;
 }
 
 .newest-posts > a .heading {
 	margin-right: auto;
-	font-size: 	  x-large;
+	   font-size: x-large;
 }
 
 .newest-posts > a .date-stamp { margin-left: auto; }
 
 .newest-posts > a .tags	{
 	margin-left: auto;
-	padding: 	 0;
+	    padding: 0;
 	font-family: monospace;
-	color: 		 #0275d8;
+	      color: #0275d8;
 }
 
 .newest-posts > a .authors:before {
-	content: 	  "By ";
+	     content: "By ";
 	padding-left: 0.5em;
 }
 
 .newest-posts > a .authors {
 	margin-right: auto;
-	padding: 	  0;
-	font-style:   italic;
+	     padding: 0;
+	  font-style: italic;
 }
 
 .newest-posts > a .summary {
-	display: 	block;
+	   display: block;
 	border-top: whitesmoke solid 1px;
 }
 
@@ -98,54 +98,54 @@
 .newest-posts > a:hover > p { text-decoration: underline; }
 
 .newest-posts > a:hover .summary {
-	color: 	    black;
+	     color: black;
 	border-top: solid 1px teal;
 }
 
 
 /* Pinned/Featured posts */
 .featured-posts > a {
-	margin: 		 0 0.5em 0.5em 0.5em;
+	         margin: 0 0.5em 0.5em 0.5em;
 	text-decoration: none;
-	color: 			 black;
-	display: 		 block;
+			  color: black;
+			display: block;
 }
 
 .featured-posts > a div {
-	display: 	    flex;
+		   display: flex;
 	flex-direction: row;
-	flex-wrap: 	    wrap;
-	align-items: 	baseline;
+		 flex-wrap: wrap;
+	   align-items: baseline;
 }
 
 .featured-posts > a .post-number { display: none; }
 .featured-posts > a .date-stamp  { padding: 0; }
 
 .featured-posts > a .heading {
-	width:   	   100%;
-	padding: 	   0 0 0.25em 0;
+			width: 100%;
+	      padding: 0 0 0.25em 0;
 	margin-bottom: 0.25em;
 	border-bottom: 1px solid whitesmoke;
 }
 
 .featured-posts > a .tags {
-	display:     none;
-	padding: 	 0;
+		display: none;
+		padding: 0;
 	margin-left: auto;
 	font-family: monospace;
-	color: 		 #0275d8;
+		  color: #0275d8;
 }
 
 .featured-posts > a .authors {
-	display:    none;
-	padding: 	0;
+	   display: none;
+	   padding: 0;
 	font-style: italic;
 }
 
 .featured-posts > a > p,
 .featured-posts > a .summary > p {
 	padding: 0.5em 0;
-	margin: 0;
+	 margin: 0;
 }
 
 .featured-posts > a:hover .date-stamp,
@@ -161,75 +161,186 @@
 
 /* Top lists */
 .top-tags ul, .top-authors ul {
-	padding:    0 0.5em;
+	   padding: 0 0.5em;
 	list-style: none;
 }
 
 
 /* ============================================ POSTS =========================================== */
-.post-content {}
+.post-content 	  { background: white; }
 .index-pane-dates {}
-.index-pane-tags {}
+.index-pane-tags  {}
+
+.tree {
+		padding: 0.5em;
+	line-height: 1.5em;
+}
+
+.tree li 					 { list-style: none; width: 100%; }
+.tree li > input + * 		 { display: none; }
+.tree li > input:checked + * { display: block; }
+.tree li > input 			 { display: none; }
+.tree li > label 			 { font-weight: bold; }
+
+
+.tree > li > ol > li:before,
+.tree > li > ol > li > ol > li:before {
+	padding-right: 0.2em;
+	content: 	   "\251C";
+}
+
+/*.tree > li > ol > li:not:last-child > ol > li:before {*/
+/*	content: 	   "#2502\251C";*/
+/*}*/
+
+.tree > li > ol > li:last-child:before,
+.tree > li > ol > li > ol > li:last-child:before {
+	content: "\2514"
+}
+
+.tree > li > ol > li > ol > li { padding-left: 1.2em; }
+
+
+.tree label { cursor: pointer; }
+
+/*.tree > li > ol > li label {*/
+/*	display: block;*/
+/*	padding-left: 0.8em;*/
+/*}*/
+
+.tree ol li input {
+	position: absolute;
+	left: 0;
+	margin-left: 0;
+	opacity: 0;
+	z-index: 2;
+	cursor: pointer;
+	height: 1em;
+	width: 1em;
+	top: 0;
+	display: none;
+}
+
+.tree > li > ol > li:before {
+	padding-right: 0.2em;
+	padding-left:  0.4em;
+	/*content: 	   "\251C";*/
+}
+
+/*.tree li > ol > li:last-child:before { content: "\2514"; }*/
+
+.tree ol > li > a:before {
+	color: black;
+	padding-right: 0.2em;
+	padding-left:  0.4em;
+	/*content: 	   "\251C";*/
+}
+
+/*.tree ol > li:last-child:before a { content: "\2514"; }*/
+
+.tree ol > li {
+	padding-left: 0.5em;
+	text-decoration: none;
+	display: inline-block;
+}
+
+/*.tree ol li.file { margin-left: -1px !important; }*/
+/*.tree li.file a[href *= '.pdf']	{ background: url(document.png) 0 0 no-repeat; }*/
+/*.tree li.file a[href *= '.html']	{ background: url(document.png) 0 0 no-repeat; }*/
+/*.tree li.file a[href $= '.css']	{ background: url(document.png) 0 0 no-repeat; }*/
+/*.tree li.file a[href $= '.js']		{ background: url(document.png) 0 0 no-repeat; }*/
+
+/*.tree ol li input + .tree ol {*/
+/*	background: url(toggle-small-expand.png) 40px 0 no-repeat;*/
+/*	margin: -0.938em 0 0 -44px; !* 15px *!*/
+/*	height: 1em;*/
+/*}*/
+
+/*li input + ol > li { display: none; margin-left: -14px !important; padding-left: 1px; }*/
+
+/*.tree ol li label {*/
+/*	background: url(folder-horizontal.png) 15px 1px no-repeat;*/
+/*	cursor: pointer;*/
+/*	display: block;*/
+/*	padding-left: 37px;*/
+/*}*/
+
+/*.tree ol li input:checked + ol {*/
+/*	background: url(toggle-small.png) 40px 5px no-repeat;*/
+/*	margin: -1.25em 0 0 -44px; !* 20px *!*/
+/*	padding: 1.563em 0 0 80px;*/
+/*	height: auto;*/
+/*}*/
+
+/*li input:checked + ol > li 			  { display: block; margin: 0 0 0.125em;  !* 2px *!}*/
+/*li input:checked + ol > li:last-child { margin: 0 0 0.063em; !* 1px *! }*/
+
 
 
 /* ========================================== INDEX LIST ======================================== */
-.index-list-flat {
-	background-color: white;
-}
-
+.index-list-flat 		 { background-color: white; }
 .index-list-flat ul      { list-style: none; }
 .index-list-flat ul > li {}
 
 .index-list-flat ul > li:before {
-	content: "\25FE";
+		  content: "\25FE";
 	padding-right: 0.5em;
 }
 
-.index-list-hierarchy {
-	background-color: white;
-}
+.index-list-hierarchy { background-color: white; }
 
 .index-list-hierarchy ul {
-	column-count: 		  2;
-	column-gap: 		  4em;
-	list-style: 		  none;
+	column-count: 2;
+	  column-gap: 4em;
+	  list-style: none;
 }
 
 .index-list-hierarchy ul > li,
 .index-list-hierarchy ul > li > ul > li { display: inline-block; }
 
-.index-list-hierarchy ul > li > a {
-	line-height: 2em;
-}
+.index-list-hierarchy ul > li > a { line-height: 2em; }
 
 .index-list-hierarchy ul > li > ul {
-	list-style:   none;
-	/*padding-left: 1em;*/
+	list-style:  none;
 	line-height: 2em;
 }
 
-.index-list-hierarchy ul > li > h3 {
-	width: auto;
-	background-color: black;
-	color: white;
+.index-list-hierarchy ul > li > h3,
+.index-list-hierarchy ul > li > a > h3 {
+			   width: auto;
+	background-color: teal;
+			  border: 1px solid teal;
+			   color: white;
+		 font-weight: normal;
+	  text-transform: uppercase;
+	  letter-spacing: 0.1em;
+}
+
+.index-list-hierarchy > ul > li > a {
+	  color: white;
+	display: inline-block;
+	  width: 100%;
+}
+
+.index-list-hierarchy > ul > li > a:hover > h3 {
+	    	   color: teal;
+	background-color: white;
+			  border: 1px solid teal;
+
 }
 
 .index-list-hierarchy ul > li > ul > li:before {
-	content: "\25FE";
+	      content: "\25FE";
 	padding-right: 0.5em;
 }
 
 
 /* ================================ POST & INDEX LIST PAGE NAMES ================================ */
 .page-name {
-	/*font-size: x-large;*/
-	/*font-weight: bold;*/
-	/*display: block;*/
-	/*width:  100%;*/
 	background-color: white;
-	padding: 0.5em;
-	margin:  0.5em 0;
-	border-bottom: 1px solid black;
+			 padding: 0.5em;
+			  margin: 0.5em 0;
+	   border-bottom: 1px solid black;
 }
 
 
@@ -237,64 +348,63 @@
 .page-nav { background-color: white; }
 
 .page-nav ul {
-	padding:     0 0.5em;
-	margin:      0;
-	list-style:  none;
-	font-size:   large;
-	text-align:  center;
+	   padding: 0 0.5em;
+	    margin: 0;
+	list-style: none;
+	 font-size: large;
+	text-align: center;
 }
 
 .page-nav ul li { display: inline; }
 
 .page-nav ul li a {
-	display: inline-block;
-	width:  1.5em;
-	height: 1.5em;
+			display: inline-block;
+			  width: 1.5em;
+			 height: 1.5em;
 	text-decoration: none;
-	margin: 0 0.1em;
-	font-size:  x-large;
-	color:      teal;;
-	background: white;
-	/*border: 1px solid teal;*/
+			 margin: 0 0.1em;
+		  font-size: x-large;
+			  color: teal;
+		 background: white;
 }
 
 .page-nav ul li a:hover {
-	color: black;
+		 color: white;
 	background: teal;
 }
 
 .page-nav ul li .curr {
-	display:     inline-block;
-	padding: 0 1em;
+		display: inline-block;
+		padding: 0 1em;
 	font-weight: bolder;
 }
 
+.page-nav ul li .disabled { color: grey; }
+
 .page-nav ul li .disabled:hover {
-	color:      white;
-	background: teal;
+		 color: grey;
+	background: white;
 }
 
 
 /*================================ INDICES ==================================*/
-
 .index-entries {}
 
 .index-entries a {
 	text-decoration: none;
-	color: black;
-	display: block;
+			  color: black;
+			display: block;
 }
 
-
 .index-entries .post-number {
-	font-size: x-large;
+	 font-size: x-large;
 	text-align: center;
-	padding: 0.5em;
+	   padding: 0.5em;
 }
 
 .index-entries .heading {
 	margin-right: auto;
-	font-size: x-large;
+	   font-size: x-large;
 }
 
 .index-entries .date-stamp {
@@ -314,121 +424,6 @@
 	border-top: whitesmoke solid 1px;
 }
 
-
-/*.tree {*/
-/*    border: 1px solid green;*/
-/*}*/
-
-
-/*!* CSS Tree menu styles *!*/
-/*.tree ol*/
-/*{*/
-/*	padding: 0 0 0 30px;*/
-/*	width: 300px;*/
-/*}*/
-/*	li */
-/*	{ */
-/*		position: relative; */
-/*		margin-left: -15px;*/
-/*		list-style: none;*/
-/*	}*/
-/*.tree ol li.file*/
-/*	{*/
-/*		margin-left: -1px !important;*/
-/*	}*/
-/*		.tree ol li a*/
-/*		{*/
-/*			background: url(document.png) 0 0 no-repeat;*/
-/*			color: #fff;*/
-/*			padding-left: 21px;*/
-/*			text-decoration: none;*/
-/*			display: block;*/
-/*		}*/
-/*		li.file a[href *= '.pdf']	{ background: url(document.png) 0 0 no-repeat; }*/
-/*		li.file a[href *= '.html']	{ background: url(document.png) 0 0 no-repeat; }*/
-/*		li.file a[href $= '.css']	{ background: url(document.png) 0 0 no-repeat; }*/
-/*		li.file a[href $= '.js']		{ background: url(document.png) 0 0 no-repeat; }*/
-/*.tree ol li input*/
-/*	{*/
-/*		position: absolute;*/
-/*		left: 0;*/
-/*		margin-left: 0;*/
-/*		opacity: 0;*/
-/*		z-index: 2;*/
-/*		cursor: pointer;*/
-/*		height: 1em;*/
-/*		width: 1em;*/
-/*		top: 0;*/
-/*	}*/
-/*		.tree ol li input + .tree ol*/
-/*		{*/
-/*			background: url(toggle-small-expand.png) 40px 0 no-repeat;*/
-/*			margin: -0.938em 0 0 -44px; !* 15px *!*/
-/*			height: 1em;*/
-/*		}*/
-/*		li input + ol > li { display: none; margin-left: -14px !important; padding-left: 1px; }*/
-/*	.tree ol li label*/
-/*	{*/
-/*		background: url(folder-horizontal.png) 15px 1px no-repeat;*/
-/*		cursor: pointer;*/
-/*		display: block;*/
-/*		padding-left: 37px;*/
-/*	}*/
-
-/*	.tree ol li input:checked + ol*/
-/*	{*/
-/*		background: url(toggle-small.png) 40px 5px no-repeat;*/
-/*		margin: -1.25em 0 0 -44px; !* 20px *!*/
-/*		padding: 1.563em 0 0 80px;*/
-/*		height: auto;*/
-/*	}*/
-/*		li input:checked + ol > li { display: block; margin: 0 0 0.125em;  !* 2px *!}*/
-/*		li input:checked + ol > li:last-child { margin: 0 0 0.063em; !* 1px *! }*/
-
-
-
-
-/*.content {*/
-/*	flex-direction: column;*/
-/*	width:          100%;*/
-/*	margin:         1em 0 0 0;*/
-/*}*/
-
-/*.page-nav {*/
-/*	padding: 0 0.5em;*/
-/*	margin:  0;*/
-/*	font-size: large;*/
-/*	text-align: center;*/
-/*	align-items: baseline;*/
-/*}*/
-
-/*.page-nav a {*/
-/*	text-decoration: none;*/
-/*	display: inline-block;*/
-/*	border-radius: 50%;*/
-/*	margin: 0 0.1em;*/
-/*	width:  1.5em;*/
-/*	height: 1.5em;*/
-/*	font-size:  x-large;*/
-/*	color:      var(--bckgrd2);;*/
-/*	background: black;*/
-/*}*/
-
-/*.page-nav a:hover {*/
-/*	color: black;*/
-/*	background: var(--green1);*/
-/*}*/
-
-/*.page-nav .curr {*/
-/*	display:     inline-block;*/
-/*	width:       4em;*/
-/*	font-weight: bolder;*/
-/*}*/
-
-/*.page-nav .disabled:hover {*/
-/*	color:      white;*/
-/*	background: black;*/
-/*}*/
 
 /*.index-entries {*/
 
