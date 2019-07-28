@@ -29,7 +29,7 @@ void blogator::html::writer::openYearNode( const blogator::dto::DateStamp &dates
     date_tree.date_line_map.emplace( std::make_pair( datestamp._year, date_tree.html._lines.size() ) );
 
     auto yyyy = std::to_string( datestamp._year );
-    date_tree.html._lines.emplace_back( "\t<li> <label for=\"checkbox_" + yyyy + "\">" + yyyy + "</label>" +
+    date_tree.html._lines.emplace_back( "\t<li><label for=\"checkbox_" + yyyy + "\">" + yyyy + "</label>" +
                                         R"(<input type="checkbox" id="checkbox_)" + yyyy + "\"/>" );
     date_tree.html._lines.emplace_back( "\t\t<ol>" );
 }
@@ -58,7 +58,7 @@ void blogator::html::writer::openMonthNode( const blogator::dto::DateStamp &date
 
     const auto &month   = month_map.at( datestamp._month );
     auto       yyyymm_s = std::to_string( yyyymm );
-    date_tree.html._lines.emplace_back( "\t\t\t<li> <label for=\"checkbox_" + yyyymm_s + "\">" + month + "</label>" +
+    date_tree.html._lines.emplace_back( "\t\t\t<li><label for=\"checkbox_" + yyyymm_s + "\">" + month + "</label>" +
                                         R"(<input type="checkbox" id="checkbox_)" + yyyymm_s + "\"/>" );
     date_tree.html._lines.emplace_back( "\t\t\t\t<ol>" );
 }
@@ -85,7 +85,7 @@ void blogator::html::writer::addArticleLeaf( const blogator::dto::Article &artic
     date_tree.article_line_map.emplace( std::make_pair( article_pos, date_tree.html._lines.size() ) );
 
     std::stringstream li;
-    li << "\t\t\t\t\t<li class=\"\">"
+    li << "\t\t\t\t\t<li>"
        << std::setfill('0') << std::setw(2) << article._datestamp._day
        << " <a href=\"" << article._paths.out_html.string() << "\">"
        << article._heading << "</a></li>";
@@ -120,7 +120,7 @@ void blogator::html::writer::openTagNode( const std::string & tag,
 
     auto id_number = std::to_string( tag_tree.tag_line_map.size() );
 
-    tag_tree.html._lines.emplace_back( "\t<li> <label for=\"checkbox_t" + id_number + "\">" + tag + "</label>" +
+    tag_tree.html._lines.emplace_back( "\t<li><label for=\"checkbox_t" + id_number + "\">" + tag + "</label>" +
                                        R"(<input type="checkbox" id="checkbox_t)" + id_number + "\"/>" );
     tag_tree.html._lines.emplace_back( "\t\t<ol>" );
 }
@@ -152,7 +152,7 @@ void blogator::html::writer::addArticleLeaf( const blogator::dto::Article &artic
     }
 
     std::stringstream li;
-    li << "\t\t\t<li class=\"\">"
+    li << "\t\t\t<li>"
        << "<a href=\"" << article._paths.out_html.string() << "\">" << article._heading << "</a>"
        << "</li>";
     tag_tree.html._lines.emplace_back( li.str() );

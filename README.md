@@ -232,7 +232,7 @@ starting from `0`.
 
 ##### Input tags
 
-* `<h1>/h1>`
+* `<h1></h1>`
 
 > Title of the post. Anything between the first occurrence of these tags will be used at the title. 
 

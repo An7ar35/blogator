@@ -313,7 +313,7 @@ void blogator::output::page::Posts::writeIndexDateTree( dto::Page &page,
         else if( month_line != tree.date_line_map.end() && month_line->second == i )
             page._out << indent << "\t" << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
         else if( article_line != tree.article_line_map.end() && article_line->second == i )
-            page._out << indent << "\t" << html::writer::setHyperlinkClass( line, "current" ) << std::endl;
+            page._out << indent << "\t" << html::writer::setHyperlinkClass( line, "current-post" ) << std::endl;
         else
             page._out << indent << "\t" << line << std::endl;
         ++i;
@@ -368,7 +368,7 @@ void blogator::output::page::Posts::writeIndexTagTree( dto::Page &page,
             page._out << indent << "\t" << html::writer::setInputCheckboxState( line, "checked" ) << std::endl;
             ++checkbox_line;
         } else if( link_line != article_link_lines.cend() && *link_line == i ) {
-            page._out << indent << "\t" << html::writer::setHyperlinkClass( line, "current" ) << std::endl;
+            page._out << indent << "\t" << html::writer::setHyperlinkClass( line, "current-post" ) << std::endl;
             ++link_line;
         } else {
             page._out << indent << "\t" << line << std::endl;
