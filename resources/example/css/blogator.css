@@ -206,6 +206,23 @@
 .post-content .summary {}
 .post-content p 	   { line-height: 1.5em; }
 
+.post-content img {
+	height: auto;
+	max-width: 50%;
+	float: left;
+	margin: 0.5em;
+}
+
+.post-content img:nth-of-type( even ) { float: left; }
+.post-content img:nth-of-type( odd ) { float: right; }
+
+@media screen and ( max-width: 800px ) {
+	.post-content img {
+		max-width: 100%;
+		margin: 0.5em 0;
+	}
+}
+
 /* Date/Tag Trees */
 .index-pane-dates {}
 .index-pane-tags  {}
