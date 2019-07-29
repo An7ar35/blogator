@@ -87,7 +87,7 @@ const blogator::dto::DateStamp & blogator::dto::Options::getRuntimeDateStamp() c
     if( !datestamp ) {
         auto now   = std::chrono::system_clock::to_time_t( RUN_TIMESTAMP );
         auto local = std::localtime( &now );
-        datestamp  = std::make_unique<DateStamp>( local->tm_year + 1900, local->tm_mon, local->tm_mday );
+        datestamp  = std::make_unique<DateStamp>( local->tm_year + 1900, local->tm_mon + 1, local->tm_mday );
     }
 
     return *datestamp;

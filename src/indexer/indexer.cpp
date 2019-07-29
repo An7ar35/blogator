@@ -232,6 +232,11 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
                     if( !global_options._posts.build_future &&
                         article._datestamp > global_options.getRuntimeDateStamp() )
                     {
+                        std::stringstream ss;
+                        ss << "Skipping future post (" << article._datestamp << " > " << global_options.getRuntimeDateStamp() << "): "
+                           << article._paths.src_html.lexically_relative( global_options._paths.root_dir );
+                        display.debug( ss.str() );
+
                         index._articles.erase( std::prev( index._articles.end() ) );
 
                     } else {
