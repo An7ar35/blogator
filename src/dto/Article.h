@@ -5,24 +5,28 @@
 #include <filesystem>
 #include <set>
 #include <list>
+#include <cstring>
 
 #include "DateStamp.h"
 #include "Template.h"
+#include "SeekRange.h"
 
 namespace blogator::dto {
     struct Article {
-        struct SeekRange { //Hold the seek range for a section of a file's content
-            SeekRange( const Template::InsertPosition &from, const Template::InsertPosition &to ) :
-                _from( from ), _to( to )
-            {};
+        struct CaseInsensitiveCompare {
+            bool operator()( const std::string &lhs, const std::string &rhs ) const {
+                std::string::size_type bound = std::min( lhs.size(), rhs.size() );
+                std::string::size_type i     = 0;
 
-            friend std::ostream &operator <<( std::ostream &s, const SeekRange &seek_range ) {
-                s << "(" << seek_range._from << " -> " << seek_range._to << ")";
-                return s;
+                for( auto it1 = lhs.begin(), it2 = rhs.begin(); i < bound; ++i, ++it1, ++it2 ) {
+                    if( std::tolower( *it1 ) < std::tolower( *it2 ) )
+                        return true;
+                    if( std::tolower( *it2 ) < std::tolower( *it1 ) )
+                        return false;
+                }
+
+                return false;
             }
-
-            Template::InsertPosition _from;
-            Template::InsertPosition _to;
         };
 
         friend std::ostream &operator <<( std::ostream &s, const Article &article ) {
@@ -34,16 +38,15 @@ namespace blogator::dto {
                 s << "\"" << a << "\" ";
             s << "\n\tDate-stamp.........: " << article._datestamp << "\n"
               << "\tSource file path...: " << article._paths.src_html.string() << "\n"
-              << "\tSummary location(s): ";
-            for( const auto &l : article._summary_pos )
-                s << l << " ";
-            s << "\n\tSummary cache......: " << ( article._summary_txt._lines.empty() ? "OFF" : "ON" ) << "\n"
               << "\tRelative html link.: " << article._paths.out_html.string() << "\n"
               << "\tIndex entry html...: " << article._paths.entry_html.string() << "\n"
               << "\tArticle stylesheet.: " << article._paths.css.string() << "\n"
               << "\tTags...............: ";
             for( const auto &t : article._tags )
                 s << "\"" << t << "\" ";
+            s << "\n\tSummary rel path(s): ";
+            for( const auto &l : article._summary.path_write_pos )
+                s << l.first << " ";
             s << "\n};";
 
             return s;
@@ -57,13 +60,18 @@ namespace blogator::dto {
 
         } _paths;
 
-        size_t                _number;
-        std::string           _heading;
-        DateStamp             _datestamp;
-        std::set<std::string> _authors;
-        std::set<std::string> _tags;
-        std::list<SeekRange>  _summary_pos;
-        HTML                  _summary_txt;
+        struct Summary {
+            HTML                       html;
+            ConsecutivePathPositions_t path_write_pos;
+
+        } _summary;
+
+        size_t      _number;
+        std::string _heading;
+        DateStamp   _datestamp;
+
+        std::set<std::string, CaseInsensitiveCompare> _authors;
+        std::set<std::string, CaseInsensitiveCompare> _tags;
     };
 }
 

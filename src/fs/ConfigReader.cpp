@@ -91,10 +91,11 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "\n"
        << "//Templates\n"
        << "template-change-paths = false;\n"
-        << "\n"
+       << "\n"
        << "//Posts settings\n"
-       << "build-future = false;\n"
-       << "safe-purge   = true;\n"
+       << "build-future       = false;\n"
+       << "safe-purge         = true;\n"
+       << "posts-change-paths = false;\n"
        << "\n"
        << "//Index settings\n"
        << "show-post-numbers = true;\n"
@@ -225,11 +226,13 @@ void blogator::fs::ConfigReader::processTemplateOptions( std::unordered_map<std:
 void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::string, ConfigReader::Value> &map,
                                                       dto::Options &options ) const
 {
-    static const std::string build_future = "build-future";
-    static const std::string safe_purge   = "safe-purge";
+    static const std::string build_future    = "build-future";
+    static const std::string safe_purge      = "safe-purge";
+    static const std::string adapt_rel_paths = "posts-change-paths";
 
     auto build_future_it = map.find( build_future );
     auto safe_purge_it   = map.find( safe_purge );
+    auto adapt_rel_paths_it = map.find( adapt_rel_paths );
 
     if( build_future_it != map.end() ) {
         if( build_future_it->second.type == Type::BOOLEAN ) {
@@ -251,6 +254,18 @@ void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::st
             throw exception::file_parsing_failure(
                 "Error converting '" + safe_purge + "' value to boolean "
                 "(line #" + std::to_string( safe_purge_it->second.line ) + "): " + safe_purge_it->second.value
+            );
+        }
+    }
+
+    if( adapt_rel_paths_it != map.end() ) {
+        if( adapt_rel_paths_it->second.type == Type::BOOLEAN ) {
+            options._posts.adapt_rel_paths = ( adapt_rel_paths_it->second.value == "true" );
+            adapt_rel_paths_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + adapt_rel_paths + "' value to boolean "
+                "(line #" + std::to_string( adapt_rel_paths_it->second.line ) + "): " + adapt_rel_paths_it->second.value
             );
         }
     }

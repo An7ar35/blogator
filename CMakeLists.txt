@@ -66,11 +66,15 @@ set(SOURCE_FILES
         src/dto/Options.h
         src/dto/Options.cpp
         src/dto/Index.h
+        src/dto/HTML.cpp
         src/dto/HTML.h
         src/dto/IndexDateTree.h
         src/dto/IndexTagTree.h
         src/dto/Page.h
         src/dto/Line.h
+        src/dto/BlogatorInfo.h
+        src/dto/SeekRange.h
+        src/dto/InsertPosition.h
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
@@ -119,7 +123,8 @@ set(SOURCE_FILES
         src/output/feed/RSS.cpp
         src/output/feed/RSS.h
         src/html/editor/code/code.cpp
-        src/html/editor/code/code.h src/dto/BlogatorInfo.h)
+        src/html/editor/code/code.h
+)
 
 #####################
 # Google Unit-Tests #

@@ -163,21 +163,20 @@ bool blogator::output::generic::EntryWriter::writeHtmlBlock( dto::Page &page,
         return false;
 
     } else if( block_name == "summary" ) {
-        try {
-            auto html = fs::importHTML( article._paths.src_html, article._summary_pos );
+        dto::Line line    = { article._summary.html._lines.cbegin(), 0 };
+        auto      path_it = article._summary.path_write_pos.cbegin();
 
-            page._out << "\n";
-            for( const auto &line : html._lines ) {
-                page._out << indent << _options->_index.summary_pad_begin
-                          << line
-                          << _options->_index.summary_pad_end << "\n";
-            }
+        page._out << "\n";
+        while( line._it != article._summary.html._lines.cend() ) {
+            page._out << indent << _options->_index.summary_pad_begin;
+            writeSummaryLine( page, line, article, path_it );
+            page._out << _options->_index.summary_pad_end << "\n";
 
-            return true;
-
-        } catch( exception::file_access_failure &e ) {
-            _display.error( e.what() );
+            ++line;
         }
+
+        return true;
+
     } else {
         _display.error(
             "[output::generic::EntryWriter::writeHtmlBlock(..)] "
@@ -186,4 +185,36 @@ bool blogator::output::generic::EntryWriter::writeHtmlBlock( dto::Page &page,
     }
 
     return false;
+}
+
+/**
+ * Inserts any paths/blocks that are on a line
+ * @param page    Output page DTO
+ * @param line    Line DTO
+ * @param article Article DTO for the entry
+ * @param path_it Iterators to the path insertion points for summary
+ */
+void blogator::output::generic::EntryWriter::writeSummaryLine( dto::Page          &page,
+                                                               const dto::Line    &line,
+                                                               const dto::Article &article,
+                                                               dto::ConsecutivePathPositions_t::const_iterator &path_it ) const
+{
+    auto hasPath  = [&]() { return ( path_it != article._summary.path_write_pos.cend() && path_it->first.line == line._num ); };
+
+    std::string::size_type col = 0;
+
+    //EARLY RETURN: when there's nothing to add/edit on the line
+    if( !hasPath() ) {
+        page._out << *line._it;
+        return;
+    }
+
+    while( hasPath() ) {
+        page._out << line._it->substr( col, path_it->first.col - col )
+                  << fs::adaptRelPath( article._paths.src_html, page._abs_path, path_it->second.string() ).string();
+        col =  path_it->first.col;
+        ++path_it;
+    }
+
+    page._out << line._it->substr( col );
 }

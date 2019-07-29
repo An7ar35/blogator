@@ -232,9 +232,9 @@ starting from `0`.
 
 ##### Input tags
 
-* `<h1></h1>`
+* `<span class="title"></span>`
 
-> Title of the post. Anything between the first occurrence of these tags will be used at the title. 
+> Title of the post. Anything between the first occurrence of these tags will be used at the title.
 
 * `<time datetime="yyyy-mm-dd"></time>`
 
@@ -258,7 +258,7 @@ starting from `0`.
 
 * `<span class="summary"></span>`
 
-> (Optional) Any text inside these tags will be used as a summary in the index entry for the post.
+> (Optional) Anything inside these tags will be used as a summary in the index entry for the post.
   If the index entry text needs to be slightly different than the content text then one approach 
   could be to put your entry text inside of a summary span and use CSS to hide it in posts.
 
@@ -402,6 +402,12 @@ is after the day of the build (i.e. when generator is run).
   the structure intact.   
   Good when resources are placed in there for whatever reasons and you don't want them to get 
   nuked during the built process.
+
+    posts-change-paths = false;
+    
+> Switch to `true` if you are using working relative paths in the posts (`source/` folder) for 
+  development/preview purposes. This will modify them based on the target html file location it 
+  is used to generate. Absolute paths (inc those that start with a `/`) will not be touched.
     
 #### Index
 

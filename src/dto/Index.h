@@ -21,7 +21,7 @@ namespace blogator::dto {
             PagePaths_t         file_names;      //page file name(s) in the list's sub-directory
         };
 
-        typedef std::map<std::string, ListIndexContent> ListIndexPaths_t;
+        typedef std::map<std::string, ListIndexContent, dto::Article::CaseInsensitiveCompare> ListIndexPaths_t;
 
         struct Category {
             size_t                   page_count { 0 };

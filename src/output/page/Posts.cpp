@@ -52,7 +52,7 @@ bool blogator::output::page::Posts::init() const {
         throw exception::failed_expectation( "No insertion points found in post template." );
 
     try {
-        const auto css_insert_line = html::reader::findLineOfTag( "</head>", *_templates->_post->html );
+        const auto css_insert_line = _templates->_post->html->findLineOfTag( "</head>" );
         size_t     curr_article_i  = 0;
 
         for( const auto &article : _index->_articles ) {
@@ -191,7 +191,6 @@ void blogator::output::page::Posts::writeTemplateLine( dto::Page &page,
 
 /**
  * Writes the relevant HTML block at the given position
- * @param page        Output file
  * @param indent      Space to place before the output lines (i.e.: html indent)
  * @param page_info   Page info (Article, Article i, css line)
  * @param block_class Block's class name
@@ -206,7 +205,7 @@ void blogator::output::page::Posts::writeHtmlBlock( dto::Page &page,
     } else if( block_class == "page-nav" ) {
         writePageNavDiv( page, indent, page_info.article_i );
     } else if( block_class == "post-content" ) {
-        writeContentDiv( page_info.article._paths.src_html, indent, page._out );
+        writeContentDiv( page, indent, page_info.article._paths.src_html );
     } else if( block_class == "index-pane-dates" ) {
         writeIndexDateTree( page, indent, page_info.article, page_info.article_i );
     } else if( block_class == "index-pane-tags" ) {
@@ -221,25 +220,68 @@ void blogator::output::page::Posts::writeHtmlBlock( dto::Page &page,
 
 /**
  * Writes the source article lines to a file
- * @param in     Source article
- * @param indent Space to place before the output line (i.e.: html indent)
- * @param page   Target file
- * @throws blogator::exception::file_access_failure when source file could not be opened
+ * @param page        Output file
+ * @param indent      Space to place before the output line (i.e.: html indent)
+ * @param source_path Article source path
+ * @throws blogator::exception::file_access_failure when source file could not be opened/imported
  */
-void blogator::output::page::Posts::writeContentDiv( const std::filesystem::path &source_path,
+void blogator::output::page::Posts::writeContentDiv( dto::Page &page,
                                                      const std::string &indent,
-                                                     std::ofstream &page ) const
+                                                     const std::filesystem::path &source_path ) const
 {
-    auto in = std::ifstream( source_path );
+    if( !_options->_posts.adapt_rel_paths ) {
 
-    if( !in.is_open() )
-        throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
-//    <span class="post_number"></span> //TODO look into inserting number in the post?
-    std::string line;
-    while( getline( in, line ) )
-        page << indent << "\t" << line << std::endl;
+        auto in = std::ifstream( source_path );
+        if( !in.is_open() )
+            throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
+            //    <span class="post_number"></span> //TODO look into inserting number in the post?
+        std::string line;
+        while( getline( in, line ) )
+            page._out << indent << "\t" << line << std::endl;
 
-    in.close();
+        in.close();
+
+    } else { //adapt all relative paths in the post/article
+
+        auto html = fs::importHTML( source_path );
+        auto path_pos = dto::Templates::extractRelativePaths( *html );
+
+        fs::checkRelPaths( _options->_paths.root_dir, source_path, path_pos );
+
+        dto::Line line = { html->_lines.cbegin(), 0 };
+        auto path_it = path_pos.cbegin();
+
+        auto hasPath = [ & ]() {
+            return ( path_it != path_pos.cend() && path_it->first.line == line._num );
+        };
+
+        page._out << "\n";
+        while( line._it != html->_lines.cend() ) {
+            std::string::size_type col = 0;
+
+            page._out << indent << "\t";
+
+            if( hasPath() ) {
+
+                while( hasPath() ) {
+                    page._out << line._it->substr( col, path_it->first.col - col )
+                              << fs::adaptRelPath( source_path, page._abs_path,
+                                                   path_it->second.string() ).string();
+                    col = path_it->first.col;
+                    ++path_it;
+                }
+
+                page._out << line._it->substr( col );
+
+            } else {
+                page._out << *line._it;
+            }
+
+            page._out << "\n";
+
+            ++line;
+        }
+    }
 }
 
 /**

@@ -388,14 +388,14 @@ std::unique_ptr<blogator::dto::HTML> blogator::fs::importHTML( const std::filesy
 }
 
 /**
- * Imports lines from na HTML file
+ * Imports lines from a HTML file
  * @param file_path Path of file
  * @param positions Range(s) of content to import
  * @return HTML DTO object
  * @throws blogator::exception::file_access_failure when access to source file fails
  */
 blogator::dto::HTML blogator::fs::importHTML( const std::filesystem::path &file_path,
-                                              const std::list<dto::Article::SeekRange> &positions )
+                                              const std::list<dto::SeekRange> &positions )
 {
     auto   html          = dto::HTML();
     size_t curr_line     = 0;
@@ -580,6 +580,38 @@ size_t blogator::fs::checkTemplateRelPaths( const blogator::dto::Template & src_
             ss << "Cannot resolve relative path in template '"
                << src_template.src.filename().string()
                << "' at " << path.first << ": " << path.second.string();
+            display.warning( ss.str() );
+        } else {
+            ++validated;
+        }
+    }
+
+    return validated;
+}
+
+/**
+ * Checks all relative paths found in a collection of path positions
+ * @param root     Root path to site
+ * @param parent   Original parent path
+ * @param path_pos ConsecutivePathPositions_t collection
+ * @return Valid count
+ */
+size_t blogator::fs::checkRelPaths( const std::filesystem::path &root,
+                                    const std::filesystem::path &parent,
+                                    const dto::ConsecutivePathPositions_t &path_pos )
+{
+    static auto &display = cli::MsgInterface::getInstance();
+    static const auto html_spaces_rx = std::regex("%20");
+    size_t validated     = 0;
+
+    for( const auto &path : path_pos ) {
+        auto abs_path = ( parent.parent_path() / path.second ).lexically_normal();
+        auto temp     = std::regex_replace( abs_path.string(), html_spaces_rx, " ");
+
+        if( !std::filesystem::exists( temp ) ) {
+            std::stringstream ss;
+            ss << "Cannot resolve relative path in '" << parent.lexically_relative( root ) << "' at "
+               << path.first << ": " << path.second.string();
             display.warning( ss.str() );
         } else {
             ++validated;

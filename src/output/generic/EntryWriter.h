@@ -33,6 +33,11 @@ namespace blogator::output::generic {
                              const std::string &indent,
                              const std::string &block_name,
                              const dto::Article &article ) const;
+
+        void writeSummaryLine( dto::Page          &page,
+                               const dto::Line    &line,
+                               const dto::Article &article,
+                               dto::ConsecutivePathPositions_t::const_iterator &path_it ) const;
     };
 }
 

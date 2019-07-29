@@ -239,7 +239,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
                         addTags( global_options, article, index );
                         addAuthors( global_options, article, index );
 
-                        if( global_options._index.show_summary && article._summary_pos.empty() )
+                        if( global_options._index.show_summary && article._summary.html._lines.empty() )
                             display.debug( "No summary found in: " + article._paths.src_html.string() );
                     }
 
@@ -612,7 +612,7 @@ blogator::dto::DateStamp blogator::indexer::convertDate( const std::string & dat
 blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options &options, const std::filesystem::path &path ) {
     static auto &display = cli::MsgInterface::getInstance();
 
-    const static auto heading_tag = std::make_pair<std::string, std::string>( "<h1>", "</h1>" );
+    const static auto heading_tag = std::make_pair<std::string, std::string>( "<span class=\"title\">", "</span>" );
     const static auto author_tag  = std::make_pair<std::string, std::string>( "<span class=\"author\">", "</span>" );
     const static auto date_tag    = std::make_pair<std::string, std::string>( "<time datetime=\"", "\"" );
     const static auto tag_tag     = std::make_pair<std::string, std::string>( "<span class=\"tag\">", "</span>" );
@@ -626,7 +626,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
     auto article           = blogator::dto::Article();
     bool heading_found     = false;
     bool date_found        = false;
-    auto summary_positions = std::deque<dto::Template::InsertPosition>();
+    auto summary_positions = std::deque<dto::InsertPosition>();
 
     article._paths.src_html = path;
 
@@ -674,12 +674,19 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
 
             html_file.close();
 
-            while( summary_positions.size() >= 2 ) {
-                auto start  = summary_positions.front();
-                summary_positions.pop_front();
-                auto finish =  summary_positions.front();
-                summary_positions.pop_front();
-                article._summary_pos.emplace_back( dto::Article::SeekRange( start, finish ) );
+            { //caching summary and extracting all relative paths found within
+                auto summary_range_pos = std::list<dto::SeekRange>();
+
+                while( summary_positions.size() >= 2 ) {
+                    auto start = summary_positions.front();
+                    summary_positions.pop_front();
+                    auto finish = summary_positions.front();
+                    summary_positions.pop_front();
+                    summary_range_pos.emplace_back( dto::SeekRange( start, finish ) );
+                }
+
+                article._summary.html           = fs::importHTML( article._paths.src_html, summary_range_pos );
+                article._summary.path_write_pos = dto::Templates::extractRelativePaths( article._summary.html );
             }
 
         } else {
@@ -691,7 +698,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
     }
 
     if( !heading_found )
-        throw exception::file_parsing_failure( "No heading (h1) found in post: " + path.string() );
+        throw exception::file_parsing_failure( "No title (<span class=\"title\">..</span>) found in post: " + path.string() );
     if( !date_found )
         throw exception::file_parsing_failure( "No date (<time>) found in post: " + path.string() );
     if( summary_positions.size() % 2 > 0 )

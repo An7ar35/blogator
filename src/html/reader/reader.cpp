@@ -109,7 +109,7 @@ std::vector<std::string> blogator::html::reader::getContentsBetween( const std::
  */
 void blogator::html::reader::getSummaryPositions( const size_t & line_number,
                                                   const std::string & line,
-                                                  std::deque<dto::Template::InsertPosition> &positions )
+                                                  std::deque<dto::InsertPosition> &positions )
 {
     const static auto tag = std::make_pair<std::string, std::string>( "<span class=\"summary\">", "</span>" );
 
@@ -122,7 +122,7 @@ void blogator::html::reader::getSummaryPositions( const size_t & line_number,
                                  : line.find( tag.first, positions.back().col );
 
             if( summary_begin != std::string::npos ) {
-                positions.emplace_back( dto::Template::InsertPosition( line_number, ( summary_begin + tag.first.length() ) ) );
+                positions.emplace_back( dto::InsertPosition( line_number, ( summary_begin + tag.first.length() ) ) );
             } else {
                 end_of_line = true;
             }
@@ -133,7 +133,7 @@ void blogator::html::reader::getSummaryPositions( const size_t & line_number,
                                : line.find( tag.second, positions.back().col );
 
             if( summary_end != std::string::npos ) {
-                positions.emplace_back( dto::Template::InsertPosition( line_number, summary_end ) );
+                positions.emplace_back( dto::InsertPosition( line_number, summary_end ) );
             } else {
                 end_of_line = true;
             }
@@ -177,37 +177,16 @@ std::vector<std::string> blogator::html::reader::getTags( const std::string &str
 }
 
 /**
- * Finds the line index of a tag's first occurrence
- * @param tag Tag to find
- * @param html HTML DTO
- * @return Line index of the tag
- * @throws std::invalid_argument when the tag is empty (i.e.: "")
- * @throws std::out_of_range when the tag cannot be found on any lines
- */
-size_t blogator::html::reader::findLineOfTag( const std::string &tag, const blogator::dto::HTML &html ) {
-    if( tag.empty() )
-        throw std::invalid_argument( "No tag was given." );
-
-    for( auto i = 0; i < html._lines.size(); ++i ) {
-        auto pos = html._lines.at( i ).find( tag );
-        if( pos != std::string::npos )
-            return i;
-    }
-
-    throw std::out_of_range( "Tag \"" + tag + "\" could not be found in dto::HTML." );
-}
-
-/**
  * Gets all insertion points for a list of blocks (css classes) in an HTML document
  * @param html   HTML DTO
  * @param blocks List of css classes used to flag insertion points in the HTML
  * @return Consecutive insert points with their respective css classes
  */
-blogator::dto::Template::ConsecutiveWritePositions_t
+blogator::dto::ConsecutiveWritePositions_t
     blogator::html::reader::getConsecutiveWritePositions( const blogator::dto::HTML &html,
                                                           blogator::dto::Template::BlockInsertClasses_t &blocks )
 {
-    auto   write_pos   = dto::Template::ConsecutiveWritePositions_t();
+    auto   write_pos   = dto::ConsecutiveWritePositions_t();
     size_t line_number = 0;
 
     for( const auto &line : html._lines ) {
@@ -221,7 +200,7 @@ blogator::dto::Template::ConsecutiveWritePositions_t
 
             while( it != std::sregex_iterator() ) {
                 write_pos.insert(
-                    std::make_pair( dto::Template::InsertPosition( line_number, it->str( 1 ).length() ),
+                    std::make_pair( dto::InsertPosition( line_number, it->str( 1 ).length() ),
                                     css_class.first
                     )
                 );

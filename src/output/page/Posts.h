@@ -45,9 +45,9 @@ namespace blogator::output::page {
                              const PageInfo    &page_info,
                              const std::string &block_class ) const;
 
-        void writeContentDiv( const std::filesystem::path &source_path,
+        void writeContentDiv( dto::Page &page,
                               const std::string &indent,
-                              std::ofstream &out ) const;
+                              const std::filesystem::path &source_path ) const;
 
         void writePageNavDiv( dto::Page &page,
                               const std::string &indent,

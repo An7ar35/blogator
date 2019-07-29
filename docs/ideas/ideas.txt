@@ -1,20 +1,25 @@
-· [INDEXING] Would hoovering the entire post into a string then using regex be faster?
-
 · [SYNTAX HIGHLIGHTER] Syntax highlighter for code snippets
         -> Optional regex override from a string in the config file? if fail then fall back on default and print error msg + message for switching to default
         -> Read at the same time as the summary in each posts
         -> snippets could be stored in temp file in the temp folder?
            "{n}_{i}_code.html" where 'n' is the article number and 'i' is the snippet number (in order)
 
-· [RSS] RSS articles: <description>, <guid> (requires the 'summary' functionality to be implemented through)
+· [RSS] RSS articles: <description>, <guid> (will need any summary rel paths to be canonified to the site's root address)
 
 · [LINK/PATHS] Perhaps add special blogator tags like "{DATE-LIST-PAGE}", "{DATE-LATEST-PAGE}" and such as an injector option in href/src stuff?
         Could be a cool way to inject up-to-date paths into links when generated files my not always have to the same names on every generation run
         -> might need a special option like "blogator-tags = true" in the cfg file to enable that search?
 
-
+· [TAGS/CATS] Optional icon injector instead of tag names? Could also do a template in blogator.cfg like: 'display-tags= "<div>{NAME}{ICONS}</div>"'
+· [POST TITLES] Have a optional struct like '<div class="title-struct"></div>"' that can be used in indices and landing page entries where an entire html structure can be
+    used instead of just a plain title.
 
 //TODO redo the folder structure diagram (pencil) to reflect all the changes
 
 blogator-tags  = false; //TODO special tag->relative path replacer based on certain key pages expressed in {TAG} form (e.g.: "{DATE-LATEST-PAGE}"
 canonify-urls  = false; //TODO true: modify all relative URLs found in the posts/templates to absolute paths with the site's URL as root,
+
+
+
+===[ V2 ]===
+· Hash & cache articles. Then check hash on run to make sure article hasn't been changed

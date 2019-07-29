@@ -21,10 +21,11 @@ namespace blogator::fs {
 
     std::string readFileContent( const std::filesystem::path &path );
     std::unique_ptr<dto::HTML> importHTML( const std::filesystem::path &file_path );
-    dto::HTML importHTML( const std::filesystem::path &file_path, const std::list<dto::Article::SeekRange> &positions );
+    dto::HTML importHTML( const std::filesystem::path &file_path, const std::list<dto::SeekRange> &positions );
     std::filesystem::path adaptRelPath( const std::filesystem::path &source_file, const std::filesystem::path &target_file, const std::filesystem::path &rel_path );
     void   checkTemplateRelPaths( const dto::Index &master_index, const dto::Templates &templates, const dto::Options &options );
     size_t checkTemplateRelPaths( const dto::Template &src_template );
+    size_t checkRelPaths( const std::filesystem::path &root, const std::filesystem::path &parent, const dto::ConsecutivePathPositions_t &path_pos );
 }
 
 #endif //BLOGATOR_FS_H

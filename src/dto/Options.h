@@ -88,8 +88,9 @@ namespace blogator::dto {
         } _templates;
 
         struct Posts {
-            bool build_future   = false;
-            bool safe_purge     = true;
+            bool build_future    = false;
+            bool safe_purge      = true;
+            bool adapt_rel_paths = false;
 
         } _posts;
 
