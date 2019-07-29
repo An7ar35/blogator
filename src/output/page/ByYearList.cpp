@@ -32,10 +32,10 @@ void blogator::output::page::ByYearList::writeFlatList( dto::Page &page,
                                                         const std::string &indent ) const
 {
     if( !_index->_indices.byYear.cats.empty() ) {
-        auto year_it = _index->_indices.byYear.cats.cbegin();
+        auto year_it = _index->_indices.byYear.cats.crbegin();
         page._out << indent << "<ul>\n";
 
-        while( year_it != _index->_indices.byYear.cats.cend() ) {
+        while( year_it != _index->_indices.byYear.cats.crend() ) {
             page._out << indent << "\t<li>"
                       << html::createHyperlink( year_it->second.file_names.front(), year_it->first ) << "</li>\n";
             ++year_it;
@@ -54,10 +54,10 @@ void blogator::output::page::ByYearList::writeHierarchyList( dto::Page &page,
                                                              const std::string &indent ) const
 {
     if( !_index->_indices.byYear.cats.empty() ) {
-        auto year_it = _index->_indices.byYear.cats.cbegin();
+        auto year_it = _index->_indices.byYear.cats.crbegin();
         page._out << indent << "<ul>\n";
 
-        while( year_it != _index->_indices.byYear.cats.cend() ) {
+        while( year_it != _index->_indices.byYear.cats.crend() ) {
             const std::string current = year_it->first;
 
             page._out << indent << "\t<li>"
