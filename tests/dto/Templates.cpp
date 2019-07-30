@@ -1,5 +1,8 @@
 #include "gtest/gtest.h"
+#include "../../src/dto/Template.h"
+#include "../../src/dto/Template.cpp"
 #include "../../src/dto/Templates.h"
+#include "../../src/dto/Templates.cpp"
 
 TEST( Template_tests, extractRelativePaths0 ) {
     using blogator::dto::HTML;

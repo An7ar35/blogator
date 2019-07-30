@@ -20,6 +20,7 @@
 #include "../exception/file_parsing_failure.h"
 #include "../exception/failed_expectation.h"
 #include "../fs/fs.h"
+#include "../html/editor/editor.h"
 
 /**
  * Initialise the index
@@ -245,7 +246,9 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
                         addAuthors( global_options, article, index );
 
                         if( global_options._index.show_summary && article._summary.html._lines.empty() )
-                            display.debug( "No summary found in: " + article._paths.src_html.string() );
+                            display.debug(
+                                "No summary found in: " + article._paths.src_html.lexically_relative( global_options._paths.root_dir ).string()
+                            );
                     }
 
                 } catch( std::exception &e ) {
@@ -691,6 +694,15 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
                 }
 
                 article._summary.html           = fs::importHTML( article._paths.src_html, summary_range_pos );
+
+                auto hrefs_count = html::editor::removeHyperlinks( article._summary.html );
+
+                if( hrefs_count > 0 )
+                    display.debug(
+                        "Removed " + std::to_string( hrefs_count ) + " hyperlinks in post's summary text: " +
+                        path.lexically_relative( options._paths.root_dir ).string()
+                    );
+
                 article._summary.path_write_pos = dto::Templates::extractRelativePaths( article._summary.html );
             }
 
@@ -699,18 +711,26 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
         }
 
     } catch( std::invalid_argument &e ) {
-        throw exception::file_parsing_failure( "Failed parsing for post '" + path.string() + "': " + e.what() );
+        throw exception::file_parsing_failure(
+            "Failed parsing for post '" + path.lexically_relative( options._paths.root_dir ).string() + "': " + e.what()
+        );
     }
 
     if( !heading_found )
-        throw exception::file_parsing_failure( "No title (<span class=\"title\">..</span>) found in post: " + path.string() );
+        throw exception::file_parsing_failure(
+            "No title (<span class=\"title\">..</span>) found in post: " + path.lexically_relative( options._paths.root_dir ).string()
+        );
     if( !date_found )
-        throw exception::file_parsing_failure( "No date (<time>) found in post: " + path.string() );
+        throw exception::file_parsing_failure(
+            "No date (<time>) found in post: " + path.lexically_relative( options._paths.root_dir ).string()
+        );
     if( summary_positions.size() % 2 > 0 )
-        display.error( "Missing open/close 'summary' tag detected in: " + path.string() );
+        display.error(
+            "Missing open/close 'summary' tag detected in: " + path.lexically_relative( options._paths.root_dir ).string()
+        );
 
     if( article._tags.empty() )
-        article._tags.emplace( "no tag" );
+        article._tags.emplace( "N/A" );
 
     return article;
 }

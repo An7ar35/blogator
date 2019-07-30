@@ -510,6 +510,18 @@ sections respectively of the page.
    
 ## Support
 
+#### Assumptions made
+
+* All tags are closed properly (check you source HTML if the generated output is incorrect).
+* hyperlinks tags are opened/closed on the same line
+* hyperlinks start with `<a` and finish with `</a>`
+* heading/date/tag/author in source posts are individually opened/closed on the same line
+
+#### Troubleshooting
+
+* See above first!
+* Turn on the debug messages from the command line (`--debug`) to get a bit more information.
+
 #### Language/Character sets
 
 As my original use-case for this software dealt with a site written in english, the 

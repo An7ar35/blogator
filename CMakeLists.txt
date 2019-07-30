@@ -124,7 +124,8 @@ set(SOURCE_FILES
         src/output/feed/RSS.h
         src/html/editor/code/code.cpp
         src/html/editor/code/code.h
-)
+        src/html/editor/editor.cpp
+        src/html/editor/editor.h)
 
 #####################
 # Google Unit-Tests #
@@ -153,7 +154,7 @@ set(TEST_FILES
         tests/html/reader/reader.cpp
         tests/dto/DateStamp.cpp
         tests/dto/Templates.cpp
-        tests/fs/fs.cpp)
+        tests/fs/fs.cpp tests/html/editor/editor.cpp tests/dto/HTML.cpp)
 
 enable_testing()
 
