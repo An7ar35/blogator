@@ -24,6 +24,7 @@ body {
     margin: 0 auto;
     height: 100%;
     max-width: 1200px;
+    overflow-y: scroll;
 }
 
 p {
