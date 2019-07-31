@@ -234,7 +234,7 @@ void blogator::output::page::Posts::writeContentDiv( dto::Page &page,
         auto in = std::ifstream( source_path );
         if( !in.is_open() )
             throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
-            //    <span class="post_number"></span> //TODO look into inserting number in the post?
+            //    <span class="post_number"></span> //TODO look into inserting number in the post in a future version?
         std::string line;
         while( getline( in, line ) )
             page._out << indent << "\t" << line << std::endl;

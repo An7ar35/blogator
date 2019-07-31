@@ -18,7 +18,6 @@
  */
 std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path,
                                                                      const dto::BlogatorInfo &info ) {
-    //TODO error control?
     auto reader = ConfigReader();
     return reader.init( file_path, info );
 }
@@ -36,7 +35,7 @@ void blogator::fs::setupEnvironment( const std::shared_ptr<dto::Options> &global
         std::cout << " (" << purged_count << " file(s)/folder(s) purged)" << std::endl;
 
         if( !std::filesystem::exists( global_options->_paths.template_dir ) ) {
-            std::filesystem::create_directories( global_options->_paths.template_dir ); //TODO generate missing templates if none are found
+            std::filesystem::create_directories( global_options->_paths.template_dir );
         }
         if( !std::filesystem::exists( global_options->_paths.posts_dir ) ) {
             if( !std::filesystem::create_directories( global_options->_paths.posts_dir ) ) {

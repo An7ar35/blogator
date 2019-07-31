@@ -1,14 +1,14 @@
 #include "output.h"
+#include "../exception/failed_expectation.h"
 
 /**
  * Initialize HTML page generation
  * @param index     Master index
  * @param templates Templates
  * @param options   Global blogator options
- * @return Success
  * @throws exception::failed_expectation when a maker cannot generate its targets
  */
-bool blogator::output::generate( const std::shared_ptr<const dto::Index>     &index,
+void blogator::output::generate( const std::shared_ptr<const dto::Index>     &index,
                                  const std::shared_ptr<const dto::Templates> &templates,
                                  const std::shared_ptr<const dto::Options>   &options )
 {
@@ -17,10 +17,12 @@ bool blogator::output::generate( const std::shared_ptr<const dto::Index>     &in
     auto landing_maker = output::page::Landing( index, templates, options );
     auto rss           = output::feed::RSS( index, templates, options );
 
-    auto posts_ok   = post_maker.init(); //TODO maybe do an if( !.. ) then throw a fit/exception on each inits?
-    auto index_ok   = index_maker.init();
-    auto landing_ok = landing_maker.init();
-    auto rss_ok     = rss.init();
-
-    return ( index_ok && posts_ok && rss_ok && landing_ok );
+    if( !post_maker.init() )
+        throw exception::failed_expectation( "Failed creating the post targets." );
+    if( !index_maker.init() )
+        throw exception::failed_expectation( "Failed creating the indices targets." );
+    if( !landing_maker.init() )
+        throw exception::failed_expectation( "Failed creating the landing page target." );
+    if( !rss.init() )
+        throw exception::failed_expectation( "Failed creating the RSS feed target." );
 }

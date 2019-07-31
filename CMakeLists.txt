@@ -50,7 +50,6 @@ endif()
 # Blogator Source Files #
 ##########################
 set(SOURCE_FILES
-        src/main.cpp
         src/cli/ArgParser.cpp
         src/cli/ArgParser.h
         src/cli/MsgInterface.cpp
@@ -160,6 +159,7 @@ enable_testing()
 
 add_executable(
         blogator_tests
+        ${SOURCE_FILES}
         ${TEST_FILES}
 )
 
@@ -174,5 +174,5 @@ add_test(blogator_tests ${TEST_FILES})
 # BLOGATOR #
 ############
 include_directories(external)
-add_executable(blogator ${SOURCE_FILES})
+add_executable(blogator src/main.cpp ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} stdc++fs)

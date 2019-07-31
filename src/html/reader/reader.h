@@ -12,7 +12,7 @@
 
 namespace blogator::html::reader {
     std::string getContentBetween( const std::string &from, const std::string &to, const std::string &str );
-    dto::HTML   getContentBetween( const std::string &from, const std::string &to, const dto::HTML &html ); //TODO remove? not really used
+    dto::HTML   getContentBetween( const std::string &from, const std::string &to, const dto::HTML &html ); //TODO remove? not currently used
     std::vector<std::string> getContentsBetween( const std::string &from, const std::string &to, const std::string &str );
     void getSummaryPositions( const size_t &line_number, const std::string &line, std::deque<dto::InsertPosition> &positions );
     std::vector<std::string> getTags( const std::string &str );

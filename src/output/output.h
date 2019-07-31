@@ -7,7 +7,7 @@
 #include "feed/RSS.h"
 
 namespace blogator::output {
-    bool generate( const std::shared_ptr<const dto::Index>     &index,
+    void generate( const std::shared_ptr<const dto::Index>     &index,
                    const std::shared_ptr<const dto::Templates> &templates,
                    const std::shared_ptr<const dto::Options>   &options );
 }

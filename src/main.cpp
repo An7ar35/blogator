@@ -39,6 +39,7 @@ int main( int argc, char **argv ) {
 
         auto index     = indexer::index( options );
         auto templates = fs::importTemplates( *index, *options );
+
         output::generate( index, templates, options );
 
         fs::checkTemplateRelPaths( *index, *templates, *options );

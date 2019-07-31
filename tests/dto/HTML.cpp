@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "../../src/dto/HTML.h"
-#include "../../src/dto/HTML.cpp"
 
 TEST( HTML_tests, findLineOfTag0 ) {
     auto html = blogator::dto::HTML();

@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "../../../src/html/editor/editor.h"
-#include "../../../src/html/editor/editor.cpp"
 
 TEST( html_editor_tests, removeHyperlinks0 ) {
     using blogator::html::editor::removeHyperlinks;

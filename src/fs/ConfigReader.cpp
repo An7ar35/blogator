@@ -79,7 +79,7 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
  * Generates a blank configuration template file
  * @param file_path Output path for the file
  */
-void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem::path & file_path ) { //TODO Test
+void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem::path & file_path ) {
     std::stringstream ss;
     ss << "// -------------------------------\n"
        << "// | Blogator configuration file |\n"
