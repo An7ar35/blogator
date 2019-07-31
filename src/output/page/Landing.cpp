@@ -256,18 +256,35 @@ void blogator::output::page::Landing::writeTopAuthors( std::ofstream     &page,
  * @param indent              Space to place before the output line (i.e.: html indent)
  */
 void blogator::output::page::Landing::writeNewestPosts( dto::Page &page, const std::string &indent ) const {
+    /**
+     * [LAMBDA] When duplicates are not allowed on the landing page,
+     *          check if an article is in the 'featured posts' list.
+     */
+    auto isFeatured = [&]( const dto::Article &article ) {
+        if( !_options->_landing_page.duplicates && !_options->_landing_page.featured.empty() ) {
+            const auto rel_path = article._paths.src_html.lexically_relative( _options->_paths.source_dir );
+            return ( _options->_landing_page.featured.find( rel_path ) != _options->_landing_page.featured.cend() );
+        }
+
+        return false;
+    };
+
     auto article_it = _index->_articles.cbegin();
     size_t i        = 0;
 
     while( article_it != _index->_articles.cend() && i < _options->_landing_page.most_recent ) {
-        auto href = _options->_folders.posts.root / article_it->_paths.out_html;
 
-        page._out << indent << "<a href=\"" << href.string() << "\">\n";
-        _entry_maker.write( page, indent, *article_it );
-        page._out << indent << "</a>" << std::endl;
+        if( !isFeatured( *article_it ) ) {
+            auto href = _options->_folders.posts.root / article_it->_paths.out_html;
+
+            page._out << indent << "<a href=\"" << href.string() << "\">\n";
+            _entry_maker.write( page, indent, *article_it );
+            page._out << indent << "</a>" << std::endl;
+
+            ++i;
+        }
 
         ++article_it;
-        ++i;
     }
 }
 

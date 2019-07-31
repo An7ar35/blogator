@@ -126,6 +126,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "landing-top-tags    = 3;\n"
        << "landing-top_authors = 3;\n"
        << "landing-featured    = [\"0.html\", \"1.html\"];\n"
+       << "landing-duplicates  = true;\n"
        << "\n"
        << "//RSS header settings\n"
        << "rss             = true;\n"
@@ -448,11 +449,13 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
     static const std::string top_tags    = "landing-top-tags";
     static const std::string top_authors = "landing-top_authors";
     static const std::string featured    = "landing-featured";
+    static const std::string duplicates  = "landing-duplicates";
 
     auto most_recent_it = map.find( most_recent );
     auto top_tags_it    = map.find( top_tags );
-    auto top_authors_it    = map.find( top_authors );
+    auto top_authors_it = map.find( top_authors );
     auto featured_it    = map.find( featured );
+    auto duplicates_it    = map.find( duplicates );
 
     if( most_recent_it != map.end() ) {
         try {
@@ -485,7 +488,7 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
         } catch( std::exception &e ) {
             throw exception::file_parsing_failure(
                 "Error converting '" + top_tags + "' value to integer "
-                                                  "(line #" + std::to_string( top_tags_it->second.line ) + "): " + top_tags_it->second.value
+                "(line #" + std::to_string( top_tags_it->second.line ) + "): " + top_tags_it->second.value
             );
         }
     }
@@ -510,6 +513,18 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
         }
 
         featured_it->second.validated = true;
+    }
+
+    if( duplicates_it != map.end() ) {
+        if( duplicates_it->second.type == Type::BOOLEAN ) {
+            options._landing_page.duplicates = ( duplicates_it->second.value == "true" );
+            duplicates_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + duplicates + "' value to boolean "
+                "(line #" + std::to_string( duplicates_it->second.line ) + "): " + duplicates_it->second.value
+            );
+        }
     }
 }
 

@@ -489,11 +489,17 @@ __absolute__ path for it to work across all generated pages.
     landing-top_authors = 5;
     
 > Top used tags/authors in the posts/articles to display inside the `top-tags` and `top-authors` 
-sections respectively of the page. 
+  sections respectively of the page. 
       
     landing-featured = ["0.html", "1.html", "2.html"];
     
 > List of filenames of source posts to display inside the `featured-posts` section of the page. 
+
+    landing-duplicates = true;
+    
+> Allow/Disallow duplicate entries in the landing page's featured posts and newest posts. 
+  i.e.: In the case when a recent article which is in the newest posts section also is set 
+  as featured in the configuration. 
 
 #### RSS feed
     
