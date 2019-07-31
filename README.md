@@ -1,5 +1,9 @@
 ![alt text](docs/graphics/logo2.svg "Blogator logo")
 
+----------------------------
+
+![alt text](docs/screenshots/terminal.png "Terminal screenshot")
+
 ## What is this?
 
 It's a static blog/news template-driven site generator sans-javascript requirements and 
