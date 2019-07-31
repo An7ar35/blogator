@@ -6,6 +6,7 @@
 
 #include "../dto/Index.h"
 #include "../dto/Options.h"
+#include "../cli/MsgInterface.h"
 
 namespace blogator::indexer {
     class FeatAggregator {
@@ -16,6 +17,7 @@ namespace blogator::indexer {
         std::vector<dto::Article> getFeaturedArticles();
 
       private:
+        cli::MsgInterface                   &_display;
         std::shared_ptr<const dto::Options> _options;
 
         typedef std::pair<size_t, dto::Article> HeapNode_t;

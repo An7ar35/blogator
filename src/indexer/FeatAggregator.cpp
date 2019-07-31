@@ -7,6 +7,7 @@
  * @param global_options Global blogator options
  */
 blogator::indexer::FeatAggregator::FeatAggregator( std::shared_ptr<const blogator::dto::Options> global_options ) :
+    _display( cli::MsgInterface::getInstance() ),
     _options( std::move( global_options ) )
 {}
 
@@ -20,8 +21,10 @@ void blogator::indexer::FeatAggregator::addArticleIfFeatured( const blogator::dt
     const auto rel_path = article._paths.src_html.lexically_relative( _options->_paths.source_dir );
     const auto it = _options->_landing_page.featured.find( rel_path );
 
-    if( it != _options->_landing_page.featured.cend() )
+    if( it != _options->_landing_page.featured.cend() ) {
         _max_heap.push( std::make_pair( it->second, article ) );
+        _display.debug( "Added to 'featured' list: " + rel_path.string() );
+    }
 }
 
 /**
@@ -34,6 +37,13 @@ std::vector<blogator::dto::Article> blogator::indexer::FeatAggregator::getFeatur
     while( !_max_heap.empty() ) {
         v.emplace_back( _max_heap.top().second );
         _max_heap.pop();
+    }
+
+    if( !_options->_landing_page.featured.empty() && v.size() != _options->_landing_page.featured.size() ) {
+        std::stringstream ss;
+        ss << v.size() << "/" << _options->_landing_page.featured.size()
+           << "articles were matched to those in the configuration's featured list.";
+        _display.error( ss.str() );
     }
 
     return v;
