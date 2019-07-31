@@ -124,6 +124,14 @@ void blogator::cli::MsgInterface::msg( const std::string & msg ) {
     _display_out->message( msg );
 }
 
+void blogator::cli::MsgInterface::msg( const std::string &msg,
+                                       bool cond,
+                                       const std::string &yes,
+                                       const std::string &no )
+{
+    _display_out->message( msg, cond, yes, no );
+}
+
 void blogator::cli::MsgInterface::warning( const std::string & msg ) {
     _display_out->warning( msg );
 }

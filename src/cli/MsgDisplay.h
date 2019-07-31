@@ -15,6 +15,7 @@ namespace blogator::cli {
 
         void debug( const std::string & msg );
         void message( const std::string &msg );
+        void message( const std::string &msg, bool cond, const std::string &yes, const std::string &no );
         void warning( const std::string &msg );
         void error( const std::string &msg );
 

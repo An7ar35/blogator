@@ -99,6 +99,36 @@ void blogator::cli::MsgDisplay::message( const std::string & msg ) {
 }
 
 /**
+ * Sends a conditional message to the buffer
+ * @param msg  Message root
+ * @param cond Condition
+ * @param yes  Message if cond == true
+ * @param no   Message if cond == false
+ */
+void blogator::cli::MsgDisplay::message( const std::string & msg,
+                                         bool cond,
+                                         const std::string & yes,
+                                         const std::string & no )
+{
+    using eadlib::cli::FGColour;
+    using eadlib::cli::Decoration;
+    if( _verbose_flag ) {
+        if( cond )
+            _msg_buffer.push(
+                eadlib::cli::format<FGColour::CYAN, Decoration::BOLD>( "|MESSAGE| " ) +
+                eadlib::cli::format<FGColour::CYAN>( msg ) +
+                eadlib::cli::format<FGColour::GREEN>( yes )
+            );
+        else
+            _msg_buffer.push(
+                eadlib::cli::format<FGColour::CYAN, Decoration::BOLD>( "|MESSAGE| " ) +
+                eadlib::cli::format<FGColour::CYAN>( msg  ) +
+                eadlib::cli::format<FGColour::RED>( no )
+            );
+    }
+}
+
+/**
  * Sends a warning message to the buffer
  * @param msg Message
  */

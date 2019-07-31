@@ -216,6 +216,8 @@ void blogator::fs::ConfigReader::processTemplateOptions( std::unordered_map<std:
             );
         }
     }
+
+    _display.msg( "Relative paths adapt (templates) : ", options._templates.adapt_rel_paths, "TRUE", "FALSE" );
 }
 
 /**
@@ -270,6 +272,10 @@ void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::st
             );
         }
     }
+
+    _display.msg( "Build future-dated posts ........: ", options._posts.build_future, "TRUE", "FALSE" );
+    _display.msg( "Safe purge post output dir.......: ", options._posts.safe_purge, "TRUE", "FALSE" );
+    _display.msg( "Relative paths adapt (posts) ....: ", options._posts.adapt_rel_paths, "TRUE", "FALSE" );
 }
 
 /**
@@ -381,13 +387,13 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
             if( pads.size() == 1 ) {
                 options._index.summary_pad_begin = pads.at( 0 );
                 post_summary_pads_it->second.validated = true;
-                _display.debug( "Index summary padding: \"" + options._index.summary_pad_begin + "\"." );
+                _display.debug( "Index summary padding: \"" + options._index.summary_pad_begin + "\"" );
             }
             if( pads.size() > 1 ) {
                 options._index.summary_pad_begin = pads.at( 0 );
                 options._index.summary_pad_end   = pads.at( 1 );
                 post_summary_pads_it->second.validated = true;
-                _display.debug( "Index summary paddings: \"" +  options._index.summary_pad_begin + "\"/\"" + options._index.summary_pad_end + "\"." );
+                _display.debug( "Index summary paddings: \"" +  options._index.summary_pad_begin + "\"/\"" + options._index.summary_pad_end + "\"" );
             }
         }
 
@@ -395,7 +401,7 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
             options._index.summary_pad_begin = post_summary_pads_it->second.value;
             options._index.summary_pad_end   = post_summary_pads_it->second.value;
             post_summary_pads_it->second.validated = true;
-            _display.debug( "Index summary padding \"" + post_summary_pads_it->second.value + "\"." );
+            _display.debug( "Index summary padding \"" + post_summary_pads_it->second.value + "\"" );
         }
     }
 
@@ -434,6 +440,11 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
             );
         }
     }
+
+    _display.msg( "Insert summary in index entries .: ", options._index.show_summary, "TRUE", "FALSE" );
+    _display.msg( "Build index 'by-year' ...........: ", options._index.index_by_year, "TRUE", "FALSE" );
+    _display.msg( "Build index 'by-tag' ............: ", options._index.index_by_tag, "TRUE", "FALSE" );
+    _display.msg( "Build index 'by-author'..........: ", options._index.index_by_author, "TRUE", "FALSE" );
 }
 
 /**
@@ -526,6 +537,8 @@ void blogator::fs::ConfigReader::processLandingPageOptions( std::unordered_map<s
             );
         }
     }
+
+    _display.msg( "Landing page post duplicates ....: ", options._landing_page.duplicates, "ALLOW", "DISALLOW" );
 }
 
 /**
@@ -769,4 +782,6 @@ void blogator::fs::ConfigReader::processRssOptions( std::unordered_map<std::stri
             );
         }
     }
+
+    _display.msg( "Generate RSS feed ...............: ", options._rss.generate, "TRUE", "FALSE" );
 }

@@ -80,7 +80,6 @@ uintmax_t blogator::fs::purge( const blogator::dto::Options &options ) {
     purge_count += std::filesystem::remove( options._paths.root_dir / options._rss.file_name ) ? 1 : 0;
 
     if( options._posts.safe_purge && std::filesystem::exists( options._paths.posts_dir ) ) {
-        display.msg( "Safe purge: ON" );
         auto file_list = std::list<std::filesystem::path>();
         for( auto &p: std::filesystem::recursive_directory_iterator( options._paths.posts_dir ) ) {
             if( p.is_regular_file() ) {
@@ -97,7 +96,6 @@ uintmax_t blogator::fs::purge( const blogator::dto::Options &options ) {
             purge_count += std::filesystem::remove( p ) ? 1 : 0;
 
     } else {
-        display.msg( "Safe purge: OFF" );
         purge_count += std::filesystem::remove_all( options._paths.posts_dir );
     }
 
