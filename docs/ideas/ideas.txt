@@ -14,6 +14,8 @@
 · [POST TITLES] Have a optional struct like '<div class="title-struct"></div>"' that can be used in indices and landing page entries where an entire html structure can be
     used instead of just a plain title.
 
+· [HYPERLINK] Cross post hyperlink recognition during build and adaptation based on output index;
+
 //TODO redo the folder structure diagram (pencil) to reflect all the changes
 
 blogator-tags  = false; //TODO special tag->relative path replacer based on certain key pages expressed in {TAG} form (e.g.: "{DATE-LATEST-PAGE}"

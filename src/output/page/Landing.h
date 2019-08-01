@@ -38,6 +38,7 @@ namespace blogator::output::page {
         void writeTopAuthors( std::ofstream &page, const std::string &indent ) const;
         void writeNewestPosts( dto::Page &page, const std::string &indent ) const;
         void writeFeatured( dto::Page &page, const std::string &indent ) const;
+        void writeEntry( dto::Page &page, const std::string &indent, const dto::Article &article ) const;
     };
 }
 

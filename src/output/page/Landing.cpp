@@ -252,8 +252,8 @@ void blogator::output::page::Landing::writeTopAuthors( std::ofstream     &page,
 
 /**
  * Writes the newest posts entries (as defined in the landing page options) to the landing page
- * @param page                Target file
- * @param indent              Space to place before the output line (i.e.: html indent)
+ * @param page   Target file
+ * @param indent Space to place before the output line (i.e.: html indent)
  */
 void blogator::output::page::Landing::writeNewestPosts( dto::Page &page, const std::string &indent ) const {
     /**
@@ -278,7 +278,7 @@ void blogator::output::page::Landing::writeNewestPosts( dto::Page &page, const s
             auto href = _options->_folders.posts.root / article_it->_paths.out_html;
 
             page._out << indent << "<a href=\"" << href.string() << "\">\n";
-            _entry_maker.write( page, indent, *article_it );
+            writeEntry( page, indent, *article_it );
             page._out << indent << "</a>" << std::endl;
 
             ++i;
@@ -290,15 +290,48 @@ void blogator::output::page::Landing::writeNewestPosts( dto::Page &page, const s
 
 /**
  * Write the featured articles (as defined in the landing page options) to the landing page
- * @param page                Target file
- * @param indent              Space to place before the output line (i.e.: html indent)
+ * @param page   Target file
+ * @param indent Space to place before the output line (i.e.: html indent)
  */
 void blogator::output::page::Landing::writeFeatured( dto::Page &page, const std::string &indent ) const {
     for( const auto &article : _index->_featured ) {
         auto href = _options->_folders.posts.root / article._paths.out_html;
 
         page._out << indent << "<a href=\"" << href.string() << "\">\n";
-        _entry_maker.write( page, indent, article );
+        writeEntry( page, indent, article );
         page._out << indent << "</a>" << std::endl;
+    }
+}
+
+/**
+ * Writes the index entry for the landing page's section
+ * @param page    Target file
+ * @param indent  Space to place before the output line (i.e.: html indent)
+ * @param article Article who's entry to write
+ */
+void blogator::output::page::Landing::writeEntry( blogator::dto::Page &page,
+                                                  const std::string   &indent,
+                                                  const dto::Article  &article ) const {
+
+    if( article._paths.entry_html.empty() ) {
+        _entry_maker.write( page, indent, article );
+
+    } else {
+        try {
+            auto entry             = std::make_shared<dto::Template>( _entry_maker.getTemplateType() );
+            entry->src             = article._paths.entry_html;
+            entry->html            = fs::importHTML( entry->src );
+            entry->block_write_pos = html::reader::getConsecutiveWritePositions( *entry->html, entry->block_classes );
+            entry->path_write_pos  = dto::Templates::extractRelativePaths( *entry->html );
+
+            fs::checkTemplateRelPaths( *entry );
+            auto custom_entry_maker = generic::EntryWriter( _options, entry );
+
+            custom_entry_maker.write( page, indent, article );
+
+        } catch( exception::file_access_failure &e ) {
+            _display.error( e.what() );
+            _entry_maker.write( page, indent, article );
+        }
     }
 }
