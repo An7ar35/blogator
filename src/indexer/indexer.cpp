@@ -276,6 +276,9 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
                     ( global_options._folders.posts.root / entry_it->second.lexically_relative( global_options._paths.source_dir ) ).string()
                 );
                 article._paths.entry_html = entry_it->second;
+
+                cacheCustomIndexEntry( global_options, article );
+
                 index_entry_files.erase( entry_it );
             }
 
@@ -733,6 +736,38 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
         article._tags.emplace( "N/A" );
 
     return article;
+}
+
+/**
+ * Caches a custom index entry for an Article
+ * @param options Global Options DTO
+ * @param article Article DTO
+ */
+void blogator::indexer::cacheCustomIndexEntry( const dto::Options & options, dto::Article & article ) {
+    static auto &display   = cli::MsgInterface::getInstance();
+    try {
+        auto entry             = std::make_shared<dto::Template>( dto::Template::Type::INDEX_ENTRY );
+        entry->src             = article._paths.entry_html;
+        entry->html            = fs::importHTML( entry->src );
+
+        auto hrefs_count = html::editor::removeHyperlinks( *entry->html );
+
+        if( hrefs_count > 0 )
+            display.debug(
+                "Removed " + std::to_string( hrefs_count ) + " hyperlinks in custom index entry: " +
+                article._paths.entry_html.lexically_relative( options._paths.root_dir ).string()
+            );
+
+        entry->block_write_pos = html::reader::getConsecutiveWritePositions( *entry->html, entry->block_classes );
+        entry->path_write_pos  = dto::Templates::extractRelativePaths( *entry->html );
+
+        fs::checkTemplateRelPaths( *entry );
+
+        article._cust_index_entry = entry;
+
+    } catch( exception::file_access_failure &e ) {
+        display.error( e.what() );
+    }
 }
 
 /**

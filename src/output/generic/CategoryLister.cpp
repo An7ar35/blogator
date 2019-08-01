@@ -8,6 +8,7 @@
 #include "../../html/reader/reader.h"
 #include "../../fs/fs.h"
 #include "../../cli/MsgInterface.h"
+#include "../../html/editor/editor.h"
 
 /**
  *
@@ -241,26 +242,12 @@ void blogator::output::generic::CategoryLister::writeIndexEntry(
 {
     page._out << indent << "<a href=\"" << post_href_path.string() << "\">\n";
 
-    if( article._paths.entry_html.empty() ) {
-        _entry_maker.write( page, indent, article );
+    if( article._cust_index_entry ) {
+        auto custom_entry_maker = generic::EntryWriter( _options, article._cust_index_entry );
+        custom_entry_maker.write( page, indent, article );
 
     } else {
-        try {
-            auto entry             = std::make_shared<dto::Template>( _entry_maker.getTemplateType() );
-            entry->src             = article._paths.entry_html;
-            entry->html            = fs::importHTML( entry->src );
-            entry->block_write_pos = html::reader::getConsecutiveWritePositions( *entry->html, entry->block_classes );
-            entry->path_write_pos  = dto::Templates::extractRelativePaths( *entry->html );
-
-            fs::checkTemplateRelPaths( *entry );
-            auto custom_entry_maker = generic::EntryWriter( _options, entry );
-
-            custom_entry_maker.write( page, indent, article );
-
-        } catch( exception::file_access_failure &e ) {
-            _display.error( e.what() );
-            _entry_maker.write( page, indent, article );
-        }
+        _entry_maker.write( page, indent, article );
     }
 
     page._out << indent << "</a>" << std::endl;

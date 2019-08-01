@@ -33,6 +33,7 @@ namespace blogator::indexer {
 
     dto::DateStamp convertDate( const std::string &date );
     dto::Article readFileProperties( const dto::Options &options, const std::filesystem::path &path );
+    void cacheCustomIndexEntry( const dto::Options &options, dto::Article &article );
 
     std::filesystem::path makeFileName( const size_t &n );
     std::filesystem::path makeFileName( const std::string &prefix, const size_t &n );

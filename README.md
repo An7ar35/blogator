@@ -362,9 +362,9 @@ starting from `0`.
 
 > Summary text from the post.
 
-> **Note:** Make sure not to put hyperlinks (`<a></a>`) in the index/landing page template or custom entries. 
-> It will result in nested hyperlinks. If hyperlinks are inside the `<span class="summary"></span>` in source posts, 
-> they will be removed automatically though.   
+> **Note:** Make sure not to put hyperlinks (`<a></a>`) in the index/landing page templates.
+> It will result in nested hyperlinks. If hyperlinks are inside the `<span class="summary"></span>` 
+> in the post's sources, they will be removed automatically though.   
 
 ## Configuration file
 

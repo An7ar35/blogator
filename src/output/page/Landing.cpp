@@ -9,6 +9,7 @@
 #include "../../exception/failed_expectation.h"
 #include "../../cli/MsgInterface.h"
 #include "../../fs/fs.h"
+#include "../../html/editor/editor.h"
 
 /**
  * Constructor
@@ -311,27 +312,13 @@ void blogator::output::page::Landing::writeFeatured( dto::Page &page, const std:
  */
 void blogator::output::page::Landing::writeEntry( blogator::dto::Page &page,
                                                   const std::string   &indent,
-                                                  const dto::Article  &article ) const {
-
-    if( article._paths.entry_html.empty() ) {
-        _entry_maker.write( page, indent, article );
+                                                  const dto::Article  &article ) const
+{
+    if( article._cust_index_entry ) {
+        auto custom_entry_maker = generic::EntryWriter( _options, article._cust_index_entry );
+        custom_entry_maker.write( page, indent, article );
 
     } else {
-        try {
-            auto entry             = std::make_shared<dto::Template>( _entry_maker.getTemplateType() );
-            entry->src             = article._paths.entry_html;
-            entry->html            = fs::importHTML( entry->src );
-            entry->block_write_pos = html::reader::getConsecutiveWritePositions( *entry->html, entry->block_classes );
-            entry->path_write_pos  = dto::Templates::extractRelativePaths( *entry->html );
-
-            fs::checkTemplateRelPaths( *entry );
-            auto custom_entry_maker = generic::EntryWriter( _options, entry );
-
-            custom_entry_maker.write( page, indent, article );
-
-        } catch( exception::file_access_failure &e ) {
-            _display.error( e.what() );
-            _entry_maker.write( page, indent, article );
-        }
+        _entry_maker.write( page, indent, article );
     }
 }

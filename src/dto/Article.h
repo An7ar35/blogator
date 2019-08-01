@@ -72,6 +72,8 @@ namespace blogator::dto {
 
         std::set<std::string, CaseInsensitiveCompare> _authors;
         std::set<std::string, CaseInsensitiveCompare> _tags;
+
+        std::shared_ptr<dto::Template> _cust_index_entry; //cache
     };
 }
 
