@@ -294,37 +294,37 @@ void blogator::output::page::Posts::writePageNavDiv( dto::Page &page,
                                                      const std::string &indent,
                                                      const size_t &article_pos ) const
 {
-    const bool is_first = article_pos == 0;
-    const bool is_last  = article_pos == _index->_articles.size() - 1;
+    const bool is_latest   = article_pos == 0;
+    const bool is_earliest = article_pos == _index->_articles.size() - 1;
 
-    const std::filesystem::path &first = _index->_articles.at( 0 )._paths.out_html;
-    const std::filesystem::path &last  = _index->_articles.at( _index->_articles.size() - 1 )._paths.out_html;
-    const std::filesystem::path &prev  = ( is_first ? first : _index->_articles.at( article_pos - 1 )._paths.out_html );
-    const std::filesystem::path &next  = ( is_last  ? last  : _index->_articles.at( article_pos + 1 )._paths.out_html );
+    const std::filesystem::path &latest   = _index->_articles.at( 0 )._paths.out_html;
+    const std::filesystem::path &earliest = _index->_articles.at( _index->_articles.size() - 1 )._paths.out_html;
+    const std::filesystem::path &prev  = ( is_latest ? latest : _index->_articles.at( article_pos - 1 )._paths.out_html );
+    const std::filesystem::path &next  = ( is_earliest ? earliest : _index->_articles.at( article_pos + 1 )._paths.out_html );
 
     page._out << indent << "<ul>\n"
               << indent << "\t<li class=\"first\">"
-                        << ( is_first
-                             ? html::createHyperlink( first, _options->_page_nav.first, "disabled" )
-                             : html::createHyperlink( first, _options->_page_nav.first ) )
+                        << ( is_earliest
+                             ? html::createHyperlink( earliest, _options->_page_nav.first, "disabled" )
+                             : html::createHyperlink( earliest, _options->_page_nav.first ) )
                         << "</li>\n"
               << indent << "\t<li class=\"prev\">"
-                        << ( is_first
-                             ? html::createHyperlink( prev, _options->_page_nav.backward, "disabled", "prev" )
-                             : html::createHyperlink( prev, _options->_page_nav.backward, "", "prev" ) )
+                        << ( is_earliest
+                             ? html::createHyperlink( next, _options->_page_nav.backward, "disabled", "prev" )
+                             : html::createHyperlink( next, _options->_page_nav.backward, "", "prev" ) )
                         << "</li>\n"
               << indent << "\t<li class=\"curr\">"
-                        << std::to_string( article_pos + 1 ) << _options->_page_nav.separator << std::to_string( _index->_articles.size() )
+                        << std::to_string( _index->_articles.size() - article_pos ) << _options->_page_nav.separator << std::to_string( _index->_articles.size() )
                         << "</li>\n"
               << indent << "\t<li class=\"next\">"
-                        << ( is_last
-                             ? html::createHyperlink( next, _options->_page_nav.forward, "disabled", "next" )
-                             : html::createHyperlink( next, _options->_page_nav.forward, "", "next" ) )
+                        << ( is_latest
+                             ? html::createHyperlink( prev, _options->_page_nav.forward, "disabled", "next" )
+                             : html::createHyperlink( prev, _options->_page_nav.forward, "", "next" ) )
                         << "</li>\n"
               << indent << "\t<li class=\"last\">"
-                        << ( is_last
-                             ? html::createHyperlink( last, _options->_page_nav.last, "disabled" )
-                             : html::createHyperlink( last, _options->_page_nav.last ) )
+                        << ( is_latest
+                             ? html::createHyperlink( latest, _options->_page_nav.last, "disabled" )
+                             : html::createHyperlink( latest, _options->_page_nav.last ) )
                         << "</li>\n"
               << indent << "</ul>"
               << std::endl;
