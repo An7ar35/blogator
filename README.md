@@ -577,10 +577,10 @@ Blogator is licensed under [GNU AGPLv3](LICENSE.txt)
 The example templates (except anything in `img/*.*`) is licensed for **personal use only**. 
 You can also base your own template from it if you like as long as you don´t make money off it.
 
-The following images that are included in the example template are under copyright @An7ar35 2017:
-* `resources/example/img/me.png`, 
+The following images that are included in the example template are under copyright @An7ar35 2019:
 * `resources/example/img/hedgegog.png`, 
 * `resources/example/img/butterfly.png`
 
-The SVG icon included in the example template is from svgrepo.com
+The SVG icon included in the example template is from svgrepo.com ([Creative Commons BY 4.0](https://creativecommons.org/licenses/by/4.0/)):
+* `resources/example/img/smiley.svg` [source](https://www.svgrepo.com/svg/100275/smiley)
 * `resources/example/img/rss.svg` [source](https://www.svgrepo.com/svg/25140/rss)
