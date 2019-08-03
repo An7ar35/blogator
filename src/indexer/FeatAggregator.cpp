@@ -42,8 +42,8 @@ std::vector<blogator::dto::Article> blogator::indexer::FeatAggregator::getFeatur
     if( !_options->_landing_page.featured.empty() && v.size() != _options->_landing_page.featured.size() ) {
         std::stringstream ss;
         ss << v.size() << "/" << _options->_landing_page.featured.size()
-           << "articles were matched to those in the configuration's featured list.";
-        _display.error( ss.str() );
+           << " articles were matched to those in the configuration's featured list.";
+        _display.warning( ss.str() );
     }
 
     return v;
