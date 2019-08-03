@@ -46,7 +46,7 @@ well as some debugging skills. The software will not sanitise/check your HTML/CS
 
 ## Example
 
-//TODO
+A basic blog example with templates is included in the `/resources/example/` directory. Just run Blogator on it to generate everything.
 
 ## Installing
 

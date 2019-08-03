@@ -210,6 +210,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
 
     auto index_entry_files = std::unordered_map<std::string, std::filesystem::path>();
     auto custom_css_files  = std::unordered_map<std::string, std::filesystem::path>();
+    auto removal_queue     = std::deque<std::filesystem::path>(); //removed article paths
     auto index_entry_match = std::smatch();
     auto custom_css_match  = std::smatch();
 
@@ -238,6 +239,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
                            << article._paths.src_html.lexically_relative( global_options._paths.root_dir );
                         display.debug( ss.str() );
 
+                        removal_queue.emplace_back( article._paths.src_html );
                         index._articles.erase( std::prev( index._articles.end() ) );
 
                     } else {
@@ -256,6 +258,17 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
                 }
             }
         }
+    }
+
+    while( !removal_queue.empty() ) { //Remove corresponding custom CSS (if any) of removed articles
+        const auto &p        = removal_queue.front();
+        const auto file_root = p.parent_path() / p.filename().stem();
+        auto       css_it    = custom_css_files.find( file_root.string() );
+
+        if( css_it != custom_css_files.end() )
+            custom_css_files.erase( css_it );
+
+        removal_queue.pop_front();
     }
 
     if( index._articles.empty() )
