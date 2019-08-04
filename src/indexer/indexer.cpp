@@ -39,7 +39,7 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     bool   doByTag    = global_options->_index.index_by_tag;
     bool   doByAuthor = global_options->_index.index_by_author;
 
-    size_t optional = ( doFeatured ? 1 : 0 )
+    size_t optional = ( doFeatured ? 2 : 0 )
                     + ( doByYear ? 1 : 0 )
                     + ( doByTag ? 1 : 0 )
                     + ( doByAuthor ? 1 : 0 );
@@ -57,6 +57,8 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     sortChronologically( index->_articles, *global_options );
 
     if( doFeatured ) {
+        display.progress( "checking featured sources" );
+        checkFeaturedExist( *global_options );
         display.progress( "generating featured targets" );
         indexFeatured( feat_aggregator, *index );
     }
@@ -794,6 +796,22 @@ void blogator::indexer::addOutputPath( const dto::Options::AbsPaths &global_path
     auto file_name = std::to_string( article._number ) + article._paths.src_html.filename().extension().string();
     auto abs_path  = global_paths.posts_dir / file_name;
     article._paths.out_html = abs_path.lexically_relative( global_paths.posts_dir );
+}
+
+/**
+ * Checks the Option's landing page featured article list has valid paths
+ * @param options Global Options DTO
+ */
+void blogator::indexer::checkFeaturedExist( const dto::Options &options ) {
+    static auto &display = cli::MsgInterface::getInstance();
+
+    for( const auto &f : options._landing_page.featured ) {
+        if( !std::filesystem::exists( options._paths.source_dir / f.first ) ) {
+            display.error(
+                "Featured article in configuration file does not exists (i:" + std::to_string( f.second ) + "): " + f.first
+            );
+        }
+    }
 }
 
 /**

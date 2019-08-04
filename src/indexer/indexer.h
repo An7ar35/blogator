@@ -35,6 +35,7 @@ namespace blogator::indexer {
     dto::Article readFileProperties( const dto::Options &options, const std::filesystem::path &path );
     void cacheCustomIndexEntry( const dto::Options &options, dto::Article &article );
 
+    void checkFeaturedExist( const dto::Options &options );
     std::filesystem::path makeFileName( const size_t &n );
     std::filesystem::path makeFileName( const std::string &prefix, const size_t &n );
     size_t calcPageCount ( const size_t &items_per_page, const size_t &item_count );
