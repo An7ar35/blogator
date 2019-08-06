@@ -176,16 +176,18 @@ void blogator::fs::ConfigReader::loadConfigurationFile( const std::filesystem::p
     while( getline( config_file, line ) ) {
         ++line_number;
         std::smatch matches;
-        if( std::regex_search( line, matches, KV_BOOL_VAL_RX) && matches.length() >= 3 ) {
-            map.emplace( std::make_pair( matches[1], Value( line_number, Type::BOOLEAN, matches[2] ) ) );
-        } else if( std::regex_search( line, matches, KV_STR_VAL_RX ) && matches.length() >= 3 ) {
-            map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING, matches[2] ) ) );
-        } else if( std::regex_search( line, matches, KV_INT_VAL_RX ) && matches.length() >= 3 ) {
-            map.emplace( std::make_pair( matches[1], Value( line_number, Type::INTEGER, matches[2] ) ) );
-        } else if( std::regex_search( line, matches, KV_STR_ARR_RX ) && matches.length() >= 3 ) {
-            map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING_ARRAY, matches[2] ) ) );
-        } else if( !std::regex_search( line, COMMENT_RX ) ) {
-            display.error( "Configuration line #" + std::to_string( line_number ) + " could not be parsed." );
+        if( !std::regex_search( line, COMMENT_RX ) ) {
+            if( std::regex_search( line, matches, KV_BOOL_VAL_RX) && matches.length() >= 3 ) {
+                map.emplace( std::make_pair( matches[1], Value( line_number, Type::BOOLEAN, matches[2] ) ) );
+            } else if( std::regex_search( line, matches, KV_STR_VAL_RX ) && matches.length() >= 3 ) {
+                map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING, matches[2] ) ) );
+            } else if( std::regex_search( line, matches, KV_INT_VAL_RX ) && matches.length() >= 3 ) {
+                map.emplace( std::make_pair( matches[1], Value( line_number, Type::INTEGER, matches[2] ) ) );
+            } else if( std::regex_search( line, matches, KV_STR_ARR_RX ) && matches.length() >= 3 ) {
+                map.emplace( std::make_pair( matches[1], Value( line_number, Type::STRING_ARRAY, matches[2] ) ) );
+            } else {
+                display.error( "Configuration line #" + std::to_string( line_number ) + " could not be parsed." );
+            }
         }
     }
 
