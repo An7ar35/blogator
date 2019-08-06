@@ -335,8 +335,8 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
 void blogator::indexer::indexFeatured( indexer::FeatAggregator &feat_aggregator,
                                        dto::Index &index )
 {
-    for( const auto &article : index._articles ) {
-        feat_aggregator.addArticleIfFeatured( article );
+    for( auto &article : index._articles ) {
+        article._is_featured = feat_aggregator.addArticleIfFeatured( article );
     }
 
     index._featured = feat_aggregator.getFeaturedArticles();

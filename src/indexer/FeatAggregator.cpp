@@ -15,8 +15,9 @@ blogator::indexer::FeatAggregator::FeatAggregator( std::shared_ptr<const blogato
  * Adds an article to the aggregator if it is featured in the options for the landing page
  * @param article   Article DTO
  * @param order_pos Featured position
+ * @return is featured
  */
-void blogator::indexer::FeatAggregator::addArticleIfFeatured( const blogator::dto::Article &article )
+bool blogator::indexer::FeatAggregator::addArticleIfFeatured( const blogator::dto::Article &article )
 {
     const auto rel_path = article._paths.src_html.lexically_relative( _options->_paths.source_dir );
     const auto it = _options->_landing_page.featured.find( rel_path );
@@ -24,7 +25,10 @@ void blogator::indexer::FeatAggregator::addArticleIfFeatured( const blogator::dt
     if( it != _options->_landing_page.featured.cend() ) {
         _max_heap.push( std::make_pair( it->second, article ) );
         _display.debug( "Added to 'featured' list: " + rel_path.string() );
+        return true;
     }
+
+    return false;
 }
 
 /**

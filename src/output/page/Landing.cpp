@@ -278,7 +278,11 @@ void blogator::output::page::Landing::writeNewestPosts( dto::Page &page, const s
         if( !isFeatured( *article_it ) ) {
             auto href = _options->_folders.posts.root / article_it->_paths.out_html;
 
-            page._out << indent << "<a href=\"" << href.string() << "\">\n";
+            if( article_it->_is_featured && !_options->_index.featured_css_class.empty() )
+                page._out << indent << "<a class=\"" << _options->_index.featured_css_class << "\" href=\"" << href.string() << "\">\n";
+            else
+                page._out << indent << "<a href=\"" << href.string() << "\">\n";
+
             writeEntry( page, indent, *article_it );
             page._out << indent << "</a>" << std::endl;
 
@@ -298,7 +302,11 @@ void blogator::output::page::Landing::writeFeatured( dto::Page &page, const std:
     for( const auto &article : _index->_featured ) {
         auto href = _options->_folders.posts.root / article._paths.out_html;
 
-        page._out << indent << "<a href=\"" << href.string() << "\">\n";
+        if( !_options->_index.featured_css_class.empty() )
+            page._out << indent << "<a class=\"" << _options->_index.featured_css_class << "\" href=\"" << href.string() << "\">\n";
+        else
+            page._out << indent << "<a href=\"" << href.string() << "\">\n";
+
         writeEntry( page, indent, article );
         page._out << indent << "</a>" << std::endl;
     }

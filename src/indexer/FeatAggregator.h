@@ -13,7 +13,7 @@ namespace blogator::indexer {
       public:
         explicit FeatAggregator( std::shared_ptr<const dto::Options> global_options );
 
-        void addArticleIfFeatured( const dto::Article &article );
+        bool addArticleIfFeatured( const dto::Article &article );
         std::vector<dto::Article> getFeaturedArticles();
 
       private:

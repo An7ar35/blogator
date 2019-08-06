@@ -98,13 +98,14 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "posts-change-paths = false;\n"
        << "\n"
        << "//Index settings\n"
-       << "show-post-numbers = true;\n"
-       << "show-post-summary = false;\n"
-       << "post-summary-pads = [\"<p>\", \"</p>\"];\n"
-       << "items-per-page    = 10;\n"
-       << "index-by-year     = false;\n"
-       << "index-by-tag      = true;\n"
-       << "index-by-author   = false;\n"
+       << "show-post-numbers  = true;\n"
+       << "show-post-summary  = false;\n"
+       << "post-summary-pads  = [\"<p>\", \"</p>\"];\n"
+       << "featured-css-class = \"featured\";\n"
+       << "items-per-page     = 10;\n"
+       << "index-by-year      = false;\n"
+       << "index-by-tag       = true;\n"
+       << "index-by-author    = false;\n"
        << "\n"
        << "//Per-Page navigation DIV contents\n"
        << "page-nav-separator = \" / \";\n"
@@ -326,19 +327,21 @@ void blogator::fs::ConfigReader::processMonthsOptions( std::unordered_map<std::s
 void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::string, ConfigReader::Value> &map,
                                                       dto::Options &options ) const
 {
-    static const std::string items_per_page    = "items-per-page";
-    static const std::string show_post_summary = "show-post-summary";
-    static const std::string post_summary_pads = "post-summary-pads";
-    static const std::string index_by_year     = "index-by-year";
-    static const std::string index_by_tag      = "index-by-tag";
-    static const std::string index_by_author   = "index-by-author";
+    static const std::string items_per_page     = "items-per-page";
+    static const std::string show_post_summary  = "show-post-summary";
+    static const std::string post_summary_pads  = "post-summary-pads";
+    static const std::string featured_css_class = "featured-css-class";
+    static const std::string index_by_year      = "index-by-year";
+    static const std::string index_by_tag       = "index-by-tag";
+    static const std::string index_by_author    = "index-by-author";
 
-    auto items_per_page_it    = map.find( items_per_page );
-    auto show_post_summary_it = map.find( show_post_summary );
-    auto post_summary_pads_it = map.find( post_summary_pads );
-    auto index_by_year_it     = map.find( index_by_year );
-    auto index_by_tag_it      = map.find( index_by_tag );
-    auto index_by_author_it   = map.find( index_by_author );
+    auto items_per_page_it     = map.find( items_per_page );
+    auto show_post_summary_it  = map.find( show_post_summary );
+    auto post_summary_pads_it  = map.find( post_summary_pads );
+    auto featured_css_class_it = map.find( featured_css_class );
+    auto index_by_year_it      = map.find( index_by_year );
+    auto index_by_tag_it       = map.find( index_by_tag );
+    auto index_by_author_it    = map.find( index_by_author );
 
     if( items_per_page_it != map.end() ) {
         try {
@@ -407,6 +410,11 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
         }
     }
 
+    if( featured_css_class_it != map.end() && !featured_css_class_it->second.value.empty() ) {
+        options._index.featured_css_class = featured_css_class_it->second.value;
+        featured_css_class_it->second.validated = true;
+    }
+
     if( index_by_year_it != map.end() ) {
         if( index_by_year_it->second.type == Type::BOOLEAN ) {
             options._index.index_by_year = ( index_by_year_it->second.value == "true" );
@@ -444,6 +452,7 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
     }
 
     _display.msg( "Insert summary in index entries .: ", options._index.show_summary, "TRUE", "FALSE" );
+    _display.msg( "Insert 'featured' CSS class .....: ", !options._index.featured_css_class.empty(), "\"" + options._index.featured_css_class + "\"", "N/A" );
     _display.msg( "Build index 'by-year' ...........: ", options._index.index_by_year, "TRUE", "FALSE" );
     _display.msg( "Build index 'by-tag' ............: ", options._index.index_by_tag, "TRUE", "FALSE" );
     _display.msg( "Build index 'by-author'..........: ", options._index.index_by_author, "TRUE", "FALSE" );

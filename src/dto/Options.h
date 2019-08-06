@@ -95,13 +95,14 @@ namespace blogator::dto {
         } _posts;
 
         struct Index {
-            bool        show_summary      { false }; //show summaries in index entries
-            std::string summary_pad_begin { "" };
-            std::string summary_pad_end   { "" };
-            size_t      items_per_page    { 10 };    //number of posts-per-page in the indices
-            bool        index_by_year     { false }; //flag to create a year based index
-            bool        index_by_tag      { true  }; //flag to create a tag based index
-            bool        index_by_author   { false }; //flag to create a author based index
+            bool        show_summary       { false }; //show summaries in index entries
+            std::string summary_pad_begin  { "" };
+            std::string summary_pad_end    { "" };
+            std::string featured_css_class { "" };
+            size_t      items_per_page     { 10 };    //number of posts-per-page in the indices
+            bool        index_by_year      { false }; //flag to create a year based index
+            bool        index_by_tag       { true  }; //flag to create a tag based index
+            bool        index_by_author    { false }; //flag to create a author based index
 
         } _index;
 

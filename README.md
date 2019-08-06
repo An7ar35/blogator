@@ -434,6 +434,12 @@ is after the day of the build (i.e. when generator is run).
   e.g.: if the summary text is _"Lorem ipsum dolor sit adipiscing."_ then , 
   with the given padding above, the ouput would be `<p>Lorem ipsum dolor sit adipiscing.</p>` 
       
+    featured-css-class = "";
+    
+> Adds a CSS class name to the index/landing page hyperlink (`<a class="{CLASS_NAME} href=".."></a>`) 
+  for any articles that are in the featured list. Make sure to put a valid formatted CSS class name
+  as whatever is between the string quotation marks will be copied verbatim. 
+    
     items-per-page = 10;
     
 > Sets the Number of post entries per page in the index

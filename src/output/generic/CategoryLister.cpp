@@ -240,7 +240,10 @@ void blogator::output::generic::CategoryLister::writeIndexEntry(
     const dto::Article &article,
     const std::filesystem::path &post_href_path ) const
 {
-    page._out << indent << "<a href=\"" << post_href_path.string() << "\">\n";
+    if( article._is_featured && !_options->_index.featured_css_class.empty() )
+        page._out << indent << "<a class=\"" << _options->_index.featured_css_class << "\" href=\"" << post_href_path.string() << "\">\n";
+    else
+        page._out << indent << "<a href=\"" << post_href_path.string() << "\">\n";
 
     if( article._cust_index_entry ) {
         auto custom_entry_maker = generic::EntryWriter( _options, article._cust_index_entry );

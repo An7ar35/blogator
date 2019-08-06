@@ -33,6 +33,7 @@ namespace blogator::dto {
             s << "Article={ \n"
               << "\tNumber.............: " << article._number << "\n"
               << "\tTitle/Heading......: \"" << article._heading << "\"\n"
+              << "\tFeatured...........: " << ( article._is_featured ? "yes" : "no" ) << "\n"
               << "\tAuthor(s) .........: ";
             for( const auto &a : article._authors )
                 s << "\"" << a << "\" ";
@@ -69,6 +70,7 @@ namespace blogator::dto {
         size_t      _number;
         std::string _heading;
         DateStamp   _datestamp;
+        bool        _is_featured;
 
         std::set<std::string, CaseInsensitiveCompare> _authors;
         std::set<std::string, CaseInsensitiveCompare> _tags;
