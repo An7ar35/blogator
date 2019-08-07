@@ -165,19 +165,19 @@ starting from `0`.
   
 ## Templates
 
-| File Name               | Description                                     | Target directory path(s)                              |
-| ----------------------- | ----------------------------------------------- | ----------------------------------------------------- |
-| `landing.html`          | Landing/start page of the site/blog             | `/`                                                   |
-| `post.html`             | Blog post/Article                               | `/posts`                                              |
-| `index.html`            | Index page used for all indices except lists    | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
-| `index_list.html`       | Index list page used for all index lists        | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
-| `year_list.html`[^1]    | (Override) index list for post years            | `/index/by_year`                                      |
-| `year_index.html`[^1]   | (Override) index pages for post years           | `/index/by_year`                                      |
-| `tag_list.html`[^1]     | (Override) index list for post categories/tags  | `/index/by_tag`                                       |
-| `tag_index.html`[^1]    | (Override) index pages for post categories/tags | `/index/by_tag`                                       |
-| `author_list.html`[^1]  | (Override) index list for post authors          | `/index/by_author`                                    |
-| `author_index.html`[^1] | (Override) index pages for post authors         | `/index/by_author`                                    |
-| `index_entry.html`      | Index page's entry for a post/article           | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
+| File Name               | Description                                     | Target directory path(s)                                   |
+| ----------------------- | ----------------------------------------------- | ---------------------------------------------------------- |
+| `landing.html`          | Landing/start page of the site/blog             | `/`                                                        |
+| `post.html`             | Blog post/Article                               | `/posts`                                                   |
+| `index.html`            | Index page used for all indices except lists    | `/index/by_date`, `/index/by_tag`, `/index/by_author`      |
+| `index_list.html`       | Index list page used for all index lists        | `/index/by_date`, `/index/by_tag`, `/index/by_author`      |
+| `year_list.html`[^1]    | (Override) index list for post years            | `/index/by_year`                                           |
+| `year_index.html`[^1]   | (Override) index pages for post years           | `/index/by_year`                                           |
+| `tag_list.html`[^1]     | (Override) index list for post categories/tags  | `/index/by_tag`                                            |
+| `tag_index.html`[^1]    | (Override) index pages for post categories/tags | `/index/by_tag`                                            |
+| `author_list.html`[^1]  | (Override) index list for post authors          | `/index/by_author`                                         |
+| `author_index.html`[^1] | (Override) index pages for post authors         | `/index/by_author`                                         |
+| `index_entry.html`      | Index/Landing page's entry for a post/article   | `/`, `/index/by_date`, `/index/by_tag`, `/index/by_author` |
 
 [^1]: Optional 
 
