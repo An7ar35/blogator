@@ -168,7 +168,6 @@ starting from `0`.
 | File Name               | Description                                     | Target directory path(s)                              |
 | ----------------------- | ----------------------------------------------- | ----------------------------------------------------- |
 | `landing.html`          | Landing/start page of the site/blog             | `/`                                                   |
-| `landing_entry.html`    | Landing page's entry for a post/article         | `/`                                                   |
 | `post.html`             | Blog post/Article                               | `/posts`                                              |
 | `index.html`            | Index page used for all indices except lists    | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
 | `index_list.html`       | Index list page used for all index lists        | `/index/by_date`, `/index/by_tag`, `/index/by_author` |
@@ -206,31 +205,9 @@ starting from `0`.
 
 > List of feature posts (source HTML files can be set in the configuration file's `landing-featured`)
 
-#### Landing page entry
+###### Note:
 
-* `post-number`
-
-> Number of the article when arranged by date (`1..n` where `n` is the newest).
-
-* `heading`
-
-> Title of the article.
-
-* `authors`
-
-> Authors (each author will be inserted in its own generated `<span class="author"></span>` html tag)
-
-* `tags`
-
-> Tags/Categories (each tag will be inserted in its own generated `<span class="tag"></span>` html tag)
-
-* `date-stamp`
-
-> Date for the post.
-
-* `summary`
-
-> Summary text from the post
+The landing page entries (in `newest-posts` and `featured-posts`) use the index entry template.
 
 #### Post/Article page
 

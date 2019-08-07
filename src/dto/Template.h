@@ -11,7 +11,7 @@
 namespace blogator::dto {
     struct Template {
         enum class Type {
-            LANDING, LANDING_ENTRY, POST, INDEX, INDEX_ENTRY, INDEX_LIST
+            LANDING, POST, INDEX, INDEX_ENTRY, INDEX_LIST
         };
 
         explicit Template( Type template_type );

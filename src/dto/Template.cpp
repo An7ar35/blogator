@@ -18,17 +18,6 @@ blogator::dto::Template::Template( Template::Type template_type ) :
             } );
             break;
 
-        case Type::LANDING_ENTRY: //If this ever differs from INDEX_ENTRY or vice-versa look in the custom index entry caching (indexer::cacheCustomIndexEntry())
-            block_classes = Template::BlockInsertClasses_t( {
-                { "post-number", false },
-                { "heading",     false },
-                { "authors",     false },
-                { "tags",        false },
-                { "date-stamp",  false },
-                { "summary",     false }
-            } );
-            break;
-
         case Type::POST:
             block_classes = Template::BlockInsertClasses_t( {
                 { "breadcrumb",       false },

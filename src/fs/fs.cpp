@@ -132,12 +132,9 @@ std::shared_ptr<blogator::dto::Templates> blogator::fs::importTemplates( const d
 void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Templates &templates ) {
     auto &display  = cli::MsgInterface::getInstance();
 
-    display.begin( "Loading templates", 12, "landing page" );
+    display.begin( "Loading templates", 11, "landing page" );
     templates._landing->src        = master_index._paths.templates.landing;
     templates._landing->html       = fs::importHTML( templates._landing->src );
-    display.progress( "landing page entry" );
-    templates._landing_entry->src  = master_index._paths.templates.landing_entry;
-    templates._landing_entry->html = fs::importHTML( templates._landing_entry->src );
     display.progress( "post page" );
     templates._post->src           = master_index._paths.templates.post;
     templates._post->html          = fs::importHTML( templates._post->src );
@@ -208,7 +205,7 @@ void blogator::fs::importTemplateHTML( const dto::Index &master_index, dto::Temp
         templates._author_index = templates._index;
     }
 
-    display.progress( "index page entry" );
+    display.progress( "index entry" );
     templates._index_entry->src    = master_index._paths.templates.index_entry;
     templates._index_entry->html   = fs::importHTML( templates._index_entry->src );
     display.progress( "DONE" );
@@ -223,13 +220,9 @@ void blogator::fs::extractTemplateRelPaths( const dto::Index &master_index, dto:
     auto &display = cli::MsgInterface::getInstance();
     size_t total  = 0;
 
-    display.begin( "Extracting template rel. paths", 12, "landing page" );
+    display.begin( "Extracting template rel. paths", 11, "landing page" );
     templates._landing->path_write_pos = dto::Templates::extractRelativePaths( *templates._landing->html );
     total += templates._landing->path_write_pos.size();
-
-    display.progress( "landing page entry" );
-    templates._landing_entry->path_write_pos = dto::Templates::extractRelativePaths( *templates._landing_entry->html );
-    total += templates._landing_entry->path_write_pos.size();
 
     display.progress( "post page" );
     templates._post->path_write_pos = dto::Templates::extractRelativePaths( *templates._post->html );
@@ -279,7 +272,7 @@ void blogator::fs::extractTemplateRelPaths( const dto::Index &master_index, dto:
         total += templates._author_index->path_write_pos.size();
     }
 
-    display.progress( "index page entry" );
+    display.progress( "index entry" );
     templates._index_entry->path_write_pos   = dto::Templates::extractRelativePaths( *templates._index_entry->html );
     total += templates._index_entry->path_write_pos.size();
 
@@ -295,11 +288,8 @@ void blogator::fs::getConsecutiveWritePositions( const dto::Index &master_index,
     using html::reader::getConsecutiveWritePositions;
     auto &display = cli::MsgInterface::getInstance();
 
-    display.begin( "Locating insertion points", 12, "landing page" );
+    display.begin( "Locating insertion points", 11, "landing page" );
     templates._landing->block_write_pos = getConsecutiveWritePositions( *templates._landing->html, templates._landing->block_classes );
-
-    display.progress( "landing page entry" );
-    templates._landing_entry->block_write_pos = getConsecutiveWritePositions( *templates._landing_entry->html, templates._landing_entry->block_classes );
 
     display.progress( "post page" );
     templates._post->block_write_pos = getConsecutiveWritePositions( *templates._post->html, templates._post->block_classes );
@@ -334,7 +324,7 @@ void blogator::fs::getConsecutiveWritePositions( const dto::Index &master_index,
     if( !master_index._paths.templates.author_index.empty() )
         templates._author_index->block_write_pos = getConsecutiveWritePositions( *templates._author_index->html, templates._author_index->block_classes );
 
-    display.progress( "index page entry" );
+    display.progress( "index entry" );
     templates._index_entry->block_write_pos = getConsecutiveWritePositions( *templates._index_entry->html, templates._index_entry->block_classes );
 
     display.progress( "DONE" );
@@ -488,13 +478,9 @@ void blogator::fs::checkTemplateRelPaths( const dto::Index     &master_index,
         size_t total_count = 0;
         size_t valid_count = 0;
 
-        display.begin( "Validating template rel. paths", 12, "landing page" );
+        display.begin( "Validating template rel. paths", 11, "landing page" );
         valid_count += checkTemplateRelPaths( *templates._landing );
         total_count += templates._landing->path_write_pos.size();
-
-        display.progress( "landing page entry" );
-        valid_count += checkTemplateRelPaths( *templates._landing_entry );
-        total_count += templates._landing_entry->path_write_pos.size();
 
         display.progress( "post page" );
         valid_count += checkTemplateRelPaths( *templates._post );
@@ -544,7 +530,7 @@ void blogator::fs::checkTemplateRelPaths( const dto::Index     &master_index,
             total_count += templates._author_index->path_write_pos.size();
         }
 
-        display.progress( "index page entry" );
+        display.progress( "index entry" );
         valid_count += checkTemplateRelPaths( *templates._index_entry );
         total_count += templates._index_entry->path_write_pos.size();
 

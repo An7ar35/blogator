@@ -122,7 +122,6 @@ void blogator::indexer::indexStylesheets( const dto::Options &global_options, dt
  */
 void blogator::indexer::indexTemplates( const dto::Options &global_options, dto::Index &index ) {
     static const std::regex landing_rx       = std::regex( R"(^.*[\/\\]landing\.(?:html|htm)$)" );
-    static const std::regex landing_entry_rx = std::regex( R"(^.*[\/\\]landing_entry\.(?:html|htm)$)" );
     static const std::regex post_rx          = std::regex( R"(^.*[\/\\]post\.(?:html|htm)$)" );
     static const std::regex index_rx         = std::regex( R"(^.*[\/\\]index\.(?:html|htm)$)" );
     static const std::regex index_list_rx    = std::regex( R"(^.*[\/\\]index_list\.(?:html|htm)$)" );
@@ -143,8 +142,6 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
                 index._paths.templates.index = p.path();
             } else if( std::regex_match( path, landing_rx ) ) {
                 index._paths.templates.landing = p.path();
-            } else if( std::regex_match( path, landing_entry_rx ) ) {
-                index._paths.templates.landing_entry = p.path();
             } else if( std::regex_match( path, index_list_rx ) ) {
                 index._paths.templates.index_list = p.path();
             } else if( std::regex_match( path, year_list_rx ) ) {
@@ -170,10 +167,6 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
 
     if( index._paths.templates.landing.empty() ) {
         display.error( "Template missing: landing page" );
-        ++errors;
-    }
-    if( index._paths.templates.landing_entry.empty() ) {
-        display.error( "Template missing: landing entry" );
         ++errors;
     }
     if( index._paths.templates.post.empty() ) {

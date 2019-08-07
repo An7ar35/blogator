@@ -24,7 +24,6 @@ namespace blogator::dto {
         std::shared_ptr<Template> _author_index;  //Author index page template
         std::shared_ptr<Template> _index_entry;   //Index entry template
         std::unique_ptr<Template> _landing;       //Blog landing page (start) template
-        std::shared_ptr<Template> _landing_entry; //Landing page newest/featured posts entry template
 
         static ConsecutivePathPositions_t extractRelativePaths( HTML &source );
     };

@@ -23,7 +23,7 @@ blogator::output::page::Landing::Landing( std::shared_ptr<const dto::Index>     
     Page( std::move( master_index ),
                std::move( templates ),
                std::move( global_options ) ),
-    _entry_maker( generic::EntryWriter( _options, _templates->_landing_entry ) ),
+    _entry_maker( generic::EntryWriter( _options, _templates->_index_entry ) ),
     _breadcrumb_parents( BreadCrumb_t() )
 {}
 
@@ -35,11 +35,11 @@ blogator::output::page::Landing::Landing( std::shared_ptr<const dto::Index>     
 bool blogator::output::page::Landing::init() const {
     _display.begin( "Generating landing page", 1, "..." );
 
-    if( _templates->_landing->block_write_pos.empty() ||  _templates->_landing_entry->block_write_pos.empty() ) {
+    if( _templates->_landing->block_write_pos.empty() ||  _templates->_index_entry->block_write_pos.empty() ) {
         throw exception::failed_expectation(
-            "Missing insertion points in one or more of the landing page templates "
+            "Missing insertion points in one or more of the required landing page templates "
             "(Found: page=" + std::to_string( _templates->_landing->block_write_pos.size() ) +
-            ", entry=" + std::to_string( _templates->_landing_entry->block_write_pos.size() ) + ")."
+            ", entry=" + std::to_string( _templates->_index_entry->block_write_pos.size() ) + ")."
         );
     }
 

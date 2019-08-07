@@ -18,8 +18,8 @@ namespace blogator::output::page {
     class Indices : abstract::Page {
       public:
         Indices( std::shared_ptr<const dto::Index>     master_index,
-               std::shared_ptr<const dto::Templates> templates,
-               std::shared_ptr<const dto::Options>   global_options );
+                 std::shared_ptr<const dto::Templates> templates,
+                 std::shared_ptr<const dto::Options>   global_options );
 
         bool init() const;
 
