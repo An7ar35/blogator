@@ -62,7 +62,7 @@
 	padding: 0.5em;
 }
 
-.newest-posts > a .heading {
+.newest-posts > a .title {
 	margin-right: auto;
 	font-size: x-large;
 }
@@ -121,7 +121,7 @@
 .featured-posts > a .post-number { display: none; }
 .featured-posts > a .date-stamp  { padding: 0; }
 
-.featured-posts > a .heading {
+.featured-posts > a .title {
 	width: 100%;
 	padding: 0 0 0.25em 0;
 	margin-bottom: 0.25em;
@@ -151,12 +151,12 @@
 .featured-posts > a:hover .date-stamp,
 .featured-posts > a:hover .summary { color: black; }
 
-.featured-posts > a:hover .heading,
+.featured-posts > a:hover .title,
 .featured-posts > a:hover .post-number,
 .featured-posts > a:hover > p { color: teal; }
 
 .featured-posts > a:hover > p 	   { text-decoration: underline; }
-.featured-posts > a:hover .heading { border-bottom: solid 1px teal; }
+.featured-posts > a:hover .title { border-bottom: solid 1px teal; }
 
 
 /* Top lists */
@@ -417,7 +417,7 @@
 	padding: 0.5em;
 }
 
-.index-entries .heading {
+.index-entries .title {
 	margin-right: auto;
 	font-size: x-large;
 }

@@ -138,7 +138,7 @@ bool blogator::output::generic::EntryWriter::writeHtmlBlock( dto::Page &page,
         page._out << article._number;
         return false;
 
-    } else if( block_name == "heading" ) {
+    } else if( block_name == "title" ) {
         page._out << article._heading;
         return false;
 

@@ -40,7 +40,7 @@ blogator::dto::Template::Template( Template::Type template_type ) :
         case Type::INDEX_ENTRY:
             block_classes = Template::BlockInsertClasses_t( {
                 { "post-number", false },
-                { "heading",     false },
+                { "title",       false },
                 { "authors",     false },
                 { "tags",        false },
                 { "date-stamp",  false },
