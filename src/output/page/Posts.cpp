@@ -237,7 +237,7 @@ void blogator::output::page::Posts::writeContentDiv( dto::Page &page,
             //    <span class="post_number"></span> //TODO look into inserting number in the post in a future version?
         std::string line;
         while( getline( in, line ) )
-            page._out << indent << "\t" << line << std::endl;
+            page._out << line << std::endl;
 
         in.close();
 
@@ -258,8 +258,6 @@ void blogator::output::page::Posts::writeContentDiv( dto::Page &page,
         page._out << "\n";
         while( line._it != html->_lines.cend() ) {
             std::string::size_type col = 0;
-
-            page._out << indent << "\t";
 
             if( hasPath() ) {
 
