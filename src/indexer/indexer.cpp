@@ -635,7 +635,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
     const static auto author_tag  = std::make_pair<std::string, std::string>( "<span class=\"author\">", "</span>" );
     const static auto date_tag    = std::make_pair<std::string, std::string>( "<time datetime=\"", "\"" );
     const static auto tag_tag     = std::make_pair<std::string, std::string>( "<span class=\"tag\">", "</span>" );
-    const static auto code_tag    = std::make_pair<std::string, std::string>( "<code", "</code>" );
+    const static auto template_kw = std::make_pair<std::string, std::string>( "{{", "}}" ); //TODO
 
 //    const static auto heading_rx = std::regex( "<h1>\\s*(.*)\\s*</h1>" );
 //    const static auto date_rx    = std::regex( "<time datetime=\"(\\d{4})-(\\d{2})-(\\d{2})\">" );
@@ -704,7 +704,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
                     summary_range_pos.emplace_back( dto::SeekRange( start, finish ) );
                 }
 
-                article._summary.html           = fs::importHTML( article._paths.src_html, summary_range_pos );
+                article._summary.html = fs::importHTML( article._paths.src_html, summary_range_pos );
 
                 auto hrefs_count = html::editor::removeHyperlinks( article._summary.html );
 
