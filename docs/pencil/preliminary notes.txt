@@ -2,14 +2,27 @@ Source material
 ===============
 · File names are in order of publication
 · HTML content is correct (tags are closed)
-· Header:
-    -> open <body> and <html>
-· Footer:
-    -> closing </body> and </html>
 · CSS is already linked in header.html's head tags
 · All posts have a <h1> heading, <span class="tag">..</span>, and <time timedate="YYY-MM-DD...">..</time>
 
+· There can only be 1 Insertion tags per line in the templates
+  "Templates file must keep to 1 insertion tag per line. No more.*"
+    "*If and when I get time in the future I might do something about continuous insertion points on a single line"
+· Index entries are nested into a <a></a> tag that links back to the post
 
+things you cannot do in the source posts/templates
+· HTML Tag nesting in source and injection points. keep it clean
+· multi-line, multi-classed blogator source tags in source posts
+· Unclosed tags
+
+Character codes (like HTML emojis/UTF greek...) are copied properly but wide character support is not at the moment. I.e.:
+As long as the character codes are used it should output to the generated files properly.
+Officially support is for English. Unofficially, I'm happy to receive sample html files with different character sets and if/when
+I get some time I'll look into expanding support for these. As this project is mostly for helping me with a side-gig and my personal
+website it was not a priority during development.
+· Each author must be in its own <span class="author"></span> tag. An author tag must be opened and closed on the same line.
+
+*_entry.html -> put summary in a <p></p> and whatever is inside will be copied into any index/landing/rss description (summary)
 
 Running the generator
 =====================
@@ -18,17 +31,16 @@ Running the generator
 · Index pane orders dates in descending order
 · Index pane orders tags in alphabetical order
 
-
-
-Notes
-=====
-Tags for page-per-page navigation:
-    <a rel="prev" href=""></a>
-    <a rel="next" href=""></a>
-
-
-
 Future
 ======
-· Localised months from text file with <K,V>=<month number, month string>
 · Add JS extension for page navigation ('select' box for page numbers?) that can work when JS is available?
+· Use collation (http://userguide.icu-project.org/collation/api) for sorting in the future along with wstring?
+
+Sources
+=======
+Pure CSS tree menu: https://www.thecssninja.com/css/css-tree-menu
+
+
+"/<([\w]+)[^>]*>(.*?)<\/\1>/"
+
+(<h1\s*)?(?:class\s*[=]\s*"\s*(heading){1}?.*["]\s*)*(?:>)?((?:\s*)(.+?)(?:\s*))<\/h1>?

@@ -1,0 +1,461 @@
+/* ===[ Blogator example: blogator stylesheet ]=== */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* All the Blogator-specific class styles          */
+/* Written by An7ar35 (an7ar35.bitbucket.io)       */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* =======================================BREADCRUMB ============================================ */
+.breadcrumb {
+	margin-right: auto;
+	padding: 0;
+}
+
+.breadcrumb ul {
+	padding: 0.5em;
+	list-style: none;
+	background-color: var( --bckgrd );
+}
+
+.breadcrumb ul li {
+	display: inline;
+	font-size: large;
+}
+
+.breadcrumb ul li+li:before {
+	padding: 0 0.2em;
+	color: black;
+	font-weight: bolder;
+	content: "/\00a0"; /* slash '/' symbol */
+}
+
+.breadcrumb ul li a 	  { text-decoration: none; }
+.breadcrumb ul li a:hover { text-decoration: underline; }
+
+/* ======================================= LANDING PAGE ========================================= */
+/* Newest Posts Feed */
+.newest-posts 		  { margin: 0 0 1em 0; }
+.newest-posts a div * { padding: 0.5em; }
+
+.newest-posts > a {
+	text-decoration: none;
+	color: black;
+	display: block;
+	margin: 1em 0;
+	background-color: white;
+}
+
+.newest-posts > a > p {
+	display: inline-block;
+	margin: auto;
+}
+
+.newest-posts > a div  {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: baseline;
+}
+
+.newest-posts > a .post-number {
+	font-size: x-large;
+	text-align: center;
+	padding: 0.5em;
+}
+
+.newest-posts > a .title {
+	margin-right: auto;
+	font-size: x-large;
+}
+
+.newest-posts > a .date-stamp { margin-left: auto; }
+
+.newest-posts > a .tags	{
+	margin-left: auto;
+	padding: 0;
+	font-family: monospace;
+	color: #0275d8;
+}
+
+.newest-posts > a .authors:before {
+	content: "By ";
+	padding-left: 0.5em;
+}
+
+.newest-posts > a .authors {
+	margin-right: auto;
+	padding: 0;
+	font-style: italic;
+}
+
+.newest-posts > a .summary {
+	display: block;
+	border-top: var( --bckgrd ) solid 1px;
+}
+
+.newest-posts > a:hover .date-stamp,
+.newest-posts > a:hover .authors { color: black; }
+
+.newest-posts > a:hover > p { text-decoration: underline; }
+
+.newest-posts > a:hover .summary {
+	color: black;
+	border-top: solid 1px teal;
+}
+
+
+/* Pinned/Featured posts */
+.featured-posts > a {
+	margin: 0 0.5em 0.5em 0.5em;
+	text-decoration: none;
+	color: black;
+	display: block;
+}
+
+.featured-posts > a div {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: baseline;
+}
+
+.featured-posts > a .post-number { display: none; }
+.featured-posts > a .date-stamp  { padding: 0; }
+
+.featured-posts > a .title {
+	width: 100%;
+	padding: 0 0 0.25em 0;
+	margin-bottom: 0.25em;
+	border-bottom: 1px solid var( --bckgrd );
+}
+
+.featured-posts > a .tags {
+	display: none;
+	padding: 0;
+	margin-left: auto;
+	font-family: monospace;
+	color: #0275d8;
+}
+
+.featured-posts > a .authors {
+	display: none;
+	padding: 0;
+	font-style: italic;
+}
+
+.featured-posts > a > p,
+.featured-posts > a .summary > p {
+	padding: 0.5em 0;
+	margin: 0;
+}
+
+.featured-posts > a:hover .date-stamp,
+.featured-posts > a:hover .summary { color: black; }
+
+.featured-posts > a:hover .title,
+.featured-posts > a:hover .post-number,
+.featured-posts > a:hover > p { color: teal; }
+
+.featured-posts > a:hover > p 	   { text-decoration: underline; }
+.featured-posts > a:hover .title { border-bottom: solid 1px teal; }
+
+
+/* Top lists */
+.top-tags ul, .top-authors ul {
+	padding: 0 0.5em;
+	list-style: none;
+}
+
+
+/* ============================================ POSTS =========================================== */
+/* Post/Article contents */
+.post-content { background: white; }
+
+.post-content > div > div {
+	padding-bottom: 0.5em;
+	border-bottom: 4px solid var( --bckgrd );
+}
+.post-content h1 {
+	padding: 0.5em;
+	margin-bottom: 0.5em;
+	border-bottom: 1px solid black;
+	background-color: black;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-size: large;
+	font-weight: normal;
+	color: white;
+}
+
+.post-content time { padding: 0 0.5em; }
+
+.post-content .tag {
+	display: none;
+	margin-left: auto;
+	font-family: monospace;
+	color: #0275d8;
+}
+
+.post-content .author {
+	padding: 0 0.5em;
+	font-style: italic;
+	color: gray;
+	float: right;
+	text-align: right;
+}
+
+.post-content .summary {}
+.post-content p 	   { line-height: 1.5em; }
+
+.post-content img {
+	height: auto;
+	max-width: 50%;
+	float: left;
+	margin: 0.5em;
+}
+
+.post-content img:nth-of-type( even ) { float: left; }
+.post-content img:nth-of-type( odd ) { float: right; }
+
+@media screen and ( max-width: 800px ) {
+	.post-content img {
+		max-width: 100%;
+		margin: 0.5em 0;
+	}
+}
+
+/* Date/Tag Trees */
+.index-pane-dates {}
+.index-pane-tags  {}
+
+.tree {
+	padding: 0.5em;
+	line-height: 1.5em;
+}
+
+.tree li {
+	list-style: none;
+	width: 100%;
+	display: inline-block;
+}
+
+.tree .current-post 		 { font-weight: bold; }
+.tree label, .tree input	 { cursor: pointer; }
+.tree li > input + * 		 { display: none; }
+.tree li > input:checked + * { display: block; }
+.tree li > input 			 { display: none; }
+.tree li > label 			 { font-weight: normal; }
+
+.tree > li > ol > li:before,
+.tree > li > ol > li > ol > li:before {
+	padding-right: 0.2em;
+	content: "\251C";
+}
+
+.tree > li > ol > li:not:last-child > ol > li:before { content: "\251C"; }
+.tree > li > ol > li:last-child:before  		 	 { content: "\2514"; }
+.tree > li > ol > li > ol > li 						 { padding-left: 1.2em; }
+.tree > li > ol > li > ol > li:last-child:before 	 { content: "\2514"; }
+
+.tree > li > ol > li:before {
+	padding-right: 0.2em;
+	padding-left: 0.4em;
+}
+
+.tree ol li a {
+	padding-right: 0.4em;
+	padding-left: 0.4em;
+}
+
+
+/* ========================================== INDEX LIST ======================================== */
+.index-list-flat 		 { background-color: white; }
+.index-list-flat ul      { list-style: none; display: inline-flex; }
+.index-list-flat ul > li {}
+
+.index-list-flat ul > li:before {
+	content: "\25FE";
+	padding-right: 0.5em;
+}
+
+.index-list-hierarchy { background-color: white; }
+
+.index-list-hierarchy > ul {
+	column-count: 2;
+	padding: 0.5em;
+	column-gap: 2em;
+	list-style: none;
+}
+
+@media screen and ( max-width: 800px ) {
+	.index-list-hierarchy > ul {
+		column-count: 1;
+	}
+}
+
+.index-list-hierarchy ul > li,
+.index-list-hierarchy ul > li > ul > li {
+	width: 100%;
+	display: inline-block;
+}
+
+.index-list-hierarchy > ul > li { width: 100%; }
+
+.index-list-hierarchy > ul > li > a {
+	width: 100%;
+	line-height: 2em;
+	color: white;
+	display: inline-block;
+}
+
+.index-list-hierarchy ul > li > ul {
+	list-style: none;
+	line-height: 2em;
+}
+
+.index-list-hierarchy ul > li > h3,
+.index-list-hierarchy ul > li > a > h3 {
+	width: auto;
+	background-color: teal;
+	border: 1px solid teal;
+	color: white;
+	font-weight: normal;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+}
+
+.index-list-hierarchy > ul > li > a:hover > h3 {
+	color: teal;
+	background-color: white;
+	border: 1px solid teal;
+}
+
+.index-list-hierarchy ul > li > ul > li:before {
+	content: "\25FE";
+	padding-right: 0.5em;
+}
+
+
+/* ================================ POST & INDEX LIST PAGE NAMES ================================ */
+.page-name {
+	background-color: white;
+	padding: 0.5em;
+	margin: 0.5em 0;
+	border-bottom: 1px solid black;
+}
+
+
+/* ============================== INDEX & POST PER-PAGE NAVIGATION ============================== */
+.page-nav { background-color: white; }
+
+.page-nav ul {
+	padding: 0 0.5em;
+	margin: 0;
+	list-style: none;
+	font-size: large;
+	text-align: center;
+}
+
+.page-nav ul li { display: inline; }
+
+.page-nav ul li a {
+	display: inline-block;
+	width: 1.5em;
+	height: 1.5em;
+	text-decoration: none;
+	margin: 0 0.1em;
+	font-size: x-large;
+	color: teal;
+	background: white;
+}
+
+.page-nav ul li a:hover {
+	color: white;
+	background: teal;
+}
+
+.page-nav ul li .curr {
+	display: inline-block;
+	padding: 0 1em;
+	font-weight: bolder;
+}
+
+.page-nav ul li .disabled { color: grey; }
+
+.page-nav ul li .disabled:hover {
+	color: grey;
+	background: white;
+}
+
+
+/*================================ INDICES ==================================*/
+.index-entries {}
+
+.index-entries a {
+	margin: 1em 0 0 0;
+	padding: 0.5em;
+	text-decoration: none;
+	color: black;
+	display: block;
+	background-color: white;
+}
+
+.index-entries > a > p {
+	display: inline-block;
+	margin: auto;
+}
+
+.index-entries > a div  {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: baseline;
+}
+
+.index-entries .post-number {
+	font-size: x-large;
+	text-align: center;
+	padding: 0.5em;
+}
+
+.index-entries .title {
+	margin-right: auto;
+	font-size: x-large;
+}
+
+.index-entries .date-stamp {
+	color: black;
+	margin-left: auto;
+	padding: 0 0.5em;
+}
+
+.index-entries .authors:before {
+	content: "By ";
+	padding-left: 0.5em;
+	padding-right: 0.25em;
+}
+
+.index-entries .authors {
+	margin-right: auto;
+	padding: 0;
+	color: black;
+	font-style: italic;
+}
+
+.index-entries .tags {
+	margin-left: auto;
+	padding: 0 0.5em;
+	font-family: monospace;
+	color: #0275d8;
+}
+
+.index-entries .summary {
+	display: block;
+	border-top: var( --bckgrd ) solid 1px;
+}
+
+.index-entries > a:hover > p { text-decoration: underline; }
+
+.index-entries > a:hover .summary {
+	color: black;
+	border-top: solid 1px teal;
+}
