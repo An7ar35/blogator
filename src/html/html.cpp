@@ -87,7 +87,7 @@ std::string blogator::html::createDateTime( const blogator::dto::DateStamp & dat
     ss << "<time ";
     if( !css_class.empty() )
         ss << "class=\"" << css_class << "\" ";
-    ss << "datetime=\"" << date_stamp._year << "-" << date_stamp._month << "-" << date_stamp._day << "\">"
+    ss << "datetime=\"" << date_stamp << "\">"
        << date_stamp._day << " " << months.at( date_stamp._month ) << " " << date_stamp._year
        << "</time>";
 

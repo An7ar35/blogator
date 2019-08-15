@@ -16,7 +16,13 @@ namespace blogator::dto {
         unsigned _day;
 
         friend std::ostream &operator <<( std::ostream &s, const DateStamp &stamp ) {
-            s << stamp._day << "/" << stamp._month << "/" << stamp._year;
+            s << stamp._year << "-";
+            if( stamp._month < 10 )
+                s << 0;
+            s << stamp._month << "-";
+            if( stamp._day < 10 )
+                s << 0;
+            s << stamp._day;
             return s;
         }
 
