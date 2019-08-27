@@ -49,13 +49,22 @@ well as some debugging skills. The software will not sanitise/check your HTML/CS
 
 A basic blog example with templates is included in the `/resources/example/` directory. Just run Blogator on it to generate everything.
 
+## Building
+
+If you just want to build the application without installing it:
+
+* First clone the repo inside the directory where you want it to reside then
+* `cd blogator`
+* `cmake .`
+* `cmake --build .`
+
+You will find the executable inside the `build/` folder.
+
 ## Installing
 
-#### On Arch
-//TODO
+#### On Arch Linux
+//TODO in the future...
 
-#### Other
-//TODO
 
 ## CLI arguments
 

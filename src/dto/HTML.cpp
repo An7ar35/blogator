@@ -43,7 +43,7 @@ size_t blogator::dto::HTML::findLineOfTag( const std::string & tag ) {
     if( tag.empty() )
         throw std::invalid_argument( "No tag was given." );
 
-    for( auto i = 0; i < _lines.size(); ++i ) {
+    for( size_t i = 0; i < _lines.size(); ++i ) {
         auto pos = _lines.at( i ).find( tag );
         if( pos != std::string::npos )
             return i;

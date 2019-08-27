@@ -21,7 +21,7 @@
 blogator-tags  = false; //TODO special tag->relative path replacer based on certain key pages expressed in {TAG} form (e.g.: "{DATE-LATEST-PAGE}"
 canonify-urls  = false; //TODO true: modify all relative URLs found in the posts/templates to absolute paths with the site's URL as root,
 
-
+· TOC create table of content based on headings (h2,h3,h4) and insert numbering
 
 ===[ V2 ]===
 · Hash & cache articles. Then check hash on run to make sure article hasn't been changed

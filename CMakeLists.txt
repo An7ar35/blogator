@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(blogator)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
@@ -11,40 +18,6 @@ set(CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(TEMP_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tmp")
 
 include(ExternalProject)
-
-#####################
-# EADLIB dependency #
-#####################
-set(EADLIB_RELEASE_URL "https://github.com/An7ar35/eadlib/releases/download/v0.1.3a/eadlib.tar.gz")
-set(EADLIB_RELEASE_MD5 "7418adcd9b942f68315c4c86ea6a571a")
-set(EADLIB_TAR_FILENAME "eadlib.tar.gz")
-set(EADLIB_DOWNLOAD_PATH "${CMAKE_EXTERNAL_OUTPUT_DIRECTORY}/${EADLIB_TAR_FILENAME}")
-set(EADLIB_EXTRACTED_FILEPATH "${CMAKE_EXTERNAL_OUTPUT_DIRECTORY}/eadlib")
-
-if(NOT EXISTS ${EADLIB_EXTRACTED_FILEPATH})
-    message(">> EADlib dependency missing. Downloading...")
-
-    file(DOWNLOAD "${EADLIB_RELEASE_URL}" "${EADLIB_DOWNLOAD_PATH}"
-            STATUS status
-            #SHOW_PROGRESS 1
-            EXPECTED_MD5 ${EADLIB_RELEASE_MD5})
-
-    list(GET status 0 status_code)
-    if(NOT status_code EQUAL 0)
-        message(FATAL_ERROR "Could not download EADlib dependency package.")
-    else()
-        message(">> EADlib package downloaded.")
-        file(MAKE_DIRECTORY ${EADLIB_EXTRACTED_FILEPATH})
-    endif()
-
-    execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xzf ${EADLIB_DOWNLOAD_PATH}
-            WORKING_DIRECTORY ${EADLIB_EXTRACTED_FILEPATH})
-
-    file(REMOVE ${EADLIB_DOWNLOAD_PATH})
-else()
-    message("Found EADLIB dependency folder.")
-endif()
 
 ##########################
 # Blogator Source Files #
@@ -142,7 +115,7 @@ if( NOT GTEST_FOUND )
             CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${GTEST_DOWNLOAD_PATH})
 
     include_directories(${GTEST_DOWNLOAD_PATH}/include)
-    link_directories(${GTEST_DOWNLOAD_PATH}/lib)
+    link_directories(${GTEST_DOWNLOAD_PATH}/lib64)
 else()
     message(">> GoogleTest package found. Using local version.")
     include_directories(${GTEST_INCLUDE_DIRS})
@@ -165,9 +138,11 @@ add_executable(
 
 if( NOT GTEST_FOUND )
     add_dependencies(blogator_tests googletest)
+    target_link_libraries(blogator_tests gtest)
+else()
+    target_link_libraries(blogator_tests gtest)
 endif()
 
-target_link_libraries(blogator_tests gtest)
 add_test(blogator_tests ${TEST_FILES})
 
 ############
