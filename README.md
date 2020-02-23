@@ -539,10 +539,12 @@ Officially only english is supported for the moment but your mileage in differen
 languages/character sets may vary. I had no problem generating for a french language 
 based site with all the wonderful `é` `ê` `è` `ç` types of characters that come with it. :)
 
-**TL/DR: `UTF-8` should not pose a problem but `UTF-16` will.** 
+**TL/DR: `UTF-8` should not pose a problem on Linux but `UTF-16` (and/or Windows) will.** 
 
-`UTF-16` is something that might be supported in version `2.0` if it gets to that. I do not 
-plan to deal with this for any `1.x` versions.
+~~`UTF-16` is something that might be supported in version `2.0` if it gets to that. I do not 
+plan to deal with this for any `1.x` versions.~~
+
+__Edit__: after some reflection and research on the whole character encoding subject I have decided not to bother with Windows and `UTF16` support. Character encoding conversion without an external library (like [ICU](http://site.icu-project.org/)) is going to be such a time sink I'm not going to bother. So, `UTF8`/Linux only going forward.
 
 #### Platform/Requirements
 
