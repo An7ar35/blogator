@@ -10,15 +10,13 @@
 /**
  * Initialise configuration file reader/import
  * @param file_path Configuration file path
- * @param info      Software information
  * @return Option DTO with all the config file options loaded in
  * @throws exception::file_access_failure when config file could not be accessed
  */
-std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const std::filesystem::path &file_path,
-                                                                          const dto::BlogatorInfo &info ) const
+std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const std::filesystem::path &file_path ) const
 {
     auto &display = cli::MsgInterface::getInstance();
-    auto options  = std::make_shared<blogator::dto::Options>( info );
+    auto options  = std::make_shared<blogator::dto::Options>();
     auto map      = std::unordered_map<std::string, Value>();
     std::stringstream ss;
 

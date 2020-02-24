@@ -123,6 +123,12 @@ void blogator::output::feed::RSS::writeItems( std::ofstream &file ) const {
             file << "\t\t\t<category>" << tag << "</category>\n";
         }
 
+        file << "\t\t\t<description>";
+        for( const auto &line : article_it->_summary.html._lines ) {
+            file << line;
+        }
+        file << "</description>\n";
+
         file << "\t\t</item>\n";
 
         ++article_it;

@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.14)
-project(blogator)
+project(blogator VERSION 1.1.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
+
+set(PROJECT_AUTHOR "An7ar35")
+set(PROJECT_HOMEPAGE_URL "https://an7ar35.bitbucket.io")
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
@@ -44,7 +47,6 @@ set(SOURCE_FILES
         src/dto/IndexTagTree.h
         src/dto/Page.h
         src/dto/Line.h
-        src/dto/BlogatorInfo.h
         src/dto/SeekRange.h
         src/dto/InsertPosition.h
         src/exception/file_access_failure.h
@@ -98,6 +100,10 @@ set(SOURCE_FILES
         src/html/editor/code/code.h
         src/html/editor/editor.cpp
         src/html/editor/editor.h)
+
+
+configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
+include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
 
 #####################
 # Google Unit-Tests #

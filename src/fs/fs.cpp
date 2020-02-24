@@ -16,10 +16,9 @@
  * @param info      Software information
  * @return Options DTO
  */
-std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path,
-                                                                     const dto::BlogatorInfo &info ) {
+std::shared_ptr<blogator::dto::Options> blogator::fs::importOptions( const std::filesystem::path &file_path ) {
     auto reader = ConfigReader();
-    return reader.init( file_path, info );
+    return reader.init( file_path );
 }
 
 /**
