@@ -10,7 +10,7 @@
 #include "../dto/HTML.h"
 
 namespace blogator::fs {
-    std::shared_ptr<dto::Options> importOptions( const std::filesystem::path &file_path, const dto::BlogatorInfo &info );
+    std::shared_ptr<dto::Options> importOptions( const std::filesystem::path &file_path );
     void setupEnvironment( const std::shared_ptr<dto::Options>& global_options );
 
     uintmax_t purge( const dto::Options &options );

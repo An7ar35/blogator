@@ -5,8 +5,7 @@
  * Constructor
  * @param info Software information
  */
-blogator::dto::Options::Options( dto::BlogatorInfo info ) :
-    BLOGATOR_INFO( std::move( info ) ),
+blogator::dto::Options::Options() :
     RUN_TIMESTAMP( std::chrono::system_clock::now() )
 {}
 
@@ -46,7 +45,7 @@ void blogator::dto::Options::setTempPath( const std::filesystem::path &temp_path
  * @return Software name
  */
 std::string blogator::dto::Options::getSoftwareNameStr() const {
-    return BLOGATOR_INFO._name;
+    return "Blogator";
 }
 
 /**
@@ -54,7 +53,7 @@ std::string blogator::dto::Options::getSoftwareNameStr() const {
  * @return Software version
  */
 std::string blogator::dto::Options::getSoftwareVersionStr() const {
-    return BLOGATOR_INFO._version;
+    return blogator::cmake::VERSION;
 }
 
 /**
@@ -62,7 +61,9 @@ std::string blogator::dto::Options::getSoftwareVersionStr() const {
  * @return Signature string
  */
 std::string blogator::dto::Options::getSoftwareSignatureStr() const {
-    static const auto str = "<!-- Generated with " + BLOGATOR_INFO._name + " " + BLOGATOR_INFO._version + " (" + BLOGATOR_INFO._url + ") -->";
+    using blogator::cmake::VERSION;
+    using blogator::cmake::URL;
+    static const auto str = "<!-- Generated with Blogator " + VERSION + " (" + URL + ") -->";
     return str;
 }
 

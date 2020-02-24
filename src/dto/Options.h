@@ -10,14 +10,15 @@
 #include <chrono>
 #include <ctime>
 
+#include "project_version.h" //Generated from CMake
+
 #include "DateStamp.h"
-#include "BlogatorInfo.h"
 
 namespace blogator::dto {
     struct Options {
         typedef std::unordered_map<unsigned, std::string> MonthStringLookup_t;
 
-        explicit Options( BlogatorInfo info );
+        Options();
 
         void setupAbsolutePaths( const std::filesystem::path & root_path );
         void setTempPath( const std::filesystem::path &temp_path );
@@ -29,8 +30,6 @@ namespace blogator::dto {
         const DateStamp & getRuntimeDateStamp() const;
 
         //==========================================================================================
-
-        const BlogatorInfo BLOGATOR_INFO;
 
         struct AbsPaths { //Absolute directory paths
             std::filesystem::path temp_dir;         //system's temporary directory path + /blogator
