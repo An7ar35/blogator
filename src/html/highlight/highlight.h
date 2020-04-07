@@ -1,7 +1,8 @@
-#ifndef BLOGATOR_HTML_EDITOR_CODE_H
-#define BLOGATOR_HTML_EDITOR_CODE_H
+#ifndef BLOGATOR_HTML_HIGHLIGHT_H
+#define BLOGATOR_HTML_HIGHLIGHT_H
 
-namespace blogator::html::editor::code { //TODO syntax highlighter
+
+namespace blogator::html::highlight { //TODO syntax highlighter
     //Need to lift any snippet (between tags like <code class="code-snippet"></code> - let's assume non-html for the moment)
     //All lifted (cached) snippets need to be cached along with their article ref and insertion point/range in the source post
     //on output, any cached code need to be processed by the highlighter (essentially putting formatting tags around keywords) and written out as a block
@@ -13,6 +14,9 @@ namespace blogator::html::editor::code { //TODO syntax highlighter
     //idea: https://www.freeformatter.com/html-escape.html
     //how-to: https://www.taniarascia.com/adding-syntax-highlighting-to-code-snippets/
     //        https://idiallo.com/blog/javascript-syntax-highlighter
+    // https://github.com/highlightjs/highlight.js/blob/master/src/languages/c-like.js
+    // https://github.com/highlightjs/highlight.js/blob/master/src/highlight.js
 }
 
-#endif //BLOGATOR_HTML_EDITOR_CODE_H
+
+#endif //BLOGATOR_HTML_HIGHLIGHT_H

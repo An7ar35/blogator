@@ -96,10 +96,10 @@ set(SOURCE_FILES
         src/output/page/ByAuthorList.h
         src/output/feed/RSS.cpp
         src/output/feed/RSS.h
-        src/html/editor/code/code.cpp
-        src/html/editor/code/code.h
         src/html/editor/editor.cpp
-        src/html/editor/editor.h)
+        src/html/editor/editor.h
+        src/html/highlight/highlight.cpp
+        src/html/highlight/highlight.h)
 
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
@@ -132,7 +132,9 @@ set(TEST_FILES
         tests/html/reader/reader.cpp
         tests/dto/DateStamp.cpp
         tests/dto/Templates.cpp
-        tests/fs/fs.cpp tests/html/editor/editor.cpp tests/dto/HTML.cpp)
+        tests/fs/fs.cpp
+        tests/html/editor/editor.cpp
+        tests/dto/HTML.cpp)
 
 enable_testing()
 
