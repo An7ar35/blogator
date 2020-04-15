@@ -120,6 +120,34 @@ blogator::dto::HTML blogator::html::createBreadcrumb( const blogator::html::Brea
 }
 
 /**
+ * Converts a filepath into a valid HTML URL path
+ * @param path Path
+ * @return URL path string
+ */
+std::string blogator::html::encodePathToURL( const std::filesystem::path &path ) {
+    static const auto encode_map = std::map<char, std::string>( {
+        { ' ',  "%20" },
+        { '\'', "%27" },
+        { '?',  "%3F" },
+        { '%',  "%25" },
+        { '#',  "%23" },
+        { '[',  "%5B" },
+        { ']',  "%5D" }
+    } );
+
+    std::stringstream ss;
+
+    for( const auto &c : path.string() ) {
+        auto it = encode_map.find( c );
+        it != encode_map.cend() ? ss << it->second
+                                : ss << c;
+    }
+
+    return ss.str();
+}
+
+
+/**
  * Generates the HTML for the By-Date section of the index pane
  * @param master_index Index DTO
  * @param options      Options DTO

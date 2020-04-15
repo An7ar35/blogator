@@ -119,7 +119,7 @@ void blogator::output::page::Landing::writeTemplateLine( dto::Page       &page,
 
         } else { //do the path first
             page._out << line._it->substr( col, insert_it.path->first.col - col )
-                      << fs::adaptRelPath( _index->_paths.templates.landing, page._abs_path, insert_it.path->second.string() ).string();
+                      << html::encodePathToURL( fs::adaptRelPath( _index->_paths.templates.landing, page._abs_path, insert_it.path->second.string() ).string() );
 
             col = insert_it.path->first.col;
             ++insert_it.path;
@@ -137,8 +137,7 @@ void blogator::output::page::Landing::writeTemplateLine( dto::Page       &page,
 
     while( hasPath() ) { //just path(s) left to insert
         page._out << line._it->substr( col, insert_it.path->first.col - col )
-                  << fs::adaptRelPath( _index->_paths.templates.landing, page._abs_path,
-                                       insert_it.path->second.string() ).string();
+                  << html::encodePathToURL( fs::adaptRelPath( _index->_paths.templates.landing, page._abs_path, insert_it.path->second.string() ).string() );
 
         col = insert_it.path->first.col;
         ++insert_it.path;
