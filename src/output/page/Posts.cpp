@@ -2,9 +2,7 @@
 
 #include "Posts.h"
 
-#include <utility>
 #include <iostream>
-#include <fstream>
 #include <stack>
 #include <functional>
 
@@ -24,8 +22,8 @@ blogator::output::page::Posts::Posts( std::shared_ptr<const dto::Index>     mast
                                       std::shared_ptr<const dto::Templates> templates,
                                       std::shared_ptr<const dto::Options>   global_options  ) :
     Page( std::move( master_index ),
-               std::move( templates ),
-               std::move( global_options ) ),
+          std::move( templates ),
+          std::move( global_options ) ),
     _breadcrumb_parents( { { _options->_breadcrumb.start, "../index.html" },
                            { _options->_breadcrumb.by_date, "../index/by_date/0.html" } } )
 {
