@@ -129,7 +129,6 @@ std::string blogator::html::encodePathToURL( const std::filesystem::path &path )
         { ' ',  "%20" },
         { '\'', "%27" },
         { '?',  "%3F" },
-        { '%',  "%25" },
         { '#',  "%23" },
         { '[',  "%5B" },
         { ']',  "%5D" }
