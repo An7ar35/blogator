@@ -404,6 +404,29 @@ is after the day of the build (i.e. when generator is run).
   development/preview purposes. This will modify them based on the target html file location it 
   is used to generate. Absolute paths (inc those that start with a `/`) will not be touched.
     
+    toc-auto-generate = 0;
+    
+> Specify levels of headings from `0` to `3` to be used for generating a table of content in posts
+  that include `<div class="auto-toc"></div>`. `0` turns off the feature. E.g.: `3` will generate a
+  TOC that include all headings `<h2>`, `<h3>` and `<h4>` found in the post. Max value = 6;
+
+    toc-level-offset = 1;
+    
+> Specify the heading offset for the ToC. Max value = 5. E.g.: When offset = 1, the H2 headings will 
+  be treated as first level headings, H3 as second level, etc...
+ 
+    toc-auto-numerate = true;
+          
+> Enables auto numbering for the ToC. Numbering will be applied to both the ToC and the matching 
+  headings in the text. 
+    
+    toc-heading = "<h2>Table of Contents</h2>"
+    
+> Specifies a heading line to be inserted within the ToC block for all auto-generated Tables of Contents.
+  The line will be inserted just before the "<ol></ol>" listing for the headings. Leave the double
+  quotation marks empty if no heading line should be inserted.
+      
+      
 #### Index
 
     show-post-numbers = true;

@@ -9,7 +9,7 @@
 namespace blogator::fs {
     class ConfigReader {
       public:
-        std::shared_ptr<blogator::dto::Options> init( const std::filesystem::path &file_path ) const;
+        [[nodiscard]] std::shared_ptr<blogator::dto::Options> init( const std::filesystem::path &file_path ) const;
 
         static void generateBlankConfigFile( const std::filesystem::path &file_path );
 

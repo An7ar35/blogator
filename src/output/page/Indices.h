@@ -21,7 +21,7 @@ namespace blogator::output::page {
                  std::shared_ptr<const dto::Templates> templates,
                  std::shared_ptr<const dto::Options>   global_options );
 
-        bool init() const;
+        [[nodiscard]] bool init() const;
 
       private:
         generic::EntryWriter _entry_maker;

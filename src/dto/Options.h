@@ -91,6 +91,18 @@ namespace blogator::dto {
             bool safe_purge      = true;
             bool adapt_rel_paths = false;
 
+            struct ToC {
+                int         generate_toc = 0;
+                int         level_offset = 1;
+                bool        numbering    = true;
+                std::string heading      = "<h2>Table of Contents</h2>";
+
+            } toc;
+
+            struct CSS {
+                std::string toc = "auto-toc"; //Table of Contents
+            } block_classes;
+
         } _posts;
 
         struct Index {
