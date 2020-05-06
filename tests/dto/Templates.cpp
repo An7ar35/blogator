@@ -39,7 +39,7 @@ TEST( Template_tests, extractRelativePaths2 ) {
     ASSERT_EQ( "css/main.css", r1->second );
     auto r2 = std::next( r1 );
     ASSERT_EQ( 0, r2->first.line );
-    ASSERT_EQ( 106, r2->first.col );
+    ASSERT_EQ( 94, r2->first.col );
     ASSERT_EQ( "css/landing.css", r2->second );
 }
 
@@ -65,7 +65,7 @@ TEST( Template_tests, extractRelativePaths3 ) {
     ASSERT_EQ( "css/main.css", r1->second );
     auto r2 = std::next( r1 );
     ASSERT_EQ( 3, r2->first.line );
-    ASSERT_EQ( 106, r2->first.col );
+    ASSERT_EQ( 94, r2->first.col );
     ASSERT_EQ( "css/landing.css", r2->second );
 }
 
