@@ -4,6 +4,32 @@
 #include <stack>
 
 /**
+ * Constructor
+ * @param hTag        Heading tag level
+ * @param heading_txt Heading text
+ */
+blogator::dto::TableOfContents::Heading::Heading( TableOfContents::HeadingLevel hTag,
+                                                  std::string heading_txt ) :
+    level( hTag ),
+    str( std::move( heading_txt ) ),
+    str_pos( dto::InsertPosition( 0, 0 ) )
+{}
+
+/**
+ * Constructor
+ * @param hTag        Heading tag level
+ * @param heading_txt Heading text
+ * @param heading_pos Heading insert position
+ */
+blogator::dto::TableOfContents::Heading::Heading( TableOfContents::HeadingLevel hTag,
+                                                  std::string heading_txt,
+                                                  dto::InsertPosition heading_pos ) :
+    level( hTag ),
+    str( std::move( heading_txt ) ),
+    str_pos( heading_pos )
+{}
+
+/**
  * Heading formatted printer helper function
  * @return Heading as a formatted string
  */
@@ -25,6 +51,20 @@ std::string blogator::dto::TableOfContents::Heading::printID() const {
         ss << *it;
         if( it != std::prev( numbering.cend() ) )
             ss << "_";
+    }
+    return ss.str();
+}
+
+/**
+ * Heading numbering printer helper function
+ * @return Heading number as a formatted string
+ */
+std::string blogator::dto::TableOfContents::Heading::printNumbering() const {
+    std::stringstream ss;
+    for( auto it = numbering.cbegin(); it != numbering.cend(); ++it ) {
+        ss << *it;
+        if( it != std::prev( numbering.cend() ) || it == numbering.cbegin() )
+            ss << ".";
     }
     return ss.str();
 }
@@ -117,9 +157,10 @@ void blogator::dto::TableOfContents::findHeading( const size_t &line_number, con
 
                 auto level_e = static_cast<TableOfContents::HeadingLevel>( level_i );
 
-                _heading_insert_pos.insert(
-                    { dto::InsertPosition( line_number, it->str( 1 ).length() ), Heading( level_e, it->str( 3 ) ) }
-                );
+                _heading_insert_pos.insert({
+                    dto::InsertPosition( line_number, it->str( 1 ).length() ),
+                    Heading( level_e, it->str( 3 ), dto::InsertPosition( line_number, it->position( 3 ) ) )
+                } );
             }
 
         } catch( std::invalid_argument &e ) {

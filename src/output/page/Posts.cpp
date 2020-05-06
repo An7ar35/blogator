@@ -287,31 +287,38 @@ void blogator::output::page::Posts::writeContentModified( blogator::dto::Page &p
 
     /* LAMBDA Helpers */
     auto insertPath = [&]( const OrderedPostInsertion::PathPosition_t &path_pos,
-                           std::string::size_type &column )
+                           const std::string::size_type &column )
     {
         page._out << line._it->substr( column, path_pos.first.col - column )
                   << html::encodePathToURL( fs::adaptRelPath( article._paths.src_html, page._abs_path, path_pos.second.string() ).string() );
-        column = path_pos.first.col;
+        return path_pos.first.col;
     };
 
     auto insertTOC  = [&]( const OrderedPostInsertion::ToCPosition_t &toc_pos,
                            const std::string &indent,
-                           std::string::size_type &column )
+                           const std::string::size_type &column )
     {
         page._out << line._it->substr( column, toc_pos.col - column ) << "\n";
         writeTocTree( page, indent + "\t", *article._toc );
         page._out << indent;
-        column = toc_pos.col;
+        return toc_pos.col;
     };
 
-    auto insertHeadingID = [&]( const OrderedPostInsertion::HeadingPosition_t &heading_pos,
-                                std::string::size_type &column )
+    auto modifyHeading = [&]( const OrderedPostInsertion::HeadingPosition_t &mod_info,
+                              const std::string::size_type &column,
+                              bool add_numbering )
     {
-        page._out << line._it->substr( column, heading_pos.first.col - column )
-                  << " id=\"" << heading_pos.second.printID()
-                  << "\"";
+        auto id_col  = mod_info.first.col - column;
+        auto str_col = mod_info.second.str_pos.col - id_col;
 
-        column = heading_pos.first.col;
+        page._out << line._it->substr( column, id_col )
+                  << " id=\"" << mod_info.second.printID() << "\"";
+
+        if( add_numbering )
+                  page._out << line._it->substr( id_col, str_col )
+                            << mod_info.second.printNumbering() << " ";
+
+        return ( add_numbering ? mod_info.second.str_pos.col : mod_info.first.col );
     };
     /* ======= */
 
@@ -331,21 +338,21 @@ void blogator::output::page::Posts::writeContentModified( blogator::dto::Page &p
                 case helper::InsertPositionType::PATH:
                 {
                     const auto &e = std::get<OrderedPostInsertion::PathPosition_t>( insert_positions.top().second );
-                    insertPath( e, column );
+                    column = insertPath( e, column );
                     break;
                 }
 
                 case helper::InsertPositionType::TOC:
                 {
                     const auto &e = std::get<OrderedPostInsertion::ToCPosition_t>( insert_positions.top().second );
-                    insertTOC( e, indent, column );
+                    column = insertTOC( e, indent, column );
                     break;
                 }
 
-                case helper::InsertPositionType::HEADING_ID:
+                case helper::InsertPositionType::HEADING:
                 {
                     const auto &e = std::get<OrderedPostInsertion::HeadingPosition_t>( insert_positions.top().second );
-                    insertHeadingID( e, column );
+                    column = modifyHeading( e, column, _options->_posts.toc.numbering );
                     break;
                 }
             }
@@ -528,10 +535,16 @@ void blogator::output::page::Posts::writeTocTree( dto::Page &page,
         }
 
         //depth == prev_depth
-        html::writer::addLeaf( html,
-                               html::createHyperlink( "#" + heading.second.printID(), heading.second.print() ),
-                               target_depth
-        );
+        if( _options->_posts.toc.numbering )
+            html::writer::addLeaf( html,
+                                   html::createHyperlink( "#" + heading.second.printID(), heading.second.print() ),
+                                   target_depth
+            );
+        else
+            html::writer::addLeaf( html,
+                                   html::createHyperlink( "#" + heading.second.printID(), heading.second.str ),
+                                   target_depth
+            );
 
         curr_depth = target_depth;
     }

@@ -17,12 +17,11 @@ namespace blogator::dto {
         };
 
         struct Heading {
-            Heading( HeadingLevel hTag, std::string heading_txt ) :
-                level( hTag ),
-                str( std::move( heading_txt ) )
-            {}
+            Heading( HeadingLevel hTag, std::string heading_txt );
+            Heading( HeadingLevel hTag, std::string heading_txt, InsertPosition heading_pos );
 
             [[nodiscard]] std::string printID() const;
+            [[nodiscard]] std::string printNumbering() const;
             [[nodiscard]] std::string print() const;
             [[nodiscard]] int depth() const;
 
@@ -30,18 +29,14 @@ namespace blogator::dto {
             bool operator!=( const Heading &rhs ) const;
 
             friend std::ostream& operator <<( std::ostream& os, const Heading& h ) {
-                for( auto it = h.numbering.cbegin(); it != h.numbering.cend(); ++it ) {
-                    os << *it;
-                    if( it != std::prev( h.numbering.cend() ) || it == h.numbering.cbegin() )
-                        os << ".";
-                }
-                os << " " << h.str;
+                os << h.printNumbering() << " " << h.str;
                 return os;
             }
 
-            HeadingLevel     level;
-            std::string      str;
-            std::vector<int> numbering;
+            HeadingLevel     level;     //Heading HTML tag level
+            std::string      str;       //Heading string
+            InsertPosition   str_pos;   //Heading string position
+            std::vector<int> numbering; //Numbering for the heading
         };
 
         TableOfContents();

@@ -51,7 +51,7 @@ namespace blogator::output::page {
         void writeContentVerbatim( dto::Page &page,
                                    const std::filesystem::path &source_path ) const;
 
-        void writeContentModified( dto::Page &page, const dto::Article &article ) const;
+        void writeContentModified( dto::Page &mod_info, const dto::Article &article ) const;
 
         void writePageNavDiv( dto::Page &page,
                               const std::string &indent,

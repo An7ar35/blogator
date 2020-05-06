@@ -11,7 +11,12 @@ class TableOfContents_tests : public testing::Test {
 
 class TableOfContents_Heading_tests : public testing::Test {
   protected:
-    void SetUp() override { heading = std::make_unique<blogator::dto::TableOfContents::Heading>( blogator::dto::TableOfContents::HeadingLevel::H1, "Heading text" ); }
+    void SetUp() override {
+        heading = std::make_unique<blogator::dto::TableOfContents::Heading>(
+            blogator::dto::TableOfContents::HeadingLevel::H1,
+            "Heading text"
+        );
+    }
     void TearDown() override {}
   public:
     std::unique_ptr<blogator::dto::TableOfContents::Heading> heading;
@@ -36,6 +41,21 @@ TEST_F( TableOfContents_Heading_tests, ostream3 ) {
     std::stringstream ss;
     ss << *heading;
     ASSERT_EQ( "0.1.5.4.6 Heading text", ss.str() );
+}
+
+TEST_F( TableOfContents_Heading_tests, printNumbering1 ) {
+    heading->numbering = std::vector<int>( { 1 } );
+    ASSERT_EQ( "1.", heading->printNumbering() );
+}
+
+TEST_F( TableOfContents_Heading_tests, printNumbering2 ) {
+    heading->numbering = std::vector<int>( { 1, 0, 3 } );
+    ASSERT_EQ( "1.0.3", heading->printNumbering() );
+}
+
+TEST_F( TableOfContents_Heading_tests, printNumbering3 ) {
+    heading->numbering = std::vector<int>( { 0, 1, 5, 4, 6 } );
+    ASSERT_EQ( "0.1.5.4.6", heading->printNumbering() );
 }
 
 TEST_F( TableOfContents_Heading_tests, printID1 ) {
@@ -250,6 +270,8 @@ TEST_F( TableOfContents_tests, findHeadings1 ) {
     ASSERT_EQ( "Sub-Heading", heading->second.str );
     ASSERT_EQ( 1, heading->first.line );
     ASSERT_EQ( 5, heading->first.col );
+    ASSERT_EQ( 1, heading->second.str_pos.line );
+    ASSERT_EQ( 6, heading->second.str_pos.col );
 }
 
 TEST_F( TableOfContents_tests, findHeadings2 ) {
@@ -263,13 +285,15 @@ TEST_F( TableOfContents_tests, findHeadings2 ) {
     ASSERT_EQ( "Sub-sub-Heading", heading->second.str );
     ASSERT_EQ( 1, heading->first.line );
     ASSERT_EQ( 3, heading->first.col );
+    ASSERT_EQ( 1, heading->second.str_pos.line );
+    ASSERT_EQ( 4, heading->second.str_pos.col );
 }
 
 
 TEST_F( TableOfContents_tests, findHeadings3 ) {
     using blogator::dto::TableOfContents;
 
-    toc->findHeading( 1, "<h3 >Inconsistent tags</h2>   <h4>Good tags</h4>" );
+    toc->findHeading( 1, "<h3 >Inconsistent tags</h2>   <h4 >Good tags</h4>" );
     ASSERT_EQ( 1, toc->headings().size() );
     const auto &heading = toc->headings().cbegin();
 
@@ -277,6 +301,8 @@ TEST_F( TableOfContents_tests, findHeadings3 ) {
     ASSERT_EQ( "Good tags", heading->second.str );
     ASSERT_EQ( 1, heading->first.line );
     ASSERT_EQ( 33, heading->first.col );
+    ASSERT_EQ( 1, heading->second.str_pos.line );
+    ASSERT_EQ( 35, heading->second.str_pos.col );
 }
 
 TEST_F( TableOfContents_tests, findHeadings4 ) {

@@ -27,7 +27,7 @@ void blogator::output::helper::OrderedPostInsertion::pushToC( const OrderedPostI
  * @param value Heading ID position
  */
 void blogator::output::helper::OrderedPostInsertion::pushHeading( const OrderedPostInsertion::HeadingPosition_t &value ) {
-    _min_heap.push( { InsertPositionType::HEADING_ID, value } );
+    _min_heap.push( { InsertPositionType::HEADING, value } );
 }
 
 /**
@@ -69,10 +69,11 @@ const blogator::dto::InsertPosition &
             return std::get<PathPosition_t>( node.second ).first;
         case InsertPositionType::TOC:
             return std::get<ToCPosition_t>( node.second );
-        case InsertPositionType::HEADING_ID:
+        case InsertPositionType::HEADING:
             return std::get<HeadingPosition_t>( node.second ).first;
     }
     throw std::invalid_argument(
-        "[blogator::output::helper::OrderedPostInsertion::getInsertPosition( const OrderedPostInsertion::HeapNode_t & )] Variant label unknown."
+        "[blogator::output::helper::OrderedPostInsertion::getInsertPosition( const HeapNode_t & )] "
+        "Variant label unknown."
     );
 }

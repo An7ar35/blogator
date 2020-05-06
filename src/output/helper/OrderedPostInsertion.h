@@ -9,7 +9,7 @@
 #include "../../dto/TableOfContents.h"
 
 namespace blogator::output::helper {
-    enum class InsertPositionType { PATH, TOC, HEADING_ID };
+    enum class InsertPositionType { PATH, TOC, HEADING };
 
     class OrderedPostInsertion {
       public:
