@@ -94,6 +94,10 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "build-future       = false;\n"
        << "safe-purge         = true;\n"
        << "posts-change-paths = false;\n"
+       << "toc-auto-generate  = 0;\n"
+       << "toc-level-offset   = 1;\n"
+       << "toc-auto-numerate  = true;\n"
+       << "toc-heading        = \"<h2>Table of Contents</h2>\";\n"
        << "\n"
        << "//Index settings\n"
        << "show-post-numbers  = true;\n"
@@ -233,10 +237,18 @@ void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::st
     static const std::string build_future    = "build-future";
     static const std::string safe_purge      = "safe-purge";
     static const std::string adapt_rel_paths = "posts-change-paths";
+    static const std::string generate_toc    = "toc-auto-generate";
+    static const std::string offset_toc      = "toc-level-offset";
+    static const std::string numerate_toc    = "toc-auto-numerate";
+    static const std::string toc_heading     = "toc-heading";
 
-    auto build_future_it = map.find( build_future );
-    auto safe_purge_it   = map.find( safe_purge );
+    auto build_future_it    = map.find( build_future );
+    auto safe_purge_it      = map.find( safe_purge );
     auto adapt_rel_paths_it = map.find( adapt_rel_paths );
+    auto generate_toc_it    = map.find( generate_toc );
+    auto offset_toc_it      = map.find( offset_toc );
+    auto numerate_toc_it    = map.find( numerate_toc );
+    auto toc_heading_it     = map.find( toc_heading );
 
     if( build_future_it != map.end() ) {
         if( build_future_it->second.type == Type::BOOLEAN ) {
@@ -274,9 +286,56 @@ void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::st
         }
     }
 
+    if( generate_toc_it != map.end() ) {
+        try {
+            auto levels = std::stoi( generate_toc_it->second.value );
+            options._posts.toc.generate_toc = ( levels > 6 ? 6 : levels );
+            generate_toc_it->second.validated = true;
+        } catch( std::exception &e ) {
+            throw exception::file_parsing_failure(
+                "Error converting '" + generate_toc + "' value to integer "
+                "(line #" + std::to_string( generate_toc_it->second.line ) + "): " + generate_toc_it->second.value
+            );
+        }
+    }
+
+    if( offset_toc_it != map.end() ) {
+        try {
+            auto offset = std::stoi( offset_toc_it->second.value );
+            options._posts.toc.level_offset = ( offset > 5 ? 5 : offset );
+            offset_toc_it->second.validated = true;
+        } catch( std::exception &e ) {
+            throw exception::file_parsing_failure(
+                "Error converting '" + offset_toc + "' value to integer "
+                "(line #" + std::to_string( offset_toc_it->second.line ) + "): " + offset_toc_it->second.value
+            );
+        }
+    }
+
+    if( adapt_rel_paths_it != map.end() ) {
+        if( numerate_toc_it->second.type == Type::BOOLEAN ) {
+            options._posts.toc.numbering = ( numerate_toc_it->second.value == "true" );
+            numerate_toc_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + numerate_toc + "' value to boolean "
+                "(line #" + std::to_string( numerate_toc_it->second.line ) + "): " + numerate_toc_it->second.value
+            );
+        }
+    }
+
+    if( toc_heading_it != map.end() ) {
+        if( toc_heading_it->second.type == Type::STRING ) {
+            options._posts.toc.heading = toc_heading_it->second.value;
+            toc_heading_it->second.validated = true;
+            _display.debug( "ToC heading .....................: \"" + toc_heading_it->second.value + "\"" );
+        }
+    }
+
     _display.msg( "Build future-dated posts ........: ", options._posts.build_future, "TRUE", "FALSE" );
     _display.msg( "Safe purge post output dir.......: ", options._posts.safe_purge, "TRUE", "FALSE" );
     _display.msg( "Relative paths adapt (posts) ....: ", options._posts.adapt_rel_paths, "TRUE", "FALSE" );
+    _display.msg( "Auto-generate tables of contents : ", ( options._posts.toc.generate_toc > 0 ), "TRUE (depth: " + std::to_string( options._posts.toc.generate_toc ) + ", offset: " + std::to_string( options._posts.toc.level_offset ) + ")", "FALSE" );
 }
 
 /**
@@ -390,13 +449,13 @@ void blogator::fs::ConfigReader::processIndexOptions( std::unordered_map<std::st
             if( pads.size() == 1 ) {
                 options._index.summary_pad_begin = pads.at( 0 );
                 post_summary_pads_it->second.validated = true;
-                _display.debug( "Index summary padding: \"" + options._index.summary_pad_begin + "\"" );
+                _display.debug( "Index summary padding ...........: \"" + options._index.summary_pad_begin + "\"" );
             }
             if( pads.size() > 1 ) {
                 options._index.summary_pad_begin = pads.at( 0 );
                 options._index.summary_pad_end   = pads.at( 1 );
                 post_summary_pads_it->second.validated = true;
-                _display.debug( "Index summary paddings: \"" +  options._index.summary_pad_begin + "\"/\"" + options._index.summary_pad_end + "\"" );
+                _display.debug( "Index summary paddings ..........: \"" +  options._index.summary_pad_begin + "\"/\"" + options._index.summary_pad_end + "\"" );
             }
         }
 

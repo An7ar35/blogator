@@ -637,17 +637,14 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
     const static auto tag_tag     = std::make_pair<std::string, std::string>( "<span class=\"tag\">", "</span>" );
     const static auto template_kw = std::make_pair<std::string, std::string>( "{{", "}}" ); //TODO
 
-//    const static auto heading_rx = std::regex( "<h1>\\s*(.*)\\s*</h1>" );
-//    const static auto date_rx    = std::regex( "<time datetime=\"(\\d{4})-(\\d{2})-(\\d{2})\">" );
-//    const static auto tag_rx     = std::regex( R"(<span class="tag">\s*(.*)\s*</span>)" );
-//    const static auto author_rx  = std::regex( R"(<span class="author">\s*(.*)\s*</span>)" );
-
     auto article           = blogator::dto::Article();
-    bool heading_found     = false;
+    bool title_found       = false;
     bool date_found        = false;
     auto summary_positions = std::deque<dto::InsertPosition>();
+    auto auto_toc_def      = dto::Template::BlockInsertClasses_t( { { options._posts.block_classes.toc, false } } );
 
     article._paths.src_html = path;
+    auto toc = std::make_shared<dto::TableOfContents>( options._posts.toc.generate_toc, options._posts.toc.level_offset );
 
     std::string   line;
     size_t        line_count = 0;
@@ -658,13 +655,14 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
         using html::reader::getContentsBetween;
         using html::reader::getSummaryPositions;
         using html::reader::getTags;
+        using html::reader::getConsecutiveWritePositions;
 
         if( html_file.is_open() ) {
             while( getline( html_file, line ) ) {
 
-                if( !heading_found ) {
+                if( !title_found ) {
                     article._heading = getContentBetween( heading_tag.first, heading_tag.second, line );
-                    heading_found = !article._heading.empty();
+                    title_found = !article._heading.empty();
                 }
 
                 if( !date_found ) {
@@ -677,6 +675,12 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
 
                 if( options._index.show_summary )
                     getSummaryPositions( line_count, line, summary_positions );
+
+
+                if( options._posts.toc.generate_toc > 0 ) {
+                    toc->findHeading( line_count, line );
+                    toc->findTocBlock( line_count, line, options._posts.block_classes.toc );
+                }
 
                 auto authors = getContentsBetween( author_tag.first, author_tag.second, line );
                 auto tags    = getContentsBetween( tag_tag.first, tag_tag.second, line );
@@ -717,6 +721,13 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
                 article._summary.path_write_pos = dto::Templates::extractRelativePaths( article._summary.html );
             }
 
+            { //caching any relevant headings+position found in the source html file if auto-generate-toc options is set
+                if( options._posts.toc.generate_toc > 0 ) {
+                    if( toc->tocBlockExists() )
+                        article._toc = toc;
+                }
+            }
+
         } else {
             throw exception::file_access_failure( "Could not open: " + path.string() );
         }
@@ -727,7 +738,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
         );
     }
 
-    if( !heading_found )
+    if( !title_found )
         throw exception::file_parsing_failure(
             "No title (<span class=\"title\">..</span>) found in post: " + path.lexically_relative( options._paths.root_dir ).string()
         );

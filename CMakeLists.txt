@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(blogator VERSION 1.1.3)
+project(blogator VERSION 1.2.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -99,7 +99,11 @@ set(SOURCE_FILES
         src/html/editor/code/code.cpp
         src/html/editor/code/code.h
         src/html/editor/editor.cpp
-        src/html/editor/editor.h)
+        src/html/editor/editor.h
+        src/dto/TableOfContents.h
+        src/dto/TableOfContents.cpp
+        src/output/helper/OrderedPostInsertion.cpp
+        src/output/helper/OrderedPostInsertion.h)
 
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
@@ -132,7 +136,10 @@ set(TEST_FILES
         tests/html/reader/reader.cpp
         tests/dto/DateStamp.cpp
         tests/dto/Templates.cpp
-        tests/fs/fs.cpp tests/html/editor/editor.cpp tests/dto/HTML.cpp)
+        tests/fs/fs.cpp
+        tests/html/editor/editor.cpp
+        tests/dto/HTML.cpp
+        tests/dto/TableOfContents.cpp)
 
 enable_testing()
 

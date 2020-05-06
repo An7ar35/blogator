@@ -200,9 +200,7 @@ blogator::dto::ConsecutiveWritePositions_t
 
             while( it != std::sregex_iterator() ) {
                 write_pos.insert(
-                    std::make_pair( dto::InsertPosition( line_number, it->str( 1 ).length() ),
-                                    css_class.first
-                    )
+                    std::make_pair( dto::InsertPosition( line_number, it->str( 1 ).length() ), css_class.first )
                 );
                 ++it;
             }

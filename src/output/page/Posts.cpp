@@ -5,12 +5,14 @@
 #include <iostream>
 #include <stack>
 #include <functional>
+#include <variant>
 
 #include "../../fs/fs.h"
 #include "../../html/html.h"
 #include "../../exception/failed_expectation.h"
 #include "../../exception/file_access_failure.h"
 #include "../../cli/MsgInterface.h"
+#include "../helper/OrderedPostInsertion.h"
 
 /**
  * Constructor
@@ -188,7 +190,7 @@ void blogator::output::page::Posts::writeTemplateLine( dto::Page &page,
 }
 
 /**
- * Writes the relevant HTML block at the given position
+ * Writes the relevant HTML block at the given position on the template
  * @param indent      Space to place before the output lines (i.e.: html indent)
  * @param page_info   Page info (Article, Article i, css line)
  * @param block_class Block's class name
@@ -203,11 +205,9 @@ void blogator::output::page::Posts::writeHtmlBlock( dto::Page &page,
     } else if( block_class == "page-nav" ) {
         writePageNavDiv( page, indent, page_info.article_i );
     } else if( block_class == "post-content" ) {
-        writeContentDiv( page, indent, page_info.article._paths.src_html );
+        writeContentDiv( page, page_info.article );
     } else if( block_class == "index-pane-dates" ) {
         writeIndexDateTree( page, indent, page_info.article, page_info.article_i );
-    } else if( block_class == "index-pane-tags" ) {
-        writeIndexTagTree( page, indent, page_info.article, page_info.article_i );
     } else {
         _display.error(
             "[output::page::Posts::init(..)] "
@@ -219,63 +219,149 @@ void blogator::output::page::Posts::writeHtmlBlock( dto::Page &page,
 /**
  * Writes the source article lines to a file
  * @param page        Output file
- * @param indent      Space to place before the output line (i.e.: html indent)
- * @param source_path Article source path
+ * @param article     Article DTO
  * @throws blogator::exception::file_access_failure when source file could not be opened/imported
  */
 void blogator::output::page::Posts::writeContentDiv( dto::Page &page,
-                                                     const std::string &indent,
-                                                     const std::filesystem::path &source_path ) const
+                                                     const dto::Article &article ) const
 {
-    if( !_options->_posts.adapt_rel_paths ) {
+    if( !_options->_posts.adapt_rel_paths && _options->_posts.toc.generate_toc < 1 ) {
+        writeContentVerbatim( page, article._paths.src_html );
+    } else {
+        writeContentModified( page, article );
+    }
+}
 
-        auto in = std::ifstream( source_path );
-        if( !in.is_open() )
-            throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
-            //    <span class="post_number"></span> //TODO look into inserting number in the post in a future version?
-        std::string line;
-        while( getline( in, line ) )
-            page._out << line << std::endl;
+/**
+ * Write the source content verbatim to the target page
+ * @param page        Output file
+ * @param source_path Post's HTML source path
+ * @throws blogator::exception::file_access_failure when source file could not be opened/imported
+ */
+void blogator::output::page::Posts::writeContentVerbatim( dto::Page &page,
+                                                          const std::filesystem::path &source_path ) const
+{
+    auto in = std::ifstream( source_path );
+    if( !in.is_open() )
+        throw exception::file_access_failure( "Cannot read source file '" + source_path.string() + "'." );
 
-        in.close();
+    std::string line;
+    while( getline( in, line ) )
+        page._out << line << std::endl;
 
-    } else { //adapt all relative paths in the post/article
+    in.close();
+}
 
-        auto html = fs::importHTML( source_path );
-        auto path_pos = dto::Templates::extractRelativePaths( *html );
+/**
+ * Writes the source article lines with modifications to a file
+ * @param page        Output file
+ * @param article     Article DTO
+ * @throws blogator::exception::file_access_failure when source file could not be opened/imported
+ */
+void blogator::output::page::Posts::writeContentModified( blogator::dto::Page &page,
+                                                          const blogator::dto::Article &article ) const
+{
+    using helper::OrderedPostInsertion;
 
-        fs::checkRelPaths( _options->_paths.root_dir, source_path, path_pos );
+    auto      html             = fs::importHTML( article._paths.src_html );
+    auto      insert_positions = helper::OrderedPostInsertion();
+    auto      path_positions   = dto::Templates::extractRelativePaths( *html );
+    dto::Line line             = { html->_lines.cbegin(), 0 };
 
-        dto::Line line = { html->_lines.cbegin(), 0 };
-        auto path_it = path_pos.cbegin();
+    const bool toc_flag      = ( article._toc != nullptr );
+    const bool rel_path_flag = ( _options->_posts.adapt_rel_paths && !path_positions.empty() );
 
-        auto hasPath = [ & ]() {
-            return ( path_it != path_pos.cend() && path_it->first.line == line._num );
-        };
+    if( rel_path_flag ) {
+        for( const auto &path : path_positions )
+            insert_positions.pushPath( path );
+    }
 
-        page._out << "\n";
-        while( line._it != html->_lines.cend() ) {
-            std::string::size_type col = 0;
+    if( toc_flag ) {
+        article._toc->finaliseToC(); //<-- generate all the numbering/depth info for the headings
+        for( const auto &heading : article._toc->headings() )
+            insert_positions.pushHeading( heading );
 
-            if( hasPath() ) {
+        for( const auto &toc : article._toc->tocPositions() )
+            insert_positions.pushToC( toc );
+    }
 
-                while( hasPath() ) {
-                    page._out << line._it->substr( col, path_it->first.col - col )
-                              << html::encodePathToURL( fs::adaptRelPath( source_path, page._abs_path, path_it->second.string() ).string() );
-                    col = path_it->first.col;
-                    ++path_it;
+    /* LAMBDA Helpers */
+    auto insertPath = [&]( const OrderedPostInsertion::PathPosition_t &path_pos,
+                           const std::string::size_type &column )
+    {
+        page._out << line._it->substr( column, path_pos.first.col - column )
+                  << html::encodePathToURL( fs::adaptRelPath( article._paths.src_html, page._abs_path, path_pos.second.string() ).string() );
+        return path_pos.first.col;
+    };
+
+    auto insertTOC  = [&]( const OrderedPostInsertion::ToCPosition_t &toc_pos,
+                           const std::string &indent,
+                           const std::string::size_type &column )
+    {
+        page._out << line._it->substr( column, toc_pos.col - column ) << "\n";
+        writeTocTree( page, indent + "\t", *article._toc );
+        page._out << indent;
+        return toc_pos.col;
+    };
+
+    auto modifyHeading = [&]( const OrderedPostInsertion::HeadingPosition_t &mod_info,
+                              const std::string::size_type &column,
+                              bool add_numbering )
+    {
+        auto id_col  = mod_info.first.col - column;
+        auto str_col = mod_info.second.str_pos.col - id_col;
+
+        page._out << line._it->substr( column, id_col )
+                  << " id=\"" << mod_info.second.printID() << "\"";
+
+        if( add_numbering )
+                  page._out << line._it->substr( id_col, str_col )
+                            << mod_info.second.printNumbering() << " ";
+
+        return ( add_numbering ? mod_info.second.str_pos.col : mod_info.first.col );
+    };
+    /* ======= */
+
+    page._out << "\n";
+
+    while( line._it != html->_lines.cend() ) {
+        const auto indent = html::reader::getIndent( *line._it );
+        std::string::size_type column = 0;
+
+        while( !insert_positions.empty() ) {
+            const auto & pos = OrderedPostInsertion::getInsertPosition( insert_positions.top() );
+
+            if( pos.line != line._num )
+                break;
+
+            switch( insert_positions.top().first ) {
+                case helper::InsertPositionType::PATH:
+                {
+                    const auto &e = std::get<OrderedPostInsertion::PathPosition_t>( insert_positions.top().second );
+                    column = insertPath( e, column );
+                    break;
                 }
 
-                page._out << line._it->substr( col );
+                case helper::InsertPositionType::TOC:
+                {
+                    const auto &e = std::get<OrderedPostInsertion::ToCPosition_t>( insert_positions.top().second );
+                    column = insertTOC( e, indent, column );
+                    break;
+                }
 
-            } else {
-                page._out << *line._it;
+                case helper::InsertPositionType::HEADING:
+                {
+                    const auto &e = std::get<OrderedPostInsertion::HeadingPosition_t>( insert_positions.top().second );
+                    column = modifyHeading( e, column, _options->_posts.toc.numbering );
+                    break;
+                }
             }
 
-            page._out << "\n";
-
-            ++line;
+            insert_positions.pop();
         }
+
+        page._out << line._it->substr( column ) << "\n";
+        ++line;
     }
 }
 
@@ -417,4 +503,61 @@ void blogator::output::page::Posts::writeIndexTagTree( dto::Page &page,
         }
         ++i;
     }
+}
+
+/**
+ * Writes the ToC tree for a 'post' page
+ * @param page   Target 'post' file
+ * @param indent Space to place before the output line (i.e.: html indent)
+ * @param toc    Article's Table of Content
+ */
+void blogator::output::page::Posts::writeTocTree( dto::Page &page,
+                                                  const std::string &indent,
+                                                  const dto::TableOfContents &toc ) const
+{
+    auto html       = dto::HTML();
+    auto curr_depth = 1;
+
+    html::writer::openTree( html );
+
+    for( const auto &heading : toc.headings() ) {
+
+        auto target_depth = heading.second.depth();
+
+        while( curr_depth > target_depth ) {
+            html::writer::closeSubTree( html, curr_depth - 1 );
+            --curr_depth;
+        }
+
+        while( curr_depth < target_depth ) {
+            html::writer::openSubTree( html, curr_depth );
+            ++curr_depth;
+        }
+
+        //depth == prev_depth
+        if( _options->_posts.toc.numbering )
+            html::writer::addLeaf( html,
+                                   html::createHyperlink( "#" + heading.second.printID(), heading.second.print() ),
+                                   target_depth
+            );
+        else
+            html::writer::addLeaf( html,
+                                   html::createHyperlink( "#" + heading.second.printID(), heading.second.str ),
+                                   target_depth
+            );
+
+        curr_depth = target_depth;
+    }
+
+    while( curr_depth > 1 ) {
+        html::writer::closeSubTree( html, curr_depth-- );
+    }
+
+    html::writer::closeTree( html );
+
+    if( !_options->_posts.toc.heading.empty() )
+        page._out << indent << _options->_posts.toc.heading << std::endl;
+
+    for( const auto &line : html._lines )
+        page._out << indent << line << "\n";
 }

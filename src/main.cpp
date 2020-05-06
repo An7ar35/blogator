@@ -58,7 +58,7 @@ int main( int argc, char **argv ) {
 void blogator::printHeader() {
     auto printBorder = []( size_t width ) {
         std::cout << "·";
-        for( auto i = 0; i < width - 2; ++i )
+        for( size_t i = 0; i < width - 2; ++i )
             std::cout << "~";
         std::cout << "·\n";
     };

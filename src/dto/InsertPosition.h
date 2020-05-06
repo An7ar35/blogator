@@ -2,6 +2,9 @@
 #define BLOGATOR_DTO_INSERTPOSITION_H
 
 #include <iostream>
+#include <map>
+#include <list>
+#include <filesystem>
 
 #include "HTML.h"
 
@@ -25,6 +28,10 @@ namespace blogator::dto {
 
         bool operator<( const InsertPosition &rhs ) const {
             return line == rhs.line ? col < rhs.col : line < rhs.line;
+        }
+
+        bool operator>( const InsertPosition &rhs ) const {
+            return line == rhs.line ? col > rhs.col : line > rhs.line;
         }
     };
 

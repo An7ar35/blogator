@@ -10,6 +10,12 @@
 #include "../../dto/Templates.h"
 
 namespace blogator::html::writer {
+    void openTree( dto::HTML &html, const std::string &css_class = "" );
+    void closeTree( dto::HTML &html );
+    void openSubTree( dto::HTML &html, int depth = 0 );
+    void closeSubTree( dto::HTML &html, int depth = 0 );
+    void addLeaf( dto::HTML &html, const std::string &content, int depth = 0 );
+
     void openTree( dto::IndexDateTree &date_tree );
     void closeTree( dto::IndexDateTree &date_tree );
     void openYearNode( const dto::DateStamp &datestamp, dto::IndexDateTree &date_tree );
