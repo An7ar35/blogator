@@ -279,8 +279,7 @@ The landing page entries (in `newest-posts` and `featured-posts`) use the index 
             habitasse ante dictum sed magna vel convallis fermentum.
         </p>
     </div>
-
-
+    
 ##### Output template
 
 * `breadcrumb`
@@ -288,9 +287,30 @@ The landing page entries (in `newest-posts` and `featured-posts`) use the index 
 > Provides a visual cue as to where in the blog hierarchy the user is currently.
 
 * `page-nav`
+
+> Page-by-page navigation (fwd/back). 
+
 * `post-content`
+
+> Where to write out the article source to on the page.
+
 * `index-pane-dates`
+
+> Displays a hierarchy tree index of year > month > day for each article.
+
 * `index-pane-tags`
+
+> Displays a hierarchy tree index of article tags.
+
+##### Post content output
+
+This section deals with special tags that can be used inside posts in the source files.
+
+* `auto-toc`
+
+> Placement of the auto-generated table of contents based on the set options in the configuration 
+  files and the headings found within the post.
+
 
 #### Index page (Chronological/Years/Tags/Authors)
 
