@@ -128,7 +128,7 @@ blogator::dto::TableOfContents::TableOfContents( int max_levels, int offset ) :
 
     if( _max_level < _min_level ) {
         std::stringstream ss;
-        ss << "[blogator::dto::TableOfContents::setProperties( " << max_levels << ", " << offset << " )] "
+        ss << "[blogator::dto::TableOfContents::TableOfContents( " << max_levels << ", " << offset << " )] "
            << "Offset exceeds the max heading level available (<h6></h6>).";
         throw std::invalid_argument( ss.str() );
     }

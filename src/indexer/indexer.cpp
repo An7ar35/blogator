@@ -641,10 +641,9 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
     bool title_found       = false;
     bool date_found        = false;
     auto summary_positions = std::deque<dto::InsertPosition>();
-    auto auto_toc_def      = dto::Template::BlockInsertClasses_t( { { options._posts.block_classes.toc, false } } );
 
     article._paths.src_html = path;
-    auto toc = std::make_shared<dto::TableOfContents>( options._posts.toc.generate_toc, options._posts.toc.level_offset );
+    std::shared_ptr<dto::TableOfContents> toc;
 
     std::string   line;
     size_t        line_count = 0;
@@ -656,6 +655,9 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
         using html::reader::getSummaryPositions;
         using html::reader::getTags;
         using html::reader::getConsecutiveWritePositions;
+
+        if( options._posts.toc.generate_toc > 0 )
+            toc = std::make_shared<dto::TableOfContents>( options._posts.toc.generate_toc, options._posts.toc.level_offset );
 
         if( html_file.is_open() ) {
             while( getline( html_file, line ) ) {
@@ -677,7 +679,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
                     getSummaryPositions( line_count, line, summary_positions );
 
 
-                if( options._posts.toc.generate_toc > 0 ) {
+                if( toc != nullptr && options._posts.toc.generate_toc > 0 ) {
                     toc->findHeading( line_count, line );
                     toc->findTocBlock( line_count, line, options._posts.block_classes.toc );
                 }
@@ -722,7 +724,7 @@ blogator::dto::Article blogator::indexer::readFileProperties( const dto::Options
             }
 
             { //caching any relevant headings+position found in the source html file if auto-generate-toc options is set
-                if( options._posts.toc.generate_toc > 0 ) {
+                if( toc != nullptr && options._posts.toc.generate_toc > 0 ) {
                     if( toc->tocBlockExists() )
                         article._toc = toc;
                 }
