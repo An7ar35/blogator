@@ -135,7 +135,7 @@ void blogator::output::generic::CategoryLister::writeTemplateLine(
 
         } else { //do the path first
             page._out << line._it->substr( col, insert_it.path->first.col - col )
-                      << fs::adaptRelPath( _template.src, page._abs_path, insert_it.path->second.string() ).string();
+                      << html::encodePathToURL( fs::adaptRelPath( _template.src, page._abs_path, insert_it.path->second.string() ).string() );
 
             col = insert_it.path->first.col;
             ++insert_it.path;
@@ -157,8 +157,7 @@ void blogator::output::generic::CategoryLister::writeTemplateLine(
 
     while( hasPath() ) { //just path(s) left to insert
         page._out << line._it->substr( col, insert_it.path->first.col - col )
-                  << fs::adaptRelPath( _template.src, page._abs_path,
-                                       insert_it.path->second.string() ).string();
+                  << html::encodePathToURL( fs::adaptRelPath( _template.src, page._abs_path, insert_it.path->second.string() ).string() );
 
         col = insert_it.path->first.col;
         ++insert_it.path;

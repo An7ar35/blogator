@@ -19,7 +19,7 @@ namespace blogator::output::page {
                std::shared_ptr<const dto::Templates> templates,
                std::shared_ptr<const dto::Options>   global_options );
 
-        bool init() const;
+        [[nodiscard]] bool init() const;
 
       private:
         struct PageInfo {
@@ -33,7 +33,7 @@ namespace blogator::output::page {
         std::unique_ptr<const dto::IndexTagTree>  _html_tag_tree;
         Breadcrumb::BreadCrumb_t                  _breadcrumb_parents;
 
-        std::filesystem::path copyStylesheet( const dto::Article &article ) const;
+        [[nodiscard]] std::filesystem::path copyStylesheet( const dto::Article &article ) const;
 
         void writeTemplateLine( dto::Page       &page,
                                 const dto::Line &line,
@@ -46,8 +46,12 @@ namespace blogator::output::page {
                              const std::string &block_class ) const;
 
         void writeContentDiv( dto::Page &page,
-                              const std::string &indent,
-                              const std::filesystem::path &source_path ) const;
+                              const dto::Article &article ) const;
+
+        void writeContentVerbatim( dto::Page &page,
+                                   const std::filesystem::path &source_path ) const;
+
+        void writeContentModified( dto::Page &mod_info, const dto::Article &article ) const;
 
         void writePageNavDiv( dto::Page &page,
                               const std::string &indent,
@@ -62,6 +66,11 @@ namespace blogator::output::page {
                                 const std::string &indent,
                                 const dto::Article &article,
                                 const size_t &article_pos ) const;
+
+        void writeTocTree( dto::Page &page,
+                           const std::string &indent,
+                           const dto::TableOfContents &toc ) const;
+
     };
 }
 

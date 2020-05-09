@@ -3,11 +3,71 @@
 #include <sstream>
 
 /**
+ * Opens a new <ol></ol> tree
+ * @param html      HTML code container
+ * @param ccs_class (optional) CSS class for the <ol> tree
+ */
+void blogator::html::writer::openTree( blogator::dto::HTML &html, const std::string &css_class ) {
+    if( css_class.empty() )
+        html._lines.emplace_back( "<ol>" );
+    else
+        html._lines.emplace_back( "<ol class=\"" + css_class + "\">" );
+}
+
+/**
+ * Closes the last <ol> tag of a tree
+ * @param html HTML code container
+ */
+void blogator::html::writer::closeTree( blogator::dto::HTML &html ) {
+    html._lines.emplace_back( "</ol>" );
+}
+
+/**
+ * Opens a sub-branch on a tree (<li><ol>)
+ * @param html  HTML code container
+ * @param depth (optional) Sub-tree depth (i.e.: number of tabs to insert before the tags)
+ */
+void blogator::html::writer::openSubTree( blogator::dto::HTML &html, int depth ) {
+    std::stringstream ss;
+    for( int i = 0; i < depth; ++i )
+        ss << "\t";
+    ss << "<li><ol>";
+    html._lines.emplace_back( ss.str() );
+}
+
+/**
+ * Closes a sub-branch on a tree (</ol></li>)
+ * @param html  HTML code container
+ * @param depth (optional) Sub-tree depth (i.e.: number of tabs to insert before the tags)
+ */
+void blogator::html::writer::closeSubTree( blogator::dto::HTML &html, int depth ) {
+    std::stringstream ss;
+    for( int i = 0; i < depth; ++i )
+        ss << "\t";
+    ss << "</ol></li>";
+    html._lines.emplace_back( ss.str() );
+}
+
+/**
+ * Adds a leaf to a tree (<li></li>)
+ * @param html    HTML code container
+ * @param content Content to insert between the tags
+ * @param depth   (optional) Sub-tree depth (i.e.: number of tabs to insert before the tags)
+ */
+void blogator::html::writer::addLeaf( blogator::dto::HTML &html, const std::string &content, int depth ) {
+    std::stringstream ss;
+    for( int i = 0; i < depth; ++i )
+        ss << "\t";
+    ss << "<li>" << content << "</li>";
+    html._lines.emplace_back( ss.str() );
+}
+
+/**
  * Opens a new <ol class="tree"></ol> tree
  * @param date_tree IndexPane::DateTree container
  */
 void blogator::html::writer::openTree( blogator::dto::IndexDateTree &date_tree ) {
-    date_tree.html._lines.emplace_back( "<ol class=\"tree\">" );
+    html::writer::openTree( date_tree.html, "tree" );
 }
 
 /**
@@ -15,7 +75,7 @@ void blogator::html::writer::openTree( blogator::dto::IndexDateTree &date_tree )
  * @param date_tree IndexPane::DateTree container
  */
 void blogator::html::writer::closeTree( blogator::dto::IndexDateTree &date_tree ) {
-    date_tree.html._lines.emplace_back( "</ol>" );
+    html::writer::closeTree( date_tree.html );
 }
 
 /**
@@ -97,7 +157,7 @@ void blogator::html::writer::addArticleLeaf( const blogator::dto::Article &artic
  * @param tag_tree IndexPane::TagTree container
  */
 void blogator::html::writer::openTree( blogator::dto::IndexTagTree &tag_tree ) {
-    tag_tree.html._lines.emplace_back( "<ol class=\"tree\">" );
+    html::writer::openTree( tag_tree.html, "tree" );
 }
 
 /**
@@ -105,7 +165,7 @@ void blogator::html::writer::openTree( blogator::dto::IndexTagTree &tag_tree ) {
  * @param tag_tree IndexPane::TagTree container
  */
 void blogator::html::writer::closeTree( blogator::dto::IndexTagTree &tag_tree ) {
-    tag_tree.html._lines.emplace_back( "</ol>" );
+    html::writer::closeTree( tag_tree.html );
 }
 
 /**

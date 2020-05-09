@@ -1,0 +1,15 @@
+1/ Import Options
+    · Read configuration file
+    · Process options from configuration (Template, Post, Index, Landing, Navigation, Breadcrumbs, Month strings, RSS)
+2/ Set base directory paths for I/O
+3/ Setup environment
+    · Clear out output directories of any content (obey safe purge option)
+    · Create new output directories
+4/ Create Indices cache
+5/ Import and cache Templates
+6/ Generate output
+    · Create post pages
+    · Create index pages
+    · Create landing pages
+    · Create RSS feed
+7/ Check converted relative paths in Templates

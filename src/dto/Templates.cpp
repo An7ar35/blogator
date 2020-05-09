@@ -17,7 +17,7 @@ blogator::dto::Templates::Templates() :
  * @return Consecutive positions and extracted paths in the HTML
  */
 blogator::dto::ConsecutivePathPositions_t blogator::dto::Templates::extractRelativePaths( dto::HTML &source )  {
-    const auto path_rx = std::regex( R"((.*?<.*?(?:src|href)=")([^/]{1}[a-zA-Z\%\.\-_\d/]+\.[a-zA-Z\d_]{2,4})("))" );
+    const auto path_rx = std::regex( R"((.*?<.*?(?:src|href)=")(?!www|http)([^/]{1}[a-zA-Z\%\.\-_\d/\s]+\.[a-zA-Z\d_]{2,4})("))" );
     auto       pos     = ConsecutivePathPositions_t();
     size_t     line_i  = 0;
 

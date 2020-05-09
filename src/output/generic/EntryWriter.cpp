@@ -90,7 +90,7 @@ void blogator::output::generic::EntryWriter::writeTemplateLine( dto::Page &page,
 
         } else { //do the path first
             page._out << line._it->substr( col, insert_its.path->first.col - col )
-                      << fs::adaptRelPath( _template->src, page._abs_path, insert_its.path->second.string() ).string();
+                      << html::encodePathToURL( fs::adaptRelPath( _template->src, page._abs_path, insert_its.path->second.string() ).string() );
 
             col =  insert_its.path->first.col;
             ++insert_its.path;
@@ -112,7 +112,7 @@ void blogator::output::generic::EntryWriter::writeTemplateLine( dto::Page &page,
 
     while( hasPath() ) { //just path(s) left to insert
         page._out << line._it->substr( col, insert_its.path->first.col - col )
-                  << fs::adaptRelPath( _template->src, page._abs_path, insert_its.path->second.string() ).string();
+                  << html::encodePathToURL( fs::adaptRelPath( _template->src, page._abs_path, insert_its.path->second.string() ).string() );
 
         col =  insert_its.path->first.col;
         ++insert_its.path;
@@ -211,7 +211,7 @@ void blogator::output::generic::EntryWriter::writeSummaryLine( dto::Page        
 
     while( hasPath() ) {
         page._out << line._it->substr( col, path_it->first.col - col )
-                  << fs::adaptRelPath( article._paths.src_html, page._abs_path, path_it->second.string() ).string();
+                  << html::encodePathToURL( fs::adaptRelPath( article._paths.src_html, page._abs_path, path_it->second.string() ).string() );
         col =  path_it->first.col;
         ++path_it;
     }

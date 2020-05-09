@@ -10,6 +10,7 @@
 #include "DateStamp.h"
 #include "Template.h"
 #include "SeekRange.h"
+#include "TableOfContents.h"
 
 namespace blogator::dto {
     struct Article {
@@ -37,7 +38,15 @@ namespace blogator::dto {
               << "\tAuthor(s) .........: ";
             for( const auto &a : article._authors )
                 s << "\"" << a << "\" ";
-            s << "\n\tDate-stamp.........: " << article._datestamp << "\n"
+            if( article._toc ) {
+                s << "\n\tHeading(s).........: \n";
+                for( const auto &h : article._toc->headings() ) {
+                    s << "\t\t" << static_cast<int>( h.second.level ) << ": \"" << h.second.str << "\"\n";
+                }
+            } else {
+                s << "\n";
+            }
+            s << "\tDate-stamp.........: " << article._datestamp << "\n"
               << "\tSource file path...: " << article._paths.src_html.string() << "\n"
               << "\tRelative html link.: " << article._paths.out_html.string() << "\n"
               << "\tIndex entry html...: " << article._paths.entry_html.string() << "\n"
@@ -74,8 +83,8 @@ namespace blogator::dto {
 
         std::set<std::string, CaseInsensitiveCompare> _authors;
         std::set<std::string, CaseInsensitiveCompare> _tags;
-
-        std::shared_ptr<dto::Template> _cust_index_entry; //cache
+        std::shared_ptr<dto::TableOfContents>         _toc; //optional (shared_ptr since the FeatAggregator makes a copy of the article atm)
+        std::shared_ptr<dto::Template>                _cust_index_entry; //cache
     };
 }
 

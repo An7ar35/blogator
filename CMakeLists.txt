@@ -99,7 +99,12 @@ set(SOURCE_FILES
         src/html/editor/editor.cpp
         src/html/editor/editor.h
         src/html/highlight/highlight.cpp
-        src/html/highlight/highlight.h)
+        src/html/highlight/highlight.h
+        src/html/editor/editor.h
+        src/dto/TableOfContents.h
+        src/dto/TableOfContents.cpp
+        src/output/helper/OrderedPostInsertion.cpp
+        src/output/helper/OrderedPostInsertion.h)
 
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
@@ -134,7 +139,8 @@ set(TEST_FILES
         tests/dto/Templates.cpp
         tests/fs/fs.cpp
         tests/html/editor/editor.cpp
-        tests/dto/HTML.cpp)
+        tests/dto/HTML.cpp
+        tests/dto/TableOfContents.cpp)
 
 enable_testing()
 
