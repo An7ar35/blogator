@@ -70,6 +70,13 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
         display.msg( "RSS feed will *not* be generated." );
     }
 
+    try {
+        processJsonOptions( map, *options );
+    } catch( exception::file_parsing_failure &e ) {
+        display.error( "Configuration reader: " + std::string( e.what() ) );
+        display.msg( "JSON Index will *not* be generated." );
+    }
+
     return std::move( options );
 }
 
@@ -108,6 +115,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "index-by-year      = false;\n"
        << "index-by-tag       = true;\n"
        << "index-by-author    = false;\n"
+       << "json-index         = false;\n"
        << "\n"
        << "//Per-Page navigation DIV contents\n"
        << "page-nav-separator = \" / \";\n"
@@ -852,4 +860,29 @@ void blogator::fs::ConfigReader::processRssOptions( std::unordered_map<std::stri
     }
 
     _display.msg( "Generate RSS feed ...............: ", options._rss.generate, "TRUE", "FALSE" );
+}
+
+/**
+ * Process all JSON related options
+ * @param map     Raw {K,V} map of options parsed from configuration file
+ * @param options Options DTO
+ */
+void blogator::fs::ConfigReader::processJsonOptions( std::unordered_map<std::string, Value> &map,
+                                                     dto::Options &options) const
+{
+    static const std::string generate_index = "json-index";
+
+    auto generate_index_it = map.find( generate_index );
+
+    if( generate_index_it != map.end() ) {
+        if( generate_index_it->second.type == Type::BOOLEAN ) {
+            options._json_index.generate = ( generate_index_it->second.value == "true" );
+            generate_index_it->second.validated = true;
+        } else {
+            throw exception::file_parsing_failure(
+                "Error converting '" + generate_index + "' value to boolean "
+                "(line #" + std::to_string( generate_index_it->second.line ) + "): " + generate_index_it->second.value
+            );
+        }
+    }
 }

@@ -50,6 +50,7 @@ namespace blogator::fs {
         void processPageNavOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processBreadcrumbOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
         void processRssOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
+        void processJsonOptions( std::unordered_map<std::string, Value> &map, dto::Options &options ) const;
     };
 }
 

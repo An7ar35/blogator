@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(blogator VERSION 1.2.0)
+project(blogator VERSION 1.3.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -96,6 +96,8 @@ set(SOURCE_FILES
         src/output/page/ByAuthorList.h
         src/output/feed/RSS.cpp
         src/output/feed/RSS.h
+        src/output/json/JSON.cpp
+        src/output/json/JSON.h
         src/html/editor/code/code.cpp
         src/html/editor/code/code.h
         src/html/editor/editor.cpp
@@ -139,7 +141,8 @@ set(TEST_FILES
         tests/fs/fs.cpp
         tests/html/editor/editor.cpp
         tests/dto/HTML.cpp
-        tests/dto/TableOfContents.cpp)
+        tests/dto/TableOfContents.cpp
+        tests/output/json/json.cpp)
 
 enable_testing()
 
