@@ -5,6 +5,7 @@
 #include "page/Indices.h"
 #include "page/Landing.h"
 #include "feed/RSS.h"
+#include "json/JSON.h"
 
 namespace blogator::output {
     void generate( const std::shared_ptr<const dto::Index>     &index,

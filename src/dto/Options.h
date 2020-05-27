@@ -161,6 +161,12 @@ namespace blogator::dto {
 
         } _rss;
 
+        struct JSONIndex {
+            bool        generate  { false };
+            std::string file_name { "index.json" };
+
+        } _json_index;
+
         /**
          * Month string lookup
          */
