@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(blogator VERSION 1.3.0)
+project(blogator VERSION 1.3.1)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)

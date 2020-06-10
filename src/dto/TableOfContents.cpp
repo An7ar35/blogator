@@ -197,7 +197,8 @@ void blogator::dto::TableOfContents::findTocBlock( const size_t &line_number,
  * Generates all the numbering and level information for all the headings
  */
 void blogator::dto::TableOfContents::finaliseToC() {
-    generateNumbering( _heading_insert_pos );
+    if( !_heading_insert_pos.empty() )
+        generateNumbering( _heading_insert_pos );
 }
 
 
