@@ -29,6 +29,7 @@ namespace blogator::output::json {
         void writeTags( std::ofstream &file );
         void writeAuthors( std::ofstream &file );
         void writeYears( std::ofstream &file );
+        void appendJSON( const std::filesystem::path &src_path, std::ofstream &file );
     };
 }
 

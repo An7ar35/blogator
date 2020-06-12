@@ -36,6 +36,7 @@ namespace blogator::fs {
         const std::regex KV_STR_ARR_RX    = std::regex( R"(\s*([a-zA-Z-]+)\s*=\s*\[(.*)\]\s*;)" );
         const std::regex QUOTED_STR_RX    = std::regex( R"((?:(?:")([^"]*)(?:"(?:\s*))))" );
         const std::regex HTML_FILENAME_RX = std::regex( R"(^.+\.(?:htm|html)$)" );
+        const std::regex JSON_FILENAME_RX = std::regex( R"(^.+\.(?:json)$)" );
         const std::regex WEB_URL_RX       = std::regex( R"((https:[/][/]|http:[/][/]|www.)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._?\,'/\+&amp;%\$#\=~])*$)" );
         const std::regex CSS_DIMENSION_RX = std::regex( R"((\d+\.{0,1}\d*\s*(?:cm|mm|in|px|pt|pc|em|ex|ch|rem|vw|vh|vmin|vmax|%)))" );
         const std::regex IMG_FILENAME     = std::regex( R"(([a-zA-Z-_\d]+\.(?:jpg|jpeg|jpe|jif|jfif|jfi|gif|png|apng|svg|svgz|bmp|dib|webp|ico)))" );

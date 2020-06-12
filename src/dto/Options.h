@@ -162,8 +162,9 @@ namespace blogator::dto {
         } _rss;
 
         struct JSONIndex {
-            bool        generate  { false };
-            std::string file_name { "index.json" };
+            bool                     generate  { false };
+            std::string              file_name { "index.json" };
+            std::vector<std::string> append_paths;
 
         } _json_index;
 

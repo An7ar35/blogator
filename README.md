@@ -488,6 +488,12 @@ is after the day of the build (i.e. when generator is run).
 
     json-index = true;
     
+> List of filenames of source JSON files whose content is to be appended to the JSON index file. 
+  Useful another category needs to be added to the search source. E.g.: personal projects. 
+  Important: JSON sources must be valid and be in the same root structure as the JSON index. 
+ 
+    json-index-append = [ "path/appendthis.json", ... ]
+    
 > Generates a JSON index of all the articles and, if enabled, the authors, tags and years for 
   use in dynamic search scripts. The JSON file is will be located in the root of the index folder.
   All indices include target hrefs with an absolute path from the root of the blog 

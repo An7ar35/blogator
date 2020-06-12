@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include "../../exception/file_access_failure.h"
+#include "../../fs/fs.h"
 
 /**
  * Escapes a string for JSON output
@@ -90,6 +91,18 @@ bool blogator::output::json::JSON::init() {
         if( _options->_index.index_by_year ) {
             out << ", ";
             writeYears( out );
+        }
+
+        if( !_options->_json_index.append_paths.empty() ) {
+
+            for( const auto &src_rel_path : _options->_json_index.append_paths ) {
+                out << ", ";
+
+                _display.debug( "Appending external JSON content to JSON Index file: " + src_rel_path );
+
+                auto src_abs_path = _options->_paths.root_dir / src_rel_path;
+                appendJSON( src_abs_path, out );
+            }
         }
 
         out << " }";
@@ -246,4 +259,65 @@ void blogator::output::json::JSON::writeYears( std::ofstream &file ) {
     }
 
     file << " ]";
+}
+
+/**
+ * Appends the content of a third party JSON file to the Blogator JSON index file
+ * Note: assumes the source contains valid JSON
+ * @param src_path Source JSON file path whose content is to be appended to the output JSON
+ * @param file     Output JSON
+ * @throws exception::file_access_failure when source JSON file could not be opened
+ */
+void blogator::output::json::JSON::appendJSON( const std::filesystem::path &src_path, std::ofstream &file ) {
+    std::ifstream     src( src_path.string() );
+    std::stringstream ss;
+
+    if( src.is_open() ) {
+        std::string line;
+
+        while( getline( src, line ) ) {
+            ss << line;
+        }
+
+        src.close();
+
+        std::string cache = ss.str();
+
+        if( cache.empty() ) {
+            _display.warning( "JSON file to append is empty: " + src_path.string() );
+            return; //EARLY-RETURN
+        }
+
+        std::string::size_type start = 0;
+        std::string::size_type end   = cache.length() - 1;
+
+        //move to the first character at start and end
+        while( start < cache.length() && ( isspace( cache.at( start ) ) ) )
+            ++start;
+
+        while( end > 0 && ( isspace( cache.at( end ) ) ) )
+            --end;
+
+        //get rid of the first encountered '{' and '}' on either end
+        if( start < cache.length() && cache.at( start ) == '{' )
+            ++start;
+
+        if( end > 0 && cache.at( end ) == '}' )
+            --end;
+
+        if( start >= end ) {
+            _display.error( "JSON file looks malformed: " + src_path.string() );
+            return; //EARLY-RETURN
+        }
+
+        std::stringstream temp;
+        temp << "start: '" << start << "', end: '" << end << "'.";
+        _display.debug( temp.str() );
+
+        for( ; start <= end; ++start )
+            file << cache.at( start );
+
+    } else {
+        throw exception::file_access_failure( "Could not open: " + src_path.string() );
+    }
 }
