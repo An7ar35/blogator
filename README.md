@@ -495,7 +495,7 @@ is after the day of the build (i.e. when generator is run).
   Note that article headings will only be included in the event the `auto-toc` feature is used 
   on the article.
 
-    json-index-append = [ "path/appendthis.json", ... ]
+    json-index-append = [ "path/appendthis.json", ... ];
 
 > List of filenames of source JSON files whose content is to be appended to the JSON index file. 
   Useful when another category needs to be added to the search source. E.g.: personal projects. 
