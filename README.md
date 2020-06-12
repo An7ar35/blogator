@@ -487,19 +487,19 @@ is after the day of the build (i.e. when generator is run).
 > Flag to enable the creation of an extra index that groups posts by authors
 
     json-index = true;
-    
-> List of filenames of source JSON files whose content is to be appended to the JSON index file. 
-  Useful another category needs to be added to the search source. E.g.: personal projects. 
-  Important: JSON sources must be valid and be in the same root structure as the JSON index. 
- 
-    json-index-append = [ "path/appendthis.json", ... ]
-    
+       
 > Generates a JSON index of all the articles and, if enabled, the authors, tags and years for 
   use in dynamic search scripts. The JSON file is will be located in the root of the index folder.
   All indices include target hrefs with an absolute path from the root of the blog 
   (e.g.: for a tag - "index/by_tags/10_0.html", and for a post - "posts/25.html").
   Note that article headings will only be included in the event the `auto-toc` feature is used 
   on the article.
+
+    json-index-append = [ "path/appendthis.json", ... ]
+
+> List of filenames of source JSON files whose content is to be appended to the JSON index file. 
+  Useful when another category needs to be added to the search source. E.g.: personal projects. 
+  __Important__: JSON sources must be valid and be in the same root structure as the JSON index. 
 
 #### Page navigation
     
