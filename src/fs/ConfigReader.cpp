@@ -116,6 +116,7 @@ void blogator::fs::ConfigReader::generateBlankConfigFile( const std::filesystem:
        << "index-by-tag       = true;\n"
        << "index-by-author    = false;\n"
        << "json-index         = false;\n"
+       << "json-index-append  = [];\n"
        << "\n"
        << "//Per-Page navigation DIV contents\n"
        << "page-nav-separator = \" / \";\n"
@@ -871,8 +872,10 @@ void blogator::fs::ConfigReader::processJsonOptions( std::unordered_map<std::str
                                                      dto::Options &options) const
 {
     static const std::string generate_index = "json-index";
+    static const std::string append_paths   = "json-index-append";
 
     auto generate_index_it = map.find( generate_index );
+    auto index_append_it   = map.find( append_paths );
 
     if( generate_index_it != map.end() ) {
         if( generate_index_it->second.type == Type::BOOLEAN ) {
@@ -884,5 +887,27 @@ void blogator::fs::ConfigReader::processJsonOptions( std::unordered_map<std::str
                 "(line #" + std::to_string( generate_index_it->second.line ) + "): " + generate_index_it->second.value
             );
         }
+    }
+
+    if( index_append_it != map.end() ) {
+        auto it = std::sregex_iterator( index_append_it->second.value.begin(),
+                                        index_append_it->second.value.end(),
+                                        QUOTED_STR_RX );
+
+        size_t i = 0;
+        while( it != std::sregex_iterator() ) {
+            if( it->size() > 1 && std::regex_search( it->str( 1 ), JSON_FILENAME_RX ) )
+                options._json_index.append_paths.emplace_back( it->str( 1 ) );
+            else
+                throw exception::file_parsing_failure(
+                    "Malformed file name in '" + append_paths + "' array (line #" +
+                    std::to_string( index_append_it->second.line ) + "): " + it->str()
+                );
+
+            ++i;
+            ++it;
+        }
+
+        index_append_it->second.validated = true;
     }
 }
