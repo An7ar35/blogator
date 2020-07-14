@@ -19,7 +19,7 @@ namespace eadlib::cli {
     enum class BGColour   { BLACK = 40, RED = 41, GREEN = 42, YELLOW = 43, BLUE = 44, MAGENTA = 45, CYAN = 46, WHITE = 47 };
     enum class Decoration { BOLD = 1, FAINT = 2, ITALIC = 3, UNDERLINE = 4 };
 
-    template<FGColour colour> void format_( std::stringstream &ss ) {}
+    template<FGColour colour> void format_( std::stringstream & ) {}
     template<FGColour colour, Decoration head, Decoration ...tail> void format_( std::stringstream &ss ) {
         ss << ';' << static_cast<int>( head );
         format_<colour, tail...>( ss );

@@ -9,9 +9,9 @@
  */
 blogator::cli::MsgDisplay::MsgDisplay() :
     _progress_bar( BAR_WIDTH, CHAR_EMPTY ),
-    _old_cerr_buffer( std::cerr.rdbuf( _err_buffer.rdbuf() ) ),
     _verbose_flag( true ),
-    _debug_flag( false )
+    _debug_flag( false ),
+    _old_cerr_buffer( std::cerr.rdbuf( _err_buffer.rdbuf() ) )
 {}
 
 /**

@@ -15,10 +15,10 @@ namespace blogator::output::abstract {
               std::shared_ptr<const dto::Options>   global_options );
 
       protected:
-        cli::MsgInterface                    &_display;
         std::shared_ptr<const dto::Index>     _index;
         std::shared_ptr<const dto::Templates> _templates;
         std::shared_ptr<const dto::Options>   _options;
+        cli::MsgInterface &                   _display;
     };
 }
 

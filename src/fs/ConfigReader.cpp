@@ -77,7 +77,7 @@ std::shared_ptr<blogator::dto::Options> blogator::fs::ConfigReader::init( const 
         display.msg( "JSON Index will *not* be generated." );
     }
 
-    return std::move( options );
+    return options;
 }
 
 /**

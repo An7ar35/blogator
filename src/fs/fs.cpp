@@ -120,7 +120,7 @@ std::shared_ptr<blogator::dto::Templates> blogator::fs::importTemplates( const d
 
     getConsecutiveWritePositions( master_index, *templates );
 
-    return std::move( templates );
+    return templates;
 }
 
 /**
@@ -370,7 +370,7 @@ std::unique_ptr<blogator::dto::HTML> blogator::fs::importHTML( const std::filesy
 
     file.close();
 
-    return std::move( html );
+    return html;
 }
 
 /**

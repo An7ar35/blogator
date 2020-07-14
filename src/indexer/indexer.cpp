@@ -87,7 +87,7 @@ std::shared_ptr<blogator::dto::Index> blogator::indexer::index( const std::share
     }
 
     display.progress( "DONE" );
-    return std::move( index );
+    return index;
 }
 
 /**

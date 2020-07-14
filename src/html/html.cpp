@@ -192,7 +192,7 @@ std::unique_ptr<blogator::dto::IndexDateTree>
         html::writer::closeTree( *tree );
     }
 
-    return std::move( tree );
+    return tree;
 }
 
 /**
@@ -233,5 +233,5 @@ std::unique_ptr<blogator::dto::IndexTagTree>
 
     html::writer::closeTree( *tree );
 
-    return std::move( tree );
+    return tree;
 }
