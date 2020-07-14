@@ -11,5 +11,7 @@
     · Create post pages
     · Create index pages
     · Create landing pages
-    · Create RSS feed
+    · Create RSS feed (opt)
+    · Create JSON index (opt)
 7/ Check converted relative paths in Templates
+8/ Check rel paths in html/css folders set in options (opt)

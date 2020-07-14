@@ -49,13 +49,19 @@ set(SOURCE_FILES
         src/dto/Line.h
         src/dto/SeekRange.h
         src/dto/InsertPosition.h
+        src/dto/TableOfContents.h
+        src/dto/TableOfContents.cpp
+        src/dto/Text.cpp
+        src/dto/Text.h
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
+        src/exception/DOMException.h
         src/fs/fs.cpp
         src/fs/fs.h
         src/fs/ConfigReader.cpp
         src/fs/ConfigReader.h
+        src/string/helpers.h
         src/html/html.cpp
         src/html/html.h
         src/html/writer/writer.cpp
@@ -102,10 +108,26 @@ set(SOURCE_FILES
         src/html/editor/code/code.h
         src/html/editor/editor.cpp
         src/html/editor/editor.h
-        src/dto/TableOfContents.h
-        src/dto/TableOfContents.cpp
         src/output/helper/OrderedPostInsertion.cpp
-        src/output/helper/OrderedPostInsertion.h)
+        src/output/helper/OrderedPostInsertion.h
+        src/checker/Checker.cpp
+        src/checker/Checker.h
+        src/encoding/encoding.cpp
+        src/encoding/encoding.h
+        src/dom/html5/Tag.h
+        src/dom/html5/Specs.cpp
+        src/dom/html5/Specs.h
+        src/dom/html5/rules.cpp
+        src/dom/html5/rules.h
+        src/dom/html5/html5.h
+        src/dom/dot/DOT.cpp
+        src/dom/dot/DOT.h
+        src/dom/dot/DOTNode.cpp
+        src/dom/dot/DOTNode.h
+        src/dom/parser/Tokeniser.cpp
+        src/dom/parser/Tokeniser.h
+        src/dom/parser/Parser.cpp
+        src/dom/parser/Parser.h src/dom/html5/Attribute.h)
 
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
@@ -142,7 +164,14 @@ set(TEST_FILES
         tests/html/editor/editor.cpp
         tests/dto/HTML.cpp
         tests/dto/TableOfContents.cpp
-        tests/output/json/json.cpp)
+        tests/output/json/json.cpp
+        tests/dom/dot/DOT_tests.cpp
+        tests/dom/dot/DOTNode_tests.cpp
+        tests/dom/html5/Specs_tests.cpp
+        tests/string/helpers_tests.cpp
+        tests/dom/parser/Tokeniser_tests.cpp
+        tests/dom/parser/Parser_tests.cpp
+        tests/dom/html5/rules_tests.cpp)
 
 enable_testing()
 

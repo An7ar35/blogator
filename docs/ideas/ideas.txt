@@ -23,6 +23,7 @@ canonify-urls  = false; //TODO true: modify all relative URLs found in the posts
 
 ===[ V2 ]===
 · Hash & cache articles. Then check hash on run to make sure article hasn't been changed
+  -> could be used to avoid having to re-validate source files if unchanged
 
 · Index page for local files (e.g.: *.pdf)
 · Updated page hook for the front page as an option (i.e. when a post is updated the article can appear in an "recently updated section" for the frontpage)
