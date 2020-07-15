@@ -7,7 +7,7 @@
 #include "validator/validator.h"
 
 /**
- * Header file to collate everything in the html5:: namespace so that only 1 #inlcude need be done.
+ * Header file grab everything in the html5:: namespace so that only 1 #inlcude need be done.
  */
 
 #endif //BLOGATOR_DOM_HTML5_H

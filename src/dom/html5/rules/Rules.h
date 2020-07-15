@@ -35,13 +35,14 @@ namespace blogator::dom::html5 {
             return instance;
         }
 
-        bool isPaired( html5::Tag tag );
         std::u32string tagToStr( html5::Tag tag );
         html5::Tag strToTag( std::u32string str );
 
-        //TODO tag-attribute matrix
         std::u32string attributeToStr( html5::Attribute attribute );
         html5::Attribute strToAttribute( std::u32string str );
+
+        bool isPaired( html5::Tag tag );
+        bool areAffiliated( Attribute attr, Tag tag );
 
         //TODO Tag matrix (i.e.: what Tag is cool inside what Tags)
 

@@ -6,24 +6,6 @@
 #include "../../../encoding/encoding.h"
 
 /**
- * Checks if a Tag requires closing
- * @param tag Tag type
- * @return Closing required
- */
-bool blogator::dom::html5::Rules::isPaired( html5::Tag tag ) {
-    const auto it = _tag2str_map.find( tag );
-
-    if( it != _tag2str_map.cend() ) {
-        return it->second.structure == TagStructure::PAIRED;
-    } else {
-        std::stringstream ss;
-        ss << "[dom::html5::Rules::isPaired( dom::html5::Tag )] "
-              "Tag (" << static_cast<int>( tag ) << ") unknown.";
-        throw std::invalid_argument( ss.str() );
-    }
-}
-
-/**
  * Converts a tag enum type to its string representation
  * @param tag Tag type
  * @return Tag type as a string
@@ -102,6 +84,45 @@ blogator::dom::html5::Attribute blogator::dom::html5::Rules::strToAttribute( std
 }
 
 /**
+ * Checks if a Tag requires closing
+ * @param tag Tag type
+ * @return Closing required
+ */
+bool blogator::dom::html5::Rules::isPaired( html5::Tag tag ) {
+    const auto it = _tag2str_map.find( tag );
+
+    if( it != _tag2str_map.cend() ) {
+        return it->second.structure == TagStructure::PAIRED;
+    } else {
+        std::stringstream ss;
+        ss << "[dom::html5::Rules::isPaired( dom::html5::Tag )] "
+              "Tag (" << static_cast<int>( tag ) << ") unknown.";
+        throw std::invalid_argument( ss.str() );
+    }
+}
+
+/**
+ * Gets the affiliation state of an attribute with a tag
+ * @param attr Attribute
+ * @param tag  Tag
+ * @return Affiliation state
+ * @throws std::out_of_range when enum(s) cast to an out of range index on the lookup map
+ */
+bool blogator::dom::html5::Rules::areAffiliated( html5::Attribute attr, html5::Tag tag ) {
+    const auto attr_i = static_cast<size_t>( attr );
+    const auto tag_i  = static_cast<size_t>( tag );
+
+    if( attr_i >= _attr2tag_table.size() || tag_i >= _attr2tag_table[attr_i].size()) {
+        std::stringstream ss;
+        ss << "[blogator::dom::html5::Rules::areAffiliated( Attribute=" << attr_i << ", Tag=" << tag_i << " )] "
+           << "argument(s) are out of bounds of the lookup table size.";
+        throw std::out_of_range( ss.str() );
+    }
+
+    return _attr2tag_table[attr_i][tag_i];
+}
+
+/**
  * Gets the number of unique tags listed in the internal maps
  * @return Number of unique tags
  */
@@ -126,9 +147,7 @@ blogator::dom::html5::Rules::Rules() :
     _attr2str_map( Factories::createAttr2StrMap() ),
     _str2attr_map( Factories::createStr2AttrMap( _attr2str_map ) ),
     _attr2tag_table( Factories::createAttr2TagLookupTable() )
-{
-    std::cout << "Rules constructor called!!" << std::endl;
-}
+{}
 
 /**
  * Generates the Tag->{TagStructure, tag str} lookup map
