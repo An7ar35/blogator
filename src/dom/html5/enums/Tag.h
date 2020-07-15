@@ -30,6 +30,8 @@ namespace blogator::dom::html5 {
         U, UL,
         VAR, VIDEO,
         WBR,
+
+        ENUM_END //Not HTML - used for enumeration of enums
     };
 
     /**

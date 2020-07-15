@@ -106,7 +106,7 @@ void blogator::dom::DOTNode::setTextContent( std::u32string text ) {
  * @throws HtmlParseLib::DOMException when attempt is made of giving a child to an unpaired node
  */
 blogator::dom::DOTNode & blogator::dom::DOTNode::addChild( std::unique_ptr<DOTNode> node ) {
-    if( !html5::Specs::isPaired( _tag ) ) //rule: Only paired structs can have nested children
+    if( !html5::Rules::getInstance().isPaired( _tag ) ) //rule: Only paired structs can have nested children
         throw exception::DOMException(
             "[blogator::dom::DOTNode::addChild( std::unique_ptr<DOTNode> )] "
             "Cannot add children to an unpaired node type.",

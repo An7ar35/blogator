@@ -114,11 +114,12 @@ set(SOURCE_FILES
         src/checker/Checker.h
         src/encoding/encoding.cpp
         src/encoding/encoding.h
-        src/dom/html5/Tag.h
-        src/dom/html5/Specs.cpp
-        src/dom/html5/Specs.h
-        src/dom/html5/rules.cpp
-        src/dom/html5/rules.h
+        src/dom/html5/enums/Attribute.h
+        src/dom/html5/enums/Tag.h
+        src/dom/html5/rules/Rules.cpp
+        src/dom/html5/rules/Rules.h
+        src/dom/html5/validator/validator.cpp
+        src/dom/html5/validator/validator.h
         src/dom/html5/html5.h
         src/dom/dot/DOT.cpp
         src/dom/dot/DOT.h
@@ -127,7 +128,7 @@ set(SOURCE_FILES
         src/dom/parser/Tokeniser.cpp
         src/dom/parser/Tokeniser.h
         src/dom/parser/Parser.cpp
-        src/dom/parser/Parser.h src/dom/html5/Attribute.h)
+        src/dom/parser/Parser.h)
 
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
@@ -167,11 +168,12 @@ set(TEST_FILES
         tests/output/json/json.cpp
         tests/dom/dot/DOT_tests.cpp
         tests/dom/dot/DOTNode_tests.cpp
-        tests/dom/html5/Specs_tests.cpp
+        tests/dom/html5/rules/Rules_tests.cpp
         tests/string/helpers_tests.cpp
         tests/dom/parser/Tokeniser_tests.cpp
         tests/dom/parser/Parser_tests.cpp
-        tests/dom/html5/rules_tests.cpp)
+        tests/dom/html5/rules_tests.cpp
+        tests/dom/html5/validator/validator_tests.cpp)
 
 enable_testing()
 

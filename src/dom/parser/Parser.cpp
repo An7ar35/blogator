@@ -56,7 +56,9 @@ blogator::dom::DOTNode & blogator::dom::parser::Parser::parseTag( const parser::
 
     //TODO attributes
 
-    return parent.addChild( std::make_unique<DOTNode>( html5::Specs::strToTag( utf32_ss.str() ) ) );
+    return parent.addChild(
+        std::make_unique<DOTNode>( html5::Rules::getInstance().strToTag( utf32_ss.str() ) )
+    );
 }
 
 blogator::dom::DOTNode & blogator::dom::parser::Parser::parseText( const parser::Token &token,
@@ -77,7 +79,7 @@ blogator::dom::html5::Tag blogator::dom::parser::Parser::parseOpeningTag( const 
 {
     auto it = str.begin();
     
-    return html5::strToTag( str );
+    return html5::Rules::getInstance().strToTag( str );
 }
 
 /**
@@ -100,7 +102,7 @@ blogator::dom::html5::Tag blogator::dom::parser::Parser::parseClosingTag( const 
     }
 
     //TODO check that there is only space before the '>' char --> ERROR CONTROL
-    return html5::strToTag( utf32_ss.str() );
+    return html5::Rules::getInstance().strToTag( utf32_ss.str() );
 
 
 //    try {

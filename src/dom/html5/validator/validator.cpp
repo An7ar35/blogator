@@ -1,18 +1,18 @@
-#include "rules.h"
+#include "validator.h"
 
 #include <cwctype>
 
-#include "../../exception/DOMException.h"
-#include "../../encoding/encoding.h"
-#include "../../string/helpers.h"
-#include "Specs.h"
+#include "../../../exception/DOMException.h"
+#include "../../../encoding/encoding.h"
+#include "../../../string/helpers.h"
+#include "../rules/Rules.h"
 
 /**
  * Checks the character matches the end of tag character ('>')
  * @param c Character to check
  * @return Matching state for the '>' character
  */
-bool blogator::dom::html5::rules::isTagEnd( char32_t c ) {
+bool blogator::dom::html5::validator::isTagEnd( char32_t c ) {
     return c == special_char::GREATER_THAN;
 }
 
@@ -22,7 +22,7 @@ bool blogator::dom::html5::rules::isTagEnd( char32_t c ) {
  * @param err_flag Error flag switch to true when an illegal character is found (ctrl, ", ' or non-character)
  * @return Validity state i.e.: !(ctrl OR '"' OR '\'' OR non-char OR space OR '>' OR '/' OR '=' )
  */
-bool blogator::dom::html5::rules::isValidAttributeNameChar( char32_t c, bool &err_flag ) {
+bool blogator::dom::html5::validator::isValidAttributeNameChar( char32_t c, bool &err_flag ) {
     /* "Attribute names must consist of one or more characters other than controls,
      *  U+0020 SPACE, U+0022 ("), U+0027 ('), U+003E (>), U+002F (/), U+003D (=),
      *  and non-characters." */
@@ -46,7 +46,7 @@ bool blogator::dom::html5::rules::isValidAttributeNameChar( char32_t c, bool &er
  * @param err_flag Error flag switch to true when an illegal character is found (ctrl/non-character)
  * @return  Validity state i.e.: !(ctrl OR non-char OR space OR '/' )
  */
-bool blogator::dom::html5::rules::isValidAttributeValueChar( char32_t c, bool &err_flag ) {
+bool blogator::dom::html5::validator::isValidAttributeValueChar( char32_t c, bool &err_flag ) {
     err_flag = iswcntrl( c )
             || encoding::isNonCharacter( c )
             || c == html5::special_char::QUOTATION_MARK
@@ -69,7 +69,7 @@ bool blogator::dom::html5::rules::isValidAttributeValueChar( char32_t c, bool &e
  * @param err_flag      Error flag switch to true when an illegal character is found (ctrl/non-character)
  * @return  Validity state i.e.: !(ctrl OR non-char OR space OR '/' )
  */
-bool blogator::dom::html5::rules::isValidAttributeValueChar( char32_t c, char32_t boundary_char, bool &err_flag ) {
+bool blogator::dom::html5::validator::isValidAttributeValueChar( char32_t c, char32_t boundary_char, bool &err_flag ) {
     err_flag = iswcntrl( c ) || encoding::isNonCharacter( c );
     return !( err_flag || c == boundary_char );
 }
@@ -79,7 +79,7 @@ bool blogator::dom::html5::rules::isValidAttributeValueChar( char32_t c, char32_
  * @param c Character
  * @return Character reference string ("&..;")
  */
-std::u32string blogator::dom::html5::rules::escapeReservedChar( char32_t c ) {
+std::u32string blogator::dom::html5::validator::escapeReservedChar( char32_t c ) {
     static const std::u32string QUOTATION_MARK = { U"&quot;" };
     static const std::u32string APOSTROPHE     = { U"&#39;"  };
     static const std::u32string AMPERSAND      = { U"&amp;"  };
@@ -107,7 +107,7 @@ std::u32string blogator::dom::html5::rules::escapeReservedChar( char32_t c ) {
  * @param str String that may be a character reference
  * @return Validity state
  */
-bool blogator::dom::html5::rules::isValidCharReference( const std::u32string& str ) {
+bool blogator::dom::html5::validator::isValidCharReference( const std::u32string& str ) {
     if( str.size() < 3 )
         return false;
 
@@ -143,7 +143,7 @@ bool blogator::dom::html5::rules::isValidCharReference( const std::u32string& st
  * @throws exception::DOMException when validation fails
  * @throws std::invalid_argument when given string is not in the expected format "<...>"
  */
-blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
+blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
     const std::u32string &str,
     std::vector<std::pair<std::u32string, std::u32string>> &attributes )
 {
@@ -153,14 +153,14 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
 
     if( it == str.cend() || *(it++) != html5::special_char::LESS_THAN ) { //i=0 '<'
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+        ss << "[blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
            << "1st character of an opening tag must be U+003C ('<').";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
 
     if( it == str.cend() || !iswalpha( *(it++) ) ) { //i=2 beginning of tag name
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
            << "Tag name must be made of ASCII alphanumeric characters only.";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
@@ -170,7 +170,7 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
     while( it != str.cend() && !iswspace( *it ) && !isTagEnd( *it ) && *it != html5::special_char::SOLIDUS ) { //reach end of tag name
         if( !iswalpha( *(it++) ) ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+            ss << "[blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
                << "Tag name must be made of ASCII alphanumeric characters only.";
             throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
         }
@@ -198,7 +198,7 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
 
             } catch( std::invalid_argument &e ) {
                 std::stringstream ss;
-                ss << "[blogator::dom::html5::rules::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+                ss << "[blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
                    << "Invalid attribute(s) format -> " << e.what();
                 throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
             }
@@ -208,7 +208,7 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
     if( it == str.cend() || *(it++) == html5::special_char::SOLIDUS ) { //i.e. self closing tag "<.../>"
         if( it == str.cend() || !isTagEnd( *it ) ) { //'>'
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+            ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
                << "The last character on a self closing tag (\"<.../>\") must U+003E ('>').";
             throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
         }
@@ -218,17 +218,17 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
 
     if( end_reached && it != str.cend() ) {
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
             << "String has character(s) after the U+003E character ('>').";
         throw std::invalid_argument( ss.str() );
     }
 
     try {
-        return html5::Specs::strToTag( tag_name );
+        return html5::Rules::getInstance().strToTag( tag_name );
 
     } catch( std::invalid_argument &e ) {
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+        ss << "[blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
            << "Tag name is not valid.";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
@@ -240,7 +240,7 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateOpeningTag(
  * @param attributes Attribute store
  * @throws std::invalid_argument when attribute string has formatting errors
  */
-void blogator::dom::html5::rules::validateAttributes(
+void blogator::dom::html5::validator::validateAttributes(
     const std::u32string &str,
     std::vector<std::pair<std::u32string, std::u32string>> &attributes )
 {
@@ -256,12 +256,12 @@ void blogator::dom::html5::rules::validateAttributes(
     { //attribute name
         bool illegal_char { false };
 
-        while( it != str.cend() && rules::isValidAttributeNameChar( *it, illegal_char ) )
+        while( it != str.cend() && validator::isValidAttributeNameChar( *it, illegal_char ) )
             name << *( it++ );
 
         if( illegal_char ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+            ss << "[blogator::dom::html5::validator::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
                << "Invalid character in named attribute \"" << encoding::encodeToUTF8( name.str() ) << "\".";
             throw std::invalid_argument( ss.str() );
         }
@@ -275,7 +275,7 @@ void blogator::dom::html5::rules::validateAttributes(
 
         if( it == str.cend() ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+            ss << "[blogator::dom::html5::validator::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
                << "Expected value for named attribute \"" << encoding::encodeToUTF8( name.str() ) << "\" missing.";
             throw std::invalid_argument( ss.str() );
         }
@@ -304,14 +304,14 @@ void blogator::dom::html5::rules::validateAttributes(
 
         if( illegal_char ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+            ss << "[blogator::dom::html5::validator::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
                << "Invalid character in value for named attribute \"" << encoding::encodeToUTF8( name.str() ) << "\".";
             throw std::invalid_argument( ss.str() );
         }
 
         if( it == str.cend() && boundary != AttrBoundaryChar::NONE ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
+            ss << "[blogator::dom::html5::validator::validateAttributes( \"" << encoding::encodeToUTF8( str ) << "\", .. )] "
                << "Missing closing character ("
                << ( boundary == AttrBoundaryChar::APOSTROPHE ? "'" : "\"")
                << ") from value for named attribute \"" << encoding::encodeToUTF8( name.str() ) << "\".";
@@ -353,27 +353,27 @@ void blogator::dom::html5::rules::validateAttributes(
  * @return Closing tag name type
  * @throws exception::DOMException when validation fails
  */
-blogator::dom::html5::Tag blogator::dom::html5::rules::validateClosingTag( const std::u32string &str ) {
+blogator::dom::html5::Tag blogator::dom::html5::validator::validateClosingTag( const std::u32string &str ) {
     auto it     = str.cbegin();
     auto length = 0;
 
     if( it == str.cend() || *(it++) != html5::special_char::LESS_THAN ) { //i=0 '<'
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
            << "1st character of an end tag must be U+003C ('<').";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
 
     if( *(it++) != html5::special_char::SOLIDUS ) { //i=1 '/'
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
            << "2nd character of an end tag must be U+002F ('/').";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
 
     if( it == str.cend() || !iswalpha( *(it++) ) ) { //i=2 beginning of tag name
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
            << "Tag name must be made of ASCII alphanumeric characters only.";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
@@ -383,7 +383,7 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateClosingTag( const
     while( it != str.cend() && !iswspace( *it ) && !isTagEnd( *it ) ) { //reach end of tag name
         if( !iswalpha( *(it++) ) ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+            ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
                << "Tag name must be made of ASCII alphanumeric characters only.";
             throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
         }
@@ -394,7 +394,7 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateClosingTag( const
     while( it != str.cend() && !isTagEnd( *it ) ) {
         if( !iswspace( *(it++) ) ) {
             std::stringstream ss;
-            ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+            ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
                << "After the tag name, there may only be ASCII whitespace before the closing character.";
             throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
         }
@@ -402,17 +402,17 @@ blogator::dom::html5::Tag blogator::dom::html5::rules::validateClosingTag( const
 
     if( it == str.cend() || !isTagEnd( *it ) ) { //'>'
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
            << "The last character on an end tag must U+003E ('>').";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }
 
     try {
-        return html5::Specs::strToTag( str.substr( 2, length ) );
+        return html5::Rules::getInstance().strToTag( str.substr( 2, length ) );
 
     } catch( std::invalid_argument &e ) {
         std::stringstream ss;
-        ss << "[blogator::dom::html5::rules::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
+        ss << "[blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
            << "Tag name is not valid.";
         throw exception::DOMException( ss.str(), exception::DOMErrorType::SyntaxError );
     }

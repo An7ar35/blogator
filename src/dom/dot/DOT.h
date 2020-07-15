@@ -4,7 +4,7 @@
 #include <stack>
 
 #include "DOTNode.h"
-#include "../html5/Tag.h"
+#include "../html5/enums/Tag.h"
 #include "../../dto/Text.h"
 
 namespace blogator::dom {

@@ -8,8 +8,7 @@
 
 #include "../../exception/DOMException.h"
 #include "../../encoding/encoding.h"
-#include "../html5/Tag.h"
-#include "../html5/Specs.h"
+#include "../html5/html5.h"
 
 namespace blogator::dom {
     /* These nodes are not meant to be copied nor deleted outside the destruction phase.
@@ -57,7 +56,7 @@ namespace blogator::dom {
         friend std::ostream & operator <<( std::ostream &os, const DOTNode &node ) {
             { //opening tag + attributes
                 u32stringstream_t ss;
-                ss << U"<" << html5::Specs::tagToStr( node._tag );
+                ss << U"<" << html5::Rules::getInstance().tagToStr( node._tag );
                 node.printAttributes( ss );
                 ss << U">";
                 ss << node.content();
@@ -70,7 +69,7 @@ namespace blogator::dom {
 
             { //closing tag
                 u32stringstream_t ss;
-                ss << U"</" << html5::Specs::tagToStr( node._tag ) << U">";
+                ss << U"</" << html5::Rules::getInstance().tagToStr( node._tag ) << U">";
 
                 encoding::encodeToUTF8( os, ss.str() );
             }
