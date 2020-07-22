@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../enums/Tag.h"
+#include "../Html5Properties.h"
 
 namespace blogator::dom::html5::validator {
     enum class AttrBoundaryChar { NONE, APOSTROPHE, QUOTATION_MARK };
