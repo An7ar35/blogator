@@ -1,13 +1,13 @@
-#ifndef BLOGATOR_DTO_TEXT_H
-#define BLOGATOR_DTO_TEXT_H
+#ifndef BLOGATOR_DOM_DTO_TEXT_H
+#define BLOGATOR_DOM_DTO_TEXT_H
 
 #include <vector>
 #include <string>
 #include <iostream>
 
-#include "../encoding/encoding.h"
+#include "../../encoding/encoding.h"
 
-namespace blogator::dto {
+namespace blogator::dom::dto {
     struct Text {
         typedef std::u32string    Line_t;
         typedef size_t            LineIndex_t;
@@ -19,6 +19,8 @@ namespace blogator::dto {
             return s;
         }
 
+        static bool isEOL( const dto::Text::Line_t::const_iterator &it, const dto::Text::Line_t &line );
+
         bool operator ==( const Text &rhs ) const;
         bool operator !=( const Text &rhs ) const;
 
@@ -26,4 +28,4 @@ namespace blogator::dto {
     };
 }
 
-#endif //BLOGATOR_DTO_TEXT_H
+#endif //BLOGATOR_DOM_DTO_TEXT_H

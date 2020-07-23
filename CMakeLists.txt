@@ -51,8 +51,6 @@ set(SOURCE_FILES
         src/dto/InsertPosition.h
         src/dto/TableOfContents.h
         src/dto/TableOfContents.cpp
-        src/dto/Text.cpp
-        src/dto/Text.h
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
@@ -114,21 +112,46 @@ set(SOURCE_FILES
         src/checker/Checker.h
         src/encoding/encoding.cpp
         src/encoding/encoding.h
-        src/dom/html5/enums/Attribute.h
-        src/dom/html5/enums/Tag.h
-        src/dom/html5/rules/Rules.cpp
-        src/dom/html5/rules/Rules.h
-        src/dom/html5/validator/validator.cpp
-        src/dom/html5/validator/validator.h
-        src/dom/html5/html5.h
         src/dom/dot/DOT.cpp
         src/dom/dot/DOT.h
         src/dom/dot/DOTNode.cpp
         src/dom/dot/DOTNode.h
-        src/dom/parser/Tokeniser.cpp
-        src/dom/parser/Tokeniser.h
+        src/dom/dto/Attribute.cpp
+        src/dom/dto/Attribute.h
+        src/dom/dto/GlobalMaps.h
+        src/dom/dto/TagSpecs.h
+        src/dom/dto/Text.cpp
+        src/dom/dto/Text.h
+        src/dom/html5/Html5Properties.cpp
+        src/dom/html5/Html5Properties.h
+        src/dom/html5/Html5Relationships.cpp
+        src/dom/html5/Html5Relationships.h
+        src/dom/html5/special_char.h
+        src/dom/html5/enums/AttrBoundaryChar.h
+        src/dom/html5/enums/Attribute.h
+        src/dom/html5/enums/ContentModel.h
+        src/dom/html5/enums/InsertMode.h
+        src/dom/html5/enums/NameSpaces.h
+        src/dom/html5/enums/Tag.h
+        src/dom/html5/enums/TagStructure.h
+        src/dom/html5/properties/attribute.cpp
+        src/dom/html5/properties/attribute.h
+        src/dom/html5/properties/content_model.cpp
+        src/dom/html5/properties/content_model.h
+        src/dom/html5/properties/relationships.cpp
+        src/dom/html5/properties/relationships.h
+        src/dom/html5/properties/tag.cpp
+        src/dom/html5/properties/tag.h
+        src/dom/html5/rules/context.h
+        src/dom/html5/rules/insert_mode.h
+        src/dom/html5/rules/OptionalTags.cpp
+        src/dom/html5/rules/OptionalTags.h
+        src/dom/html5/validator/validator.cpp
+        src/dom/html5/validator/validator.h
         src/dom/parser/Parser.cpp
-        src/dom/parser/Parser.h)
+        src/dom/parser/Parser.h
+        src/dom/parser/Tokeniser.cpp
+        src/dom/parser/Tokeniser.h)
 
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
@@ -166,14 +189,17 @@ set(TEST_FILES
         tests/dto/HTML.cpp
         tests/dto/TableOfContents.cpp
         tests/output/json/json.cpp
+        tests/string/helpers_tests.cpp
         tests/dom/dot/DOT_tests.cpp
         tests/dom/dot/DOTNode_tests.cpp
-        tests/dom/html5/rules/Rules_tests.cpp
-        tests/string/helpers_tests.cpp
         tests/dom/parser/Tokeniser_tests.cpp
         tests/dom/parser/Parser_tests.cpp
-        tests/dom/html5/rules_tests.cpp
-        tests/dom/html5/validator/validator_tests.cpp)
+        tests/dom/html5/validator/validator_tests.cpp
+        tests/dom/html5/validator/validator_validateOpeningTag_tests.cpp
+        tests/dom/html5/validator/validator_validateClosingTag_tests.cpp
+        tests/dom/html5/validator/validator_validateAttributes_tests.cpp
+        tests/dom/html5/Html5Properties_tests.cpp
+        tests/dom/html5/Html5Relationships_tests.cpp)
 
 enable_testing()
 

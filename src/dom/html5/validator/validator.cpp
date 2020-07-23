@@ -17,6 +17,16 @@ bool blogator::dom::html5::validator::isTagEnd( char32_t c ) {
 }
 
 /**
+ * Checks the characters from a given iterator point for a self-closing end ('/>')
+ * @param src Source string
+ * @param it  Iterator
+ * @return Matching state for '/>' starting from character at iterator
+ */
+bool blogator::dom::html5::validator::isSelfClosingTagEnd( const std::u32string &src, std::u32string::const_iterator it ) {
+    return ( it != src.cend() && *it == special_char::SOLIDUS && (++it) != src.cend() && isTagEnd( *it ) );
+}
+
+/**
  * Checks for validity of attribute name character
  * @param c        UTF-32 character
  * @param err_flag Error flag switch to true when an illegal character is found (ctrl, ", ' or non-character)
@@ -29,16 +39,15 @@ bool blogator::dom::html5::validator::isValidAttributeNameChar( char32_t c, bool
     err_flag = iswcntrl( c )
             || c == html5::special_char::QUOTATION_MARK
             || c == html5::special_char::APOSTROPHE
+            || c == html5::special_char::SOLIDUS
             || encoding::isNonCharacter( c );
 
     return !( err_flag
               || c == html5::special_char::SPACE
               || c == html5::special_char::GREATER_THAN
-              || c == html5::special_char::SOLIDUS
               || c == html5::special_char::EQUALS_SIGN
     );
 }
-
 
 /**
  * Checks for validity of character from an unquoted attribute value
@@ -143,7 +152,7 @@ bool blogator::dom::html5::validator::isValidCharReference( const std::u32string
  */
 blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
     const std::u32string &str,
-    std::vector<std::pair<std::u32string, std::u32string>> &attributes )
+    std::vector<std::pair<std::u32string, dom::dto::Attribute>> &attributes )
 {
     auto it            = str.cbegin();
     auto substr_length { 0 };
@@ -167,19 +176,22 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
         );
     }
 
-    if( it == str.cend() || !iswalpha( *(it++) ) ) { //i=2 beginning of tag name
+    if( it == str.cend() || ( !iswalpha( *it ) && *it != html5::special_char::EXCLAMATION_MARK ) ) { //i=2 beginning of tag name
         std::stringstream ss;
         ss << "blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\" )";
         throw exception::DOMException( ss.str(),
-            "Tag name must be made of ASCII alphanumeric characters only.",
+            "Valid tag names start with either ASCII alphanumeric character or a '!' only.",
             exception::DOMErrorType::SyntaxError
         );
     }
 
+    if( *(it++) == html5::special_char::EXCLAMATION_MARK && str == U"<!--" ) //EDGE-CASE: i.e. comment start
+        return html5::Html5Properties::strToTag( U"!--" );
+
     ++substr_length;
 
     while( it != str.cend() && !iswspace( *it ) && !isTagEnd( *it ) && *it != html5::special_char::SOLIDUS ) { //reach end of tag name
-        if( !iswalpha( *(it++) ) ) {
+        if( !iswalnum( *(it++) ) ) {
             std::stringstream ss;
             ss << "blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )";
             throw exception::DOMException( ss.str(),
@@ -198,7 +210,7 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
     { //Parse and validate attributes if any
         auto attribute_begin_it = it;
 
-        while( it != str.cend() && *it != html5::special_char::SOLIDUS && !isTagEnd( *it ) )
+        while( it != str.cend() && !isTagEnd( *it ) && !isSelfClosingTagEnd( str, it ) )
             ++it;
 
         const auto attribute_length  = it - attribute_begin_it;
@@ -218,7 +230,7 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
     }
 
     if( it == str.cend() || *it == html5::special_char::SOLIDUS ) { //i.e. self closing tag "<.../>"
-        if( (++it) == str.cend() || !isTagEnd( *it ) ) { //'>'
+        if( (++it) == str.cend() || !isTagEnd( *(it++) ) ) { //'>'
             std::stringstream ss;
             ss << "blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )";
             throw exception::DOMException( ss.str(),
@@ -263,9 +275,10 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
  */
 void blogator::dom::html5::validator::validateAttributes(
     const std::u32string &str,
-    std::vector<std::pair<std::u32string, std::u32string>> &attributes )
+    std::vector<std::pair<std::u32string, dom::dto::Attribute>> &attributes )
 {
-    auto it = str.begin();
+    auto it       = str.begin();
+    auto boundary = AttrBoundaryChar::NONE;
 
     string::skipWhitespace<char32_t>( str, it );
 
@@ -289,7 +302,9 @@ void blogator::dom::html5::validator::validateAttributes(
 
     string::skipWhitespace<char32_t>( str, it );
 
-    if( it != str.cend() && *(it++) == special_char::EQUALS_SIGN ) { //attribute name has a value
+    if( it != str.cend() && *it == special_char::EQUALS_SIGN ) { //attribute name has a value
+
+        ++it;
 
         string::skipWhitespace<char32_t>( str, it );
 
@@ -300,7 +315,6 @@ void blogator::dom::html5::validator::validateAttributes(
         }
 
         bool illegal_char { false };
-        auto boundary     { AttrBoundaryChar::NONE };
 
         if( *it == special_char::APOSTROPHE ) { //single-quoted attribute value syntax
             boundary = AttrBoundaryChar::APOSTROPHE;
@@ -315,6 +329,8 @@ void blogator::dom::html5::validator::validateAttributes(
                 value << *it;
 
         } else { //unquoted attribute value syntax
+            boundary = AttrBoundaryChar::NONE;
+
             while( it != str.cend() && isValidAttributeValueChar( *it, illegal_char ) )
                 value << *(it++);
         }
@@ -337,10 +353,10 @@ void blogator::dom::html5::validator::validateAttributes(
             ++it;
     }
 
-    attributes.emplace_back( name.str(), value.str() );
+    attributes.emplace_back( name.str(), dto::Attribute { value.str(), boundary } );
 
     if( it != str.cend() )
-        validateAttributes( str.substr( it - str.cbegin() ), attributes );
+        return validateAttributes( str.substr( it - str.cbegin() ), attributes );
 }
 
 /**
@@ -357,10 +373,13 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateClosingTag( c
         std::stringstream ss;
         ss << "blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )";
         throw exception::DOMException( ss.str(),
-            "Closing tag string is empty.",
+            "Closing tag is empty.",
             exception::DOMErrorType::SyntaxError
         );
     }
+
+    if( str == U"-->" ) //EDGE-CASE: i.e. comment end
+        return html5::Tag::COMMENT;
 
     if( *(it++) != html5::special_char::LESS_THAN ) { //i=0 '<'
         std::stringstream ss;
@@ -388,7 +407,7 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateClosingTag( c
     }
 
     while( it != str.cend() && !iswspace( *it ) && !isTagEnd( *it ) ) { //reach end of tag name
-        if( !iswalpha( *(it++) ) ) {
+        if( !iswalnum( *(it++) ) ) {
             std::stringstream ss;
             ss << "blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )";
             throw exception::DOMException( ss.str(),

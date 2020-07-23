@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../../dto/Text.h"
+#include "../dto/Text.h"
 
 namespace blogator::dom::parser {
     enum class TokenType { START_TAG, END_TAG, TEXT };
@@ -43,9 +43,10 @@ namespace blogator::dom::parser {
             return os;
         }
 
-//        bool init();
-
+        typedef typename std::vector<Token>::iterator iterator;
         typedef typename std::vector<Token>::const_iterator const_iterator;
+        [[nodiscard]] iterator begin();
+        [[nodiscard]] iterator end();
         [[nodiscard]] const_iterator cbegin() const;
         [[nodiscard]] const_iterator cend() const;
 
@@ -64,10 +65,16 @@ namespace blogator::dom::parser {
 
         const dto::Text &  _source;
         std::vector<Token> _tokens;
+        bool               _inside_comment_flag;
 
         void processLine( const dto::Text::Line_t &line, const dto::Text::LineIndex_t &line_i );
         void processTag( LineInfo line_info, CharInfo char_info );
         void processText( LineInfo line_info, CharInfo char_info );
+
+        bool processCommentOpen( LineInfo line_info, CharInfo char_info );
+        void processCommentText( LineInfo line_info, CharInfo char_info );
+        bool isCommentClose( LineInfo line_info, CharInfo char_info );
+        void processCommentClose( LineInfo line_info, CharInfo char_info );
     };
 }
 

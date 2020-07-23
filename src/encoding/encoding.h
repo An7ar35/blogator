@@ -13,6 +13,7 @@ namespace blogator {
 }
 
 namespace blogator::encoding {
+    std::string encodeToUTF8( char32_t c );
     std::string encodeToUTF8( const std::u32string &utf32_str );
     std::ostream & encodeToUTF8( std::ostream &out, const std::u32string &utf32_str );
 

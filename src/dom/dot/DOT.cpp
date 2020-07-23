@@ -1,28 +1,63 @@
 #include "DOT.h"
 
 #include <algorithm>
+#include <fstream>
 
 #include "../../string/helpers.h"
-
-blogator::dom::DOT::DOT( const std::string &html ) :
-    _root( std::make_unique<DOTNode>( html5::Tag::NONE ) )
-{
-//    parse( encoding::encodeToUTF32( html ) );
-}
+#include "../parser/Tokeniser.h"
+#include "../parser/Parser.h"
 
 /**
  * Constructor
  */
-blogator::dom::DOT::DOT( const std::u32string &html ) :
+blogator::dom::DOT::DOT() :
+    _display( cli::MsgInterface::getInstance() ),
     _root( std::make_unique<DOTNode>( html5::Tag::NONE ) )
+{}
+
+/**
+ * Constructor
+ * @param html UTF-8 HTML string
+ */
+blogator::dom::DOT::DOT( const std::string &html ) :
+    DOT()
 {
-//    parse( html );
+    auto text = dto::Text();
+    text._lines.emplace_back( encoding::encodeToUTF32( html ) );
+    parse( text );
 }
 
-blogator::dom::DOT::DOT( const blogator::dto::Text &html ) :
-    _root( std::make_unique<DOTNode>( html5::Tag::NONE ) )
+/**
+ * Constructor
+ * @param html UTF-32 HTML string
+ */
+blogator::dom::DOT::DOT( const std::u32string &html ) :
+    DOT()
 {
-    //TODO
+    auto text = dto::Text();
+    text._lines.emplace_back( html );
+    parse( text );
+}
+
+/**
+ * Constructor
+ * @param html HTML based Text DTO
+ */
+blogator::dom::DOT::DOT( const dto::Text &html ) :
+    DOT()
+{
+    parse( html );
+}
+
+/**
+ * Constructor
+ * @param src Source file path for the HTML to import
+ */
+blogator::dom::DOT::DOT( const std::filesystem::path &src ) :
+    DOT()
+{
+    auto text = DOT::readFile( src );
+    parse( text );
 }
 
 /**
@@ -31,6 +66,7 @@ blogator::dom::DOT::DOT( const blogator::dto::Text &html ) :
  * @throws exception::DOMException when an ID is already in use
  */
 blogator::dom::DOT::DOT( std::unique_ptr<DOTNode> root ) :
+    _display( cli::MsgInterface::getInstance() ),
     _root( std::move( root ) )
 {
     /**
@@ -41,13 +77,13 @@ blogator::dom::DOT::DOT( std::unique_ptr<DOTNode> root ) :
             auto it = curr->_attributes.find( U"id" );
 
             if( it != curr->_attributes.cend() ) {
-                if( !_css_id_map.try_emplace( it->second, curr ).second ) {
-                    std::stringstream ss;
-                    ss << "[blogator::dom::DOT::parseIDs( ... )] "
-                       << "ID '" << encoding::encodeToUTF8( it->second ) << "' already exists.";
+                if( !_css_id_map.try_emplace( it->second.value, curr ).second ) {
+                    std::stringstream msg;
+                    msg << "ID '" << encoding::encodeToUTF8( it->second.value ) << "' already exists.";
 
                     throw exception::DOMException(
-                        ss.str(),
+                        "blogator::dom::DOT::DOT( std::unique_ptr<DOTNode> )",
+                        msg.str(),
                         exception::DOMErrorType::InUseAttributeError
                     );
                 }
@@ -58,7 +94,7 @@ blogator::dom::DOT::DOT( std::unique_ptr<DOTNode> root ) :
             auto it = curr->_attributes.find( U"class" );
 
             if( it != curr->_attributes.cend() ) {
-                auto classes = string::split( it->second, U' ' );
+                auto classes = string::split( it->second.value, U' ' );
 
                 for( const auto &c : classes ) {
                     if( !c.empty() ) {
@@ -85,6 +121,7 @@ blogator::dom::DOT::DOT( std::unique_ptr<DOTNode> root ) :
  * @param dot DOT to move over
  */
 blogator::dom::DOT::DOT( blogator::dom::DOT &&dot ) noexcept :
+    _display( dot._display ),
     _root( std::move( dot._root ) ),
     _css_id_map( std::move( dot._css_id_map ) ),
     _css_class_map( std::move( dot._css_class_map ) )
@@ -160,95 +197,46 @@ std::vector<const blogator::dom::DOTNode *> blogator::dom::DOT::getElementByClas
 }
 
 /**
- * Checks character is a boundary defining character
- * @param c Character to check
- * @return Boundary defining state
+ * Processes text into a DOT
+ * @param text Text DTO
  */
-bool blogator::dom::DOT::isBoundaryChar( char32_t c ) {
-    return ( iswspace( c ) || c == U'\"' || c == '\'' || c == U'>' || c == U'<' || c == '/' );
-}
+void blogator::dom::DOT::parse( const dto::Text &text ) {
+    auto tokeniser = parser::Tokeniser( text );
+    auto parser    = parser::Parser();
+    auto curr      = _root.get();
 
-std::u32string blogator::dom::DOT::consumeToken( const std::u32string &src, std::u32string::const_iterator &it ) {
-    u32stringstream_t ss;
+    for( const auto &token : tokeniser ) {
+        try {
+            curr = parser.parseToken( token, curr, _global_maps );
 
-    while( it != src.cend() && iswspace( *it ) )
-        ++it;
-
-    while( it != src.cend() && !DOT::isBoundaryChar( *it ) ) {
-        ss << *it;
-        ++it;
+        } catch( exception::DOMException &e ) {
+            std::stringstream ss;
+            ss << "(" << token.line_i << ":" << token.char_i << ") [" << e.where() << "] " << e.what();
+            _display.error( ss.str() );
+            throw;
+        }
     }
-
-    return ss.str();
 }
-
 
 /**
- * Adds an attribute to a node
- * @param node       DOTNode
- * @param name       Attribute name
- * @param definition Attribute value(s)
+ * Read into a Text DTO a text-based file
+ * @param path Path for file
+ * @return Text DTO
+ * @throws std::filesystem::filesystem_error when target file at given path cannot be opened
  */
-void blogator::dom::DOT::addAttribute( std::unique_ptr<DOTNode> &node,
-                                       std::u32string name,
-                                       std::u32string definition )
-{
-    using blogator::string::split;
+blogator::dom::dto::Text blogator::dom::DOT::readFile( const std::filesystem::path &path ) {
+    auto text = dto::Text();
+    std::string   line;
+    std::ifstream file( path );
 
-    std::transform( name.begin(), name.end(), name.begin(), []( char32_t c ){ return std::towlower( c ); } );
+    if( !file.is_open() )
+        throw std::filesystem::filesystem_error( "Could not open: " + path.string(), std::error_code() );
 
-    if( name == U"class" ) {
-        auto defs = string::split<char32_t>( definition, U' ' );
-
-        for( const auto & def : defs ) {
-            if( !def.empty() ) {
-                auto it = _css_class_map.find( def );
-
-                if( it != _css_class_map.end() )
-                    it->second.emplace_back( node.get() );
-            }
-        }
-
-        node->addAttribute( name , std::move( definition ) );
-
-        auto it = _css_class_map.find( name );
-
-        if( it == _css_class_map.end() )
-            it = _css_class_map.emplace( name, std::vector<const dom::DOTNode *>() ).first;
-
-        it->second.emplace_back( node.get() );
-
-    } else if( name == U"id" ) {
-        auto defs     = string::split<char32_t>( definition, U' ' );
-        auto filtered = std::vector<std::u32string>();
-
-        std::copy_if( defs.begin(), defs.end(), std::back_inserter( filtered ), []( auto str ){ return !str.empty(); } );
-
-        if( filtered.empty() ) { //ERROR
-            u32stringstream_t ss;
-            ss << "Missing value in 'id' attribute.";
-            throw exception::DOMException( encoding::encodeToUTF8( ss.str() ), exception::DOMErrorType::SyntaxError );
-        }
-
-        if( filtered.size() > 1 ) { //ERROR
-            u32stringstream_t ss;
-            ss << "Multiple values given in 'id' attribute: ";
-            for( const auto & id : filtered )
-                ss << "'" << id << "' ";
-            throw exception::DOMException( encoding::encodeToUTF8( ss.str() ), exception::DOMErrorType::SyntaxError );
-        }
-
-        if( _css_id_map.find( filtered.at( 0 ) ) != _css_id_map.end() ) { //ERROR
-            u32stringstream_t ss;
-            ss << "'id' value '" << filtered.at( 0 ) << "' already in use.";
-            throw exception::DOMException( encoding::encodeToUTF8( ss.str() ), exception::DOMErrorType::InUseAttributeError );
-        }
-
-        node->addAttribute( name, filtered.at( 0 ) );
-        _css_id_map.emplace( name, node.get() );
-
-    } else {
-        node->addAttribute( name, std::move( definition ) );
+    while( getline( file, line ) ) {
+        text._lines.emplace_back( blogator::encoding::encodeToUTF32( line ) );
     }
 
+    file.close();
+
+    return text;
 }

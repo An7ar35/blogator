@@ -5,6 +5,19 @@
 #include <sstream>
 
 /**
+ * Encodes a UTF-32 character into a UTF-8 string
+ * @param c UTF-32 Character
+ * @return Encoded character as a string
+ */
+std::string blogator::encoding::encodeToUTF8( char32_t c ) {
+    std::u32string str;
+    str.append( 1, c );
+    std::stringstream ss;
+    encodeToUTF8( ss, str );
+    return ss.str();
+}
+
+/**
  * Encodes a UTF-32 string into a UTF-8 string
  * @param str UTF-32 string
  * @return Encoded string

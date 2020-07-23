@@ -1,27 +1,33 @@
 #ifndef BLOGATOR_DOM_PARSER_PARSER_H
 #define BLOGATOR_DOM_PARSER_PARSER_H
 
+#include <deque>
+
 #include "Tokeniser.h"
-#include "../dot/DOT.h"
-#include "../html5/html5.h"
+#include "../dot/DOTNode.h"
+#include "../dto/GlobalMaps.h"
+#include "../html5/enums/Tag.h"
 
 namespace blogator::dom::parser {
-    struct Parser {
+    class Parser {
       public:
-        static DOTNode & parseTag( const parser::Token &token, DOTNode &parent );
-        static DOTNode & parseText( const parser::Token &token, DOTNode &parent );
+        Parser() = default;
+        Parser( std::initializer_list<html5::Tag> list ); //helper for unit-testing
+
+        DOTNode * parseToken( const parser::Token &token, DOTNode *parent, dto::GlobalMaps &global_attr_map );
+
+        [[nodiscard]] size_t treeDepth() const;
 
       private:
-        static dom::html5::Tag parseOpeningTag( const std::u32string &str, std::unordered_map<std::u32string, std::u32string> &attributes );
-        static dom::html5::Tag parseClosingTag( const std::u32string &str );
+        std::deque<html5::Tag> _stack;
 
-        //TODO maybe public + static all these and use them as callable helpers in DOT parser call>?
+        DOTNode *  parseOpeningTag( const std::u32string &str, DOTNode *parent, dto::GlobalMaps &global_attr_map );
+        DOTNode *  parseClosingTag( const std::u32string &str, DOTNode *curr );
+        DOTNode *  parseText( const parser::Token &token, DOTNode *parent );
+        bool       autoClosePrevTag( html5::Tag prev, html5::Tag next );
+        html5::Tag autoOpenTag( html5::Tag prev, html5::Tag next );
 
-        //Tokeniser -> Parser into a DOT tree -> Validator of DOT tree?
-        //OR Tokeniser -> Validator using stack -> Parser into a DOT tree?
-
-        //TODO in any case maybe have initializer methods in the blogator::dom:: namespace for a easier way to understand how it all fits together at a glance
-
+        static void populateGlobalAttrMap( std::unique_ptr<DOTNode> &node, dto::GlobalMaps &global_attr_map );
     };
 }
 

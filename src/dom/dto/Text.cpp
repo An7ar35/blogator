@@ -5,7 +5,7 @@
  * @param rhs Text DTO to compare to
  * @return result
  */
-bool blogator::dto::Text::operator ==( const blogator::dto::Text &rhs ) const {
+bool blogator::dom::dto::Text::operator ==( const blogator::dom::dto::Text &rhs ) const {
     if( _lines.size() != rhs._lines.size() )
         return false;
 
@@ -26,6 +26,16 @@ bool blogator::dto::Text::operator ==( const blogator::dto::Text &rhs ) const {
  * @param rhs Text DTO to compare to
  * @return result
  */
-bool blogator::dto::Text::operator !=( const blogator::dto::Text &rhs ) const {
+bool blogator::dom::dto::Text::operator !=( const blogator::dom::dto::Text &rhs ) const {
     return !( *this == rhs );
+}
+
+/**
+ * Helper method to check if an iterator is at the end of a Text line
+ * @param it   Character iterator
+ * @param line Text line
+ * @return EOL state
+ */
+bool blogator::dom::dto::Text::isEOL( const Text::Line_t::const_iterator &it, const Text::Line_t &line ) {
+    return it == line.cend();
 }

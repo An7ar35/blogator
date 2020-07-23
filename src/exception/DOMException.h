@@ -62,7 +62,21 @@ namespace blogator::exception {
             _message( error + ": " + message )
         {};
 
+        DOMException( const std::string &loc_details, const std::string &message, DOMErrorType error_type ) :
+            _provenance( loc_details ),
+            _message( errorStr( error_type ) + ": " + message )
+        {};
+
+        DOMException( const std::string &loc_details, const std::string &message, const std::string &error ) :
+            _provenance( loc_details ),
+            _message( error + ": " + message )
+        {};
+
         ~DOMException() override = default;
+
+        [[nodiscard]] const char *where() const noexcept {
+            return _provenance.c_str();
+        };
 
         [[nodiscard]] const char *what() const noexcept override {
             return _message.c_str();
@@ -70,6 +84,7 @@ namespace blogator::exception {
 
 
       private:
+        const std::string  _provenance;
         const std::string  _message;
 
         static std::string errorStr( DOMErrorType type ) {
@@ -152,22 +167,27 @@ namespace blogator::exception {
 
     class EvalError : DOMException {
         explicit EvalError( const std::string &message ) : DOMException( message , "EvalError"  ) {}
+        EvalError( const std::string &loc_details, const std::string &message ) : DOMException( loc_details, message , "EvalError"  ) {}
     };
 
     class RangeError : DOMException {
         explicit RangeError( const std::string &message ) : DOMException( message , "RangeError"  ) {}
+        RangeError( const std::string &loc_details, const std::string &message ) : DOMException( loc_details, message , "RangeError"  ) {}
     };
 
     class ReferenceError : DOMException {
         explicit ReferenceError( const std::string &message ) : DOMException( message , "ReferenceError"  ) {}
+        ReferenceError( const std::string &loc_details, const std::string &message ) : DOMException( loc_details, message , "ReferenceError"  ) {}
     };
 
     class TypeError : DOMException {
         explicit TypeError( const std::string &message ) : DOMException( message , "TypeError"  ) {}
+        TypeError( const std::string &loc_details, const std::string &message ) : DOMException( loc_details, message , "TypeError"  ) {}
     };
 
     class URIError : DOMException {
         explicit URIError( const std::string &message ) : DOMException( message , "URIError"  ) {}
+        URIError( const std::string &loc_details, const std::string &message ) : DOMException( loc_details, message , "URIError"  ) {}
     };
 }
 

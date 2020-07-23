@@ -3,10 +3,10 @@
 
 namespace blogator::dom::html5 {
     /**
-     * HTML5 attributes
-     * ref: https://www.w3schools.com/tags/ref_attributes.asp
+     * HTML5 + ARIA attributes
      */
     enum class Attribute {
+        /* HTML5-proper attributes */
         ACCEPT = 0, ACCEPT_CHARSET, ACCESSKEY, ACTION, ALT, ASYNC, AUTOCOMPLETE, AUTOFOCUS, AUTOPLAY,
         CHARSET, CHECKED, CITE, CLASS, COLS, COLSPAN, CONTENT, CONTENTEDITABLE, CONTROLS, COORDS,
         DATA, DATA_X /* data-* */, DATETIME, DEFAULT, DEFER, DIR, DIRNAME, DISABLED, DOWNLOAD, DRAGGABLE,
@@ -46,7 +46,14 @@ namespace blogator::dom::html5 {
         VALUE,
         WIDTH, WRAP,
 
-        ENUM_END //Not HTML - used for enumeration of enums
+        /* Accessible Rich Internet Applications (ARIA) attributes */
+        ARIA_X,
+        ROLE,
+
+        /* XML namespace */
+        XMLNS,
+
+        ENUM_END //Not HTML - used for iterating enums
     };
 }
 

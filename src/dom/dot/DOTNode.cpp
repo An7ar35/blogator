@@ -1,10 +1,13 @@
 #include "DOTNode.h"
 
+#include "../html5/special_char.h"
+#include "../../string/helpers.h"
+
 /**
  * Constructor
  */
 blogator::dom::DOTNode::DOTNode() :
-    DOTNode( html5::Tag::NONE )
+    DOTNode( 0, html5::Tag::NONE )
 {}
 
 /**
@@ -12,9 +15,20 @@ blogator::dom::DOTNode::DOTNode() :
  * @param tag  Node's html tag type
  * @param text (optional) Text content
  */
-blogator::dom::DOTNode::DOTNode( html5::Tag tag, std::u32string text ) :
+blogator::dom::DOTNode::DOTNode( blogator::dom::html5::Tag tag, std::u32string text ) :
+    DOTNode( 0, tag, std::move( text ) )
+{}
+
+/**
+ * Constructor
+ * @param i_pos Index position in the list of children in the parent node
+ * @param tag   Node's html tag type
+ * @param text  (optional) Text content
+ */
+blogator::dom::DOTNode::DOTNode( size_t i_pos, html5::Tag tag, std::u32string text ) :
     _tag( tag ),
     _text( std::move( text ) ),
+    _nth_pos( i_pos ),
     _parent( nullptr ),
     _children( std::vector<std::unique_ptr<DOTNode>>() )
 {}
@@ -23,9 +37,10 @@ blogator::dom::DOTNode::DOTNode( html5::Tag tag, std::u32string text ) :
  * Move-Constructor
  * @param node DOTNode to move over
  */
-blogator::dom::DOTNode::DOTNode( blogator::dom::DOTNode &&node ) noexcept :
+blogator::dom::DOTNode::DOTNode( DOTNode &&node ) noexcept :
     _tag( node._tag ),
     _text( std::move( node._text ) ),
+    _nth_pos( node._nth_pos ),
     _parent( node._parent ),
     _children( std::move( node._children ) )
 {}
@@ -39,7 +54,8 @@ bool blogator::dom::DOTNode::operator ==( const blogator::dom::DOTNode &rhs ) co
     return _tag == rhs._tag
            && _text == rhs._text
            && _attributes.size() == rhs._attributes.size()
-           && std::equal( _attributes.cbegin(), _attributes.cend(), rhs._attributes.cbegin() )
+           && std::equal( _attributes.cbegin(), _attributes.cend(), rhs._attributes.cbegin(),
+               []( const auto &a, const auto &b ) { return a.second == b.second; })
            && _children.size() == rhs._children.size()
            && std::equal( _children.cbegin(), _children.cend(), rhs._children.cbegin(),
                []( const auto &a, const auto &b ) { return *a == *b; } );
@@ -61,7 +77,7 @@ bool blogator::dom::DOTNode::operator !=( const blogator::dom::DOTNode &rhs ) co
  * @return Pointer to the node as the root of the copied tree structure
  */
 std::unique_ptr<blogator::dom::DOTNode> blogator::dom::DOTNode::recursiveCopy() const {
-    auto p = std::make_unique<DOTNode>( _tag );
+    auto p = std::make_unique<DOTNode>( _nth_pos, _tag );
 
     p->_text   = _text;
     p->_parent = _parent;
@@ -79,7 +95,7 @@ std::unique_ptr<blogator::dom::DOTNode> blogator::dom::DOTNode::recursiveCopy() 
  * @return Pointer to the node as the root of the copied tree structure
  */
 std::unique_ptr<blogator::dom::DOTNode> blogator::dom::DOTNode::recursiveCopy( blogator::dom::DOTNode *parent ) const {
-    auto p = std::make_unique<DOTNode>( _tag );
+    auto p = std::make_unique<DOTNode>( _nth_pos, _tag );
 
     p->_text   = _text;
     p->_parent = parent;
@@ -102,20 +118,22 @@ void blogator::dom::DOTNode::setTextContent( std::u32string text ) {
 /**
  * Add child node
  * @param node Node to add as a child
- * @return Reference to the new child
+ * @return Pointer to the new child
  * @throws HtmlParseLib::DOMException when attempt is made of giving a child to an unpaired node
  */
-blogator::dom::DOTNode & blogator::dom::DOTNode::addChild( std::unique_ptr<DOTNode> node ) {
-    if( !html5::Rules::getInstance().isPaired( _tag ) ) //rule: Only paired structs can have nested children
+blogator::dom::DOTNode * blogator::dom::DOTNode::addChild( std::unique_ptr<DOTNode> node ) {
+    if( !html5::Html5Properties::isPaired( _tag ) && parent() ) //rule: Only paired structs can have nested children
         throw exception::DOMException(
             "[blogator::dom::DOTNode::addChild( std::unique_ptr<DOTNode> )] "
             "Cannot add children to an unpaired node type.",
             blogator::exception::DOMErrorType::HierarchyRequestError
         );
 
+    const auto i = _children.size();
     _children.emplace_back( std::move( node ) );
     _children.back()->_parent = this;
-    return *_children.back();
+    _children.back()->_nth_pos = i;
+    return _children.back().get();
 }
 
 /**
@@ -127,22 +145,48 @@ const std::u32string & blogator::dom::DOTNode::content() const {
 }
 
 /**
+ * Gets the index position of the node in its parent
+ * @return Index position
+ */
+size_t blogator::dom::DOTNode::indexInParent() const {
+    return _nth_pos;
+}
+
+/**
  * Get's the node's parent
  * @return Pointer to parent of node or nullptr if orphaned
  */
-const blogator::dom::DOTNode *blogator::dom::DOTNode::parent() const {
+blogator::dom::DOTNode *blogator::dom::DOTNode::parent() {
     return _parent;
 }
 
 /**
- * Gets an attribute's value
+ * Get's the node's parent
+ * @return Pointer to parent of node or nullptr if orphaned
+ */
+const blogator::dom::DOTNode * blogator::dom::DOTNode::parent() const {
+    return _parent;
+}
+
+/**
+ * Gets the list of the node's children
+ * @return Collection of children in order of insertion
+ */
+const std::vector<std::unique_ptr<blogator::dom::DOTNode>> &blogator::dom::DOTNode::children() const {
+    return _children;
+}
+
+/**
+ * Gets an attribute's value content
  * @param key Attribute key
  * @return Value string of the given attribute
  * @throws exception::DOMException when attribute key does not exist for the node
  */
 std::u32string blogator::dom::DOTNode::attribute( const std::u32string &key ) const {
     try {
-        return _attributes.at( key );
+        auto attr = _attributes.at( key );
+        return attr.value;
+
     } catch ( std::out_of_range &e ) {
         std::stringstream ss;
         ss << "[blogator::dom::DOTNode::attribute( \""
@@ -174,38 +218,54 @@ bool blogator::dom::DOTNode::hasAttribute( const std::u32string &key ) const {
  * Adds a new attribute if key not found otherwise appends to the existing value
  * @param key   Attribute key
  * @param value Attribute value to add/append (adds a space prior to appending when value is !empty)
+ * @param bc    Boundary character to use when a new key/value attribute pair is created
  * @return `true` key added, `false` if key already existed
  */
-bool blogator::dom::DOTNode::addAttribute( const std::u32string &key, std::u32string value ) {
+bool blogator::dom::DOTNode::addAttribute( const std::u32string &key, std::u32string value, html5::AttrBoundaryChar bc ) {
     auto it = _attributes.find( key );
 
     if( it != _attributes.end() ) {
-        it->second += ( it->second.empty() ? std::move( value ) : U" " + std::move( value ) );
+        it->second.value += ( it->second.value.empty() ? std::move( value ) : U" " + std::move( value ) );
         return false;
     } else {
-        _attributes.emplace( key, std::move( value ) );
+        _attributes.emplace( key, dto::Attribute { std::move( value ), bc } );
         return true;
     }
 }
 
 /**
- * Replaces the value of a given attribute
- * @param key   Attribute key
- * @param value Attribute value
- * @throws exception::DOMException when key could not be found in the node's attributes
+ * Adds a new attribute
+ * @param key       Attribute key
+ * @param attribute Attribute DTO (value, boundary char)
+ * @return true if success, false if key already exists
  */
-void blogator::dom::DOTNode::replaceAttribute( const std::u32string &key, const std::u32string &value ) {
+bool blogator::dom::DOTNode::addAttribute( const std::u32string &key, dom::dto::Attribute attribute ) {
+    auto it = _attributes.find( key );
+
+    if( it != _attributes.end() )
+        return false;
+
+    _attributes.emplace( key, std::move( attribute ) );
+    return true;
+}
+
+/**
+ * Replaces the value of a given attribute
+ * @param key       Attribute key
+ * @param attribute Attribute DTO
+ */
+void blogator::dom::DOTNode::replaceAttribute( const std::u32string &key, dom::dto::Attribute attribute ) {
     auto it = _attributes.find( key );
 
     if( it != _attributes.end() ) {
-        it->second = value;
+        it->second = attribute;
         return;
     }
 
     std::stringstream ss;
     ss << "[blogator::dom::DOTNode::replaceAttribute( \""
        << encoding::encodeToUTF8( key ) << "\" , \""
-       << encoding::encodeToUTF8( value ) << "\" )] "
+       << encoding::encodeToUTF8( attribute.value ) << "\" )] "
        << "Attribute key not found.";
 
     throw exception::DOMException( ss.str(), exception::DOMErrorType::NotFoundError );
@@ -235,7 +295,28 @@ void blogator::dom::DOTNode::printAttributes( u32ostream_t &os ) const {
     if( !_attributes.empty() )
         os << U" ";
     for( auto it = _attributes.cbegin(); it != _attributes.cend(); ++it ) {
-        os << it->first << U"=\"" << it->second << U"\"";
+        os << it->first;
+
+        if( !it->second.value.empty() ) {
+            os << U"=";
+
+            switch( it->second.boundary ) {
+                case html5::AttrBoundaryChar::APOSTROPHE:
+                    os << html5::special_char::APOSTROPHE
+                       << it->second.value
+                       << html5::special_char::APOSTROPHE;
+                    break;
+                case html5::AttrBoundaryChar::QUOTATION_MARK:
+                    os << html5::special_char::QUOTATION_MARK
+                       << it->second.value
+                       << html5::special_char::QUOTATION_MARK;
+                    break;
+                default:
+                    os << it->second.value;
+                    break;
+            }
+        }
+
         if( it != std::prev( _attributes.cend() ) )
             os << U" ";
     }

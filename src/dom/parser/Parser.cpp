@@ -1,119 +1,693 @@
 #include "Parser.h"
 
-#include "../../exception/DOMException.h"
-
-//void blogator::dom::parser::Parser::init( const parser::Tokeniser &tokeniser ) {
-////    auto dot = std::make_unique<DOT>();
-//    auto token = tokeniser.cbegin();
-//
-//    while( token != tokeniser.cend() ) {
-//        switch( token->type ) {
-//            case TokenType::START_TAG: {
-////                parseTag( token, )
-//                }
-//                break;
-//
-//            case TokenType::END_TAG: {
-//
-//                }
-//                break;
-//
-//            case TokenType::TEXT: {
-//
-//                }
-//                break;
-//        }
-//    }
-//
-//
-//}
+#include "../dto/Attribute.h"
+#include "../html5/validator/validator.h"
+#include "../../string/helpers.h"
 
 /**
- * Parse TAG token
- * @param parent Parent DOTNode
- * @param token  Token to parse
- * @return Newly created DOTNode
- * @throws std::invalid_argument when tag string is not valid
+ * [UNIT-TESTING] Constructor
+ * @param list Initializer list of TokenType(s) to be pushed on the stack in order
  */
-blogator::dom::DOTNode & blogator::dom::parser::Parser::parseTag( const parser::Token &token,
-                                                                  blogator::dom::DOTNode &parent )
-{
-
-    auto it = token.content.cbegin();
-
-    if( it != token.content.cend() && *it == html5::special_char::LESS_THAN )
-        ++it;
-
-    if( it != token.content.cend() && *it == html5::special_char::SOLIDUS ) {
-        //closing tag, check tag type and return parent of opening tag
-    }
-
-    u32stringstream_t utf32_ss;
-
-    while( it != token.content.cend() && iswspace( *it ) ) {
-        utf32_ss << *it;
-    }
-
-    //TODO attributes
-
-    return parent.addChild(
-        std::make_unique<DOTNode>( html5::Rules::getInstance().strToTag( utf32_ss.str() ) )
-    );
+blogator::dom::parser::Parser::Parser( std::initializer_list<html5::Tag> list ) {
+    for( auto e : list )
+        _stack.push_front( e );
 }
 
-blogator::dom::DOTNode & blogator::dom::parser::Parser::parseText( const parser::Token &token,
-                                                                   blogator::dom::DOTNode &parent )
-{ //TODO maybe concatenate continuous text content into 1 node?
-    return parent.addChild( std::make_unique<DOTNode>( html5::Tag::NONE, token.content ) );
+/**
+ * Parse a token
+ * @param token           Token to parse
+ * @param parent          Parent DOTNode
+ * @param global_attr_map Global lookup map DTO
+ * @return Current parent node based on what was inserted
+ * @throws exception::DOMException when a parsing error occurs
+ */
+blogator::dom::DOTNode * blogator::dom::parser::Parser::parseToken(
+    const dom::parser::Token  & token,
+    dom::DOTNode              * parent,
+    dom::dto::GlobalMaps      & global_attr_map )
+{
+    try {
+        switch( token.type ) {
+            case TokenType::START_TAG:
+                return parseOpeningTag( token.content, parent, global_attr_map );
+            case TokenType::END_TAG:
+                return parseClosingTag( token.content, parent );
+            default: //i.e.: TokenType::TEXT
+                return parseText( token, parent );
+        }
+
+    } catch( exception::DOMException &e ) {
+        throw;
+    }
+}
+
+/**
+ * Gets the tree depth (i.e.: tag stack size)
+ * @return Tree depth
+ */
+size_t blogator::dom::parser::Parser::treeDepth() const {
+    return _stack.size();
 }
 
 /**
  * Parse an opening tag
- * @param str        Opening tag string (w/o attributes)
- * @param attributes Attribute store for the Tag
- * @return HTML5 Tag type
- * @throws std::invalid_argument when given string cannot be converted to a valid HTML5 tag type
+ * @param str             Opening tag string
+ * @param parent          Node where to append new child node at
+ * @param global_attr_map Global lookup map DTO
+ * @return Pointer to the new node
+ * @throws exception::DOMException when trying to give a child to an unpaired node
+ * @throws exception::DOMException when validation fails
  */
-blogator::dom::html5::Tag blogator::dom::parser::Parser::parseOpeningTag( const std::u32string &str,
-                                                                          std::unordered_map<std::u32string, std::u32string> &attributes )
+blogator::dom::DOTNode * blogator::dom::parser::Parser::parseOpeningTag(
+    const std::u32string & str,
+    DOTNode              * parent,
+    dto::GlobalMaps      & global_attr_map )
 {
-    auto it = str.begin();
-    
-    return html5::Rules::getInstance().strToTag( str );
+    using blogator::dom::html5::validator::validateOpeningTag;
+    using blogator::dom::dto::Attribute;
+
+    try {
+        auto attr = std::vector<std::pair<std::u32string, Attribute>>();
+        auto node = std::make_unique<DOTNode>( validateOpeningTag( str, attr ) );
+
+        for( const auto &pair : attr )
+            node->addAttribute( pair.first, pair.second );
+
+        populateGlobalAttrMap( node, global_attr_map );
+
+        if( dom::html5::Html5Properties::isPaired( node->type() ) ) {
+            _stack.push_front( node->type() );
+            return parent->addChild( std::move( node ) );
+
+        } else {
+            parent->addChild( std::move( node ) );
+            return parent;
+        }
+
+
+    } catch( exception::DOMException&e ) {
+        throw;
+    }
 }
 
 /**
  * Parse a closing tag
- * @param str Closing tag string
- * @return HTML5 Tag type
- * @throws std::invalid_argument when given string cannot be converted to a valid HTML5 tag type
+ * @param str  Closing tag string
+ * @param curr Current DOTNode
+ * @return //TODO
+ * @throws exception::DOMException when validation fails
+ * @throws exception::DOMException when closing tag has no opening tag match or is not a recognised tag
  */
-blogator::dom::html5::Tag blogator::dom::parser::Parser::parseClosingTag( const std::u32string &str ) {
-    auto it = str.cbegin();
+blogator::dom::DOTNode * blogator::dom::parser::Parser::parseClosingTag(
+    const std::u32string & str,
+    DOTNode              * curr )
+{
+    using blogator::dom::html5::validator::validateClosingTag;
 
-    while( it != str.cend() && ( *it == html5::special_char::LESS_THAN || *it == html5::special_char::SOLIDUS ) )
-        ++it;
+    auto tag = html5::validator::validateClosingTag( str );
 
-    u32stringstream_t utf32_ss;
-
-    while( it != str.cend() && ( *it != html5::special_char::GREATER_THAN || !iswspace( *it ) ) ) {
-        utf32_ss << *it;
-        ++it;
+    if( _stack.empty() ) { //tree struct ERROR
+        std::stringstream loc, msg;
+        loc << "blogator::dom::parser::Parser::parseClosingTag( \"" << encoding::encodeToUTF8( str ) << "\", DOTNode * )";
+        msg << "Closing tag (" << encoding::encodeToUTF8( html5::Html5Properties::tagToStr( tag ) ) << ") does not match an opening tag.";
+        throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::ValidationError );
     }
 
-    //TODO check that there is only space before the '>' char --> ERROR CONTROL
-    return html5::Rules::getInstance().strToTag( utf32_ss.str() );
+    //TODO allow for the allowed exceptions as outlined in the standards?
 
+    if( _stack.front() != tag ) {
+        //missing closing tag somewhere (or missing opening tag?)
+        std::stringstream loc, msg;
+        loc << "blogator::dom::parser::Parser::parseClosingTag( \"" << encoding::encodeToUTF8( str ) << "\", DOTNode * )";
+        msg << "Closing tag ("
+            << encoding::encodeToUTF8( html5::Html5Properties::tagToStr( tag ) ) << ") "
+            << "does not match last opened tag ("
+            << encoding::encodeToUTF8( html5::Html5Properties::tagToStr( _stack.front() ) ) << ").";
+        throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::ValidationError );
+    }
 
-//    try {
-//
-//
-//    } catch( std::invalid_argument &e ) {
-//        std::stringstream ss;
-//        ss << "blogator::dom::parser::Parser::parseClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )] "
-//           << "Invalid HTML5 tag".
-//
-//        throw exception::DOMException( "", exception::DOMErrorType::SyntaxError );
-//    }
+    _stack.pop_front();
+    return curr->parent();
 }
 
+/**
+ *
+ * @param token
+ * @param parent
+ * @return
+ */
+blogator::dom::DOTNode * blogator::dom::parser::Parser::parseText(
+    const parser::Token    & token,
+    blogator::dom::DOTNode * parent )
+{ //TODO maybe concatenate continuous text content into 1 node?
+    parent->addChild( std::make_unique<DOTNode>( html5::Tag::NONE, token.content ) );
+    return parent;
+}
+
+/**
+ * Add any 'class' and 'id' attribute values found in a given node to a global map
+ * @param node            DOTNode
+ * @param global_attr_map Global attribute map for ids and classes
+ */
+void blogator::dom::parser::Parser::populateGlobalAttrMap(
+    std::unique_ptr<DOTNode> & node,
+    dto::GlobalMaps          & global_attr_map )
+{
+    if( node->hasAttribute( U"id") ) {
+        auto id_value = node->attribute( U"id" );
+
+        if( !global_attr_map.id_map.try_emplace( id_value, node.get() ).second ) {
+            std::stringstream ss;
+            ss << "[blogator::dom::DOT::parseIDs( ... )] "
+               << "ID '" << encoding::encodeToUTF8( id_value ) << "' already exists.";
+
+            throw exception::DOMException(
+                ss.str(),
+                exception::DOMErrorType::InUseAttributeError
+            );
+        }
+    }
+
+    if( node->hasAttribute( U"class" ) ) {
+        auto class_values = string::split( node->attribute( U"class" ), U' ' );
+
+        for( const auto &val : class_values ) {
+            if( !val.empty() ) {
+                auto class_it = global_attr_map.class_map.find( val );
+
+                if( class_it == global_attr_map.class_map.end() )
+                    class_it = global_attr_map.class_map.emplace( val, std::vector<const DOTNode *>() ).first;
+
+                class_it->second.emplace_back( node.get() );
+            }
+        }
+    }
+}
+
+bool blogator::dom::parser::Parser::autoClosePrevTag(
+    blogator::dom::html5::Tag prev,
+    blogator::dom::html5::Tag next )
+{
+    switch( prev ) {
+        case html5::Tag::NONE:
+            break;
+        case html5::Tag::A:
+            break;
+        case html5::Tag::ABBR:
+            break;
+        case html5::Tag::ADDRESS:
+            break;
+        case html5::Tag::AREA:
+            break;
+        case html5::Tag::ARTICLE:
+            break;
+        case html5::Tag::ASIDE:
+            break;
+        case html5::Tag::AUDIO:
+            break;
+        case html5::Tag::B:
+            break;
+        case html5::Tag::BASE:
+            break;
+        case html5::Tag::BDI:
+            break;
+        case html5::Tag::BDO:
+            break;
+        case html5::Tag::BLOCKQUOTE:
+            break;
+        case html5::Tag::BODY:
+            break;
+        case html5::Tag::BR:
+            break;
+        case html5::Tag::BUTTON:
+            break;
+        case html5::Tag::CANVAS:
+            break;
+        case html5::Tag::CAPTION:
+            break;
+        case html5::Tag::CITE:
+            break;
+        case html5::Tag::CODE:
+            break;
+        case html5::Tag::COL:
+            break;
+        case html5::Tag::COLGROUP:
+
+
+            break;
+        case html5::Tag::COMMENT:
+            break;
+        case html5::Tag::DATA:
+            break;
+        case html5::Tag::DATALIST:
+            break;
+        case html5::Tag::DD:
+            return ( next == html5::Tag::DD || next == html5::Tag::DT );
+
+        case html5::Tag::DEL:
+            break;
+        case html5::Tag::DETAILS:
+            break;
+        case html5::Tag::DFN:
+            break;
+        case html5::Tag::DIALOG:
+            break;
+        case html5::Tag::DIV:
+            break;
+        case html5::Tag::DL:
+            break;
+        case html5::Tag::DOCTYPE:
+            break;
+        case html5::Tag::DT:
+            return ( next == html5::Tag::DD || next == html5::Tag::DT );
+
+        case html5::Tag::EM:
+            break;
+        case html5::Tag::EMBED:
+            break;
+        case html5::Tag::FIELDSET:
+            break;
+        case html5::Tag::FIGCAPTION:
+            break;
+        case html5::Tag::FIGURE:
+            break;
+        case html5::Tag::FOOTER:
+            break;
+        case html5::Tag::FORM:
+            break;
+        case html5::Tag::H1:
+            break;
+        case html5::Tag::H2:
+            break;
+        case html5::Tag::H3:
+            break;
+        case html5::Tag::H4:
+            break;
+        case html5::Tag::H5:
+            break;
+        case html5::Tag::H6:
+            break;
+        case html5::Tag::HEAD:
+            break;
+        case html5::Tag::HEADER:
+            break;
+        case html5::Tag::HR:
+            break;
+        case html5::Tag::HTML:
+            break;
+        case html5::Tag::I:
+            break;
+        case html5::Tag::IFRAME:
+            break;
+        case html5::Tag::IMG:
+            break;
+        case html5::Tag::INPUT:
+            break;
+        case html5::Tag::INS:
+            break;
+        case html5::Tag::KBD:
+            break;
+        case html5::Tag::LABEL:
+            break;
+        case html5::Tag::LEGEND:
+            break;
+        case html5::Tag::LI:
+            return ( next == html5::Tag::LI );
+
+        case html5::Tag::LINK:
+            break;
+        case html5::Tag::MAIN:
+            break;
+        case html5::Tag::MAP:
+            break;
+        case html5::Tag::MARK:
+            break;
+        case html5::Tag::META:
+            break;
+        case html5::Tag::METER:
+            break;
+        case html5::Tag::NAV:
+            break;
+        case html5::Tag::NOSCRIPT:
+            break;
+        case html5::Tag::OBJECT:
+            break;
+        case html5::Tag::OL:
+            break;
+        case html5::Tag::OPTGROUP:
+            return ( next == html5::Tag::OPTGROUP );
+            //TODO ...or if there is no more content in the parent element.
+        case html5::Tag::OPTION:
+            return ( next == html5::Tag::OPTION || next == html5::Tag::OPTGROUP );
+            //TODO ...or if there is no more content in the parent element.
+            break;
+        case html5::Tag::OUTPUT:
+            break;
+        case html5::Tag::P:
+            return ( next == html5::Tag::ADDRESS    || next == html5::Tag::ARTICLE      ||
+                     next == html5::Tag::ASIDE      || next == html5::Tag::BLOCKQUOTE   ||
+                     next == html5::Tag::DETAILS    || next == html5::Tag::DIV          ||
+                     next == html5::Tag::DL         || next == html5::Tag::FIELDSET     ||
+                     next == html5::Tag::FIGCAPTION || next == html5::Tag::FIGURE       ||
+                     next == html5::Tag::FOOTER     || next == html5::Tag::FORM         ||
+                     next == html5::Tag::H1         || next == html5::Tag::H2           ||
+                     next == html5::Tag::H3         || next == html5::Tag::H4           ||
+                     next == html5::Tag::H5         || next == html5::Tag::H6           ||
+                     next == html5::Tag::HEADER     || next == html5::Tag::HR           ||
+                     next == html5::Tag::MAIN       || next == html5::Tag::NAV          ||
+                     next == html5::Tag::OL         || next == html5::Tag::P            ||
+                     next == html5::Tag::PRE        || next == html5::Tag::SECTION      ||
+                     next == html5::Tag::TABLE      || next == html5::Tag::UL
+            );
+            /*TODO A p element's end tag may be omitted ..., or if there is no more content in
+             * the parent element and the parent element is an HTML element that is not an
+             * a, audio, del, ins, map, noscript, or video element, or an autonomous custom element. */
+        case html5::Tag::PARAM:
+            break;
+        case html5::Tag::PICTURE:
+            break;
+        case html5::Tag::PRE:
+            break;
+        case html5::Tag::PROGRESS:
+            break;
+        case html5::Tag::Q:
+            break;
+        case html5::Tag::RP:
+            return ( next == html5::Tag::RT || next == html5::Tag::RP );
+            //TODO ...or if there is no more content in the parent element.
+        case html5::Tag::RT:
+            return ( next == html5::Tag::RT || next == html5::Tag::RP );
+            //TODO ...or if there is no more content in the parent element.
+        case html5::Tag::RUBY:
+            break;
+        case html5::Tag::S:
+            break;
+        case html5::Tag::SAMP:
+            break;
+        case html5::Tag::SCRIPT:
+            break;
+        case html5::Tag::SECTION:
+            break;
+        case html5::Tag::SELECT:
+            break;
+        case html5::Tag::SMALL:
+            break;
+        case html5::Tag::SOURCE:
+            break;
+        case html5::Tag::SPAN:
+            break;
+        case html5::Tag::STRONG:
+            break;
+        case html5::Tag::STYLE:
+            break;
+        case html5::Tag::SUB:
+            break;
+        case html5::Tag::SUMMARY:
+            break;
+        case html5::Tag::SUP:
+            break;
+        case html5::Tag::TABLE:
+            break;
+        case html5::Tag::TBODY:
+            break;
+        case html5::Tag::TD:
+            break;
+        case html5::Tag::TEMPLATE:
+            break;
+        case html5::Tag::TEXTAREA:
+            break;
+        case html5::Tag::TFOOT:
+            break;
+        case html5::Tag::TH:
+            break;
+        case html5::Tag::THEAD:
+            break;
+        case html5::Tag::TIME:
+            break;
+        case html5::Tag::TITLE:
+            break;
+        case html5::Tag::TR:
+            break;
+        case html5::Tag::TRACK:
+            break;
+        case html5::Tag::U:
+            break;
+        case html5::Tag::UL:
+            break;
+        case html5::Tag::VAR:
+            break;
+        case html5::Tag::VIDEO:
+            break;
+        case html5::Tag::WBR:
+            break;
+        case html5::Tag::MATH:
+            break;
+        case html5::Tag::SVG:
+            break;
+        case html5::Tag::ENUM_END:
+            break;
+        default:
+            return false;
+    }
+
+    return false;
+}
+
+blogator::dom::html5::Tag
+blogator::dom::parser::Parser::autoOpenTag( blogator::dom::html5::Tag prev,
+                                            blogator::dom::html5::Tag next ) {
+    switch( next ) {
+
+        case html5::Tag::NONE:
+            break;
+        case html5::Tag::A:
+            break;
+        case html5::Tag::ABBR:
+            break;
+        case html5::Tag::ADDRESS:
+            break;
+        case html5::Tag::AREA:
+            break;
+        case html5::Tag::ARTICLE:
+            break;
+        case html5::Tag::ASIDE:
+            break;
+        case html5::Tag::AUDIO:
+            break;
+        case html5::Tag::B:
+            break;
+        case html5::Tag::BASE:
+            break;
+        case html5::Tag::BDI:
+            break;
+        case html5::Tag::BDO:
+            break;
+        case html5::Tag::BLOCKQUOTE:
+            break;
+        case html5::Tag::BODY:
+            break;
+        case html5::Tag::BR:
+            break;
+        case html5::Tag::BUTTON:
+            break;
+        case html5::Tag::CANVAS:
+            break;
+        case html5::Tag::CAPTION:
+            break;
+        case html5::Tag::CITE:
+            break;
+        case html5::Tag::CODE:
+            break;
+        case html5::Tag::COL:
+            break;
+        case html5::Tag::COLGROUP:
+            //TODO A colgroup element's start tag may be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)
+            break;
+        case html5::Tag::COMMENT:
+            break;
+        case html5::Tag::DATA:
+            break;
+        case html5::Tag::DATALIST:
+            break;
+        case html5::Tag::DD:
+            break;
+        case html5::Tag::DEL:
+            break;
+        case html5::Tag::DETAILS:
+            break;
+        case html5::Tag::DFN:
+            break;
+        case html5::Tag::DIALOG:
+            break;
+        case html5::Tag::DIV:
+            break;
+        case html5::Tag::DL:
+            break;
+        case html5::Tag::DOCTYPE:
+            break;
+        case html5::Tag::DT:
+            break;
+        case html5::Tag::EM:
+            break;
+        case html5::Tag::EMBED:
+            break;
+        case html5::Tag::FIELDSET:
+            break;
+        case html5::Tag::FIGCAPTION:
+            break;
+        case html5::Tag::FIGURE:
+            break;
+        case html5::Tag::FOOTER:
+            break;
+        case html5::Tag::FORM:
+            break;
+        case html5::Tag::H1:
+            break;
+        case html5::Tag::H2:
+            break;
+        case html5::Tag::H3:
+            break;
+        case html5::Tag::H4:
+            break;
+        case html5::Tag::H5:
+            break;
+        case html5::Tag::H6:
+            break;
+        case html5::Tag::HEAD:
+            break;
+        case html5::Tag::HEADER:
+            break;
+        case html5::Tag::HR:
+            break;
+        case html5::Tag::HTML:
+            break;
+        case html5::Tag::I:
+            break;
+        case html5::Tag::IFRAME:
+            break;
+        case html5::Tag::IMG:
+            break;
+        case html5::Tag::INPUT:
+            break;
+        case html5::Tag::INS:
+            break;
+        case html5::Tag::KBD:
+            break;
+        case html5::Tag::LABEL:
+            break;
+        case html5::Tag::LEGEND:
+            break;
+        case html5::Tag::LI:
+            break;
+        case html5::Tag::LINK:
+            break;
+        case html5::Tag::MAIN:
+            break;
+        case html5::Tag::MAP:
+            break;
+        case html5::Tag::MARK:
+            break;
+        case html5::Tag::META:
+            break;
+        case html5::Tag::METER:
+            break;
+        case html5::Tag::NAV:
+            break;
+        case html5::Tag::NOSCRIPT:
+            break;
+        case html5::Tag::OBJECT:
+            break;
+        case html5::Tag::OL:
+            break;
+        case html5::Tag::OPTGROUP:
+            break;
+        case html5::Tag::OPTION:
+            break;
+        case html5::Tag::OUTPUT:
+            break;
+        case html5::Tag::P:
+            break;
+        case html5::Tag::PARAM:
+            break;
+        case html5::Tag::PICTURE:
+            break;
+        case html5::Tag::PRE:
+            break;
+        case html5::Tag::PROGRESS:
+            break;
+        case html5::Tag::Q:
+            break;
+        case html5::Tag::RP:
+            break;
+        case html5::Tag::RT:
+            break;
+        case html5::Tag::RUBY:
+            break;
+        case html5::Tag::S:
+            break;
+        case html5::Tag::SAMP:
+            break;
+        case html5::Tag::SCRIPT:
+            break;
+        case html5::Tag::SECTION:
+            break;
+        case html5::Tag::SELECT:
+            break;
+        case html5::Tag::SMALL:
+            break;
+        case html5::Tag::SOURCE:
+            break;
+        case html5::Tag::SPAN:
+            break;
+        case html5::Tag::STRONG:
+            break;
+        case html5::Tag::STYLE:
+            break;
+        case html5::Tag::SUB:
+            break;
+        case html5::Tag::SUMMARY:
+            break;
+        case html5::Tag::SUP:
+            break;
+        case html5::Tag::TABLE:
+            break;
+        case html5::Tag::TBODY:
+            break;
+        case html5::Tag::TD:
+            break;
+        case html5::Tag::TEMPLATE:
+            break;
+        case html5::Tag::TEXTAREA:
+            break;
+        case html5::Tag::TFOOT:
+            break;
+        case html5::Tag::TH:
+            break;
+        case html5::Tag::THEAD:
+            break;
+        case html5::Tag::TIME:
+            break;
+        case html5::Tag::TITLE:
+            break;
+        case html5::Tag::TR:
+            break;
+        case html5::Tag::TRACK:
+            break;
+        case html5::Tag::U:
+            break;
+        case html5::Tag::UL:
+            break;
+        case html5::Tag::VAR:
+            break;
+        case html5::Tag::VIDEO:
+            break;
+        case html5::Tag::WBR:
+            break;
+        case html5::Tag::MATH:
+            break;
+        case html5::Tag::SVG:
+            break;
+        case html5::Tag::ENUM_END:
+            break;
+    }
+}

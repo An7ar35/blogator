@@ -3,12 +3,12 @@
 
 namespace blogator::dom::html5 {
     /**
-     * HTML5 tag types
-     * ref: https://www.w3schools.com/TAGs/
+     * Allowed tag types
      */
     enum class Tag {
         NONE = 0, //Not HTML - used internally for the root node and any leaf nodes with untagged data (raw)
 
+        /* HTML5 */
         A, ABBR, ADDRESS, AREA, ARTICLE, ASIDE, AUDIO,
         B, BASE, BDI, BDO, BLOCKQUOTE, BODY, BR, BUTTON,
         CANVAS, CAPTION, CITE, CODE, COL, COLGROUP, COMMENT,
@@ -25,24 +25,20 @@ namespace blogator::dom::html5 {
         P, PARAM, PICTURE, PRE, PROGRESS,
         Q,
         RP, RT, RUBY,
-        S, SAMP, SCRIPT, SECTION, SELECT, SMALL, SOURCE, SPAN, STRONG, STYLE, SUB, SUMMARY, SUP, SVG,
+        S, SAMP, SCRIPT, SECTION, SELECT, SMALL, SOURCE, SPAN, STRONG, STYLE, SUB, SUMMARY, SUP,
         TABLE, TBODY, TD, TEMPLATE, TEXTAREA, TFOOT, TH, THEAD, TIME, TITLE, TR, TRACK,
         U, UL,
         VAR, VIDEO,
         WBR,
 
-        ENUM_END //Not HTML - used for enumeration of enums
+        /* MathML 3.0 (https://developer.mozilla.org/en-US/docs/Web/MathML/Element) */
+        MATH,
+
+        /* SVG */
+        SVG,
+
+        ENUM_END //Not HTML - used for iterating enums
     };
-
-    /**
-     * HTML5 tag structure
-     */
-    enum class TagStructure {
-        PAIRED,   //open and closing tag pair
-        UNPAIRED, //single self-closing tag
-    };
-
-
 }
 
 #endif //BLOGATOR_DOM_HTML5_TAG_H

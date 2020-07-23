@@ -2,10 +2,13 @@
 #define BLOGATOR_HTML_DOM_DOT_DOT_H
 
 #include <stack>
+#include <filesystem>
 
 #include "DOTNode.h"
+#include "../dto/GlobalMaps.h"
 #include "../html5/enums/Tag.h"
-#include "../../dto/Text.h"
+#include "../dto/Text.h"
+#include "../../cli/MsgInterface.h"
 
 namespace blogator::dom {
     /**
@@ -18,9 +21,11 @@ namespace blogator::dom {
      */
     class DOT {
       public:
+        DOT();
         explicit DOT( const std::string    &html );
         explicit DOT( const std::u32string &html );
-        explicit DOT( const dto::Text &html );
+        explicit DOT( const dto::Text      &html );
+        explicit DOT( const std::filesystem::path &src );
         explicit DOT( std::unique_ptr<DOTNode> root );
 
         DOT( const DOT &dot ) = delete;
@@ -52,14 +57,15 @@ namespace blogator::dom {
         std::ostream & prettyPrint( std::ostream &os ) const;
 
       private:
+        cli::MsgInterface &                                         _display;
         std::unique_ptr<DOTNode>                                    _root;
+        dto::GlobalMaps                                             _global_maps;
         std::map<std::u32string, const dom::DOTNode *>              _css_id_map;
         std::map<std::u32string, std::vector<const dom::DOTNode *>> _css_class_map;
 
-        static bool isBoundaryChar( char32_t c );
-        static std::u32string consumeToken( const std::u32string &src, std::u32string::const_iterator &it );
+        void parse( const dto::Text &text );
 
-        void addAttribute( std::unique_ptr<DOTNode> &node, std::u32string name, std::u32string definition );
+        [[nodiscard]] static dto::Text readFile( const std::filesystem::path &path ) ;
     };
 }
 

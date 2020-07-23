@@ -8,7 +8,9 @@
 
 #include "../../exception/DOMException.h"
 #include "../../encoding/encoding.h"
-#include "../html5/html5.h"
+#include "../dto/Attribute.h"
+#include "../html5/Html5Properties.h"
+#include "../html5/enums/AttrBoundaryChar.h"
 
 namespace blogator::dom {
     /* These nodes are not meant to be copied nor deleted outside the destruction phase.
@@ -19,6 +21,7 @@ namespace blogator::dom {
       public:
         DOTNode();
         explicit DOTNode( html5::Tag tag, std::u32string text = U"" );
+        DOTNode( size_t i_pos, html5::Tag tag, std::u32string text = U"" );
 
         DOTNode( const DOTNode & node ) = delete;
         DOTNode( DOTNode && node ) noexcept ;
@@ -32,17 +35,21 @@ namespace blogator::dom {
         [[nodiscard]] std::unique_ptr<DOTNode> recursiveCopy() const;
 
         void setTextContent( std::u32string text );
-        DOTNode & addChild( std::unique_ptr<DOTNode> node );
+        DOTNode * addChild( std::unique_ptr<DOTNode> node );
 
         [[nodiscard]] const std::u32string & content() const;
+        [[nodiscard]] size_t indexInParent() const;
+        [[nodiscard]] DOTNode * parent();
         [[nodiscard]] const DOTNode * parent() const;
+        [[nodiscard]] const std::vector<std::unique_ptr<DOTNode>> & children() const;
 
         [[nodiscard]] std::u32string attribute( const std::u32string &key ) const;
         [[nodiscard]] bool hasAttribute() const;
         [[nodiscard]] bool hasAttribute( const std::u32string &key ) const;
 
-        bool addAttribute( const std::u32string &key, std::u32string value );
-        void replaceAttribute( const std::u32string &key, const std::u32string &value );
+        bool addAttribute( const std::u32string &key, std::u32string value, html5::AttrBoundaryChar bc );
+        bool addAttribute( const std::u32string &key, dto::Attribute attribute );
+        void replaceAttribute( const std::u32string &key, dto::Attribute attribute );
 
         [[nodiscard]] size_t childrenCount() const;
         [[nodiscard]] html5::Tag type() const;
@@ -56,9 +63,14 @@ namespace blogator::dom {
         friend std::ostream & operator <<( std::ostream &os, const DOTNode &node ) {
             { //opening tag + attributes
                 u32stringstream_t ss;
-                ss << U"<" << html5::Rules::getInstance().tagToStr( node._tag );
-                node.printAttributes( ss );
-                ss << U">";
+
+                if( node.type() != html5::Tag::NONE ) {
+                    ss << U"<" << html5::Html5Properties::tagToStr( node._tag );
+                    node.printAttributes( ss );
+                    if( node.type() != html5::Tag::COMMENT ) //edge case
+                        ss << U">";
+                }
+
                 ss << node.content();
 
                 encoding::encodeToUTF8( os, ss.str() );
@@ -67,9 +79,12 @@ namespace blogator::dom {
             for( const auto &n : node._children )
                 os << *n;
 
-            { //closing tag
+            if( html5::Html5Properties::isPaired( node.type() ) ) { //closing tag
                 u32stringstream_t ss;
-                ss << U"</" << html5::Rules::getInstance().tagToStr( node._tag ) << U">";
+                if( node.type() == html5::Tag::COMMENT ) //edge case
+                    ss << U"-->";
+                else
+                    ss << U"</" << html5::Html5Properties::tagToStr( node._tag ) << U">";
 
                 encoding::encodeToUTF8( os, ss.str() );
             }
@@ -81,12 +96,13 @@ namespace blogator::dom {
 
       private:
         friend class DOT;
-        friend class Parser;
+
         const html5::Tag                         _tag;
         std::u32string                           _text;
+        size_t                                   _nth_pos;
         DOTNode *                                _parent;
         std::vector<std::unique_ptr<DOTNode>>    _children;
-        std::map<std::u32string, std::u32string> _attributes;
+        std::map<std::u32string, dto::Attribute> _attributes;
 
         std::unique_ptr<DOTNode> recursiveCopy( DOTNode *parent ) const;
     };
