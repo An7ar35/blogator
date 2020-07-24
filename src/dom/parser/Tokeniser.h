@@ -26,6 +26,9 @@ namespace blogator::dom::parser {
             return os;
         }
 
+        bool operator ==( const Token &rhs ) const;
+        bool operator !=( const Token &rhs ) const;
+
         dto::Text::LineIndex_t line_i;
         dto::Text::CharIndex_t char_i;
         TokenType              type;

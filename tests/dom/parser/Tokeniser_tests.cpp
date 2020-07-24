@@ -1,56 +1,50 @@
 #include "gtest/gtest.h"
 #include "../../src/dom/parser/Tokeniser.h"
 
-#include <fstream>
-
-namespace Tokeniser_Tests {
-    blogator::dom::dto::Text createTextObject( std::u32string line ) {
-        auto text = blogator::dom::dto::Text();
-        text._lines.emplace_back( std::move( line ) );
-        return text;
-    }
-}
-
 TEST( Tokeniser_Tests, empty_str ) {
-    auto text      = Tokeniser_Tests::createTextObject( U"" );
+    auto text      = blogator::dom::dto::Text( U"" );
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
     ASSERT_EQ( 0, tokeniser.tokenCount() );
 }
 
 TEST( Tokeniser_Tests, valid_tag0 ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
-    auto text      = Tokeniser_Tests::createTextObject( U"<div >" );
+    auto text      = blogator::dom::dto::Text( U"<div >" );
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
     ASSERT_EQ( 1, tokeniser.tokenCount() );
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 0 ).type );
+    ASSERT_EQ( Token( { 1, 1, TokenType::START_TAG, U"<div >" } ), tokeniser.at( 0 ) );
 }
 
 TEST( Tokeniser_Tests, valid_tag1 ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
-    auto text      = Tokeniser_Tests::createTextObject( U"</div >" );
+    auto text      = blogator::dom::dto::Text( U"</div >" );
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
     ASSERT_EQ( 1, tokeniser.tokenCount() );
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 0 ).type );
+    ASSERT_EQ( Token( { 1, 1, TokenType::END_TAG, U"</div >" } ), tokeniser.at( 0 ) );
 }
 
 TEST( Tokeniser_Tests, valid_tag2_comment_open ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
-    auto text      = Tokeniser_Tests::createTextObject( U"<!--" );
+    auto text      = blogator::dom::dto::Text( U"<!--" );
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
     ASSERT_EQ( 1, tokeniser.tokenCount() );
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 0 ).type );
+    ASSERT_EQ( Token( { 1, 1, TokenType::START_TAG, U"<!--" } ), tokeniser.at( 0 ) );
 }
 
 TEST( Tokeniser_Tests, valid_tag2_comment_line ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
-    auto text      = Tokeniser_Tests::createTextObject( U"<!--some comment ... -->" );
+    auto text      = blogator::dom::dto::Text( U"<!--some comment ... -->" );
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
     ASSERT_EQ( 3, tokeniser.tokenCount() );
@@ -64,82 +58,50 @@ TEST( Tokeniser_Tests, valid_tag2_comment_line ) {
 
 TEST( Tokeniser_Tests, valid_line1 ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
-    auto text      = Tokeniser_Tests::createTextObject( U"<div><h1>Title</h1><p>Paragraph text.</p></div>" );
+    auto text      = blogator::dom::dto::Text( U"<div><h1>Title</h1><p>Paragraph text.</p></div>" );
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
     ASSERT_EQ( 8, tokeniser.tokenCount() );
-
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 0 ).type );
-    ASSERT_EQ( U"<div>", tokeniser.at( 0 ).content );
-
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 1 ).type );
-    ASSERT_EQ( U"<h1>", tokeniser.at( 1 ).content );
-
-    ASSERT_EQ( TokenType::TEXT, tokeniser.at( 2 ).type );
-    ASSERT_EQ( U"Title", tokeniser.at( 2 ).content );
-
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 3 ).type );
-    ASSERT_EQ( U"</h1>", tokeniser.at( 3 ).content );
-
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 4 ).type );
-    ASSERT_EQ( U"<p>", tokeniser.at( 4 ).content );
-
-    ASSERT_EQ( TokenType::TEXT, tokeniser.at( 5 ).type );
-    ASSERT_EQ( U"Paragraph text.", tokeniser.at( 5 ).content );
-
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 6 ).type );
-    ASSERT_EQ( U"</p>", tokeniser.at( 6 ).content );
-
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 7 ).type );
-    ASSERT_EQ( U"</div>", tokeniser.at( 7 ).content );
+    ASSERT_EQ( Token( { 1, 1, TokenType::START_TAG, U"<div>" } ), tokeniser.at( 0 ) );
+    ASSERT_EQ( Token( { 1, 6, TokenType::START_TAG, U"<h1>" } ), tokeniser.at( 1 ) );
+    ASSERT_EQ( Token( { 1, 10, TokenType::TEXT, U"Title" } ), tokeniser.at( 2 ) );
+    ASSERT_EQ( Token( { 1, 15, TokenType::END_TAG, U"</h1>" } ), tokeniser.at( 3 ) );
+    ASSERT_EQ( Token( { 1, 20, TokenType::START_TAG, U"<p>" } ), tokeniser.at( 4 ) );
+    ASSERT_EQ( Token( { 1, 23, TokenType::TEXT, U"Paragraph text." } ), tokeniser.at( 5 ) );
+    ASSERT_EQ( Token( { 1, 38, TokenType::END_TAG, U"</p>" } ), tokeniser.at( 6 ) );
+    ASSERT_EQ( Token( { 1, 42, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 7 ) );
 }
 
 
 TEST( Tokeniser_Tests, valid_line2 ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
-    auto text      = Tokeniser_Tests::createTextObject(
+    auto text = blogator::dom::dto::Text(
         U"<div class=class1><h1 id='title' >Title</h1 >  <p class=\"id001\">Paragraph text.</p>   </div>"
     );
+
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
     ASSERT_EQ( 10, tokeniser.tokenCount() );
-
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 0 ).type );
-    ASSERT_EQ( U"<div class=class1>", tokeniser.at( 0 ).content );
-
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 1 ).type );
-    ASSERT_EQ( U"<h1 id='title' >", tokeniser.at( 1 ).content );
-
-    ASSERT_EQ( TokenType::TEXT, tokeniser.at( 2 ).type );
-    ASSERT_EQ( U"Title", tokeniser.at( 2 ).content );
-
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 3 ).type );
-    ASSERT_EQ( U"</h1 >", tokeniser.at( 3 ).content );
-
-    ASSERT_EQ( TokenType::TEXT, tokeniser.at( 4 ).type );
-    ASSERT_EQ( U"  ", tokeniser.at( 4 ).content );
-
-    ASSERT_EQ( TokenType::START_TAG, tokeniser.at( 5 ).type );
-    ASSERT_EQ( U"<p class=\"id001\">", tokeniser.at( 5 ).content );
-
-    ASSERT_EQ( TokenType::TEXT, tokeniser.at( 6 ).type );
-    ASSERT_EQ( U"Paragraph text.", tokeniser.at( 6 ).content );
-
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 7 ).type );
-    ASSERT_EQ( U"</p>", tokeniser.at( 7 ).content );
-
-    ASSERT_EQ( TokenType::TEXT, tokeniser.at( 8 ).type );
-    ASSERT_EQ( U"   ", tokeniser.at( 8 ).content );
-
-    ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 9 ).type );
-    ASSERT_EQ( U"</div>", tokeniser.at( 9 ).content );
+    ASSERT_EQ( Token( { 1, 1, TokenType::START_TAG, U"<div class=class1>" } ), tokeniser.at( 0 ) );
+    ASSERT_EQ( Token( { 1, 19, TokenType::START_TAG, U"<h1 id='title' >" } ), tokeniser.at( 1 ) );
+    ASSERT_EQ( Token( { 1, 35, TokenType::TEXT, U"Title" } ), tokeniser.at( 2 ) );
+    ASSERT_EQ( Token( { 1, 40, TokenType::END_TAG, U"</h1 >" } ), tokeniser.at( 3 ) );
+    ASSERT_EQ( Token( { 1, 46, TokenType::TEXT, U"  " } ), tokeniser.at( 4 ) );
+    ASSERT_EQ( Token( { 1, 48, TokenType::START_TAG, U"<p class=\"id001\">" } ), tokeniser.at( 5 ) );
+    ASSERT_EQ( Token( { 1, 65, TokenType::TEXT, U"Paragraph text." } ), tokeniser.at( 6 ) );
+    ASSERT_EQ( Token( { 1, 80, TokenType::END_TAG, U"</p>" } ), tokeniser.at( 7 ) );
+    ASSERT_EQ( Token( { 1, 84, TokenType::TEXT, U"   " } ), tokeniser.at( 8 ) );
+    ASSERT_EQ( Token( { 1, 87, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 9 ) );
 }
 
 
 TEST( Tokeniser_Tests, valid_line3 ) {
     using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
 
     auto text = blogator::dom::dto::Text(
         U"<div class=class1>",
@@ -157,7 +119,18 @@ TEST( Tokeniser_Tests, valid_line3 ) {
 
     auto tokeniser = blogator::dom::parser::Tokeniser( text );
 
-    for( const auto & t : tokeniser )
-        std::cout << t << std::endl;
-
+    ASSERT_EQ( 13, tokeniser.tokenCount() );
+    ASSERT_EQ( Token ( { 1, 1, TokenType::START_TAG, U"<div class=class1>" } ), tokeniser.at( 0 ) );
+    ASSERT_EQ( Token ( { 2, 1, TokenType::START_TAG, U"<h1 id='title' >" } ), tokeniser.at( 1 ) );
+    ASSERT_EQ( Token ( { 3, 1, TokenType::TEXT, U"Title" } ), tokeniser.at( 2 ) );
+    ASSERT_EQ( Token ( { 4, 1, TokenType::END_TAG, U"</h1 >" } ), tokeniser.at( 3 ) );
+    ASSERT_EQ( Token ( { 5, 1, TokenType::TEXT, U"  " } ), tokeniser.at( 4 ) );
+    ASSERT_EQ( Token ( { 5, 3, TokenType::START_TAG, U"<p class=\"id001\">" } ), tokeniser.at( 5 ) );
+    ASSERT_EQ( Token ( { 6, 1, TokenType::TEXT, U"Paragraph text." } ), tokeniser.at( 6 ) );
+    ASSERT_EQ( Token ( { 7, 1, TokenType::END_TAG, U"</p>" } ), tokeniser.at( 7 ) );
+    ASSERT_EQ( Token ( { 8, 1, TokenType::TEXT, U"   " } ), tokeniser.at( 8 ) );
+    ASSERT_EQ( Token ( { 8, 4, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 9 ) );
+    ASSERT_EQ( Token ( { 8, 10, TokenType::START_TAG, U"<div id='id002'>" } ), tokeniser.at( 10 ) );
+    ASSERT_EQ( Token ( { 9, 1, TokenType::TEXT, U" some more text... " } ), tokeniser.at( 11 ) );
+    ASSERT_EQ( Token ( { 10, 1, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 12 ) );
 }

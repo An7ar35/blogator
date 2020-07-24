@@ -6,6 +6,8 @@ TEST( Html5Relationships, validateNode_consistency_check ) { //Checks that all T
     using blogator::dom::html5::Tag;
     using blogator::dom::DOTNode;
 
+    FAIL(); //TODO
+
     for( auto i = 0; i < static_cast<int>( Tag::ENUM_END ); ++i ) {
         auto node = DOTNode( static_cast<Tag>( i ) );
         ASSERT_NO_THROW( Html5Relationships::validateNode( node ) );

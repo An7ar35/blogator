@@ -21,6 +21,27 @@ blogator::dom::parser::Token::Token( dto::Text::LineIndex_t line_number,
 {}
 
 /**
+ * Equality operator
+ * @param rhs Token object to compare to
+ * @return result
+ */
+bool blogator::dom::parser::Token::operator ==( const blogator::dom::parser::Token &rhs ) const {
+    return line_i  == rhs.line_i
+        && char_i  == rhs.char_i
+        && type    == rhs.type
+        && content == rhs.content;
+}
+
+/**
+ * Inequality operator
+ * @param rhs Token object to compare to
+ * @return result
+ */
+bool blogator::dom::parser::Token::operator !=( const blogator::dom::parser::Token &rhs ) const {
+    return !( *this == rhs );
+}
+
+/**
  * Constructor
  * @param utf32_src Source html text
  */
