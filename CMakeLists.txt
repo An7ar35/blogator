@@ -54,7 +54,7 @@ set(SOURCE_FILES
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
-        src/exception/DOMException.h
+        src/dom/exception/DOMException.h
         src/fs/fs.cpp
         src/fs/fs.h
         src/fs/ConfigReader.cpp
@@ -199,7 +199,7 @@ set(TEST_FILES
         tests/dom/html5/validator/validator_validateClosingTag_tests.cpp
         tests/dom/html5/validator/validator_validateAttributes_tests.cpp
         tests/dom/html5/Html5Properties_tests.cpp
-        tests/dom/html5/Html5Relationships_tests.cpp)
+        tests/dom/html5/Html5Relationships_tests.cpp tests/dom/dto/Attribute.cpp)
 
 enable_testing()
 

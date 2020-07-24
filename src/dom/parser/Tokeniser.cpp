@@ -69,6 +69,26 @@ blogator::dom::parser::Tokeniser::const_iterator blogator::dom::parser::Tokenise
 }
 
 /**
+ * Returns a reference to the element at specified location pos, with bounds checking.
+ * @param pos position of the Token to return
+ * @return Reference to the Token at position
+ * @throws std::out_of_range when pos is not within the element range of the container
+ */
+blogator::dom::parser::Token &blogator::dom::parser::Tokeniser::at( unsigned long pos ) {
+    return _tokens.at( pos );
+}
+
+/**
+ * Returns a reference to the element at specified location pos, with bounds checking.
+ * @param pos position of the Token to return
+ * @return Reference to the Token at position
+ * @throws std::out_of_range when pos is not within the element range of the container
+ */
+const blogator::dom::parser::Token &blogator::dom::parser::Tokeniser::at( std::vector<Token>::size_type pos ) const {
+    return _tokens.at( pos );
+}
+
+/**
  * Gets the number of currently held tokens
  * @return Token count
  */
@@ -93,7 +113,7 @@ void blogator::dom::parser::Tokeniser::processLine( const dto::Text::Line_t &lin
         if( it != line.cend() ) {
             if( _inside_comment_flag ) {
                 processCommentText( { line, line_i }, { it, char_i } );
-            } else if( *it == html5::special_char::LESS_THAN && !Text::isEOL( it, line ) && !iswspace( *std::next( it ) ) ) { //open tag
+            } else if( *it == html5::special_char::LESS_THAN && !Text::isEOL( it, line ) && !iswspace( *std::next( it ) ) ) { //a tag looks to begin...
                 processTag( { line, line_i }, { it, char_i } );
             } else {
                 processText( { line, line_i }, { it, char_i } );
@@ -180,9 +200,9 @@ void blogator::dom::parser::Tokeniser::processText( Tokeniser::LineInfo line_inf
         ++char_info.index;
     }
 
-    if( !( !_tokens.empty() && _tokens.back().type == TokenType::END_TAG && is_space ) ) {
+//    if( !( !_tokens.empty() && _tokens.back().type == TokenType::END_TAG && is_space ) ) {
         _tokens.emplace_back( line_info.index, start_char_i, TokenType::TEXT, ss.str() );
-    } //i.e. If previous node is a END_TAG and text is just space then omit from insertion
+//    } //i.e. If previous node is a END_TAG and text is just space then omit from insertion
 }
 
 /**
@@ -260,6 +280,21 @@ void blogator::dom::parser::Tokeniser::processCommentText( Tokeniser::LineInfo l
 }
 
 /**
+ * Processes a comment closing tag
+ * @param line_info Line information container (const ref to line content and index)
+ * @param char_info Character information container (ref to char iterator and index)
+ */
+void blogator::dom::parser::Tokeniser::processCommentClose( Tokeniser::LineInfo line_info,
+                                                            Tokeniser::CharInfo char_info )
+{
+    char_info.it         = std::next( char_info.it, 3 );
+    char_info.index     += 3;
+    _inside_comment_flag = false;
+
+    _tokens.emplace_back( line_info.index, char_info.index, TokenType::END_TAG, U"-->" );
+}
+
+/**
  * Checks for a comment closing tag
  * @param line_info Line information container (const ref to line content and index)
  * @param char_info Character information container (ref to char iterator and index)
@@ -276,19 +311,4 @@ bool blogator::dom::parser::Tokeniser::isCommentClose( Tokeniser::LineInfo line_
         return false;
 
     return ( !Text::isEOL( it, line_info.line ) && *( it++ ) == html5::special_char::GREATER_THAN );
-}
-
-/**
- * Processes a comment closing tag
- * @param line_info Line information container (const ref to line content and index)
- * @param char_info Character information container (ref to char iterator and index)
- */
-void blogator::dom::parser::Tokeniser::processCommentClose( Tokeniser::LineInfo line_info,
-                                                            Tokeniser::CharInfo char_info )
-{
-    char_info.it         = std::next( char_info.it, 3 );
-    char_info.index     += 3;
-    _inside_comment_flag = false;
-
-    _tokens.emplace_back( line_info.index, char_info.index, TokenType::END_TAG, U"-->" );
 }

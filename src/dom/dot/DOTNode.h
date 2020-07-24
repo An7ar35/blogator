@@ -6,7 +6,7 @@
 #include <map>
 #include <sstream>
 
-#include "../../exception/DOMException.h"
+#include "../exception/DOMException.h"
 #include "../../encoding/encoding.h"
 #include "../dto/Attribute.h"
 #include "../html5/Html5Properties.h"
@@ -47,9 +47,10 @@ namespace blogator::dom {
         [[nodiscard]] bool hasAttribute() const;
         [[nodiscard]] bool hasAttribute( const std::u32string &key ) const;
 
-        bool addAttribute( const std::u32string &key, std::u32string value, html5::AttrBoundaryChar bc );
         bool addAttribute( const std::u32string &key, dto::Attribute attribute );
+        bool appendAttribute( const std::u32string &key, std::u32string value );
         void replaceAttribute( const std::u32string &key, dto::Attribute attribute );
+        html5::AttrBoundaryChar boundaryChar( const std::u32string &attr_key );
 
         [[nodiscard]] size_t childrenCount() const;
         [[nodiscard]] html5::Tag type() const;

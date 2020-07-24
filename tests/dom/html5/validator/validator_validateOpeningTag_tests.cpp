@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "../../../../src/dom/html5/validator/validator.h"
-#include "../../../../src/exception/DOMException.h"
+#include "../../../../src/dom/exception/DOMException.h"
 
 TEST( html5_validator_Tests, validateOpeningTag_pass0 ) {
     using blogator::exception::DOMException;
@@ -91,7 +91,25 @@ TEST( html5_validator_Tests, validateOpeningTag_pass4 ) {
     ASSERT_EQ( AttrBoundaryChar::QUOTATION_MARK, v.at( 2 ).second.boundary );
 }
 
+TEST( html5_validator_Tests, validateOpeningTag_pass5 ) {
+    using blogator::exception::DOMException;
+    using blogator::dom::dto::Attribute;
+    using blogator::dom::html5::AttrBoundaryChar;
+    using blogator::dom::html5::Tag;
+    using blogator::dom::html5::validator::validateOpeningTag;
 
+    auto str = U"<a class=\"my-link nested-link\" href=\"http://start.duckduckgo.com\">";
+    auto v   = std::vector<std::pair<std::u32string, Attribute>>();
+
+    ASSERT_EQ( Tag::A, validateOpeningTag( str, v ) );
+    ASSERT_EQ( 2, v.size() );
+    ASSERT_EQ( U"class", v.at( 0 ).first );
+    ASSERT_EQ( U"my-link nested-link", v.at( 0 ).second.value );
+    ASSERT_EQ( AttrBoundaryChar::QUOTATION_MARK, v.at( 0 ).second.boundary );
+    ASSERT_EQ( U"href", v.at( 1 ).first );
+    ASSERT_EQ( U"http://start.duckduckgo.com", v.at( 1 ).second.value );
+    ASSERT_EQ( AttrBoundaryChar::QUOTATION_MARK, v.at( 1 ).second.boundary );
+}
 
 TEST( html5_validator_Tests, validateOpeningTag_fail0 ) {
     using blogator::exception::DOMException;

@@ -43,6 +43,7 @@ namespace blogator::dom::parser {
             return os;
         }
 
+        /* access to the list of tokens created */
         typedef typename std::vector<Token>::iterator iterator;
         typedef typename std::vector<Token>::const_iterator const_iterator;
         [[nodiscard]] iterator begin();
@@ -50,6 +51,8 @@ namespace blogator::dom::parser {
         [[nodiscard]] const_iterator cbegin() const;
         [[nodiscard]] const_iterator cend() const;
 
+        [[nodiscard]] Token & at( std::vector<Token>::size_type pos );
+        [[nodiscard]] const Token & at( std::vector<Token>::size_type pos ) const;
         [[nodiscard]] std::vector<Token>::size_type tokenCount() const;
 
       private:
@@ -73,8 +76,8 @@ namespace blogator::dom::parser {
 
         bool processCommentOpen( LineInfo line_info, CharInfo char_info );
         void processCommentText( LineInfo line_info, CharInfo char_info );
-        bool isCommentClose( LineInfo line_info, CharInfo char_info );
         void processCommentClose( LineInfo line_info, CharInfo char_info );
+        static bool isCommentClose( LineInfo line_info, CharInfo char_info );
     };
 }
 

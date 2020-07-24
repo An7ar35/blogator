@@ -215,25 +215,6 @@ bool blogator::dom::DOTNode::hasAttribute( const std::u32string &key ) const {
 }
 
 /**
- * Adds a new attribute if key not found otherwise appends to the existing value
- * @param key   Attribute key
- * @param value Attribute value to add/append (adds a space prior to appending when value is !empty)
- * @param bc    Boundary character to use when a new key/value attribute pair is created
- * @return `true` key added, `false` if key already existed
- */
-bool blogator::dom::DOTNode::addAttribute( const std::u32string &key, std::u32string value, html5::AttrBoundaryChar bc ) {
-    auto it = _attributes.find( key );
-
-    if( it != _attributes.end() ) {
-        it->second.value += ( it->second.value.empty() ? std::move( value ) : U" " + std::move( value ) );
-        return false;
-    } else {
-        _attributes.emplace( key, dto::Attribute { std::move( value ), bc } );
-        return true;
-    }
-}
-
-/**
  * Adds a new attribute
  * @param key       Attribute key
  * @param attribute Attribute DTO (value, boundary char)
@@ -250,6 +231,71 @@ bool blogator::dom::DOTNode::addAttribute( const std::u32string &key, dom::dto::
 }
 
 /**
+ * Appends a value to an existing attribute that can support this operation (i.e.: with a boundary character specified)
+ * @param key   Attribute key
+ * @param value Attribute value to append
+ * @return Success of operation (i.e. key was found and its value appended to)
+ * @throws exception::DOMException when value has a nested boundary character that is already in used as a boundary character
+ */
+bool blogator::dom::DOTNode::appendAttribute( const std::u32string &key, std::u32string value ) {
+    auto it = _attributes.find( key );
+
+    if( value.empty() || it == _attributes.end() )
+        return false;
+
+    try {
+        auto nested_bc = dom::dto::Attribute::checkNestedBoundaryChar( value ); //can throw
+
+        if( it->second.boundary == html5::AttrBoundaryChar::NONE ) {
+            switch( nested_bc ) {
+                case html5::AttrBoundaryChar::NONE:
+                case html5::AttrBoundaryChar::APOSTROPHE:
+                    it->second.boundary = html5::AttrBoundaryChar::QUOTATION_MARK;
+                    break;
+                case html5::AttrBoundaryChar::QUOTATION_MARK:
+                    it->second.boundary = html5::AttrBoundaryChar::APOSTROPHE;
+                    break;
+            }
+
+            it->second.value += ( it->second.value.empty() ? std::move( value ) : U" " + std::move( value ) );
+            return true;
+        }
+
+        if( it->second.boundary == html5::AttrBoundaryChar::APOSTROPHE ) {
+            if( nested_bc == html5::AttrBoundaryChar::APOSTROPHE ) { //cannot nest (') into (')
+                std::stringstream msg;
+                msg << "Nested boundary char (') already in use by the attribute \"" << encoding::encodeToUTF8( key ) << "\".";
+                throw std::invalid_argument( msg.str() );
+            }
+
+            it->second.value += ( it->second.value.empty() ? std::move( value ) : U" " + std::move( value ) );
+            return true;
+        }
+
+        if( it->second.boundary == html5::AttrBoundaryChar::QUOTATION_MARK ) {
+            if( nested_bc == html5::AttrBoundaryChar::QUOTATION_MARK ) { //cannot nest (") into (")
+                std::stringstream msg;
+                msg << "Nested boundary char (\") already in use by the attribute \"" << encoding::encodeToUTF8( key ) << "\".";
+                throw std::invalid_argument( msg.str() );
+            }
+
+            it->second.value += ( it->second.value.empty() ? std::move( value ) : U" " + std::move( value ) );
+            return true;
+        }
+
+    } catch( std::invalid_argument &e ) {
+        std::stringstream loc;
+        loc << "blogator::dom::DOTNode::appendAttribute( \"" << encoding::encodeToUTF8( key ) << "\", \""
+                                                             << encoding::encodeToUTF8( value ) << "\" )";
+        throw exception::DOMException(
+            loc.str(),
+            e.what(),
+            exception::DOMErrorType::ValidationError
+        );
+    }
+}
+
+/**
  * Replaces the value of a given attribute
  * @param key       Attribute key
  * @param attribute Attribute DTO
@@ -262,13 +308,29 @@ void blogator::dom::DOTNode::replaceAttribute( const std::u32string &key, dom::d
         return;
     }
 
-    std::stringstream ss;
-    ss << "[blogator::dom::DOTNode::replaceAttribute( \""
-       << encoding::encodeToUTF8( key ) << "\" , \""
-       << encoding::encodeToUTF8( attribute.value ) << "\" )] "
-       << "Attribute key not found.";
+    std::stringstream loc;
+    loc << "blogator::dom::DOTNode::replaceAttribute( \""
+        << encoding::encodeToUTF8( key ) << "\" , \""
+        << encoding::encodeToUTF8( attribute.value ) << "\" )";
 
-    throw exception::DOMException( ss.str(), exception::DOMErrorType::NotFoundError );
+    throw exception::DOMException( loc.str(), "Attribute key not found.", exception::DOMErrorType::NotFoundError );
+}
+
+/**
+ * Gets the attribute boundary character type in use with a given attribute
+ * @param attr_key Attribute key
+ * @return Boundary character type
+ */
+blogator::dom::html5::AttrBoundaryChar blogator::dom::DOTNode::boundaryChar( const std::u32string &attr_key ) {
+    auto it = _attributes.find( attr_key );
+
+    if( it != _attributes.end() )
+        return it->second.boundary;
+
+    std::stringstream loc;
+    loc << "[blogator::dom::DOTNode::boundaryChar( \"" << encoding::encodeToUTF8( attr_key ) << " )";
+
+    throw exception::DOMException( loc.str(), "Attribute key not found.", exception::DOMErrorType::NotFoundError );
 }
 
 /**

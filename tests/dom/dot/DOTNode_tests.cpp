@@ -118,10 +118,131 @@ TEST( DOTNode_Tests, addAttribute2 ) {
     using blogator::dom::html5::Tag;
 
     auto node = DOTNode( Tag::DIV );
-    ASSERT_TRUE( node.addAttribute( U"class", Attribute { U"block left", AttrBoundaryChar::NONE } ) );
+    ASSERT_TRUE( node.addAttribute( U"class", Attribute { U"block left", AttrBoundaryChar::QUOTATION_MARK } ) );
     ASSERT_EQ( U"block left", node.attribute( U"class" ) );
-    ASSERT_FALSE( node.addAttribute( U"class", Attribute { U"bordered", AttrBoundaryChar::NONE } ) );
-    ASSERT_EQ( U"block left bordered", node.attribute( U"class" ) );
+    ASSERT_FALSE( node.addAttribute( U"class", Attribute { U"bordered", AttrBoundaryChar::QUOTATION_MARK } ) );
+    ASSERT_EQ( U"block left", node.attribute( U"class" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_pass0 ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_FALSE( node.appendAttribute( U"class", U"classname" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_pass1 ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::NONE } ) );
+    ASSERT_FALSE( node.appendAttribute( U"class", U"" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_pass2 ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::NONE } ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"anothername" ) );
+    ASSERT_EQ( U"classname anothername", node.attribute( U"class" ) );
+    ASSERT_EQ( AttrBoundaryChar::QUOTATION_MARK, node.boundaryChar( U"class" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_pass3 ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::QUOTATION_MARK } ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"rock'n'roll" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_pass4 ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::APOSTROPHE } ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"\"awesome\"" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_pass5 ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::QUOTATION_MARK } ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"name_1" ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"name'2" ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"name_3" ) );
+    ASSERT_EQ( U"classname name_1 name'2 name_3", node.attribute( U"class" ) );
+}
+
+TEST( DOTNode_Tests, appendAttribute_fail0 ) {
+    using blogator::dom::dto::Attribute;
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::QUOTATION_MARK } ) );
+
+    EXPECT_THROW( {
+        try {
+            node.appendAttribute( U"class", U"a\"class\"" );
+        } catch( const blogator::exception::DOMException &e ) {
+            EXPECT_STREQ( "ValidationError: Nested boundary char (\") already in use by the attribute \"class\".", e.what() );
+            throw;
+        }
+    }, blogator::exception::DOMException );
+}
+
+TEST( DOTNode_Tests, appendAttribute_fail1 ) {
+    using blogator::dom::dto::Attribute;
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::APOSTROPHE } ) );
+
+    EXPECT_THROW( {
+        try {
+            node.appendAttribute( U"class", U"class's_name" );
+        } catch( const blogator::exception::DOMException &e ) {
+            EXPECT_STREQ( "ValidationError: Nested boundary char (') already in use by the attribute \"class\".", e.what() );
+            throw;
+        }
+    }, blogator::exception::DOMException );
+}
+
+TEST( DOTNode_Tests, appendAttribute_fail2 ) {
+    using blogator::dom::dto::Attribute;
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"clasname", AttrBoundaryChar::NONE } ) );
+
+    EXPECT_THROW( {
+        try {
+            node.appendAttribute( U"class", U"a_\"class\"'s_name" );
+        } catch( const blogator::exception::DOMException &e ) {
+            EXPECT_STREQ( "ValidationError: Using both quotation and apostrophes in string.", e.what() );
+            throw;
+        }
+    }, blogator::exception::DOMException );
+}
+
+TEST( DOTNode_Tests, appendAttribute_fail3 ) {
+    using blogator::dom::dto::Attribute;
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", { U"classname", AttrBoundaryChar::NONE } ) );
+    ASSERT_TRUE( node.appendAttribute( U"class", U"class's_name" ) );
+
+    EXPECT_THROW( {
+        try {
+            node.appendAttribute( U"class", U"another\"name\"" );
+        } catch( const blogator::exception::DOMException &e ) {
+            EXPECT_STREQ( "ValidationError: Nested boundary char (\") already in use by the attribute \"class\".", e.what() );
+            throw;
+        }
+    }, blogator::exception::DOMException );
 }
 
 TEST( DOTNode_Tests, replaceAttribute_fail ) {
@@ -146,4 +267,20 @@ TEST( DOTNode_Tests, replaceAttribute ) {
     ASSERT_EQ( U"original", node.attribute( U"class" ) );
     node.replaceAttribute( U"class", Attribute { U"modified", AttrBoundaryChar::QUOTATION_MARK } );
     ASSERT_EQ( U"modified", node.attribute( U"class" ) );
+}
+
+TEST( DOTNode_Tests, boundaryChar_pass ) {
+    using blogator::dom::dto::Attribute;
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_TRUE( node.addAttribute( U"class", Attribute { U"original", AttrBoundaryChar::QUOTATION_MARK } ) );
+    ASSERT_EQ( AttrBoundaryChar::QUOTATION_MARK, node.boundaryChar( U"class" ) );
+}
+
+TEST( DOTNode_Tests, boundaryChar_fail ) {
+    using blogator::dom::html5::AttrBoundaryChar;
+
+    auto node = blogator::dom::DOTNode( blogator::dom::html5::Tag::DIV );
+    ASSERT_THROW( node.boundaryChar( U"class" ), blogator::exception::DOMException );
 }

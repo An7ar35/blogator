@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "../../../../src/dom/html5/validator/validator.h"
-#include "../../../../src/exception/DOMException.h"
+#include "../../../../src/dom/exception/DOMException.h"
 
 TEST( html5_validator_Tests, validateAttributes_fail1 ) {
     using blogator::dom::html5::validator::validateAttributes;

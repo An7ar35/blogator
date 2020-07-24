@@ -11,6 +11,8 @@ namespace blogator::dom::dto {
 
         bool operator ==( const Attribute &rhs ) const;
         bool operator !=( const Attribute &rhs ) const;
+
+        static html5::AttrBoundaryChar checkNestedBoundaryChar( const std::u32string &str );
     };
 }
 

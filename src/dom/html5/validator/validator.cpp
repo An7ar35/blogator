@@ -3,7 +3,7 @@
 #include <cwctype>
 
 #include "../special_char.h"
-#include "../../../exception/DOMException.h"
+#include "../../exception/DOMException.h"
 #include "../../../encoding/encoding.h"
 #include "../../../string/helpers.h"
 
