@@ -4,11 +4,14 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <type_traits>
 
 #include "../../encoding/encoding.h"
 
 namespace blogator::dom::dto {
     struct Text {
+        Text() = default;
+
         typedef std::u32string    Line_t;
         typedef size_t            LineIndex_t;
         typedef Line_t::size_type CharIndex_t;
@@ -19,13 +22,50 @@ namespace blogator::dom::dto {
             return s;
         }
 
+        template<typename ...UTF32Strings> void addLines( UTF32Strings ...strings );
+
         static bool isEOL( const dto::Text::Line_t::const_iterator &it, const dto::Text::Line_t &line );
 
         bool operator ==( const Text &rhs ) const;
         bool operator !=( const Text &rhs ) const;
 
         std::vector<Line_t> _lines;
+
+      private:
+        template<typename H, typename ...T> void addLines_( H head, T ...tail );
+        void                                     addLines_() {}; //recurse stopper
     };
+}
+
+/**
+ * Adds a list of lines to the Text
+ * @tparam UTF32String Deducted var type passed (allowed: const char *, const char32_t, std::string, std::u32string )
+ * @param strings List of lines (non-char32_t based args will be encoded from UTF8 to UTF32)
+ */
+template<typename... UTF32String> void blogator::dom::dto::Text::addLines( UTF32String... strings ) {
+    addLines_( strings... );
+}
+
+/**
+ * Adds the first line in the packed argument list to the Text
+ * @tparam H   Head var type
+ * @tparam T   Tail var types
+ * @param head First line in argument list
+ * @param tail Remaining lines in argument list
+ */
+template<typename H, typename... T> void blogator::dom::dto::Text::addLines_( H head, T... tail ) {
+    static_assert(
+        ( std::is_same_v<H, const char32_t *> || std::is_same_v<H, std::basic_string<char32_t>> ||
+          std::is_same_v<H, const char *>     || std::is_same_v<H, std::basic_string<char>> ),
+        "Template arguments can only be of type `const char *`, `const char32_t *`, `std::string` or `std::u32string`."
+    );
+
+    if constexpr( std::is_same_v<H, const char *> || std::is_same_v<H, std::basic_string<char>> )
+        _lines.emplace_back( blogator::encoding::encodeToUTF32( head ) );
+    else
+        _lines.emplace_back( std::move( head ) );
+
+    addLines_( tail... );
 }
 
 #endif //BLOGATOR_DOM_DTO_TEXT_H
