@@ -11,6 +11,7 @@
 namespace blogator::dom::dto {
     struct Text {
         Text() = default;
+        template<typename ...LINE> Text( LINE ...lines );
 
         typedef std::u32string    Line_t;
         typedef size_t            LineIndex_t;
@@ -22,7 +23,7 @@ namespace blogator::dom::dto {
             return s;
         }
 
-        template<typename ...UTF32Strings> void addLines( UTF32Strings ...strings );
+        template<typename ...LINE> void addLines( LINE ...lines );
 
         static bool isEOL( const dto::Text::Line_t::const_iterator &it, const dto::Text::Line_t &line );
 
@@ -38,12 +39,21 @@ namespace blogator::dom::dto {
 }
 
 /**
- * Adds a list of lines to the Text
- * @tparam UTF32String Deducted var type passed (allowed: const char *, const char32_t, std::string, std::u32string )
- * @param strings List of lines (non-char32_t based args will be encoded from UTF8 to UTF32)
+ * Constructor
+ * @tparam LINE Deducted var type passed (allowed: const char *, const char32_t, std::string, std::u32string )
+ * @param lines List of lines (non-char32_t based args will be encoded from UTF8 to UTF32)
  */
-template<typename... UTF32String> void blogator::dom::dto::Text::addLines( UTF32String... strings ) {
-    addLines_( strings... );
+template<typename... LINE> blogator::dom::dto::Text::Text( LINE... lines ) {
+    addLines_( lines... );
+}
+
+/**
+ * Adds a list of lines to the Text
+ * @tparam LINE Deducted var type passed (allowed: const char *, const char32_t, std::string, std::u32string )
+ * @param lines List of lines (non-char32_t based args will be encoded from UTF8 to UTF32)
+ */
+template<typename... LINE> void blogator::dom::dto::Text::addLines( LINE... lines ) {
+    addLines_( lines... );
 }
 
 /**

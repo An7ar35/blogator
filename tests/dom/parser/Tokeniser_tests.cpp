@@ -136,3 +136,28 @@ TEST( Tokeniser_Tests, valid_line2 ) {
     ASSERT_EQ( TokenType::END_TAG, tokeniser.at( 9 ).type );
     ASSERT_EQ( U"</div>", tokeniser.at( 9 ).content );
 }
+
+
+TEST( Tokeniser_Tests, valid_line3 ) {
+    using blogator::dom::parser::TokenType;
+
+    auto text = blogator::dom::dto::Text(
+        U"<div class=class1>",
+        U"<h1 id='title' >",
+        U"Title",
+        U"</h1 >",
+        U"  <p class=\"id001\">",
+        U"Paragraph text.",
+        U"</p>",
+        U"   </div>"
+        "<div id='id002'>",
+        " some more text... ",
+        "</div>"
+    );
+
+    auto tokeniser = blogator::dom::parser::Tokeniser( text );
+
+    for( const auto & t : tokeniser )
+        std::cout << t << std::endl;
+
+}
