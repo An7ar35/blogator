@@ -20,8 +20,9 @@ namespace blogator::encoding {
     std::u32string encodeToUTF32( const std::string &utf8_str );
     u32stringstream_t & encodeToUTF32( u32stringstream_t &out, const std::string &utf8_str );
 
-    bool isNonCharacter( char32_t c );
+    std::u32string convertToHex( char32_t c );
 
+    bool isNonCharacter( char32_t c );
 }
 
 #endif //BLOGATOR_ENCODING_H

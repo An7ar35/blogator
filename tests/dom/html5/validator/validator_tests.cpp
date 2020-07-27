@@ -66,3 +66,22 @@ TEST( html5_validator_Tests, isValidCharReference_fail7 ) {
     using blogator::dom::html5::validator::isValidCharReference;
     ASSERT_FALSE( isValidCharReference( U"&#x;" ) );
 }
+
+TEST( html5_validator_Tests, escapeReservedChar_reserved ) {
+    using blogator::dom::html5::validator::escapeReservedChar;
+
+    ASSERT_EQ( U"&amp;",  escapeReservedChar( U'&' ) );
+    ASSERT_EQ( U"&lt;",   escapeReservedChar( U'<' ) );
+    ASSERT_EQ( U"&gt;",   escapeReservedChar( U'>' ) );
+    ASSERT_EQ( U"&quot;", escapeReservedChar( U'\"' ) );
+    ASSERT_EQ( U"&apos;", escapeReservedChar( U'\'' ) );
+}
+
+TEST( html5_validator_Tests, escapeReservedChar_unreserved ) {
+    using blogator::dom::html5::validator::escapeReservedChar;
+
+    ASSERT_EQ( U"&#x5C;", escapeReservedChar( static_cast<char32_t>( 92 ) ) );
+    ASSERT_EQ( U"&#x2265;", escapeReservedChar( static_cast<char32_t>( 8805 ) ) );
+    ASSERT_EQ( U"&#x2995;", escapeReservedChar( static_cast<char32_t>( 10645 ) ) );
+    ASSERT_EQ( U"&#x1D54A;", escapeReservedChar( static_cast<char32_t>( 120138 ) ) );
+}

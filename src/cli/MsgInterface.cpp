@@ -140,7 +140,19 @@ void blogator::cli::MsgInterface::error( const std::string & msg ) {
     _display_out->error( msg );
 }
 
+/**
+ * Sets the debug flag state
+ * @param state State
+ */
 void blogator::cli::MsgInterface::setShowDebug( bool state ) {
     _display_out->setDebug( state );
     _display_out->message( std::string( "Show debug messages: " ) + ( state ? "ON" : "OFF" ) );
+}
+
+/**
+ * Gets the debug flag state
+ * @return Debug messages state
+ */
+bool blogator::cli::MsgInterface::showDebug() const {
+    return _display_out->getDebugState();
 }

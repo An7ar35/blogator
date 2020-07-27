@@ -3,6 +3,7 @@
 #include <codecvt>
 #include <locale>
 #include <sstream>
+#include <algorithm>
 
 /**
  * Encodes a UTF-32 character into a UTF-8 string
@@ -60,6 +61,30 @@ std::u32string blogator::encoding::encodeToUTF32( const std::string &utf8_str ) 
 blogator::u32stringstream_t & blogator::encoding::encodeToUTF32( blogator::u32stringstream_t &out, const std::string &utf8_str ) {
     out << encodeToUTF32( utf8_str );
     return out;
+}
+
+/**
+ * Converts a character to its Hexadecimal representation
+ * @param c UTF-32 character
+ * @return Hexadecimal representation as a string
+ */
+std::u32string blogator::encoding::convertToHex( char32_t c ) {
+    static const uint32_t mask = ( uint32_t( 1 ) << uint32_t( 4 ) ) - 1;
+    static const auto     hex  = std::vector<char32_t>{ U'0', U'1', U'2', U'3', U'4', U'5', U'6', U'7',
+                                                        U'8', U'9', U'A', U'B', U'C', U'D', U'E', U'F' };
+
+    auto i = static_cast<uint32_t>( c );
+    u32stringstream_t ss;
+
+    while( i > 0 ) {
+        uint32_t num  = i & mask; //last 4 bits
+        i >>= uint32_t( 4 ); //shift right by 4 bits
+        ss << hex.at( num );
+    }
+
+    auto str = ss.str();
+    std::reverse( str.begin(), str.end() );
+    return str;
 }
 
 /**

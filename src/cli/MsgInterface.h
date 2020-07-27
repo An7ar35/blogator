@@ -32,6 +32,7 @@ namespace blogator::cli {
         void error( const std::string &msg );
 
         void setShowDebug( bool state );
+        bool showDebug() const;
 
       private:
         MsgInterface();
