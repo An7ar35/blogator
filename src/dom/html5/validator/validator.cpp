@@ -89,7 +89,7 @@ bool blogator::dom::html5::validator::isValidAttributeValueChar( char32_t c, cha
  */
 std::u32string blogator::dom::html5::validator::escapeReservedChar( char32_t c ) {
     static const std::u32string QUOTATION_MARK = { U"&quot;" };
-    static const std::u32string APOSTROPHE     = { U"&#39;"  };
+    static const std::u32string APOSTROPHE     = { U"&apos;"  };
     static const std::u32string AMPERSAND      = { U"&amp;"  };
     static const std::u32string LESS_THAN      = { U"&lt;"   };
     static const std::u32string GREATER_THAN   = { U"&gt;"   };
@@ -105,8 +105,11 @@ std::u32string blogator::dom::html5::validator::escapeReservedChar( char32_t c )
             return LESS_THAN;
         case html5::special_char::GREATER_THAN:
             return GREATER_THAN;
-        default:
-            return U"";
+        default: {
+            u32stringstream_t ss;
+            ss << U"&#x" << encoding::convertToHex( c ) << U';';
+            return ss.str();
+        }
     }
 }
 
@@ -258,12 +261,10 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
         return html5::Html5Properties::strToTag( tag_name );
 
     } catch( std::invalid_argument &e ) {
-        std::stringstream ss;
-        ss << "blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )";
-        throw exception::DOMException( ss.str(),
-            "Tag name is not valid.",
-            exception::DOMErrorType::SyntaxError
-        );
+        std::stringstream loc, msg;
+        loc << "blogator::dom::html5::validator::validateOpeningTag( \"" << encoding::encodeToUTF8( str ) << "\", .. )";
+        msg << "Tag name \"" << encoding::encodeToUTF8( tag_name ) << "\" is not valid.",
+        throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::SyntaxError );
     }
 }
 
@@ -452,11 +453,9 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateClosingTag( c
         return html5::Html5Properties::strToTag( str.substr( 2, length ) );
 
     } catch( std::invalid_argument &e ) {
-        std::stringstream ss;
-        ss << "blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )";
-        throw exception::DOMException( ss.str(),
-            "Tag name is not valid.",
-            exception::DOMErrorType::SyntaxError
-        );
+        std::stringstream loc, msg;
+        loc << "blogator::dom::html5::validator::validateClosingTag( \"" << encoding::encodeToUTF8( str ) << "\" )";
+        msg << "Tag name \"" << encoding::encodeToUTF8( str.substr( 2, length ) ) << "\" is not valid.";
+        throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::SyntaxError );
     }
 }
