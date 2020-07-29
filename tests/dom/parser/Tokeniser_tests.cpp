@@ -135,6 +135,28 @@ TEST( Tokeniser_Tests, valid_multi_lines1 ) {
     ASSERT_EQ( Token ( { 11, 1, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 12 ) );
 }
 
+TEST( Tokeniser_Tests, valid_multi_lines_comment ) {
+    using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
+
+    auto text = blogator::dom::dto::Text(
+        U"<div>",
+        U"pre comment text <!--This is a comment with <a href=\"www.wikipedia.org\">nested link</a> tag.--> post comment text",
+        U"</div>"
+    );
+
+    auto tokeniser = blogator::dom::parser::Tokeniser( text );
+
+    ASSERT_EQ( 7, tokeniser.tokenCount() );
+    ASSERT_EQ( Token ( { 1, 1, TokenType::START_TAG, U"<div>" } ), tokeniser.at( 0 ) );
+    ASSERT_EQ( Token ( { 2, 1, TokenType::TEXT, U"pre comment text " } ), tokeniser.at( 1 ) );
+    ASSERT_EQ( Token ( { 2, 18, TokenType::START_TAG, U"<!--" } ), tokeniser.at( 2 ) );
+    ASSERT_EQ( Token ( { 2, 22, TokenType::TEXT, U"This is a comment with <a href=\"www.wikipedia.org\">nested link</a> tag." } ), tokeniser.at( 3 ) );
+    ASSERT_EQ( Token ( { 2, 93, TokenType::END_TAG, U"-->" } ), tokeniser.at( 4 ) );
+    ASSERT_EQ( Token ( { 2, 96, TokenType::TEXT, U" post comment text" } ), tokeniser.at( 5 ) );
+    ASSERT_EQ( Token ( { 3, 1, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 6 ) );
+}
+
 TEST( Tokeniser_Tests, valid_multi_lines2 ) {
     using blogator::dom::parser::TokenType;
     using blogator::dom::parser::Token;

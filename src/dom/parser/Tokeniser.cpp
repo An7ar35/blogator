@@ -269,7 +269,7 @@ void blogator::dom::parser::Tokeniser::processCommentText( Tokeniser::LineInfo l
      * [LAMBDA] checks for end of text content
      */
     auto isCommentText = [&]( bool &flag ) {
-        if( char_info.it == line_info.line.cend() )
+        if( dom::dto::Text::isEOL( char_info.it, line_info.line ) )
             return false;
         if( *char_info.it == html5::special_char::HYPHEN_MINUS && isCommentClose( line_info, char_info ) ) {
             flag = true;
@@ -307,11 +307,11 @@ void blogator::dom::parser::Tokeniser::processCommentText( Tokeniser::LineInfo l
 void blogator::dom::parser::Tokeniser::processCommentClose( Tokeniser::LineInfo line_info,
                                                             Tokeniser::CharInfo char_info )
 {
+    _tokens.emplace_back( line_info.index, char_info.index, TokenType::END_TAG, U"-->" );
+
     char_info.it         = std::next( char_info.it, 3 );
     char_info.index     += 3;
     _inside_comment_flag = false;
-
-    _tokens.emplace_back( line_info.index, char_info.index, TokenType::END_TAG, U"-->" );
 }
 
 /**
