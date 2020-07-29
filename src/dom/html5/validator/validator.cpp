@@ -189,7 +189,7 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
     }
 
     if( *(it++) == html5::special_char::EXCLAMATION_MARK && str == U"<!--" ) //EDGE-CASE: i.e. comment start
-        return html5::Html5Properties::strToTag( U"!--" );
+        return html5::kb::KnowledgeBase::strToTag( U"!--" );
 
     ++substr_length;
 
@@ -258,7 +258,7 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateOpeningTag(
     }
 
     try {
-        return html5::Html5Properties::strToTag( tag_name );
+        return html5::kb::KnowledgeBase::strToTag( tag_name );
 
     } catch( std::invalid_argument &e ) {
         std::stringstream loc, msg;
@@ -450,7 +450,7 @@ blogator::dom::html5::Tag blogator::dom::html5::validator::validateClosingTag( c
     }
 
     try {
-        return html5::Html5Properties::strToTag( str.substr( 2, length ) );
+        return html5::kb::KnowledgeBase::strToTag( str.substr( 2, length ) );
 
     } catch( std::invalid_argument &e ) {
         std::stringstream loc, msg;

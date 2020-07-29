@@ -1,7 +1,6 @@
 #include "Tokeniser.h"
 
 #include "../html5/special_char.h"
-#include "../html5/Html5Properties.h"
 
 /**
  * Constructor

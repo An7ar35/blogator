@@ -2,7 +2,7 @@
 #define BLOGATOR_DOM_HTML5_INSERTMODE_H
 
 namespace blogator::dom::html5 {
-    enum class InsertMode {
+    enum class InsertMode { //TODO use or delete?
         INITIAL,
         BEFORE_HTML,
         BEFORE_HEAD,

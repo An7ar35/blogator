@@ -81,6 +81,8 @@ namespace blogator::dom::parser {
         void processCommentText( LineInfo line_info, CharInfo char_info );
         void processCommentClose( LineInfo line_info, CharInfo char_info );
         static bool isCommentClose( LineInfo line_info, CharInfo char_info );
+
+        //TODO deal with data-x and svg
     };
 }
 

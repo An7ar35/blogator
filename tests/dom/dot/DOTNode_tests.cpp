@@ -20,7 +20,7 @@ TEST( DOTNode_Tests, dfs_print ) {
     auto n5  = n4->addChild( std::make_unique<DOTNode>( Tag::A, U"Click here!" ) );
     n5->addAttribute( U"href", Attribute { U"http://start.duckduckgo.com", AttrBoundaryChar::QUOTATION_MARK } );
     n5->addAttribute( U"class", Attribute { U"my-link", AttrBoundaryChar::QUOTATION_MARK } );
-    n5->addAttribute( U"class", Attribute { U"nested-link", AttrBoundaryChar::QUOTATION_MARK } );
+    n5->appendAttribute( U"class", U"nested-link" );
 
     std::string expected = "<html><body><h1>Test heading</h1><ul class=\"my-ul\"><li class=\"my-li\" id=\"link1\"><a class=\"my-link nested-link\" href=\"http://start.duckduckgo.com\">Click here!</a></li><li>list item 2</li><li>list item 3</li></ul></body></html>";
     std::stringstream ss;

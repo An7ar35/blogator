@@ -9,9 +9,11 @@
 
 /**
  * Constructor
+ * @param config Configuration
  */
-blogator::dom::DOT::DOT() :
+blogator::dom::DOT::DOT( DOTConfig config ) :
     _display( cli::MsgInterface::getInstance() ),
+    _config( config ),
     _root( std::make_unique<DOTNode>( html5::Tag::NONE ) )
 {}
 
@@ -19,8 +21,8 @@ blogator::dom::DOT::DOT() :
  * Constructor
  * @param html UTF-8 HTML string
  */
-blogator::dom::DOT::DOT( const std::string &html ) :
-    DOT()
+blogator::dom::DOT::DOT( DOTConfig config, const std::string &html ) :
+    DOT( config )
 {
     auto text = dto::Text();
     text._lines.emplace_back( encoding::encodeToUTF32( html ) );
@@ -31,8 +33,8 @@ blogator::dom::DOT::DOT( const std::string &html ) :
  * Constructor
  * @param html UTF-32 HTML string
  */
-blogator::dom::DOT::DOT( const std::u32string &html ) :
-    DOT()
+blogator::dom::DOT::DOT( DOTConfig config, const std::u32string &html ) :
+    DOT( config )
 {
     auto text = dto::Text();
     text._lines.emplace_back( html );
@@ -43,8 +45,8 @@ blogator::dom::DOT::DOT( const std::u32string &html ) :
  * Constructor
  * @param html HTML based Text DTO
  */
-blogator::dom::DOT::DOT( const dto::Text &html ) :
-    DOT()
+blogator::dom::DOT::DOT( DOTConfig config, const dto::Text &html ) :
+    DOT( config )
 {
     parse( html );
 }
@@ -53,8 +55,8 @@ blogator::dom::DOT::DOT( const dto::Text &html ) :
  * Constructor
  * @param src Source file path for the HTML to import
  */
-blogator::dom::DOT::DOT( const std::filesystem::path &src ) :
-    DOT()
+blogator::dom::DOT::DOT( DOTConfig config, const std::filesystem::path &src ) :
+    DOT( config )
 {
     auto text = DOT::readFile( src );
     parse( text );
@@ -122,6 +124,7 @@ blogator::dom::DOT::DOT( std::unique_ptr<DOTNode> root ) :
  */
 blogator::dom::DOT::DOT( blogator::dom::DOT &&dot ) noexcept :
     _display( dot._display ),
+    _config( dot._config ),
     _root( std::move( dot._root ) ),
     _css_id_map( std::move( dot._css_id_map ) ),
     _css_class_map( std::move( dot._css_class_map ) )
@@ -134,6 +137,7 @@ blogator::dom::DOT::DOT( blogator::dom::DOT &&dot ) noexcept :
  */
 blogator::dom::DOT &blogator::dom::DOT::operator =( blogator::dom::DOT &&dot ) noexcept {
     _root          = std::move( dot._root );
+    _config        = dot._config ;
     _css_id_map    = std::move( dot._css_id_map );
     _css_class_map = std::move( dot._css_class_map );
     return *this;
@@ -203,16 +207,23 @@ std::vector<const blogator::dom::DOTNode *> blogator::dom::DOT::getElementByClas
 void blogator::dom::DOT::parse( const dto::Text &text ) {
     auto tokeniser = parser::Tokeniser( text );
     auto parser    = parser::Parser();
-    auto curr      = _root.get();
+    auto curr_node = _root.get();
+
+    parser.setAttributeValidation( _config.html5.attribute_compliance );
 
     for( const auto &token : tokeniser ) {
         try {
-            curr = parser.parseToken( token, curr, _global_maps );
+            curr_node = parser.parseToken( token, curr_node, _global_maps );
 
         } catch( exception::DOMException &e ) {
             std::stringstream ss;
-            ss << "(" << token.line_i << ":" << token.char_i << ") [" << e.where() << "] " << e.what();
+
+            if( _display.showDebug() )
+                ss << "[" << e.where() << "] ";
+
+            ss << "(" << token.line_i << ":" << token.char_i << ") " << e.what();
             _display.error( ss.str() );
+
             throw;
         }
     }

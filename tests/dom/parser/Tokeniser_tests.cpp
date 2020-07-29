@@ -99,7 +99,7 @@ TEST( Tokeniser_Tests, valid_line2 ) {
 }
 
 
-TEST( Tokeniser_Tests, valid_line3 ) {
+TEST( Tokeniser_Tests, valid_multi_lines1 ) {
     using blogator::dom::parser::TokenType;
     using blogator::dom::parser::Token;
 
@@ -111,7 +111,7 @@ TEST( Tokeniser_Tests, valid_line3 ) {
         U"  <p class=\"id001\">",
         U"Paragraph text.",
         U"</p>",
-        U"   </div>"
+        U"   </div>",
         "<div id='id002'>",
         " some more text... ",
         "</div>"
@@ -130,7 +130,23 @@ TEST( Tokeniser_Tests, valid_line3 ) {
     ASSERT_EQ( Token ( { 7, 1, TokenType::END_TAG, U"</p>" } ), tokeniser.at( 7 ) );
     ASSERT_EQ( Token ( { 8, 1, TokenType::TEXT, U"   " } ), tokeniser.at( 8 ) );
     ASSERT_EQ( Token ( { 8, 4, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 9 ) );
-    ASSERT_EQ( Token ( { 8, 10, TokenType::START_TAG, U"<div id='id002'>" } ), tokeniser.at( 10 ) );
-    ASSERT_EQ( Token ( { 9, 1, TokenType::TEXT, U" some more text... " } ), tokeniser.at( 11 ) );
-    ASSERT_EQ( Token ( { 10, 1, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 12 ) );
+    ASSERT_EQ( Token ( { 9, 1, TokenType::START_TAG, U"<div id='id002'>" } ), tokeniser.at( 10 ) );
+    ASSERT_EQ( Token ( { 10, 1, TokenType::TEXT, U" some more text... " } ), tokeniser.at( 11 ) );
+    ASSERT_EQ( Token ( { 11, 1, TokenType::END_TAG, U"</div>" } ), tokeniser.at( 12 ) );
+}
+
+TEST( Tokeniser_Tests, valid_multi_lines2 ) {
+    using blogator::dom::parser::TokenType;
+    using blogator::dom::parser::Token;
+
+    auto text = blogator::dom::dto::Text(
+        U"<div paragraph text </div> everything is going to",
+        " break<p> oh fml...</p"
+    );
+
+    auto tokeniser = blogator::dom::parser::Tokeniser( text );
+
+    for( const auto & t : tokeniser )
+        std::cout << t << std::endl;
+
 }

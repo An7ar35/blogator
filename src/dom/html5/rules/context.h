@@ -31,6 +31,7 @@ template<> bool blogator::dom::html5::rules::context::isValidContext<blogator::d
     //Contexts in which this element can be used: Where phrasing content is expected.
     //Transparent, but there must be no interactive content or a element descendants.
 
+
     return false;
 }
 

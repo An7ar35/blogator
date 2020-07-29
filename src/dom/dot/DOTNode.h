@@ -9,7 +9,7 @@
 #include "../exception/DOMException.h"
 #include "../../encoding/encoding.h"
 #include "../dto/Attribute.h"
-#include "../html5/Html5Properties.h"
+#include "../html5/kb/KnowledgeBase.h"
 #include "../html5/enums/AttrBoundaryChar.h"
 
 namespace blogator::dom {
@@ -66,7 +66,7 @@ namespace blogator::dom {
                 u32stringstream_t ss;
 
                 if( node.type() != html5::Tag::NONE ) {
-                    ss << U"<" << html5::Html5Properties::tagToStr( node._tag );
+                    ss << U"<" << html5::kb::KnowledgeBase::tagToStr( node._tag );
                     node.printAttributes( ss );
                     if( node.type() != html5::Tag::COMMENT ) //edge case
                         ss << U">";
@@ -80,12 +80,12 @@ namespace blogator::dom {
             for( const auto &n : node._children )
                 os << *n;
 
-            if( html5::Html5Properties::isPaired( node.type() ) ) { //closing tag
+            if( html5::kb::KnowledgeBase::isPaired( node.type() ) ) { //closing tag
                 u32stringstream_t ss;
                 if( node.type() == html5::Tag::COMMENT ) //edge case
                     ss << U"-->";
                 else
-                    ss << U"</" << html5::Html5Properties::tagToStr( node._tag ) << U">";
+                    ss << U"</" << html5::kb::KnowledgeBase::tagToStr( node._tag ) << U">";
 
                 encoding::encodeToUTF8( os, ss.str() );
             }

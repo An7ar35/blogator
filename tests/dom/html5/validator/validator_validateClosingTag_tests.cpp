@@ -86,7 +86,7 @@ TEST( html5_validator_Tests, validateClosingTag_fail5 ) {
         try {
             validateClosingTag( str );
         } catch( const DOMException &e ) {
-            EXPECT_STREQ( "SyntaxError: Tag name is not valid.", e.what() );
+            EXPECT_STREQ( "SyntaxError: Tag name \"tagname\" is not valid.", e.what() );
             throw;
         }
     }, DOMException );

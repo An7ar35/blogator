@@ -1,14 +1,24 @@
 #include "Parser.h"
 
-#include "../dto/Attribute.h"
 #include "../html5/validator/validator.h"
 #include "../../string/helpers.h"
+#include "../html5/kb/KnowledgeBase.h"
+
+/**
+ * Constructor
+ */
+blogator::dom::parser::Parser::Parser() :
+    _attributes_validation( ComplianceLevel::NONE ),
+    _curr_ns( html5::NameSpace::BLOGATOR )
+{}
 
 /**
  * [UNIT-TESTING] Constructor
  * @param list Initializer list of TokenType(s) to be pushed on the stack in order
  */
-blogator::dom::parser::Parser::Parser( std::initializer_list<html5::Tag> list ) {
+blogator::dom::parser::Parser::Parser( std::initializer_list<html5::Tag> list ) : //TODO change that to Tag_t
+    Parser()
+{
     for( auto e : list )
         _stack.push_front( e );
 }
@@ -42,6 +52,22 @@ blogator::dom::DOTNode * blogator::dom::parser::Parser::parseToken(
 }
 
 /**
+ * Sets the attribute validation flag
+ * @param level Compliance level
+ */
+void blogator::dom::parser::Parser::setAttributeValidation( dom::ComplianceLevel level ) {
+    _attributes_validation = level;
+}
+
+/**
+ * Gets the compliance level set for attribute validation
+ * @return Attribute validation level
+ */
+blogator::dom::ComplianceLevel blogator::dom::parser::Parser::attributeValidation() const {
+    return _attributes_validation;
+}
+
+/**
  * Gets the tree depth (i.e.: tag stack size)
  * @return Tree depth
  */
@@ -68,14 +94,25 @@ blogator::dom::DOTNode * blogator::dom::parser::Parser::parseOpeningTag(
 
     try {
         auto attr = std::vector<std::pair<std::u32string, Attribute>>();
-        auto node = std::make_unique<DOTNode>( validateOpeningTag( str, attr ) );
+        auto node = std::make_unique<DOTNode>( validateOpeningTag( str, attr ) ); //TODO edge-case: SVG
 
-        for( const auto &pair : attr )
+        for( const auto &pair : attr ) {
+            if( !validateAttributeName( _attributes_validation, node->type(), pair.first ) ) {
+                std::stringstream loc, msg;
+                loc << "blogator::dom::parser::Parser::parseOpeningTag( " << encoding::encodeToUTF8( pair.first ) << ", ... )";
+                msg << "Failed validation of attribute name \""
+                    << encoding::encodeToUTF8( pair.first ) << "\" in \""
+                    << encoding::encodeToUTF8( str ) << "\".";
+
+                throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::ValidationError );
+            }
+
             node->addAttribute( pair.first, pair.second );
+        }
 
         populateGlobalAttrMap( node, global_attr_map );
 
-        if( dom::html5::Html5Properties::isPaired( node->type() ) ) {
+        if( dom::html5::kb::KnowledgeBase::isPaired( node->type() ) ) {
             _stack.push_front( node->type() );
             return parent->addChild( std::move( node ) );
 
@@ -83,7 +120,6 @@ blogator::dom::DOTNode * blogator::dom::parser::Parser::parseOpeningTag(
             parent->addChild( std::move( node ) );
             return parent;
         }
-
 
     } catch( exception::DOMException&e ) {
         throw;
@@ -94,7 +130,7 @@ blogator::dom::DOTNode * blogator::dom::parser::Parser::parseOpeningTag(
  * Parse a closing tag
  * @param str  Closing tag string
  * @param curr Current DOTNode
- * @return //TODO
+ * @return Pointer to the appropriate parent node
  * @throws exception::DOMException when validation fails
  * @throws exception::DOMException when closing tag has no opening tag match or is not a recognised tag
  */
@@ -109,7 +145,7 @@ blogator::dom::DOTNode * blogator::dom::parser::Parser::parseClosingTag(
     if( _stack.empty() ) { //tree struct ERROR
         std::stringstream loc, msg;
         loc << "blogator::dom::parser::Parser::parseClosingTag( \"" << encoding::encodeToUTF8( str ) << "\", DOTNode * )";
-        msg << "Closing tag (" << encoding::encodeToUTF8( html5::Html5Properties::tagToStr( tag ) ) << ") does not match an opening tag.";
+        msg << "Closing tag (" << encoding::encodeToUTF8( html5::kb::KnowledgeBase::tagToStr( tag ) ) << ") does not match an opening tag.";
         throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::ValidationError );
     }
 
@@ -120,9 +156,9 @@ blogator::dom::DOTNode * blogator::dom::parser::Parser::parseClosingTag(
         std::stringstream loc, msg;
         loc << "blogator::dom::parser::Parser::parseClosingTag( \"" << encoding::encodeToUTF8( str ) << "\", DOTNode * )";
         msg << "Closing tag ("
-            << encoding::encodeToUTF8( html5::Html5Properties::tagToStr( tag ) ) << ") "
+            << encoding::encodeToUTF8( html5::kb::KnowledgeBase::tagToStr( tag ) ) << ") "
             << "does not match last opened tag ("
-            << encoding::encodeToUTF8( html5::Html5Properties::tagToStr( _stack.front() ) ) << ").";
+            << encoding::encodeToUTF8( html5::kb::KnowledgeBase::tagToStr( _stack.front() ) ) << ").";
         throw exception::DOMException( loc.str(), msg.str(), exception::DOMErrorType::ValidationError );
     }
 
@@ -690,4 +726,41 @@ blogator::dom::parser::Parser::autoOpenTag( blogator::dom::html5::Tag prev,
         case html5::Tag::ENUM_END:
             break;
     }
+}
+
+/**
+ * Validates an attribute's name in a tag based on a compliance level
+ * @param level     Validation compliance level
+ * @param tag_type  Parent tag type for attribute
+ * @param attr_name Attribute name
+ * @return Validation state
+ */
+bool blogator::dom::parser::Parser::validateAttributeName(
+    dom::ComplianceLevel   level,
+    html5::Tag             tag_type,
+    const std::u32string & attr_name )
+{
+    using blogator::dom::html5::kb::KnowledgeBase;
+
+    switch( level ) {
+        case ComplianceLevel::NONE:
+            break;
+
+        case ComplianceLevel::PARTIAL: //only checks the relationship of a recognised attribute with tag
+            if( !html5::kb::KnowledgeBase::isValidAttribute( attr_name ) )
+                break;
+            [[fallthrough]];
+
+        case ComplianceLevel::STRICT:
+            try {
+                return html5::kb::KnowledgeBase::areAffiliated(
+                    html5::kb::KnowledgeBase::strToAttribute( attr_name ), tag_type
+                );
+
+            } catch( std::invalid_argument &e ) {
+                return false;
+            }
+    }
+
+    return true;
 }

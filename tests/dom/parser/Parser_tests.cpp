@@ -110,7 +110,7 @@ TEST_F( Parser_Tests, parseToken_parseClosingTag_fail3 ) {
         try {
             parser.parseToken( token, Parser_Tests::node.get(), *attr_maps );
         } catch( const blogator::exception::DOMException &e ) {
-            EXPECT_STREQ( "SyntaxError: Tag name is not valid.", e.what() );
+            EXPECT_STREQ( "SyntaxError: Tag name \"tagname\" is not valid.", e.what() );
             throw;
         }
     }, blogator::exception::DOMException );

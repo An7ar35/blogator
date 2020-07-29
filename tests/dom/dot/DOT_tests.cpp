@@ -62,9 +62,25 @@ TEST( DOT_Tests, constructor_injector ) {
 TEST( DOT_Tests, constructor_path ) {
     using blogator::dom::DOT;
     using blogator::dom::DOTNode;
+    using blogator::dom::DOTSetting;
     using blogator::dom::html5::Tag;
 
-    auto dot = DOT( std::filesystem::path( "../tests/dom/parser/text1.html" ) );
+    auto dot = DOT( { }, std::filesystem::path( "../tests/dom/parser/text1.html" ) );
+    std::cout << dot << std::endl;
+    FAIL();
+}
+
+TEST( DOT_Tests, constructor_text ) {
+    using blogator::dom::DOT;
+    using blogator::dom::DOTConfig;
+    using blogator::dom::DOTSetting;
+
+    auto text = blogator::dom::dto::Text(
+        U"<weird paragraph> text </weird> everything is going to",
+        " break<p> oh fml...</p>"
+    );
+
+    auto dot = DOT( DOTConfig( DOTSetting::HTML5_PARTIAL ), text );
     std::cout << dot << std::endl;
     FAIL();
 }

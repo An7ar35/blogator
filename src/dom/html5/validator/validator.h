@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../Html5Properties.h"
+#include "../kb/KnowledgeBase.h"
 #include "../../dto/Attribute.h"
 
 namespace blogator::dom::html5::validator {

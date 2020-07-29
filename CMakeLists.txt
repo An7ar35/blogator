@@ -54,6 +54,7 @@ set(SOURCE_FILES
         src/exception/file_access_failure.h
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
+        src/exception/not_implemented.h
         src/dom/exception/DOMException.h
         src/fs/fs.cpp
         src/fs/fs.h
@@ -114,16 +115,18 @@ set(SOURCE_FILES
         src/encoding/encoding.h
         src/dom/dot/DOT.cpp
         src/dom/dot/DOT.h
+        src/dom/dot/DOTConfig.cpp
+        src/dom/dot/DOTConfig.h
         src/dom/dot/DOTNode.cpp
         src/dom/dot/DOTNode.h
+        src/dom/dot/enums/ComplianceLevel.h
+        src/dom/dot/enums/DOTSetting.h
         src/dom/dto/Attribute.cpp
         src/dom/dto/Attribute.h
         src/dom/dto/GlobalMaps.h
         src/dom/dto/TagSpecs.h
         src/dom/dto/Text.cpp
         src/dom/dto/Text.h
-        src/dom/html5/Html5Properties.cpp
-        src/dom/html5/Html5Properties.h
         src/dom/html5/Html5Relationships.cpp
         src/dom/html5/Html5Relationships.h
         src/dom/html5/special_char.h
@@ -131,17 +134,21 @@ set(SOURCE_FILES
         src/dom/html5/enums/Attribute.h
         src/dom/html5/enums/ContentModel.h
         src/dom/html5/enums/InsertMode.h
-        src/dom/html5/enums/NameSpaces.h
+        src/dom/html5/enums/NameSpace.h
         src/dom/html5/enums/Tag.h
         src/dom/html5/enums/TagStructure.h
-        src/dom/html5/properties/attribute.cpp
-        src/dom/html5/properties/attribute.h
+        src/dom/html5/kb/kb_attributes.cpp
+        src/dom/html5/kb/kb_attributes.h
+        src/dom/html5/kb/kb_relationships.cpp
+        src/dom/html5/kb/kb_relationships.h
+        src/dom/html5/kb/kb_tags.cpp
+        src/dom/html5/kb/kb_tags.h
+        src/dom/html5/kb/KnowledgeBase.cpp
+        src/dom/html5/kb/KnowledgeBase.h
         src/dom/html5/properties/content_model.cpp
         src/dom/html5/properties/content_model.h
         src/dom/html5/properties/relationships.cpp
         src/dom/html5/properties/relationships.h
-        src/dom/html5/properties/tag.cpp
-        src/dom/html5/properties/tag.h
         src/dom/html5/rules/context.h
         src/dom/html5/rules/insert_mode.h
         src/dom/html5/rules/OptionalTags.cpp
@@ -198,8 +205,9 @@ set(TEST_FILES
         tests/dom/html5/validator/validator_validateOpeningTag_tests.cpp
         tests/dom/html5/validator/validator_validateClosingTag_tests.cpp
         tests/dom/html5/validator/validator_validateAttributes_tests.cpp
-        tests/dom/html5/Html5Properties_tests.cpp
-        tests/dom/html5/Html5Relationships_tests.cpp tests/dom/dto/Attribute.cpp)
+        tests/dom/html5/Html5Relationships_tests.cpp
+        tests/dom/dto/Attribute.cpp
+        tests/dom/html5/kb/KnowledgeBase_Tests.cpp)
 
 enable_testing()
 

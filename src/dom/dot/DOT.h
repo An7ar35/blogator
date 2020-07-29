@@ -5,6 +5,7 @@
 #include <filesystem>
 
 #include "DOTNode.h"
+#include "DOTConfig.h"
 #include "../dto/GlobalMaps.h"
 #include "../html5/enums/Tag.h"
 #include "../dto/Text.h"
@@ -21,11 +22,11 @@ namespace blogator::dom {
      */
     class DOT {
       public:
-        DOT();
-        explicit DOT( const std::string    &html );
-        explicit DOT( const std::u32string &html );
-        explicit DOT( const dto::Text      &html );
-        explicit DOT( const std::filesystem::path &src );
+        explicit DOT( DOTConfig config );
+        explicit DOT( DOTConfig config, const std::string    &html );
+        explicit DOT( DOTConfig config, const std::u32string &html );
+        explicit DOT( DOTConfig config, const dto::Text      &html );
+        explicit DOT( DOTConfig config, const std::filesystem::path &src );
         explicit DOT( std::unique_ptr<DOTNode> root );
 
         DOT( const DOT &dot ) = delete;
@@ -54,10 +55,9 @@ namespace blogator::dom {
             return os;
         }
 
-        std::ostream & prettyPrint( std::ostream &os ) const;
-
       private:
         cli::MsgInterface &                                         _display;
+        DOTConfig                                                   _config;
         std::unique_ptr<DOTNode>                                    _root;
         dto::GlobalMaps                                             _global_maps;
         std::map<std::u32string, const dom::DOTNode *>              _css_id_map;

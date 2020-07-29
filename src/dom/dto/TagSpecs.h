@@ -4,13 +4,13 @@
 #include <string>
 
 #include "../html5/enums/TagStructure.h"
-#include "../html5/enums/NameSpaces.h"
+#include "../html5/enums/NameSpace.h"
 
 namespace blogator::dom::dto {
     struct TagSpecs {
-        html5::TagStructure   structure;
-        html5::NameSpace      ns;
-        std::u32string        tag_str;
+        html5::TagStructure           structure;
+        std::vector<html5::NameSpace> ns;
+        std::u32string                tag_str;
     };
 }
 

@@ -1,10 +1,10 @@
-#include "attribute.h"
+#include "kb_attributes.h"
 
 /**
  * Generates the Attribute->string lookup table
  * @return Lookup vector
  */
-std::vector<std::u32string> blogator::dom::html5::properties::attribute::createAttributeStrTable() {
+std::vector<std::u32string> blogator::dom::html5::kb::attributes::createAttributeStrTable() {
     auto v = std::vector<std::u32string>( static_cast<size_t>( Attribute::ENUM_END ) );
 
     v[ static_cast<size_t>( html5::Attribute::ACCEPT )              ] = U"accept";
@@ -184,7 +184,7 @@ std::vector<std::u32string> blogator::dom::html5::properties::attribute::createA
  * @param str2attr Attribute->string map
  * @return Lookup map
  */
-std::unordered_map<std::u32string, blogator::dom::html5::Attribute> blogator::dom::html5::properties::attribute::createStrAttributeMap(
+std::unordered_map<std::u32string, blogator::dom::html5::Attribute> blogator::dom::html5::kb::attributes::createStrAttributeMap(
     const std::vector<std::u32string> &attr2str )
 {
     auto map = std::unordered_map<std::u32string, Attribute>();

@@ -5,7 +5,7 @@ namespace blogator::dom::html5 {
     /**
      * Content models
      */
-    enum class ContentModel {
+    enum class ContentModel { //TODO use or delete?
         NOTHING = 0,
         METADATA,
         FLOW,
