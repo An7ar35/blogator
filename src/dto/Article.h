@@ -26,7 +26,7 @@ namespace blogator::dto {
                         return false;
                 }
 
-                return false;
+                return lhs.size() < rhs.size();
             }
         };
 

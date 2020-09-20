@@ -191,6 +191,7 @@ set(TEST_FILES
         tests/html/reader/reader.cpp
         tests/dto/DateStamp.cpp
         tests/dto/Templates.cpp
+        tests/dto/Article.cpp
         tests/fs/fs.cpp
         tests/html/editor/editor.cpp
         tests/dto/HTML.cpp
@@ -207,7 +208,8 @@ set(TEST_FILES
         tests/dom/html5/validator/validator_validateAttributes_tests.cpp
         tests/dom/html5/Html5Relationships_tests.cpp
         tests/dom/dto/Attribute.cpp
-        tests/dom/html5/kb/KnowledgeBase_Tests.cpp)
+        tests/dom/html5/kb/KnowledgeBase_Tests.cpp
+)
 
 enable_testing()
 
