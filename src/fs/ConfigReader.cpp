@@ -321,7 +321,7 @@ void blogator::fs::ConfigReader::processPostsOptions( std::unordered_map<std::st
         }
     }
 
-    if( adapt_rel_paths_it != map.end() ) {
+    if( numerate_toc_it != map.end() ) {
         if( numerate_toc_it->second.type == Type::BOOLEAN ) {
             options._posts.toc.numbering = ( numerate_toc_it->second.value == "true" );
             numerate_toc_it->second.validated = true;
