@@ -9,7 +9,7 @@ namespace blogator::parser::specs::html5 {
      * Parsing error codes and descriptions
      * Lifted from: https://html.spec.whatwg.org/multipage/parsing.html#parse-errors
      */
-    struct ErrorCode {
+    class ErrorCode {
       public:
         enum {
             NONE = 0,
@@ -80,7 +80,7 @@ namespace blogator::parser::specs::html5 {
         static std::array<Description, ENUM_END> _descriptions;
 
         static void loadErrorStrings( std::array<Description, ENUM_END> &arr );
-    }
+    };
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_ERRORCODE_H

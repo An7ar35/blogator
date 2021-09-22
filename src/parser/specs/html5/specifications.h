@@ -3,6 +3,8 @@
 
 #include "ContentModel.h"
 #include "Element.h"
+#include "ErrorCode.h"
+#include "InsertionMode.h"
 #include "Namespace.h"
 
 //Namespace = { [Element...] }
