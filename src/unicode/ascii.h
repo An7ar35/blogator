@@ -1,12 +1,12 @@
-#ifndef BLOGATOR_PARSER_UNICODE_UTILITIES_H
-#define BLOGATOR_PARSER_UNICODE_UTILITIES_H
+#ifndef BLOGATOR_UNICODE_ASCII
+#define BLOGATOR_UNICODE_ASCII
 
 #include <cstdint>
 
 /**
- * Functions from <cctype> adapted for UTF32 format
+ * ASCII specific methods for UTF32 code points with range checks
  */
-namespace blogator::parser::unicode::ascii {
+namespace blogator::unicode::ascii {
     bool isalnum( uint32_t c ) noexcept;
     bool isalpha( uint32_t c ) noexcept;
     bool isblank( uint32_t c ) noexcept;
@@ -19,9 +19,13 @@ namespace blogator::parser::unicode::ascii {
     bool islower( uint32_t c ) noexcept;
     bool isprint( uint32_t c ) noexcept;
     bool ispunct( uint32_t c ) noexcept;
+    bool istab( uint32_t c ) noexcept;
+    bool isnewline( uint32_t c ) noexcept;
+    bool isuxdigit( uint32_t c ) noexcept;
+    bool islxdigit( uint32_t c ) noexcept;
 
     uint32_t tolower( uint32_t c ) noexcept;
     uint32_t toupper( uint32_t c ) noexcept;
 }
 
-#endif //BLOGATOR_PARSER_UNICODE_UTILITIES_H
+#endif //BLOGATOR_UNICODE_ASCII
