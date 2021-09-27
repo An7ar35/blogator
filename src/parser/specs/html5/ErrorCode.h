@@ -69,17 +69,6 @@ namespace blogator::parser::specs::html5 {
 
         static const std::string & str( int err );
         static const std::string & detailed( int err );
-
-      private:
-        struct Description {
-            std::string text;
-            std::string detailed;
-        };
-
-        static bool                              _error_desc_loaded;
-        static std::array<Description, ENUM_END> _descriptions;
-
-        static void loadErrorStrings( std::array<Description, ENUM_END> &arr );
     };
 }
 

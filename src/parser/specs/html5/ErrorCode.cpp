@@ -1,47 +1,22 @@
 #include "ErrorCode.h"
 
-#include <map>
 #include <string>
 
 using namespace blogator::parser::specs::html5;
 
-bool ErrorCode::_error_desc_loaded = false;
+struct Description {
+    std::string text;
+    std::string detailed;
+};
 
-/**
- * Gets the description string for an error code
- * @param err html5::ErrorCode::* enum
- * @return Short description string
- */
-const std::string & ErrorCode::str( int err ) {
-    if( !ErrorCode::_error_desc_loaded )
-        ErrorCode::loadErrorStrings( _descriptions );
-
-    if( ( err = abs( err ) ) >= ENUM_END )
-        return _descriptions[ErrorCode::UNKNOWN].text;
-    else
-        return _descriptions[err].text;
-}
-
-/**
- * Gets the detailed description for an error code
- * @param err html5::ErrorCode::* enum
- * @return Long detailed description string
- */
-const std::string & ErrorCode::detailed( int err ) {
-    if( !ErrorCode::_error_desc_loaded )
-        ErrorCode::loadErrorStrings( _descriptions );
-
-    if( ( err = abs( err ) ) >= ENUM_END )
-        return _descriptions[ErrorCode::UNKNOWN].detailed;
-    else
-        return _descriptions[err].detailed;
-}
+static bool                                         error_desc_loaded = false;
+static std::array<Description, ErrorCode::ENUM_END> error_descriptions;
 
 /**
  * Loads description strings in a container
  * @param arr Container
  */
-void ErrorCode::loadErrorStrings( std::array<Description, ENUM_END> &arr ) {
+static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr ) {
     arr[ErrorCode::NONE] = {
         "no error",
         "No error."
@@ -240,7 +215,7 @@ void ErrorCode::loadErrorStrings( std::array<Description, ENUM_END> &arr ) {
     };
     arr[ErrorCode::UNEXPECTED_SOLIDUS_IN_TAG] = {
         "unexpected solidus in tag",
-        R"(This error occurs if the parser encounters a U+002F (/) code point that is not a part of a quoted attribute value and not immediately followed by a U+003E (>) code point in a tag (e.g., <div / id="foo">). In this case the parser behaves as if it encountered ASCII whitespace.)";
+        R"(This error occurs if the parser encounters a U+002F (/) code point that is not a part of a quoted attribute value and not immediately followed by a U+003E (>) code point in a tag (e.g., <div / id="foo">). In this case the parser behaves as if it encountered ASCII whitespace.)"
     };
     arr[ErrorCode::UNKNOWN_NAMED_CHARACTER_REFERENCE] = {
         "unknown named character reference",
@@ -248,5 +223,35 @@ void ErrorCode::loadErrorStrings( std::array<Description, ENUM_END> &arr ) {
     };
 
     //TODO log debug
-    ErrorCode::_error_desc_loaded = true;
+    error_desc_loaded = true;
+}
+
+/**
+ * Gets the description string for an error code
+ * @param err html5::ErrorCode::* enum
+ * @return Short description string
+ */
+const std::string & ErrorCode::str( int err ) {
+    if( !error_desc_loaded )
+        loadErrorStrings( error_descriptions );
+
+    if( ( err = abs( err ) ) >= ENUM_END )
+        return error_descriptions[ErrorCode::UNKNOWN].text;
+    else
+        return error_descriptions[err].text;
+}
+
+/**
+ * Gets the detailed description for an error code
+ * @param err html5::ErrorCode::* enum
+ * @return Long detailed description string
+ */
+const std::string & ErrorCode::detailed( int err ) {
+    if( !error_desc_loaded )
+        loadErrorStrings( error_descriptions );
+
+    if( ( err = abs( err ) ) >= ENUM_END )
+        return error_descriptions[ErrorCode::UNKNOWN].detailed;
+    else
+        return error_descriptions[err].detailed;
 }
