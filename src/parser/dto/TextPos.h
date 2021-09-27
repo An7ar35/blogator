@@ -5,8 +5,8 @@
 
 namespace blogator::parser {
     struct TextPos {
-        size_t col;
-        size_t line;
+        size_t col  { 1 };
+        size_t line { 1 };
     };
 }
 

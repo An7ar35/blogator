@@ -5,34 +5,30 @@ using namespace blogator::parser;
 /**
  * Constructor
  * @param ns Context namespace
- * @param line_number Line position of token
- * @param col_number Char position of token on line
+ * @param position Line:Col position of token
  */
-token::Token::Token( specs::Context ns, size_t line_number, size_t col_number ) :
+token::Token::Token( specs::Context ns, TextPos position ) :
     _context( ns ),
-    _line_pos( line_number ),
-    _col_pos( col_number )
+    _position( position )
 {}
 
 /**
  * Constructor
  * @param ns Context namespace
- * @param text Text
- * @param line_number Line position of token
- * @param col_number Char position of token on line
+ * @param text UTF32 Text
+ * @param position Line:Col position of token
  */
-token::Token::Token( specs::Context ns, std::string text, size_t line_number, size_t col_number ) :
+token::Token::Token( specs::Context ns, std::u32string text, TextPos position ) :
     _context( ns ),
     _text( std::move( text ) ),
-    _line_pos( line_number ),
-    _col_pos( col_number )
+    _position( position )
 {}
 
 /**
  * Sets the text string of the token
  * @param text Text
  */
-void token::Token::setText( std::string text ) {
+void token::Token::setText( std::u32string text ) {
     _text = std::move( text );
 }
 
@@ -46,9 +42,9 @@ specs::Context token::Token::context() const {
 
 /**
  * Gets the text
- * @return Text string
+ * @return UTF32 text string
  */
-std::string token::Token::text() const {
+std::u32string token::Token::text() const {
     return _text;
 }
 
@@ -57,7 +53,7 @@ std::string token::Token::text() const {
  * @return Line number
  */
 size_t token::Token::lineNum() const {
-    return _line_pos;
+    return _position.line;
 }
 
 /**
@@ -65,5 +61,15 @@ size_t token::Token::lineNum() const {
  * @return Char number on line
  */
 size_t token::Token::colPos() const {
-    return _col_pos;
+    return _position.col;
+}
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void token::Token::toStr( std::ostream &os ) const {
+    os << "token::Token={ text: \"";
+    unicode::utf8::convert( os, text() );
+    os << "\", position: " << lineNum() << ":" << colPos() << " }";
 }
