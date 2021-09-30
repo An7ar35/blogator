@@ -13,44 +13,104 @@ U32Text::U32Text( const std::u32string &text ) :
 {}
 
 /**
- * Advances the column position only (pos.col += n)
+ * Constructor
+ * @param src_path Source file path
+ * @param text Source text to reference
+ */
+U32Text::U32Text( std::filesystem::path src_path, const std::u32string &text ) :
+    _path( std::move( src_path ) ),
+    _src( text ),
+    _position( { 1, 1 } ),
+    _iterator( text.cbegin() )
+{}
+
+/**
+ * Blindly advances the column position tracker only (pos.col += n)
  * @param n Number of code points to advance by (default=1)
  */
-void U32Text::advanceCol( size_t n ) {
-    ++_position.col;
+void U32Text::advanceColTracker( unsigned int n ) {
+    _position.col += n;
 }
 
 /**
- * Advances the position by 1 line (pos.line++, pos.col = 1)
+ * Blindly advances the position tracker by 1 line (pos.line++, pos.col = 1)
  */
-void U32Text::advanceLine() {
-    _position.col = 0;
+void U32Text::advanceLineTracker() {
+    _position.col = 1;
     ++_position.line;
 }
 
 /**
- * Advance caret  (it += n, pos.col += n)
- * @param n Number of characters to skipCol by
+ * Advance caret and position tracker (it += n, pos.col += n)
+ * @param n Number of characters to advanceCol by
+ * @return number of code points skipped
  */
-void U32Text::skipCol( size_t n ) {
-    std::advance( _iterator, n );
-    advanceCol( n );
+size_t U32Text::advanceCol( unsigned int n ) {
+    if( !reachedEnd() ) {
+        auto remaining = std::distance( _iterator, _src.cend() );
+        auto advance   = ( remaining > n ? n : remaining );
+        std::advance( _iterator, advance );
+        _position.col += advance;
+        return advance;
+    }
+
+    return 0;
 }
 
 /**
- * Advance caret to the next line (it++, pos.line++, pos.col = 1)
+ * Advance caret and position tracker to the next line (it++, pos.line++, pos.col = 1)
  */
-void U32Text::skipLine() {
-    std::advance( _iterator, 1 );
-    advanceLine();
+void U32Text::advanceLine() {
+    if( !reachedEnd() ) {
+        std::advance( _iterator, 1 );
+        advanceLineTracker();
+    }
 }
 
 /**
- * [UNCHECKED] Gets the current code point as pointed to by the iterator
- * @return Code point
+ * Gets the current code point as pointed to by the iterator
+ * @return Code point or 0x00 if end was reached
  */
 uint32_t U32Text::character() const {
-    return *_iterator;
+    if( reachedEnd() )
+        return 0x00;
+    else
+        return *_iterator;
+}
+
+/**
+ * Gets the code point n code points away from current position
+ * @param fwd_n Number of code points to skip
+ * @return Code point and reached end flag
+ */
+std::pair<uint32_t, bool> U32Text::character( std::u32string::iterator::difference_type fwd_n ) {
+    if( reachedEnd() ) {
+        return { 0x00, true };
+    } else if ( fwd_n > 0 ) {
+        auto iterator = std::next( _iterator, fwd_n );
+
+        if( iterator == _src.cend() )
+            return { 0x00, true };
+        else
+            return { *iterator, false };
+    } else {
+        return { character(), false };
+    }
+}
+
+/**
+ * Gets a range of character code points starting at the current position
+ * @param n Number of code points
+ * @return String of size range or less if end was reached
+ */
+std::u32string U32Text::characters( std::u32string::iterator::difference_type n ) {
+    if( !reachedEnd() ) {
+        auto remaining   = std::distance( _iterator, _src.cend() );
+        auto code_points = ( remaining > n ? n : remaining );
+        return { _iterator, std::next( _iterator, code_points ) };
+    }
+
+    return {};
 }
 
 /**
@@ -59,6 +119,14 @@ uint32_t U32Text::character() const {
  */
 TextPos U32Text::position() const noexcept {
     return _position;
+}
+
+/**
+ * Gets the file path for the associated text
+ * @return File path
+ */
+std::filesystem::path U32Text::path() const noexcept {
+    return _path;
 }
 
 /**

@@ -2,6 +2,7 @@
 #define BLOGATOR_PARSER_DTO_U32TEXT_H
 
 #include <string>
+#include <filesystem>
 
 #include "TextPos.h"
 
@@ -11,19 +12,24 @@ namespace blogator::parser {
     class U32Text {
       public:
         explicit U32Text( const std::u32string &text );
+        U32Text( std::filesystem::path src_path, const std::u32string &text );
 
-        void advanceCol( size_t n = 1 );
+        void advanceColTracker( unsigned int n = 1 );
+        void advanceLineTracker();
+        size_t advanceCol( unsigned int n = 1 );
         void advanceLine();
-        void skipCol( size_t n = 1 );
-        void skipLine();
 
         [[nodiscard]] uint32_t character() const;
+        [[nodiscard]] std::pair<uint32_t, bool> character( std::u32string::iterator::difference_type fwd_n );
+        [[nodiscard]] std::u32string characters( std::u32string::iterator::difference_type n );
         [[nodiscard]] TextPos position() const noexcept;
+        [[nodiscard]] std::filesystem::path path() const noexcept;
 
         [[nodiscard]] bool reachedEnd() const;
         [[nodiscard]] bool reachedEnd( const TextIterator_t & it ) const;
 
       private:
+        std::filesystem::path  _path;
         const std::u32string & _src;
         TextPos                _position;
         TextIterator_t         _iterator;
