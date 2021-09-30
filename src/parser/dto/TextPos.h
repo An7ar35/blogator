@@ -5,8 +5,18 @@
 
 namespace blogator::parser {
     struct TextPos {
-        size_t col  { 1 };
-        size_t line { 1 };
+        TextPos();
+        TextPos( size_t line, size_t col );
+
+        bool operator ==( const TextPos &rhs ) const;
+        bool operator !=( const TextPos &rhs ) const;
+        bool operator <( const TextPos &rhs ) const;
+        bool operator >( const TextPos &rhs ) const;
+        bool operator <=( const TextPos &rhs ) const;
+        bool operator >=( const TextPos &rhs ) const;
+
+        size_t line;
+        size_t col;
     };
 }
 
