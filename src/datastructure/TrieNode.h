@@ -24,16 +24,20 @@ namespace blogator {
         bool operator >=( const TrieNode<T> &rhs ) const;
 
         std::pair<ChildIterator_t, bool> addChild( T e, bool end = false );
+        void incrementUsage();
+        void decrementUsage();
         void setEnd( bool val = true );
 
-        bool hasChildren();
+        [[nodiscard]] bool hasChildren() const;
         std::pair<ChildIterator_t, bool> next( T e );
-        T element();
-        bool end();
+        T element() const;
+        [[nodiscard]] size_t usage() const;
+        [[nodiscard]] bool end() const;
 
       private:
         T                        _element;
         std::map<T, TrieNode<T>> _children;
+        size_t                   _usage_count;
         bool                     _end;
     };
 
@@ -46,6 +50,7 @@ namespace blogator {
      */
     template<TrieType T> TrieNode<T>::TrieNode( T e ) :
         _element( e ),
+        _usage_count( 0 ),
         _end( false )
     {}
 
@@ -57,6 +62,7 @@ namespace blogator {
      */
     template<TrieType T> TrieNode<T>::TrieNode( T e, bool end_flag ):
         _element( e ),
+        _usage_count( 0 ),
         _end( end_flag )
     {}
 
@@ -121,7 +127,7 @@ namespace blogator {
     }
 
     /**
-     * Adds a child node
+     * Adds a child node and increments the node's usage count by 1
      * @tparam T Element type
      * @param e Element of the child node
      * @param end End flag to set (default=false)
@@ -134,7 +140,25 @@ namespace blogator {
             pair.first->second.setEnd( end );
         }
 
+        ++_usage_count;
         return pair;
+    }
+
+    /**
+     * Increments usage count by 1
+     * @tparam T Element type
+     */
+    template<TrieType T> void TrieNode<T>::incrementUsage() {
+        ++_usage_count;
+    }
+
+    /**
+     * Decrement usage count by 1
+     * @tparam T Element type
+     */
+    template<TrieType T> void TrieNode<T>::decrementUsage() {
+        if( _usage_count > 0 )
+            --_usage_count;
     }
 
     /**
@@ -151,7 +175,7 @@ namespace blogator {
      * @tparam T Element type
      * @return Has children state
      */
-    template<TrieType T> bool TrieNode<T>::hasChildren() {
+    template<TrieType T> bool TrieNode<T>::hasChildren() const {
         return !( _children.empty() );
     }
 
@@ -171,8 +195,17 @@ namespace blogator {
      * @tparam T Element type
      * @return Element
      */
-    template<TrieType T> T TrieNode<T>::element() {
+    template<TrieType T> T TrieNode<T>::element() const {
         return _element;
+    }
+
+    /**
+     * Gets the use count of the node
+     * @tparam T Element type
+     * @return Use counter
+     */
+    template<TrieType T> size_t TrieNode<T>::usage() const {
+        return _usage_count;
     }
 
     /**
@@ -180,7 +213,7 @@ namespace blogator {
      * @tparam T Element type
      * @return End flag state
      */
-    template<TrieType T> bool TrieNode<T>::end() {
+    template<TrieType T> bool TrieNode<T>::end() const {
         return _end;
     }
 }

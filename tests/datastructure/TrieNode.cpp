@@ -13,6 +13,11 @@ TEST( TrieNode_Tests, addChild ) {
     auto [it2, success2] = it1->second.addChild( 'c', false );
     ASSERT_TRUE( success2 );
     ASSERT_EQ( it2->first, U'c' );
+
+    ASSERT_EQ( root.usage(), 1 );
+    ASSERT_EQ( it1->second.usage(), 1 );
+    ASSERT_EQ( it2->second.usage(), 0 );
+
 }
 
 TEST( TrieNode_Tests, addChild_same ) {
@@ -31,6 +36,8 @@ TEST( TrieNode_Tests, addChild_same ) {
         ASSERT_EQ( it->first, U'b' );
         ASSERT_TRUE( it->second.end() );
     }
+
+    ASSERT_EQ( root.usage(), 2 );
 }
 
 TEST( TrieNode_Tests, setEnd ) {
