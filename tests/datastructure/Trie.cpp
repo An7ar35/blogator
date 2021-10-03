@@ -64,6 +64,8 @@ TEST( Trie_Tests, match_pass ) {
     for( auto e : str1 ) {
         ASSERT_TRUE( trie.match( tracker, e ) );
     }
+
+    ASSERT_TRUE( tracker.complete() );
 }
 
 TEST( Trie_Tests, match_fail1 ) {
@@ -78,6 +80,7 @@ TEST( Trie_Tests, match_fail1 ) {
     ASSERT_TRUE( trie.match( tracker, str2.at( 1 ) ) );
     ASSERT_FALSE( trie.match( tracker, str2.at( 2 ) ) );
     ASSERT_FALSE( trie.match( tracker, str2.at( 3 ) ) );
+    ASSERT_FALSE( tracker.complete() );
 }
 
 TEST( Trie_Tests, match_fail2 ) {
@@ -92,6 +95,7 @@ TEST( Trie_Tests, match_fail2 ) {
     ASSERT_FALSE( trie.match( tracker, str2.at( 1 ) ) );
     ASSERT_FALSE( trie.match( tracker, str2.at( 2 ) ) );
     ASSERT_TRUE( trie.match( tracker, str2.at( 3 ) ) );
+    ASSERT_FALSE( tracker.complete() );
 }
 
 TEST( Trie_Tests, match_fail3 ) {
@@ -106,6 +110,7 @@ TEST( Trie_Tests, match_fail3 ) {
     ASSERT_FALSE( trie.match( tracker, str2.at( 1 ) ) );
     ASSERT_FALSE( trie.match( tracker, str2.at( 2 ) ) );
     ASSERT_FALSE( trie.match( tracker, str2.at( 3 ) ) );
+    ASSERT_FALSE( tracker.complete() );
 }
 
 TEST( Trie_Tests, has ) {

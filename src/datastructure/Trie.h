@@ -133,7 +133,8 @@ namespace blogator {
                 const auto root_index = _grove.at( next_element );
                 auto     & root_node  = _roots.at( root_index );
 
-                tracker._match_state = true;
+                tracker._match_state     = true;
+                tracker._complete_match  = root_node.end();
                 tracker._last_match_node = &root_node;
                 tracker._last_match_buffer.emplace_back( next_element );
 
@@ -143,6 +144,7 @@ namespace blogator {
             auto child_it = tracker._last_match_node->_children.find( next_element );
 
             if( child_it != tracker._last_match_node->_children.cend() ) {
+                tracker._complete_match  = child_it->second.end();
                 tracker._last_match_node = &child_it->second;
                 tracker._last_match_buffer.emplace_back( next_element );
 

@@ -16,12 +16,15 @@ namespace blogator {
         TrieTracker();
 
         const std::vector<T> & lastMatch() const;
-        bool matched();
-        bool matching();
-        template<class InputIt> bool match( InputIt first, InputIt last );
+        [[nodiscard]] bool matched() const ;
+        [[nodiscard]] bool matching() const;
+        [[nodiscard]] bool partial() const;
+        [[nodiscard]] bool complete() const;
+        template<class InputIt> bool match( InputIt first, InputIt last ) const;
 
       private:
         bool           _match_state;
+        bool           _complete_match;
         std::vector<T> _last_match_buffer;
         TrieNode<T> *  _last_match_node;
     };
@@ -33,6 +36,7 @@ namespace blogator {
      */
     template<TrieType T> TrieTracker<T>::TrieTracker() :
         _match_state( false ),
+        _complete_match( false ),
         _last_match_buffer( {} ),
         _last_match_node( nullptr )
     {}
@@ -51,7 +55,7 @@ namespace blogator {
      * @tparam T Element type
      * @return Match state (past or present)
      */
-    template<TrieType T> bool TrieTracker<T>::matched() {
+    template<TrieType T> bool TrieTracker<T>::matched() const {
         return !_last_match_buffer.empty();
     }
 
@@ -60,8 +64,26 @@ namespace blogator {
      * @tparam T Element type
      * @return Matching state (present)
      */
-    template<TrieType T> bool TrieTracker<T>::matching() {
+    template<TrieType T> bool TrieTracker<T>::matching() const {
         return _match_state;
+    }
+
+    /**
+     * Checks if the tracker is currently matching partially (i.e. if the last element matched was not an end node)
+     * @tparam T Element type
+     * @return Partial match state
+     */
+    template<TrieType T> bool TrieTracker<T>::partial() const {
+        return !_complete_match;
+    }
+
+    /**
+     * Checks if the tracker is currently matching a complete match (non-partial)
+     * @tparam T Element type
+     * @return Complete match state
+     */
+    template<TrieType T> bool TrieTracker<T>::complete() const {
+        return _complete_match;
     }
 
     /**
@@ -72,7 +94,7 @@ namespace blogator {
      * @param last End of the range
      * @return Match state of the comparison (false if first==last)
      */
-    template<TrieType T> template<class InputIt> bool TrieTracker<T>::match( InputIt first, InputIt last ) {
+    template<TrieType T> template<class InputIt> bool TrieTracker<T>::match( InputIt first, InputIt last ) const {
         if( matched() && first != last ) {
             return std::equal_to( _last_match_buffer, first, last );
         }
