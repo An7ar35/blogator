@@ -17,7 +17,6 @@ TEST( TrieNode_Tests, addChild ) {
     ASSERT_EQ( root.usage(), 1 );
     ASSERT_EQ( it1->second.usage(), 1 );
     ASSERT_EQ( it2->second.usage(), 0 );
-
 }
 
 TEST( TrieNode_Tests, addChild_same ) {
@@ -54,19 +53,15 @@ TEST( TrieNode_Tests, hasChildren ) {
     ASSERT_TRUE( root.hasChildren() );
 }
 
-TEST( TrieNode_Tests, next ) {
+TEST( TrieNode_Tests, hasChild ) {
     auto root = TrieNode<uint32_t>( U'a', false );
     auto [it, success] = root.addChild( U'b' );
     ASSERT_TRUE( success );
     ASSERT_EQ( it->first, U'b' );
-
-    auto [next_it, next_success] = root.next( U'b' );
-    ASSERT_TRUE( next_success );
-    ASSERT_EQ( next_it->second.element(), U'b' );
+    ASSERT_TRUE( root.hasChild( U'b' ) );
 }
 
 TEST( TrieNode_Tests, next_failed ) {
     auto root = TrieNode<uint32_t>( U'a', false );
-    auto [next_it, next_success] = root.next( U'b' );
-    ASSERT_FALSE( next_success );
+    ASSERT_FALSE( root.hasChild( U'b' ) );
 }

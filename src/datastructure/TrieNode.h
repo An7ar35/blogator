@@ -4,17 +4,26 @@
 #include <type_traits>
 #include <limits>
 #include <vector>
+#include <ostream>
 
 namespace blogator {
     template<typename T> concept TrieType = ( std::numeric_limits<T>::is_integer &&
                                               std::negation<std::bool_constant<std::is_same<T, bool>::value>>::value );
 
+    template<TrieType T> class Trie;
+
     template<TrieType T> class TrieNode {
+        friend class Trie<T>;
       public:
         typedef typename std::map<T, TrieNode<T>>::iterator ChildIterator_t;
 
         explicit TrieNode( T e );
         TrieNode( T e, bool end_flag );
+
+        friend std::ostream & operator<<( std::ostream &os, const TrieNode<T> &node ) {
+            os << node.element();
+            return os;
+        }
 
         bool operator ==( const TrieNode<T> &rhs ) const;
         bool operator !=( const TrieNode<T> &rhs ) const;
@@ -29,8 +38,9 @@ namespace blogator {
         void setEnd( bool val = true );
 
         [[nodiscard]] bool hasChildren() const;
-        std::pair<ChildIterator_t, bool> next( T e );
+        [[nodiscard]] bool hasChild( T e ) const;
         T element() const;
+        const std::map<T, TrieNode<T>> & children() const;
         [[nodiscard]] size_t usage() const;
         [[nodiscard]] bool end() const;
 
@@ -134,13 +144,15 @@ namespace blogator {
      * @return { iterator, insertion_flag }
      */
     template<TrieType T> std::pair<typename TrieNode<T>::ChildIterator_t, bool> TrieNode<T>::addChild( T e, bool end ) {
-        auto pair = _children.try_emplace( e, TrieNode<T>{ e, end } );
+        auto   pair  = _children.try_emplace( e, e, end );
+        auto & node  = pair.first->second;
+        auto   added = pair.second;
 
-        if( pair.first->second.end() != end ) {
-            pair.first->second.setEnd( end );
-        }
+        if( !added && !node.end() && end )
+            node.setEnd( end );
 
         ++_usage_count;
+
         return pair;
     }
 
@@ -180,14 +192,13 @@ namespace blogator {
     }
 
     /**
-     * Gets the child node matching a given element
+     * Checks if node has a child element
      * @tparam T Element type
-     * @param e Element to find
-     * @return { iterator, found_flag }
+     * @param e Element
+     * @return Found state
      */
-    template<TrieType T> std::pair<typename TrieNode<T>::ChildIterator_t, bool> TrieNode<T>::next( T e ) {
-        auto it = _children.find( e );
-        return { it, ( it != _children.cend() ) };
+    template<TrieType T> bool TrieNode<T>::hasChild( T e ) const {
+        return _children.contains( e );
     }
 
     /**
@@ -197,6 +208,15 @@ namespace blogator {
      */
     template<TrieType T> T TrieNode<T>::element() const {
         return _element;
+    }
+
+    /**
+     * Gets the map of all the children for the node
+     * @tparam T Element type
+     * @return Children
+     */
+    template<TrieType T> const std::map<T, TrieNode<T>> &TrieNode<T>::children() const {
+        return _children;
     }
 
     /**
