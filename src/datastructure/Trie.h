@@ -26,7 +26,7 @@ namespace blogator {
         template<class InputIt> bool has( InputIt first, InputIt last ) const;
 
         void clear();
-
+        [[nodiscard]] size_t rootCount() const;
         Collection_t collect() const;
         std::ostream & print( std::ostream & os ) const;
 
@@ -184,6 +184,15 @@ namespace blogator {
     template<TrieType T> void Trie<T>::clear() {
         _grove.clear();
         _roots.clear();
+    }
+
+    /**
+     * Gets the number of roots in the grove
+     * @tparam T Element type
+     * @return Root count in the grove
+     */
+    template<TrieType T> size_t Trie<T>::rootCount() const {
+        return _roots.size();
     }
 
     /**
