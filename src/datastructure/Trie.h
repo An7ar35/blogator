@@ -173,7 +173,6 @@ namespace blogator {
 
         const auto   root_index = _grove.at( *first );
         const auto & root_node  = _roots.at( root_index );
-        const auto & children   = root_node.children();
         auto         curr_it    = std::next( first );
 
         return has_( curr_it, last, &root_node );

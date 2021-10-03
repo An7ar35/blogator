@@ -35,11 +35,10 @@ namespace blogator::parser::specs::html5 {
 
       private:
         typedef std::unordered_map<std::u32string, NamedCharRef> NamedCharRefMap_t;
-        typedef blogator::Trie<uint32_t>                         Trie_t;
 
-        static void loadNCR( NamedCharRef::NamedCharRefMap_t & map, Trie_t &trie, std::unique_ptr<NamedCharRef> &ncr );
+        static void loadNCR( NamedCharRef::NamedCharRefMap_t & map, Trie<uint32_t> &trie, std::unique_ptr<NamedCharRef> &ncr );
 
-        static Trie_t                        _ncr_trie;
+        static Trie<uint32_t>                _ncr_trie;
         static std::unique_ptr<NamedCharRef> _not_found;
         static NamedCharRefMap_t             _ncr_map;
     };

@@ -68,6 +68,35 @@ TEST( Trie_Tests, match_pass ) {
     ASSERT_TRUE( tracker.complete() );
 }
 
+TEST( Trie_Tests, match_double_pass ) {
+    auto str1    = std::u32string( U"ab" );
+    auto str2    = std::u32string( U"abc" );
+    auto trie    = Trie<uint32_t>();
+    auto tracker = TrieTracker<uint32_t>();
+
+    trie.add( str1.begin(), str1.end() );
+    trie.add( str2.begin(), str2.end() );
+
+    ASSERT_FALSE( tracker.partial() );
+    ASSERT_FALSE( tracker.complete() );
+    ASSERT_FALSE( tracker.matched() );
+    ASSERT_FALSE( tracker.matching() );
+
+    ASSERT_TRUE( trie.match( tracker, U'a' ) );
+    ASSERT_TRUE( tracker.partial() );
+    ASSERT_TRUE( trie.match( tracker, U'b' ) );
+    ASSERT_FALSE( tracker.partial() );
+
+    ASSERT_TRUE( tracker.complete() );
+    ASSERT_TRUE( tracker.matched() );
+    ASSERT_TRUE( tracker.matching() );
+
+    ASSERT_TRUE( trie.match( tracker, U'c' ) );
+    ASSERT_TRUE( tracker.complete() );
+    ASSERT_TRUE( tracker.matched() );
+    ASSERT_TRUE( tracker.matching() );
+}
+
 TEST( Trie_Tests, match_fail1 ) {
     auto str1    = std::u32string( U"abcd" );
     auto str2    = std::u32string( U"abdc" );

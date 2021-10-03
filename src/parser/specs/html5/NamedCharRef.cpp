@@ -128,7 +128,7 @@ bool NamedCharRef::match( blogator::TrieTracker<uint32_t> &tracker, uint32_t nex
  * @param trie Search data-structure
  * @param ncr NamedCharRef used when an element is not found
  */
-void NamedCharRef::loadNCR( NamedCharRef::NamedCharRefMap_t &map, NamedCharRef::Trie_t &trie, std::unique_ptr<NamedCharRef> &ncr ) {
+void NamedCharRef::loadNCR( NamedCharRef::NamedCharRefMap_t &map, Trie<uint32_t> &trie, std::unique_ptr<NamedCharRef> &ncr ) {
     if( map.empty() ) {
         ncr.reset();
         ncr = std::make_unique<NamedCharRef>();

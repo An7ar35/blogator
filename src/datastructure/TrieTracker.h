@@ -74,7 +74,7 @@ namespace blogator {
      * @return Partial match state
      */
     template<TrieType T> bool TrieTracker<T>::partial() const {
-        return !_complete_match;
+        return !_last_match_buffer.empty() && !_complete_match;
     }
 
     /**
