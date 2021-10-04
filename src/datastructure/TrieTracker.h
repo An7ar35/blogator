@@ -16,6 +16,7 @@ namespace blogator {
         TrieTracker();
 
         const std::vector<T> & lastMatch() const;
+        const T & lastMatchedElement() const;
         [[nodiscard]] bool matched() const ;
         [[nodiscard]] bool matching() const;
         [[nodiscard]] bool partial() const;
@@ -48,6 +49,19 @@ namespace blogator {
      */
     template<TrieType T> const std::vector<T> &TrieTracker<T>::lastMatch() const {
         return _last_match_buffer;
+    }
+
+    /**
+     * Gets the last element matched
+     * @tparam T Element type
+     * @return Last matched element
+     * @throws std::out_of_range if element buffer is empty
+     */
+    template<TrieType T> const T &TrieTracker<T>::lastMatchedElement() const {
+        if( !_last_match_buffer.empty() )
+            return _last_match_buffer.back();
+
+        throw std::out_of_range( "No elements in match buffer." );
     }
 
     /**
