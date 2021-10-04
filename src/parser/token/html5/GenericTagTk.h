@@ -35,8 +35,8 @@ namespace blogator::parser::token::html5 {
         void toStr( std::ostream &os ) const override;
 
       private:
-        bool                   _self_closing;
-        std::vector<Attribute> _attributes;
+        bool         _self_closing;
+        Attributes_t _attributes;
     };
 }
 

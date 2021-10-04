@@ -18,7 +18,7 @@ namespace blogator::parser::token::html5 {
         [[nodiscard]] bool hasName() const;
         [[nodiscard]] bool hasPID() const;
         [[nodiscard]] bool hasSID() const;
-        [[nodiscard]] bool forcequirks() const;
+        [[nodiscard]] bool forceQuirks() const;
 
         void setName( std::u32string name );
         void setPID( std::u32string pid );

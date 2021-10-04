@@ -26,6 +26,7 @@ namespace blogator::parser::token {
         [[nodiscard]] virtual std::u32string text() const;
         [[nodiscard]] virtual size_t lineNum() const;
         [[nodiscard]] virtual size_t colPos() const;
+        [[nodiscard]] virtual TextPos position() const;
 
       protected:
         virtual void toStr( std::ostream& os ) const;
@@ -38,7 +39,7 @@ namespace blogator::parser::token {
 }
 
 namespace blogator::parser {
-    typedef std::vector<std::unique_ptr<tokeniser::Token>> Tokens_t;
+    typedef std::vector<std::unique_ptr<token::Token>> Tokens_t;
 }
 
 #endif //BLOGATOR_PARSER_TOKEN_TOKEN_H

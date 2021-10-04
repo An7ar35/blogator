@@ -66,7 +66,7 @@ bool DoctypeTk::hasSID() const {
  * Gets the 'force-quirks' flag state
  * @return Force-quirks flag state
  */
-bool DoctypeTk::forcequirks() const {
+bool DoctypeTk::forceQuirks() const {
     return _force_quirks;
 }
 
@@ -134,5 +134,5 @@ void DoctypeTk::toStr( std::ostream &os ) const {
     } else {
         os << "missing";
     }
-    os << ", force-quirks: " << forcequirks() << ", position: " << lineNum() << ":" << colPos() << " }";
+    os << ", force-quirks: " << forceQuirks() << ", position: " << lineNum() << ":" << colPos() << " }";
 }

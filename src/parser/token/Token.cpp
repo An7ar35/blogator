@@ -65,6 +65,14 @@ size_t token::Token::colPos() const {
 }
 
 /**
+ * Gets the line:col position of the token
+ * @return Token position from the source text
+ */
+TextPos token::Token::position() const {
+    return _position;
+}
+
+/**
  * Prints out a string representation of the token
  * @param os Output stream
  */
