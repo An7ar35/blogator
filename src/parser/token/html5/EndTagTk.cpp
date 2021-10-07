@@ -24,6 +24,12 @@ EndTagTk::EndTagTk( std::u32string text, blogator::parser::TextPos position ) :
  * @param os Output stream
  */
 void EndTagTk::toStr( std::ostream &os ) const {
+#ifdef TESTING
+    os << R"(["EndTag", ")";
+    unicode::utf8::convert( os, name() );
+    os << "\"]";
+#else
     os << "html5::EndTagTk=";
     GenericTagTk::toStr( os );
+#endif
 }

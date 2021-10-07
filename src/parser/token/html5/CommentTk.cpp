@@ -24,7 +24,13 @@ CommentTk::CommentTk( std::u32string text, blogator::parser::TextPos position ) 
  * @param os Output stream
  */
 void CommentTk::toStr( std::ostream &os ) const {
+#ifdef TESTING
+    os << R"(["Comment", ")";
+    unicode::utf8::convert( os, text() );
+    os << "\"]";
+#else
     os << "html5::CommentTk={ text: \"";
     unicode::utf8::convert( os, text() );
     os << "\", position: " << lineNum() << ":" << colPos() << " }";
+#endif
 }

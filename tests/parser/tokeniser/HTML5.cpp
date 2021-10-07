@@ -20,10 +20,10 @@ class ParserLogCatcher {
         _errors.push_back( e );
     }
 
-    [[nodiscard]] std::string stringify() const {
+    [[nodiscard]] nlohmann::json jsonify() const {
         std::stringstream ss;
         blogator::tests::jsonifyHtml5Errors( ss, _errors );
-        return ss.str();
+        return nlohmann::json::parse( ss.str() );
     }
 
   private:
@@ -39,10 +39,10 @@ class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
         _tokens.emplace_back( std::move( tk ) );
     }
 
-    [[nodiscard]] std::string stringify() const {
+    [[nodiscard]] nlohmann::json jsonify() const {
         std::stringstream  ss;
         blogator::tests::jsonifyHtml5Tokens( ss, _tokens );
-        return ss.str();
+        return nlohmann::json::parse( ss.str() );
     }
 
     [[nodiscard]]bool empty() const {
@@ -68,10 +68,11 @@ testing::AssertionResult runTest( const nlohmann::json &test ) {
     auto           tokens    = blogator::parser::Tokens_t();
     auto           tokeniser = HTML5( mock_tree_builder );
 
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
     tokeniser.parse( text );
 
-    auto actual_tokens = mock_tree_builder.stringify();
-    auto actual_errors = error_catcher.stringify();
+    auto actual_tokens = mock_tree_builder.jsonify();
+    auto actual_errors = error_catcher.jsonify();
 
     if( actual_tokens != test.at( "output" ) ) {
         return testing::AssertionFailure() << "Failed test - input-output mismatch\n"

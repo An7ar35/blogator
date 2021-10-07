@@ -15,5 +15,9 @@ EndOfFileTk::EndOfFileTk( blogator::parser::TextPos position ) :
  * @param os Output stream
  */
 void EndOfFileTk::toStr( std::ostream &os ) const {
+#ifdef TESTING
+    os << "[\"EOF\"]";
+#else
     os << "html5::EndOfFileTk={ position: " << lineNum() << ":" << colPos() << " }";
+#endif
 }

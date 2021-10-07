@@ -110,6 +110,33 @@ void DoctypeTk::setForceQuirks( bool flag ) {
  * @param os Output stream
  */
 void DoctypeTk::toStr( std::ostream &os ) const {
+#ifdef TESTING
+    os << R"(["DOCTYPE", )";
+    if( hasName() ) {
+        os << "\"";
+        unicode::utf8::convert( os, name() );
+        os << "\"";
+    } else {
+        os << "null";
+    }
+    os << ", ";
+    if( hasPID() ) {
+        os << "\"";
+        unicode::utf8::convert( os, publicIdentifier() );
+        os << "\"";
+    } else {
+        os << "null";
+    }
+    os << ", ";
+    if( hasSID() ) {
+        os << "\"";
+        unicode::utf8::convert( os, systemIdentifier() );
+        os << "\"";
+    } else {
+        os << "null";
+    }
+    os << ", " << ( forceQuirks() ? "true" : "false" ) << " ]";
+#else
     os << "html5::DoctypeTk={ name: ";
     if( hasName() ) {
         os << "\"";
@@ -135,4 +162,5 @@ void DoctypeTk::toStr( std::ostream &os ) const {
         os << "missing";
     }
     os << ", force-quirks: " << forceQuirks() << ", position: " << lineNum() << ":" << colPos() << " }";
+#endif
 }

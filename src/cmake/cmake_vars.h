@@ -12,6 +12,7 @@
 
 namespace blogator::cmake {
     inline static const std::string AUTHOR        = "@PROJECT_AUTHOR@";
+    inline static const std::string YEARS         = "@PROJECT_YEARS@";
     inline static const std::string URL           = "@PROJECT_HOMEPAGE_URL@";
     static const unsigned           VERSION_MAJOR = @PROJECT_VERSION_MAJOR@;
     static const unsigned           VERSION_MINOR = @PROJECT_VERSION_MINOR@;
