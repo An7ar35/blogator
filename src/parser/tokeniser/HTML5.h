@@ -54,6 +54,7 @@ namespace blogator::parser::tokeniser {
         static const uint32_t UNDEFINED_CHAR_10FFFF  = 0x10FFFF;
         static const auto     THIS_CONTEXT           = specs::Context::HTML5;
 
+        bool                       _eof;
         std::filesystem::path      _src_path;
         size_t                     _error_count;
         dom::TreeBuilder         & _tree_builder;

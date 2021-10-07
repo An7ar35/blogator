@@ -19,6 +19,7 @@ using           blogator::parser::specs::html5::TokeniserState;
  * @param tree_builder TreeBuilder to use during tokenisation
  */
 tokeniser::HTML5::HTML5( dom::TreeBuilder &tree_builder ) :
+    _eof( false ),
     _src_path( "" ),
     _error_count( 0 ),
     _tree_builder( tree_builder ),
@@ -43,6 +44,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
     //break condition HTML => "{{" when not in verbatim mode or other places where BLOGATOR::* wouldn't work
 
     _src_path = text.path(); //internal caching for error calls
+    _eof      = text.reachedEnd();
 
     bool reconsume_flag = true;
 
@@ -68,7 +70,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
     auto character = getNextChar( text );
 
-    while( !text.reachedEnd() ) {
+    while( !_eof ) {
         switch( currentState() ) {
             case State_e::DATA: {
                 if( text.reachedEnd() ) {
@@ -1874,6 +1876,7 @@ inline void tokeniser::HTML5::emitCharacterToken( TextPos position, std::u32stri
  */
 inline void tokeniser::HTML5::emitEndOfFileToken( TextPos position ) {
     _tree_builder.addToken( std::make_unique<token::html5::EndOfFileTk>( position ) );
+    _eof = true;
 }
 
 /**

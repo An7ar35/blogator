@@ -36,6 +36,7 @@ std::ostream & blogator::tests::jsonifyHtml5Errors( std::ostream & os, const std
         auto code = it->error();
         auto pos  = it->textpos();
         std::replace( code.begin(), code.end(), ' ', '-' );
+        std::transform( code.begin(), code.end(), code.begin(), []( auto c ) { return std::tolower( c ); } );
         os << R"({ "code": ")" << code << R"(", "line": )" << pos.line << ",  \"col\": " << pos.col << " }";
         if( std::next( it ) != err.cend() ) {
             os << ", ";

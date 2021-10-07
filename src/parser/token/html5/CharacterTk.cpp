@@ -26,11 +26,19 @@ CharacterTk::CharacterTk( std::u32string text, TextPos position ) :
 void CharacterTk::toStr( std::ostream &os ) const {
 #ifdef TESTING
     os << R"(["Character", ")";
-//    if( text().size() == 1 ) {
-//        os << unicode::toxunicode( text().at( 0 ) );
-//    } else {
+
+    if( text().size() == 1 &&
+        ( unicode::ascii::iscntrl( text().at( 0 ) )
+          || unicode::ascii::isblank( text().at( 0 ) )
+          || text().at( 0 ) == U'\"'
+          || text().at( 0 ) == U'\\'
+          || text().at( 0 ) == 0xFFFD ) )
+    {
+        os << unicode::toxunicode( text().at( 0 ) );
+    } else {
         unicode::utf8::convert( os, text() );
-//    }
+    }
+
     os << "\"]";
 #else
     os << "html5::CharacterTk={ text: \"";
