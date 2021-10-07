@@ -1,6 +1,8 @@
 #include "utf32.h"
 
 #include <ranges>
+#include <locale>
+#include <codecvt>
 
 /**
  * Checks if code point is a surrogate
@@ -82,4 +84,14 @@ uint32_t blogator::unicode::utf32::toscalar( uint32_t c ) noexcept {
  */
 void blogator::unicode::utf32::toscalar( std::u32string &str ) {
     std::for_each( str.begin(), str.end(), []( auto &c ) { c = toscalar( c ); } );
+}
+
+/**
+ * Converts a UTF8 string into UTF32
+ * @param u8str UTF8 string
+ * @return UTF32 string
+ */
+std::u32string blogator::unicode::utf32::convert( const std::string &u8str ) {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+    return converter.from_bytes( u8str );
 }

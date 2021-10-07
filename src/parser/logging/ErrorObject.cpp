@@ -6,6 +6,16 @@ using namespace blogator::parser::logging;
 
 /**
  * Constructor
+ */
+ErrorObject::ErrorObject() :
+    _src_file( "" ),
+    _context( specs::Context::UNKNOWN ),
+    _code( 0 ),
+    _position( { 0, 0 } )
+{}
+
+/**
+ * Constructor
  * @param src Source filepath
  * @param ctx Context
  * @param err_code Error code
@@ -76,6 +86,14 @@ std::string ErrorObject::position() const {
     std::stringstream ss;
     ss << _position.line << ":" << _position.col;
     return ss.str();
+}
+
+/**
+ * Gets the position
+ * @return TextPos
+ */
+blogator::parser::TextPos ErrorObject::textpos() const {
+    return _position;
 }
 
 /**

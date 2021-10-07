@@ -12,6 +12,7 @@
 namespace blogator::parser::logging {
     class ErrorObject {
       public:
+        ErrorObject();
         ErrorObject( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position );
 
         [[nodiscard]] std::string filepath() const;
@@ -19,6 +20,7 @@ namespace blogator::parser::logging {
         [[nodiscard]] std::string error() const;
         [[nodiscard]] std::string detailed() const;
         [[nodiscard]] std::string position() const;
+        [[nodiscard]] TextPos textpos() const;
 
         std::ostream & filepath( std::ostream & os ) const;
         std::ostream & context( std::ostream & os ) const;

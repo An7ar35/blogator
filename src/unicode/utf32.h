@@ -13,6 +13,8 @@ namespace blogator::unicode::utf32 {
 
     uint32_t toscalar( uint32_t c ) noexcept;
     void toscalar( std::u32string &str );
+
+    std::u32string convert( const std::string & u8str );
 }
 
 #endif //BLOGATOR_UNICODE_UTF32_H
