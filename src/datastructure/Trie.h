@@ -133,27 +133,42 @@ namespace blogator {
                 const auto root_index = _grove.at( next_element );
                 auto     & root_node  = _roots.at( root_index );
 
-                tracker._match_state     = true;
-                tracker._complete_match  = root_node.end();
+                tracker._matching_state  = true;
                 tracker._last_match_node = &root_node;
-                tracker._last_match_buffer.emplace_back( next_element );
 
+                if( root_node.end() ) {
+                    tracker._complete_match = true;
+                }
+
+                if( root_node.end() ) {
+                    tracker._last_end_index = tracker._last_match_buffer.size();
+                }
+
+                tracker._last_match_buffer.emplace_back( next_element );
             }
 
         } else {
             auto child_it = tracker._last_match_node->_children.find( next_element );
 
             if( child_it != tracker._last_match_node->_children.cend() ) {
-                tracker._complete_match  = child_it->second.end();
                 tracker._last_match_node = &child_it->second;
+
+                if( child_it->second.end() ) {
+                    tracker._complete_match = true;
+                }
+
+                if( tracker._last_match_node->end() ) {
+                    tracker._last_end_index = tracker._last_match_buffer.size();
+                }
+
                 tracker._last_match_buffer.emplace_back( next_element );
 
             } else {
-                tracker._match_state = false;
+                tracker._matching_state = false;
             }
         }
 
-        return tracker._match_state;
+        return tracker._matching_state;
     }
 
     /**
