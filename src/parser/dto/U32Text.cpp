@@ -6,23 +6,25 @@ using namespace blogator::parser;
  * Constructor
  * @param text Source text to reference
  */
-U32Text::U32Text( const std::u32string &text ) :
-    _src( text ),
-    _position( { 1, 1 } ),
-    _iterator( text.cbegin() )
-{}
+U32Text::U32Text( std::u32string text ) :
+    _src( std::move( text ) ),
+    _position( { 1, 1 } )
+{
+    _iterator = _src.begin();
+}
 
 /**
  * Constructor
  * @param src_path Source file path
  * @param text Source text to reference
  */
-U32Text::U32Text( std::filesystem::path src_path, const std::u32string &text ) :
+U32Text::U32Text( std::filesystem::path src_path, std::u32string text ) :
     _path( std::move( src_path ) ),
-    _src( text ),
-    _position( { 1, 1 } ),
-    _iterator( text.cbegin() )
-{}
+    _src( std::move( text ) ),
+    _position( { 1, 1 } )
+{
+    _iterator = _src.begin();
+}
 
 /**
  * Blindly advances the column position tracker only (pos.col += n)

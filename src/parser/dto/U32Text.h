@@ -11,8 +11,8 @@ namespace blogator::parser {
 
     class U32Text {
       public:
-        explicit U32Text( const std::u32string &text );
-        U32Text( std::filesystem::path src_path, const std::u32string &text );
+        explicit U32Text( std::u32string text );
+        U32Text( std::filesystem::path src_path, std::u32string text );
 
         void advanceColTracker( unsigned int n = 1 );
         void advanceLineTracker();
@@ -29,10 +29,10 @@ namespace blogator::parser {
         [[nodiscard]] bool reachedEnd( const TextIterator_t & it ) const;
 
       private:
-        std::filesystem::path  _path;
-        const std::u32string & _src;
-        TextPos                _position;
-        TextIterator_t         _iterator;
+        std::filesystem::path _path;
+        std::u32string        _src;
+        TextPos               _position;
+        TextIterator_t        _iterator;
     };
 }
 

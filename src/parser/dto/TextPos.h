@@ -21,6 +21,11 @@ namespace blogator::parser {
         bool operator <=( const TextPos &rhs ) const;
         bool operator >=( const TextPos &rhs ) const;
 
+        TextPos operator +( const TextPos &rhs ) const;
+        TextPos operator -( const TextPos &rhs ) const;
+        TextPos & operator +=( const TextPos &rhs );
+        TextPos & operator -=( const TextPos &rhs );
+
         size_t line;
         size_t col;
     };

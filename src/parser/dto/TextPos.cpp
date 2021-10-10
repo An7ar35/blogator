@@ -90,3 +90,45 @@ bool TextPos::operator >=( const TextPos &rhs ) const {
         return ( line > rhs.line );
     }
 }
+
+/**
+ * Addition operator
+ * @param rhs TextPos to add
+ * @return Result
+ */
+TextPos TextPos::operator +( const TextPos &rhs ) const {
+    return { ( line + rhs.line ),
+             ( col + rhs.col ) };
+}
+
+/**
+ * Subtraction operator
+ * @param rhs TextPos to add
+ * @return Result
+ */
+TextPos TextPos::operator -( const TextPos &rhs ) const {
+    return { ( line > rhs.line ? line - rhs.line : 1 ),
+             ( col > rhs.col ? col - rhs.col : 1 ) };
+}
+
+/**
+ * Addition to self operator
+ * @param rhs TextPos to add
+ * @return Result
+ */
+TextPos & TextPos::operator +=( const TextPos &rhs ) {
+    line += rhs.line;
+    col  += rhs.col;
+    return *this;
+}
+
+/**
+ * Subtraction to self operator
+ * @param rhs TextPos to add
+ * @return Result
+ */
+TextPos & TextPos::operator -=( const TextPos &rhs ) {
+    line = ( line > rhs.line ? line - rhs.line : 1 );
+    col  = ( col > rhs.col   ? col - rhs.col   : 1 );
+    return *this;
+}
