@@ -53,7 +53,7 @@ const Attributes_t &GenericTagTk::attributes() const {
  * @param value Attribute value
  */
 void GenericTagTk::addAttribute( std::u32string name, std::u32string value ) {
-    _attributes.emplace_back( Attribute { std::move( name ), std::move( value ) } );
+    _attributes.emplace_back( Attribute { .name = std::move( name ), .value = std::move( value ) } );
 }
 
 /**

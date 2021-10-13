@@ -19,30 +19,37 @@ CharacterTk::CharacterTk( std::u32string text, TextPos position ) :
     HTML5Tk( specs::html5::TokenType::CHARACTER, std::move( text ), position )
 {}
 
+#ifdef TESTING
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream
  */
 void CharacterTk::toStr( std::ostream &os ) const {
-#ifdef TESTING
-    os << R"(["Character", ")";
+    const auto & txt = text();
 
-    if( text().size() == 1 &&
-        ( unicode::ascii::iscntrl( text().at( 0 ) )
-          || unicode::ascii::isblank( text().at( 0 ) )
-          || text().at( 0 ) == U'\"'
-          || text().at( 0 ) == U'\\'
-          || text().at( 0 ) == 0xFFFD ) )
-    {
-        os << unicode::toxunicode( text().at( 0 ) );
+    os << R"(["Character",")";
+
+    if( txt.size() == 1 && unicode::utf32::isascii( txt.at( 0 ) ) ) {
+        auto hex = unicode::utf32::toxunicode( txt.at( 0 ) );
+        unicode::utf8::convert( os, hex );
     } else {
-        unicode::utf8::convert( os, text() );
+        unicode::utf8::convert( os, txt );
     }
 
     os << "\"]";
+}
+
 #else
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void CharacterTk::toStr( std::ostream &os ) const {
     os << "html5::CharacterTk={ text: \"";
     unicode::utf8::convert( os, text() );
     os << "\", position: " << lineNum() << ":" << colPos() << " }";
-#endif
 }
+
+#endif

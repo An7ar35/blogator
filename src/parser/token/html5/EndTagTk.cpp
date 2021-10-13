@@ -19,17 +19,27 @@ EndTagTk::EndTagTk( std::u32string text, blogator::parser::TextPos position ) :
     GenericTagTk( specs::html5::TokenType::END_TAG, std::move( text ), position )
 {}
 
+#ifdef TESTING
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream
  */
 void EndTagTk::toStr( std::ostream &os ) const {
-#ifdef TESTING
     os << R"(["EndTag", ")";
     unicode::utf8::convert( os, name() );
     os << "\"]";
+}
+
 #else
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void EndTagTk::toStr( std::ostream &os ) const {
     os << "html5::EndTagTk=";
     GenericTagTk::toStr( os );
-#endif
 }
+
+#endif

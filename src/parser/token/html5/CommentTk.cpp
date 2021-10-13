@@ -19,18 +19,28 @@ CommentTk::CommentTk( std::u32string text, blogator::parser::TextPos position ) 
     HTML5Tk( specs::html5::TokenType::COMMENT, std::move( text ), position )
 {}
 
+#ifdef TESTING
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream
  */
 void CommentTk::toStr( std::ostream &os ) const {
-#ifdef TESTING
     os << R"(["Comment", ")";
     unicode::utf8::convert( os, text() );
     os << "\"]";
+}
+
 #else
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void CommentTk::toStr( std::ostream &os ) const {
     os << "html5::CommentTk={ text: \"";
     unicode::utf8::convert( os, text() );
     os << "\", position: " << lineNum() << ":" << colPos() << " }";
-#endif
 }
+
+#endif

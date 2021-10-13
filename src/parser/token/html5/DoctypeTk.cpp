@@ -105,12 +105,13 @@ void DoctypeTk::setForceQuirks( bool flag ) {
     _force_quirks = flag;
 }
 
+#ifdef TESTING
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream
  */
 void DoctypeTk::toStr( std::ostream &os ) const {
-#ifdef TESTING
     os << R"(["DOCTYPE", )";
     if( hasName() ) {
         os << "\"";
@@ -135,8 +136,17 @@ void DoctypeTk::toStr( std::ostream &os ) const {
     } else {
         os << "null";
     }
-    os << ", " << ( forceQuirks() ? "true" : "false" ) << " ]";
+    os << ", " << ( forceQuirks() ?  "false" : "true" ) //bool values are swapped as html5lib_tests's flag checks 'correct' (i.e. !force-quirks)
+       << " ]";
+}
+
 #else
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void DoctypeTk::toStr( std::ostream &os ) const {
     os << "html5::DoctypeTk={ name: ";
     if( hasName() ) {
         os << "\"";
@@ -162,5 +172,6 @@ void DoctypeTk::toStr( std::ostream &os ) const {
         os << "missing";
     }
     os << ", force-quirks: " << forceQuirks() << ", position: " << lineNum() << ":" << colPos() << " }";
-#endif
 }
+
+#endif
