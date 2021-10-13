@@ -16,7 +16,7 @@ using           blogator::parser::specs::html5::TokeniserState;
 
 /**
  * Constructor
- * @param tree_builder TreeBuilder to use during tokenisation
+ * @param tree_builder TreeBuilder to use during tokenization
  */
 tokeniser::HTML5::HTML5( dom::TreeBuilder &tree_builder ) :
     _eof( false ),
@@ -28,6 +28,22 @@ tokeniser::HTML5::HTML5( dom::TreeBuilder &tree_builder ) :
 {
     tree_builder.setChangeHTML5TokeniserStateCallback( [this]( State_e s ) { setState( s ); } );
 }
+
+/**
+ * Constructor (for unit tests)
+ * @param tree_builder TreeBuilder to use during tokenization
+ * @param init_state Initial state
+ * @param last_start_tag Last start tag name (optional)
+ */
+tokeniser::HTML5::HTML5( dom::TreeBuilder & tree_builder, specs::html5::TokeniserState init_state, std::u32string last_start_tag ) :
+    _eof( false ),
+    _src_path( "" ),
+    _error_count( 0 ),
+    _tree_builder( tree_builder ),
+    _current_state( init_state ),
+    _return_state( State_e::DATA ),
+    _last_start_tag( std::move( last_start_tag ) )
+{}
 
 /**
  * Parse HTML5 content into tokens
@@ -44,29 +60,40 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
     //break condition HTML => "{{" when not in verbatim mode or other places where BLOGATOR::* wouldn't work
 
     _src_path = text.path(); //internal caching for error calls
-    _eof      = text.reachedEnd();
+    _eof      = false;
 
     bool reconsume_flag = true;
+    bool next_line_flag = false;
 
-    const auto reconsume   = [&]( State_e new_state ) {
+    /**
+     * [LAMBDA] Sets the state to reconsume the current code point under the caret
+     */
+    const auto reconsume = [&]( State_e new_state ) {
         reconsume_flag = true;
         setState( new_state );
     };
 
-    const auto getNextChar = [&reconsume_flag]( U32Text &text ) {
+    /**
+     * [LAMBDA] Moves the caret and gets the code point under it
+     */
+    const auto getNextChar = [&]( U32Text &text ) {
         if( reconsume_flag ) {
             reconsume_flag = false;
         } else {
             text.advanceCol();
 
-            if( unicode::ascii::isnewline( text.character() ) )
+            if( next_line_flag ) {
                 text.advanceLineTracker();
+                next_line_flag = false;
+            }
+
+            next_line_flag = unicode::ascii::isnewline( text.character() );
         }
 
         return text.character();
     };
 
-
+    // ============================== [ Tokenizer state machine ] ==================================
 
     auto character = getNextChar( text );
 
@@ -173,6 +200,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_END_TAG_NAME );
                     setState( State_e::DATA );
+                    emitPendingToken( text.position() );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     createEndTagToken( text.position() );
                     reconsume( State_e::TAG_NAME );
@@ -193,7 +221,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::SELF_CLOSING_START_TAG );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( unicode::ascii::isupper( character ) ) {
                     appendToPendingTokenText( unicode::ascii::tolower( character ) );
                 } else if( character == NULL_CHAR ) {
@@ -257,7 +285,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::DATA );
-                        emitPendingToken();
+                        emitPendingToken( text.position() );
                     } else {
                         emitCharacterToken( text.position(), LESS_THAN_SIGN );
                         emitCharacterToken( text.position(), SOLIDUS );
@@ -337,7 +365,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::DATA );
-                        emitPendingToken();
+                        emitPendingToken( text.position() );
                     } else {
                         emitCharacterToken( text.position(), LESS_THAN_SIGN );
                         emitCharacterToken( text.position(), SOLIDUS );
@@ -421,7 +449,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::DATA );
-                        emitPendingToken();
+                        emitPendingToken( text.position() );
                     } else {
                         emitCharacterToken( text.position(), LESS_THAN_SIGN );
                         emitCharacterToken( text.position(), SOLIDUS );
@@ -551,46 +579,15 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::SCRIPT_DATA_ESCAPED_END_TAG_NAME: {
-                if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
-                    if( appropriateEndTagToken() ) {
-                        setState( State_e::BEFORE_ATTRIBUTE_NAME );
-                    } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                const bool appropriate = appropriateEndTagToken();
 
-                        for( const auto & c : tempBuffer() ) {
-                            emitCharacterToken( text.position(), c );
-                        }
-
-                        reconsume( State_e::SCRIPT_DATA_ESCAPED );
-                    }
-                } else if( character == SOLIDUS ) {
-                    if( appropriateEndTagToken() ) {
-                        setState( State_e::SELF_CLOSING_START_TAG );
-                    } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
-
-                        for( const auto & c : tempBuffer() ) {
-                            emitCharacterToken( text.position(), c );
-                        }
-
-                        reconsume( State_e::SCRIPT_DATA_ESCAPED );
-                    }
-                } else if( character == GREATER_THAN_SIGN ) {
-                    if( appropriateEndTagToken() ) {
-                        setState( State_e::DATA );
-                        emitPendingToken();
-                    } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
-
-                        for( const auto & c : tempBuffer() ) {
-                            emitCharacterToken( text.position(), c );
-                        }
-
-                        reconsume( State_e::SCRIPT_DATA_ESCAPED );
-                    }
+                if( ( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) && appropriate ) {
+                    setState( State_e::BEFORE_ATTRIBUTE_NAME );
+                } else if( character == SOLIDUS && appropriate ) {
+                    setState( State_e::SELF_CLOSING_START_TAG );
+                } else if( character == GREATER_THAN_SIGN && appropriate ) {
+                    setState( State_e::DATA );
+                    emitPendingToken( text.position() );
                 } else if( unicode::ascii::isupper( character ) ) {
                     appendToPendingTokenText( unicode::ascii::tolower( character ) );
                     appendToTempBuffer( character );
@@ -738,7 +735,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     appendToPendingTokenAttrNameBuffer( character );
                     setState( State_e::ATTRIBUTE_NAME );
                 } else {
-                    clearPendingTokenAttribute();
+                    if( !addPendingTokenAttribute() ) {
+                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
+                    }
                     reconsume( State_e::ATTRIBUTE_NAME );
                 }
             } break;
@@ -759,7 +758,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenAttrNameBuffer( REPLACEMENT_CHAR );
-                } else if( character == QUESTION_MARK || character == APOSTROPHE || character == LESS_THAN_SIGN ) {
+                } else if( character == QUOTATION_MARK || character == APOSTROPHE || character == LESS_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_CHARACTER_IN_ATTRIBUTE_NAME );
                     appendToPendingTokenAttrNameBuffer( character );
                 } else {
@@ -779,7 +778,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::BEFORE_ATTRIBUTE_VALUE );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    if( !addPendingTokenAttribute() ) {
+                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
+                    }
+                    emitPendingToken( text.position() );
                 } else {
                     if( !addPendingTokenAttribute() ) {
                         logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
@@ -798,7 +800,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_ATTRIBUTE_VALUE );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     reconsume( State_e::ATTRIBUTE_VALUE_UNQUOTED );
                 }
@@ -810,6 +812,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( character == QUOTATION_MARK ) {
                     setState( State_e::AFTER_ATTRIBUTE_VALUE_QUOTED );
+                    if( !addPendingTokenAttribute() ) {
+                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
+                    }
                 } else if( character == AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_DOUBLE_QUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
@@ -827,6 +832,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( character == APOSTROPHE ) {
                     setState( State_e::AFTER_ATTRIBUTE_VALUE_QUOTED );
+                    if( !addPendingTokenAttribute() ) {
+                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
+                    }
                 } else if( character == AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_SINGLE_QUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
@@ -849,7 +857,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::CHARACTER_REFERENCE );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( character == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenAttrValueBuffer( REPLACEMENT_CHAR );
@@ -876,7 +884,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::SELF_CLOSING_START_TAG );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_BETWEEN_ATTRIBUTES );
                     reconsume( State_e::BEFORE_ATTRIBUTE_NAME );
@@ -890,7 +898,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     setPendingTokenSelfCloseFlag();
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::UNEXPECTED_SOLIDUS_IN_TAG );
                     reconsume( State_e::BEFORE_ATTRIBUTE_NAME );
@@ -899,11 +907,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
             case State_e::BOGUS_COMMENT: {
                 if( text.reachedEnd() ) {
-                    logError( text.position(), ErrorCode::EOF_IN_TAG );
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( character == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenText( REPLACEMENT_CHAR );
@@ -921,10 +929,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     createCommentToken( text.position() );
                     setState( State_e::COMMENT_START );
                 } else if( unicode::ascii::toupper( next7 ) == U"DOCTYPE" ) {
-                    text.advanceCol( 7 );
+                    text.advanceCol( 6 );
                     setState( State_e::DOCTYPE );
                 } else if( next7 == U"[CDATA[" ) {
-                    text.advanceCol( 7 );
+                    text.advanceCol( 6 );
                     if( _tree_builder.hasAdjustedCurrentNode() && _tree_builder.adjustedCurrentNode().second != specs::html5::Namespace::HTML5 ) {
                         setState( State_e::CDATA_SECTION );
                     } else {
@@ -932,7 +940,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     }
                     createCommentToken( text.position() );
                     appendToPendingTokenText( U"[CDATA[" );
-                    reconsume( State_e::BOGUS_COMMENT );
+                    setState( State_e::BOGUS_COMMENT );
                 } else {
                     logError( text.position(), ErrorCode::INCORRECTLY_OPENED_COMMENT );
                     createCommentToken( text.position() );
@@ -946,7 +954,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_CLOSING_OF_EMPTY_COMMENT );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     reconsume( State_e::COMMENT );
                 }
@@ -955,14 +963,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::COMMENT_START_DASH: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_END );
                 } else if( character == GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_CLOSING_OF_EMPTY_COMMENT );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     appendToPendingTokenText( HYPHEN_MINUS );
                     reconsume( State_e::COMMENT );
@@ -972,7 +980,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::COMMENT: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == LESS_THAN_SIGN ) {
                     appendToPendingTokenText( character );
@@ -1016,7 +1024,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
             case State_e::COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH: {
                 if( text.reachedEnd() || character == GREATER_THAN_SIGN ) {
-                    reconsume( State_e::COMMENT );
+                    reconsume( State_e::COMMENT_END );
                 } else {
                     logError( text.position(), ErrorCode::NESTED_COMMENT );
                     reconsume( State_e::COMMENT_END );
@@ -1026,7 +1034,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::COMMENT_END_DASH: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_END );
@@ -1039,11 +1047,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::COMMENT_END: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( character == EXCLAMATION_MARK ) {
                     setState( State_e::COMMENT_END_BANG );
                 } else if( character == HYPHEN_MINUS ) {
@@ -1058,7 +1066,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::COMMENT_END_BANG: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == HYPHEN_MINUS ) {
                     appendToPendingTokenText( HYPHEN_MINUS );
@@ -1068,7 +1076,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( character == GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::INCORRECTLY_CLOSED_COMMENT );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     appendToPendingTokenText( HYPHEN_MINUS );
                     appendToPendingTokenText( HYPHEN_MINUS );
@@ -1081,10 +1089,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     createDoctypeToken( text.position(), true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
-                    setState( State_e::BOGUS_DOCTYPE );
+                    setState( State_e::BEFORE_DOCTYPE_NAME );
                 } else if( character == GREATER_THAN_SIGN ) {
                     reconsume( State_e::BEFORE_DOCTYPE_NAME );
                 } else {
@@ -1097,7 +1105,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     createDoctypeToken( text.position(), true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
@@ -1114,7 +1122,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_NAME );
                     createDoctypeToken( text.position(), true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     createDoctypeToken( text.position() );
                     appendToPendingTokenText( character );
@@ -1125,14 +1133,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::DOCTYPE_NAME: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
-                    createDoctypeToken( text.position(), true );
-                    emitPendingToken();
+                    setPendingDoctypeTokenQuirksFlag( true );
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::AFTER_DOCTYPE_NAME );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( unicode::ascii::isupper( character ) ) {
                     appendToPendingTokenText( unicode::ascii::tolower( character ) );
                 } else if( character == NULL_CHAR ) {
@@ -1147,20 +1155,20 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     auto next6 = unicode::ascii::toupper( text.characters( 6 ) );
                     if( next6 == U"PUBLIC" ) {
-                        text.advanceCol( 6 );
+                        text.advanceCol( 5 );
                         setState( State_e::AFTER_DOCTYPE_PUBLIC_KEYWORD );
                     } else if( next6 ==U"SYSTEM" ) {
-                        text.advanceCol( 6 );
+                        text.advanceCol( 5 );
                         setState( State_e::AFTER_DOCTYPE_SYSTEM_KEYWORD );
                     } else {
                         logError( text.position(), ErrorCode::INVALID_CHARACTER_SEQUENCE_AFTER_DOCTYPE_NAME );
@@ -1174,7 +1182,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_DOCTYPE_PUBLIC_IDENTIFIER );
@@ -1190,7 +1198,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_QUOTE_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
@@ -1202,7 +1210,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
@@ -1216,7 +1224,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_QUOTE_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
@@ -1228,7 +1236,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == QUOTATION_MARK ) {
                     setState( State_e::AFTER_DOCTYPE_PUBLIC_IDENTIFIER );
@@ -1239,7 +1247,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     appendToPendingTokenPIDBuffer( character );
                 }
@@ -1249,7 +1257,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == APOSTROPHE ) {
                     setState( State_e::AFTER_DOCTYPE_PUBLIC_IDENTIFIER );
@@ -1260,7 +1268,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     appendToPendingTokenPIDBuffer( character );
                 }
@@ -1270,13 +1278,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
-                    setState( State_e::DATA );
-                    emitPendingToken();
-                } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIER );
+                } else if( character == GREATER_THAN_SIGN ) {
+                    setState( State_e::DATA );
+                    emitPendingToken( text.position() );
                 } else if( character == QUOTATION_MARK ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS );
                     setPendingDoctypeTokenSIDFlag( true );
@@ -1296,13 +1304,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( character == QUOTATION_MARK ) {
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED );
@@ -1320,7 +1328,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_DOCTYPE_SYSTEM_IDENTIFIER );
@@ -1330,13 +1338,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED );
                 } else if( character == APOSTROPHE ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_AFTER_DOCTYPE_SYSTEM_KEYWORD );
-                    setPendingDoctypeTokenQuirksFlag( true );
+                    setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED );
                 } else if( character == GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_QUOTE_BEFORE_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
@@ -1348,7 +1356,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
@@ -1362,7 +1370,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_QUOTE_BEFORE_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
@@ -1374,10 +1382,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == QUOTATION_MARK ) {
-                    setState( State_e::AFTER_DOCTYPE_SYSTEM_KEYWORD );
+                    setState( State_e::AFTER_DOCTYPE_SYSTEM_IDENTIFIER );
                 } else if( character == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenSIDBuffer( REPLACEMENT_CHAR );
@@ -1385,7 +1393,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     appendToPendingTokenSIDBuffer( character );
                 }
@@ -1395,10 +1403,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == APOSTROPHE ) {
-                    setState( State_e::AFTER_DOCTYPE_SYSTEM_KEYWORD );
+                    setState( State_e::AFTER_DOCTYPE_SYSTEM_IDENTIFIER );
                 } else if( character == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenSIDBuffer( REPLACEMENT_CHAR );
@@ -1406,7 +1414,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     appendToPendingTokenSIDBuffer( character );
                 }
@@ -1416,13 +1424,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_DOCTYPE );
                     setPendingDoctypeTokenQuirksFlag( true );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else {
                     logError( text.position(), ErrorCode::UNEXPECTED_CHARACTER_AFTER_DOCTYPE_SYSTEM_IDENTIFIER );
                     reconsume( State_e::BOGUS_DOCTYPE );
@@ -1431,11 +1439,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
             case State_e::BOGUS_DOCTYPE: {
                 if( text.reachedEnd() ) {
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    emitPendingToken();
+                    emitPendingToken( text.position() );
                 } else if( character == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     //ignore character
@@ -1501,28 +1509,35 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     character = getNextChar( text );
                 }
 
+                const auto next_input_char = ( match_tracker.complete() && match_tracker.atEnd() )
+                                             ? character
+                                             : tempBuffer().back();
+
                 if( match_tracker.matched() && match_tracker.complete() ) {
                     if( ( returnState() == State_e::ATTRIBUTE_VALUE_DOUBLE_QUOTED ||
                           returnState() == State_e::ATTRIBUTE_VALUE_SINGLE_QUOTED ||
                           returnState() == State_e::ATTRIBUTE_VALUE_UNQUOTED )
                         && ( match_tracker.lastMatchedElement() != SEMICOLON )
-                        && ( character == EQUALS_SIGN || unicode::ascii::isalnum( character ) ) )
+                        && ( next_input_char == EQUALS_SIGN || unicode::ascii::isalnum( next_input_char ) ) )
                     {
-                        clearTempBuffer();
+                        flushCodePoints( start_position );
                         reconsume( returnState() ); //since next character is already current because of the NamedCharRef::match(..) while loop
 
                     } else {
+                        using specs::html5::NamedCharRef;
+
+                        const auto match_buffer   = match_tracker.lastCompleteMatch();
+                        const auto remainders     = match_tracker.remainder();
+                        const auto [ found, ncr ] = NamedCharRef::fetch( std::u32string( match_buffer.begin(), match_buffer.end() ) );
+
                         if( match_tracker.lastMatchedElement() != SEMICOLON ) {
-                            logError( text.position(), ErrorCode::MISSING_SEMICOLON_AFTER_CHARACTER_REFERENCE );
+                            const auto err_pos = ( start_position + TextPos { 0, match_tracker.lastCompleteMatchSize() - 1 } );
+                            logError(err_pos, ErrorCode::MISSING_SEMICOLON_AFTER_CHARACTER_REFERENCE );
                         }
 
-                        using namespace specs::html5;
-
-                        const auto & match_buffer = match_tracker.lastMatch();
-                        const auto [ found, ncr ] = NamedCharRef::fetch( std::u32string( match_buffer.cbegin(), match_buffer.cend() ) );
+                        clearTempBuffer();
 
                         if( found ) {
-                            clearTempBuffer();
                             appendToTempBuffer( ncr.codepoint1 );
 
                             if( ncr.codepoint2 ) {
@@ -1530,16 +1545,18 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                             }
 
                         } else {
+                            appendToTempBuffer( match_buffer.begin(), match_buffer.end() );
                             //TODO log error (tempbuff will be used as-is)
                         }
 
+                        appendToTempBuffer( remainders.begin(), remainders.end() );
                         flushCodePoints( start_position );
                         reconsume( returnState() ); //since next character is already current because of the NamedCharRef::match(..) while loop
                     }
 
                 } else {
                     flushCodePoints( start_position );
-                    setState( State_e::AMBIGUOUS_AMPERSAND );
+                    reconsume( State_e::AMBIGUOUS_AMPERSAND ); //since next character is already current because of the NamedCharRef::match(..) while loop
                 }
             } break;
 
@@ -1625,7 +1642,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( crc == NULL_CHAR ) {
                     logError( text.position(), ErrorCode::NULL_CHARACTER_REFERENCE );
                     resetCharRefCode( REPLACEMENT_CHAR );
-                } else if( crc > UNDEFINED_CHAR_10FFFF ) {
+                } else if( !validCharRefCode() || crc > UNDEFINED_CHAR_10FFFF ) {
                     logError( text.position(), ErrorCode::CHARACTER_REFERENCE_OUTSIDE_UNICODE_RANGE );
                     resetCharRefCode( REPLACEMENT_CHAR );
                 } else if( unicode::utf32::issurrogate( crc ) ) {
@@ -1633,22 +1650,22 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     resetCharRefCode( REPLACEMENT_CHAR );
                 } else if( unicode::utf32::isnonchar( crc ) ) {
                     logError( text.position(), ErrorCode::NONCHARACTER_CHARACTER_REFERENCE );
-                } else if( crc == CARRIAGE_RETURN || ( unicode::ascii::iscntrl( crc ) && !unicode::ascii::isblank( crc ) ) ) {
-                    logError( text.position(), ErrorCode::CONTROL_CHARACTER_REFERENCE );
                 } else {
+                    if( crc == CARRIAGE_RETURN || ( unicode::utf32::iscntrl( crc ) && !unicode::ascii::iswspace( crc ) ) ) {
+                        logError( text.position(), ErrorCode::CONTROL_CHARACTER_REFERENCE );
+                    }
+
                     auto [found, codepoint] = specs::html5::NumericCharRef::fetch( crc );
 
                     if( found ) {
                         resetCharRefCode( codepoint );
-                    } else {
-                        //TODO log error
                     }
                 }
 
                 clearTempBuffer();
                 appendToTempBuffer( charRefCode() );
                 flushCodePoints( text.position() );
-                setState( returnState() );
+                reconsume( returnState() ); //since char is already after the char ref code
             } break;
         }
 
@@ -1659,21 +1676,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 }
 
 /**
- * Sets the initial tokeniser state (for testing)
- * @param state Init state
- */
-void tokeniser::HTML5::setInitState( specs::html5::TokeniserState state ) noexcept {
-    setState( state );
-}
-
-/**
  * Resets/Clears the tokeniser (inc. error count)
  */
 void tokeniser::HTML5::reset() {
     _error_count = 0;
     setState( State_e::DATA );
     setReturnState( State_e::DATA );
-    _open_tags.clear();
+    _last_start_tag.clear();
     _temp_buffer.clear();
     clearPendingToken();
 }
@@ -1747,6 +1756,7 @@ inline void tokeniser::HTML5::clearPendingToken() {
     _pending.not_missing_b = false;
     _pending.quirks        = false;
     _pending.char_ref_code = 0;
+    _pending.bad_ref_code  = false;
     _pending.token.reset();
 }
 
@@ -1759,6 +1769,16 @@ inline void tokeniser::HTML5::appendToTempBuffer( uint32_t c ) {
 }
 
 /**
+ * Append a range to the temporary buffer
+ * @tparam InputIt
+ * @param begin
+ * @param end
+ */
+template<typename InputIt> void tokeniser::HTML5::appendToTempBuffer( InputIt begin, InputIt end ) {
+    std::copy( begin, end, back_inserter( _temp_buffer ) );
+}
+
+/**
  * Gets the temporary buffer
  * @return Reference to the temporary buffer
  */
@@ -1768,71 +1788,71 @@ inline const std::vector<uint32_t> &tokeniser::HTML5::tempBuffer() {
 
 /**
  * Emits the pending token
+ * @param position Current caret position at time of call
  */
-inline void tokeniser::HTML5::emitPendingToken() {
-    if( _pending.token ) {
-        if( _pending.token->type() == Type_e::START_TAG ) {
-            _pending.token->setText( std::u32string(
-                _pending.token_name_buffer.cbegin(),
-                _pending.token_name_buffer.cend()
-            ) );
+inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
+    if( _pending.token == nullptr ) {
+        return; //EARLY RETURN
+    }
 
-            auto * tk = dynamic_cast<token::html5::StartTagTk *>( _pending.token.get() );
+    if( _pending.token->type() == Type_e::START_TAG ) {
+        auto * tk = dynamic_cast<token::html5::StartTagTk *>( _pending.token.get() );
 
-            if( !addPendingTokenAttribute() ) {
-                logError( tk->position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-            }
-            
-            _open_tags.push_front( tk->name() );
-            
-        } else if( _pending.token->type() == Type_e::END_TAG ) {
-            _pending.token->setText( std::u32string(
-                _pending.token_name_buffer.cbegin(),
-                _pending.token_name_buffer.cend()
-            ) );
+        tk->setText( std::u32string(
+            _pending.token_name_buffer.cbegin(),
+            _pending.token_name_buffer.cend()
+        ) );
 
-            auto * tk = dynamic_cast<token::html5::EndTagTk *>( _pending.token.get() );
+        if( !addPendingTokenAttribute() ) {
+            logError( tk->position(), ErrorCode::DUPLICATE_ATTRIBUTE );
+        }
 
-            if( !addPendingTokenAttribute() ) {
-                logError( tk->position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-            }
-            
-            if( !tk->attributes().empty() ) //(13.2.5) "...end tag token is emitted with attributes..."
-                logError( tk->position(), ErrorCode::END_TAG_WITH_ATTRIBUTES );
-            if( tk->selfclosing() ) //(13.2.5) "...end tag token is emitted with its self-closing flag set..."
-                logError( tk->position(), ErrorCode::END_TAG_WITH_TRAILING_SOLIDUS );
+        _last_start_tag = tk->name();
 
-        } else if( _pending.token->type() == Type_e::DOCTYPE ) {
-            if( !_pending.token_name_buffer.empty() ) {
-                _pending.token->setText( std::u32string(
-                    _pending.token_name_buffer.cbegin(),
-                    _pending.token_name_buffer.cend() )
-                );
-            }
+    } else if( _pending.token->type() == Type_e::END_TAG ) {
+        auto * tk = dynamic_cast<token::html5::EndTagTk *>( _pending.token.get() );
 
-            auto * tk = dynamic_cast<token::html5::DoctypeTk *>( _pending.token.get() );
+        tk->setText( std::u32string(
+            _pending.token_name_buffer.cbegin(),
+            _pending.token_name_buffer.cend()
+        ) );
 
-            if( _pending.quirks )
-                tk->setForceQuirks();
-            if( _pending.not_missing_a || !_pending.field_buffer_a.empty() )
-                tk->setPID( std::u32string( _pending.field_buffer_a.cbegin(), _pending.field_buffer_a.cend() ) );
-            if( _pending.not_missing_b || !_pending.field_buffer_b.empty() )
-                tk->setSID( std::u32string( _pending.field_buffer_a.cbegin(), _pending.field_buffer_a.cend() ) );
+        if( !addPendingTokenAttribute() ) {
+            logError( tk->position(), ErrorCode::DUPLICATE_ATTRIBUTE );
+        }
 
-        } else {
-            _pending.token->setText( std::u32string(
+        if( !tk->attributes().empty() ) //(13.2.5) "...end tag token is emitted with attributes..."
+            logError( position, ErrorCode::END_TAG_WITH_ATTRIBUTES );
+        if( tk->selfclosing() ) //(13.2.5) "...end tag token is emitted with its self-closing flag set..."
+            logError( position, ErrorCode::END_TAG_WITH_TRAILING_SOLIDUS );
+
+        _last_start_tag.clear();
+
+    } else if( _pending.token->type() == Type_e::DOCTYPE ) {
+        auto * tk = dynamic_cast<token::html5::DoctypeTk *>( _pending.token.get() );
+
+        if( !_pending.token_name_buffer.empty() ) {
+            tk->setName( std::u32string(
                 _pending.token_name_buffer.cbegin(),
                 _pending.token_name_buffer.cend() )
             );
         }
 
-        _tree_builder.addToken( std::move( _pending.token ) );
+        if( _pending.quirks )
+            tk->setForceQuirks();
+        if( _pending.not_missing_a || !_pending.field_buffer_a.empty() )
+            tk->setPID( std::u32string( _pending.field_buffer_a.cbegin(), _pending.field_buffer_a.cend() ) );
+        if( _pending.not_missing_b || !_pending.field_buffer_b.empty() )
+            tk->setSID( std::u32string( _pending.field_buffer_b.cbegin(), _pending.field_buffer_b.cend() ) );
 
     } else {
-        //TODO log ERROR: trying to emit a non-existent pending token
-        //TODO throw
+        _pending.token->setText( std::u32string(
+            _pending.token_name_buffer.cbegin(),
+            _pending.token_name_buffer.cend() )
+        );
     }
 
+    _tree_builder.addToken( std::move( _pending.token ) );
     clearPendingToken();
 }
 
@@ -1849,7 +1869,7 @@ inline void tokeniser::HTML5::appendToPendingTokenText( uint32_t c ) {
  * @param txt String to append
  */
 inline void tokeniser::HTML5::appendToPendingTokenText( const std::u32string &txt ) {
-    std::for_each( txt.begin(), txt.end(), [&]( uint32_t c ) { _pending.token_name_buffer.emplace_back( c ); } );
+    _pending.token_name_buffer.insert( _pending.token_name_buffer.end(), txt.begin(), txt.end() );
 }
 
 /**
@@ -1866,8 +1886,8 @@ inline void tokeniser::HTML5::emitCharacterToken( TextPos position, uint32_t c )
  * @param position Start position of character(s) in source text
  * @param str String
  */
-inline void tokeniser::HTML5::emitCharacterToken( TextPos position, std::u32string str ) {
-    _tree_builder.addToken( std::make_unique<token::html5::CharacterTk>( std::move( str ), position ) );
+inline void tokeniser::HTML5::emitCharacterToken( TextPos position, const std::u32string & str ) {
+    _tree_builder.addToken( std::make_unique<token::html5::CharacterTk>( str, position ) );
 }
 
 /**
@@ -1884,7 +1904,6 @@ inline void tokeniser::HTML5::emitEndOfFileToken( TextPos position ) {
  * @param position Position in source text
  */
 inline void tokeniser::HTML5::createCommentToken( TextPos position ) {
-    clearPendingToken();
     _pending.type = Type_e::COMMENT;
     _pending.token = std::make_unique<token::html5::CommentTk>( position );
 }
@@ -1895,7 +1914,6 @@ inline void tokeniser::HTML5::createCommentToken( TextPos position ) {
  * @param force_quirks Force quirks flag (default=false)
  */
 inline void tokeniser::HTML5::createDoctypeToken( TextPos position, bool force_quirks ) {
-    clearPendingToken();
     _pending.type = Type_e::DOCTYPE;
     _pending.token = std::make_unique<token::html5::DoctypeTk>( position );
 
@@ -1910,7 +1928,6 @@ inline void tokeniser::HTML5::createDoctypeToken( TextPos position, bool force_q
  * @param position Position in source text
  */
 inline void tokeniser::HTML5::createStartTagToken( TextPos position ) {
-    clearPendingToken();
     _pending.type = Type_e::START_TAG;
     _pending.token = std::make_unique<token::html5::StartTagTk>( position );
 }
@@ -1920,7 +1937,14 @@ inline void tokeniser::HTML5::createStartTagToken( TextPos position ) {
  * @param position Position in source text
  */
 inline void tokeniser::HTML5::createEndTagToken( TextPos position ) {
-    clearPendingToken();
+    if( _pending.token ) {
+        if( _pending.token->type() != Type_e::END_TAG ) {
+            emitPendingToken( position );
+        } else {
+            clearPendingToken();
+        }
+    }
+
     _pending.type = Type_e::END_TAG;
     _pending.token = std::make_unique<token::html5::EndTagTk>( position );
 }
@@ -1928,39 +1952,68 @@ inline void tokeniser::HTML5::createEndTagToken( TextPos position ) {
 
 
 inline bool tokeniser::HTML5::appropriateEndTagToken() {
-    //(13.2.5) checking if appropriate end tag token
     if( _pending.token->type() == Type_e::END_TAG ) {
         auto name = std::u32string( _pending.token_name_buffer.cbegin(), _pending.token_name_buffer.cend() );
-        return ( !_open_tags.empty() && name == _open_tags.front() );
+        
+        return ( !_last_start_tag.empty() && name == _last_start_tag );
     }
 
     return false;
 }
 
+/**
+ * Checks string is same as temp buffer content
+ * @param str String
+ * @return Temp buffer equal to string
+ */
 inline bool tokeniser::HTML5::isEqualToTempBuffer( const std::u32string &str ) const {
     return std::equal( str.cbegin(), str.cend(), _temp_buffer.cbegin(), _temp_buffer.cend() );
 }
 
+/**
+ * Appends a code point to the pending token's attribute name buffer
+ * @param c Code point
+ */
 inline void tokeniser::HTML5::appendToPendingTokenAttrNameBuffer( uint32_t c ) {
     _pending.field_buffer_a.emplace_back( c );
 }
 
+/**
+ * Appends a code point to the pending token's attribute value buffer
+ * @param c Code point
+ */
 inline void tokeniser::HTML5::appendToPendingTokenAttrValueBuffer( uint32_t c ) {
     _pending.field_buffer_b.emplace_back( c );
 }
 
+/**
+ * Appends a code point to the pending token's PUBLIC ID buffer
+ * @param c Code point
+ */
 inline void tokeniser::HTML5::appendToPendingTokenPIDBuffer( uint32_t c ) {
     _pending.field_buffer_a.emplace_back( c );
 }
 
+/**
+ * Appends a code point to the pending token's SYSTEM ID buffer
+ * @param c Code point
+ */
 inline void tokeniser::HTML5::appendToPendingTokenSIDBuffer( uint32_t c ) {
     _pending.field_buffer_b.emplace_back( c );
 }
 
+/**
+ * Sets the pending token's PUBLIC ID 'not_missing' flag
+ * @param not_missing Flag value
+ */
 inline void tokeniser::HTML5::setPendingDoctypeTokenPIDFlag( bool not_missing ) {
     _pending.not_missing_a = not_missing;
 }
 
+/**
+ * Sets the pending token's SYSTEM ID 'not_missing' flag
+ * @param not_missing Flag value
+ */
 inline void tokeniser::HTML5::setPendingDoctypeTokenSIDFlag( bool not_missing ) {
     _pending.not_missing_b = not_missing;
 }
@@ -1978,6 +2031,9 @@ inline void tokeniser::HTML5::setPendingDoctypeTokenQuirksFlag( bool force_quirk
  * @return Success
  */
 inline bool tokeniser::HTML5::addPendingTokenAttribute() {
+    if( _pending.field_buffer_a.empty() ) //attribute name buffer
+        return true; //EARLY RETURN
+
     if( !_pending.token ) {
         //TODO log error
         return false;  //TODO replace by throw
@@ -1992,19 +2048,20 @@ inline bool tokeniser::HTML5::addPendingTokenAttribute() {
     auto * tk  = dynamic_cast<token::html5::GenericTagTk *>( _pending.token.get() );
     auto name  = std::u32string( _pending.field_buffer_a.cbegin(), _pending.field_buffer_a.cend() );
 
-    if( !name.empty() ) {
-        if( std::ranges::none_of( tk->attributes(), [&name]( auto & attr ) { return attr.name == name; } ) ) {
-            tk->addAttribute( std::move( name ),
-                              std::u32string( _pending.field_buffer_b.cbegin(), _pending.field_buffer_b.cend() ) );
-        } else { //attribute name already exists
-            error = true;
-        }
+    if( std::ranges::none_of( tk->attributes(), [&name]( auto & attr ) { return attr.name == name; } ) ) {
+        tk->addAttribute( std::move( name ),
+                          std::u32string( _pending.field_buffer_b.cbegin(), _pending.field_buffer_b.cend() ) );
+    } else { //attribute name already exists
+        error = true;
     }
 
     clearPendingTokenAttribute();
     return !( error );
 }
 
+/**
+ * Clears the pending tokens's attribute buffers
+ */
 inline void tokeniser::HTML5::clearPendingTokenAttribute() {
     _pending.field_buffer_a.clear();
     _pending.field_buffer_b.clear();
@@ -2012,6 +2069,9 @@ inline void tokeniser::HTML5::clearPendingTokenAttribute() {
     _pending.not_missing_b = false;
 }
 
+/**
+ * Sets the 'self-close' flag on the pending token
+ */
 inline void tokeniser::HTML5::setPendingTokenSelfCloseFlag() {
     if( !_pending.token ) {
         //TODO log error
@@ -2027,8 +2087,13 @@ inline void tokeniser::HTML5::setPendingTokenSelfCloseFlag() {
     tk->setSelfClosing( true );
 }
 
+/**
+ * Sets the cached character reference code
+ * @param val Value (default: 0)
+ */
 inline void tokeniser::HTML5::resetCharRefCode( uint32_t val ) {
     _pending.char_ref_code = val;
+    _pending.bad_ref_code  = false;
 }
 
 /**
@@ -2037,8 +2102,16 @@ inline void tokeniser::HTML5::resetCharRefCode( uint32_t val ) {
  * @param num Numeric version of the character
  */
 inline void tokeniser::HTML5::addToCharRefCode( uint32_t base, uint32_t num ) {
-    _pending.char_ref_code *= base;
-    _pending.char_ref_code += num;
+    uint64_t temp = _pending.char_ref_code;
+
+    temp *= base;
+    temp += num;
+
+    if( temp <= std::numeric_limits<uint32_t>::max() ) {
+        _pending.char_ref_code = static_cast<uint32_t>( temp );
+    } else {
+        _pending.bad_ref_code = true;
+    }
 }
 
 /**
@@ -2047,6 +2120,14 @@ inline void tokeniser::HTML5::addToCharRefCode( uint32_t base, uint32_t num ) {
  */
 inline uint32_t tokeniser::HTML5::charRefCode() const {
     return _pending.char_ref_code;
+}
+
+/**
+ * Checks the currently cached character reference code is valid
+ * @return Valid state
+ */
+inline bool tokeniser::HTML5::validCharRefCode() const {
+    return !_pending.bad_ref_code;
 }
 
 /**
@@ -2063,7 +2144,9 @@ inline void tokeniser::HTML5::flushCodePoints( TextPos position ) {
             appendToPendingTokenAttrValueBuffer( c );
         }
     } else {
-        emitCharacterToken( position, std::u32string( _temp_buffer.cbegin(), _temp_buffer.cend() ) );
+        for( auto c : _temp_buffer ) {
+            emitCharacterToken( position, c );
+        }
     }
 
     clearTempBuffer(); //TODO check if need that
