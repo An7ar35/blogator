@@ -28,6 +28,8 @@ namespace blogator::parser {
         [[nodiscard]] bool reachedEnd() const;
         [[nodiscard]] bool reachedEnd( const TextIterator_t & it ) const;
 
+        void reset();
+
       private:
         std::filesystem::path _path;
         std::u32string        _src;

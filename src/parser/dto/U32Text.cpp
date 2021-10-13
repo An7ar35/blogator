@@ -147,3 +147,11 @@ bool U32Text::reachedEnd() const {
 bool U32Text::reachedEnd( const TextIterator_t &it ) const {
     return ( it == _src.cend() );
 }
+
+/**
+ * Resets the iterator and position back to the beginning
+ */
+void U32Text::reset() {
+    _iterator = _src.cbegin();
+    _position = TextPos();
+}
