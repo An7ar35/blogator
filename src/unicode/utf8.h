@@ -4,7 +4,9 @@
 #include <iostream>
 
 namespace blogator::unicode::utf8 {
+    std::string toxunicode( uint32_t val, const std::string & prefix = "\\u" );
     std::ostream & convert( std::ostream & stream, const std::u32string & str );
+    std::ostream & convert( std::ostream & stream, char32_t c );
     std::string convert( const std::u32string & str );
 }
 

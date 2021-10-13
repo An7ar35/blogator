@@ -5,8 +5,6 @@
 #include "utf8.h"
 #include "utf32.h"
 
-namespace blogator::unicode {
-    std::string toxunicode( uint32_t val, std::string prefix = "\\u" );
-}
+namespace blogator::unicode {}
 
 #endif //BLOGATOR_UNICODE_H

@@ -3,10 +3,11 @@
 #include <ranges>
 #include <locale>
 #include <codecvt>
+#include <vector>
 
 /**
  * Checks if code point is a surrogate
- * @param c Code point
+ * @param c Unicode code point
  * @return Is surrogate
  */
 bool blogator::unicode::utf32::issurrogate( uint32_t c ) noexcept {
@@ -15,7 +16,7 @@ bool blogator::unicode::utf32::issurrogate( uint32_t c ) noexcept {
 
 /**
  * Checks if code point is scalar (i.e. not surrogate)
- * @param c Code point
+ * @param c Unicode code point
  * @return Is scalar
  */
 bool blogator::unicode::utf32::isscalar( uint32_t c ) noexcept {
@@ -24,7 +25,7 @@ bool blogator::unicode::utf32::isscalar( uint32_t c ) noexcept {
 
 /**
  * Checks if code point is a non-character
- * @param c Code point
+ * @param c Unicode code point
  * @return Is non-character
  */
 bool blogator::unicode::utf32::isnonchar( uint32_t c ) noexcept {
@@ -50,7 +51,7 @@ bool blogator::unicode::utf32::isnonchar( uint32_t c ) noexcept {
 
 /**
  * Checks code point is within the ASCII range
- * @param c Code point
+ * @param c Unicode code point
  * @return Is ASCII
  */
 bool blogator::unicode::utf32::isascii( uint32_t c ) noexcept {
@@ -67,8 +68,17 @@ bool blogator::unicode::utf32::isascii( const std::u32string &str ) {
 }
 
 /**
+ * Check if character is a control character
+ * @param c Unicode code point
+ * @return Is control character (0x00->0x1F || 0x7F->0x9F)
+ */
+bool blogator::unicode::utf32::iscntrl( uint32_t c ) noexcept {
+    return ( c <= 0x1F || ( c >= 0x7F && c <= 0x9F ) );
+}
+
+/**
  * Convert surrogate character to replacement character (U+FFFD)
- * @param c Code point
+ * @param c Unicode code point
  * @return Replacement character or input character if not surrogate
  */
 uint32_t blogator::unicode::utf32::toscalar( uint32_t c ) noexcept {
@@ -94,4 +104,41 @@ void blogator::unicode::utf32::toscalar( std::u32string &str ) {
 std::u32string blogator::unicode::utf32::convert( const std::string &u8str ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
     return converter.from_bytes( u8str );
+}
+
+/**
+ * Converts a unicode integer value into its hexadecimal representation
+ * @param val Integer value to convert
+ * @param prefix Hex code prefix (default="\\u")
+ * @return Unicode hex string
+ */
+std::u32string blogator::unicode::utf32::toxunicode( uint32_t val, const std::u32string &prefix ) {
+    static const uint32_t hex[] = { U'0', U'1', U'2', U'3', U'4', U'5', U'6', U'7', U'8', U'9',
+                                    U'A', U'B', U'C', U'D', U'E', U'F' };
+
+    std::vector<uint32_t> out_buffer;
+    std::vector<uint32_t> hex_buffer;
+
+    out_buffer.insert( out_buffer.begin(), prefix.cbegin(), prefix.cend() );
+
+    while( val >= 16 ) {
+        uint32_t remainder = val % 16;
+        val = ( val - remainder ) / 16;
+        hex_buffer.emplace_back( remainder );
+    }
+
+    hex_buffer.emplace_back( val );
+
+    if( hex_buffer.size() < 4 ) {
+        for( auto i = 0; i < 4 - hex_buffer.size(); ++i ) {
+            out_buffer.emplace_back( '0' );
+        }
+    }
+
+    std::for_each( hex_buffer.crbegin(),
+                   hex_buffer.crend(),
+                   [&]( const auto & h ) { out_buffer.emplace_back( hex[h] ); }
+    );
+
+    return { out_buffer.begin(), out_buffer.end() };
 }
