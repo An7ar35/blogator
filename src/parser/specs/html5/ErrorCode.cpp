@@ -166,11 +166,11 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
         R"(This error occurs if the parser encounters a nested comment (e.g., <!-- <!-- nested --> -->). Such a comment will be closed by the first occurring "-->" code point sequence and everything that follows will be treated as markup.)"
     };
     arr[ErrorCode::NONCHARACTER_CHARACTER_REFERENCE] = {
-        "non-character character reference",
+        "noncharacter character reference",
         R"(This error occurs if the parser encounters a numeric character reference that references a noncharacter. The parser resolves such character references as-is.)"
     };
     arr[ErrorCode::NONCHARACTER_IN_INPUT_STREAM] = {
-        "non-character in input stream",
+        "noncharacter in input stream",
         R"(This error occurs if the input stream contains a noncharacter. Such code points are parsed as-is and usually, where parsing rules don't apply any additional restrictions, make their way into the DOM.)"
     };
     arr[ErrorCode::NON_VOID_HTML_ELEMENT_START_TAG_WITH_TRAILING_SOLIDUS] = {
