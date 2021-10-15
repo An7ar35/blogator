@@ -27,7 +27,7 @@ CommentTk::CommentTk( std::u32string text, blogator::parser::TextPos position ) 
  */
 void CommentTk::toStr( std::ostream &os ) const {
     os << R"(["Comment", ")";
-    unicode::utf8::convert( os, text() );
+    unicode::normalize( os, text() );
     os << "\"]";
 }
 

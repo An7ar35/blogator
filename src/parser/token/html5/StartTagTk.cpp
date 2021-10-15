@@ -29,7 +29,7 @@ StartTagTk::StartTagTk( std::u32string text, blogator::parser::TextPos position 
  */
 void StartTagTk::toStr( std::ostream &os ) const {
     os << R"(["StartTag", ")";
-    unicode::utf8::convert( os, text() );
+    unicode::normalize( os, text() );
     os << "\", { ";
     for( auto it = attributes().cbegin(); it != attributes().cend(); ++it ) {
         os << "\"";

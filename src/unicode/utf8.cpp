@@ -6,6 +6,23 @@
 #include <iomanip>
 
 /**
+ * Gets the number of bytes a utf8 encoded codepoint has
+ * @param first First byte
+ * @return Number of bytes
+ */
+size_t blogator::unicode::utf8::bytes( uint8_t first ) {
+    if( first >= 0b11110000 ) {
+        return 4;
+    } else if( first >= 0b11100000 ) {
+        return 3;
+    } else if( first >= 0b11000000 ) {
+        return 2;
+    } else {
+        return 1;
+    }
+}
+
+/**
  * Converts a unicode integer value into its hexadecimal representation
  * @param val Integer value to convert
  * @param prefix Hex code prefix (default="\\u")

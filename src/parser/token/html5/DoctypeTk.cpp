@@ -115,7 +115,7 @@ void DoctypeTk::toStr( std::ostream &os ) const {
     os << R"(["DOCTYPE", )";
     if( hasName() ) {
         os << "\"";
-        unicode::utf8::convert( os, name() );
+        unicode::normalize( os, name() );
         os << "\"";
     } else {
         os << "null";
@@ -123,7 +123,7 @@ void DoctypeTk::toStr( std::ostream &os ) const {
     os << ", ";
     if( hasPID() ) {
         os << "\"";
-        unicode::utf8::convert( os, publicIdentifier() );
+        unicode::normalize( os, publicIdentifier() );
         os << "\"";
     } else {
         os << "null";
@@ -131,7 +131,7 @@ void DoctypeTk::toStr( std::ostream &os ) const {
     os << ", ";
     if( hasSID() ) {
         os << "\"";
-        unicode::utf8::convert( os, systemIdentifier() );
+        unicode::normalize( os, systemIdentifier() );
         os << "\"";
     } else {
         os << "null";

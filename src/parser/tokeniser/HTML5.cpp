@@ -97,6 +97,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
     auto character = getNextChar( text );
 
+    next_line_flag = unicode::ascii::isnewline( text.character() ); //edge case: when the first character is a newline.
+
     while( !_eof ) {
         switch( currentState() ) {
             case State_e::DATA: {

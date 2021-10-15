@@ -29,14 +29,7 @@ void CharacterTk::toStr( std::ostream &os ) const {
     const auto & txt = text();
 
     os << R"(["Character",")";
-
-    if( txt.size() == 1 && unicode::utf32::isascii( txt.at( 0 ) ) ) {
-        auto hex = unicode::utf32::toxunicode( txt.at( 0 ) );
-        unicode::utf8::convert( os, hex );
-    } else {
-        unicode::utf8::convert( os, txt );
-    }
-
+    unicode::normalize( os, text() );
     os << "\"]";
 }
 
