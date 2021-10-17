@@ -2,9 +2,13 @@
 #define BLOGATOR_PARSER_UNICODE_UTF8_H
 
 #include <iostream>
+#include <vector>
+
 
 namespace blogator::unicode::utf8 {
-    size_t bytes( uint8_t first );
+    size_t bytelength( uint8_t first );
+    uint32_t toU32( const uint8_t sequence[4], size_t ln );
+
     std::string toxunicode( uint32_t val, const std::string & prefix = "\\u" );
     std::ostream & convert( std::ostream & stream, const std::u32string & str );
     std::ostream & convert( std::ostream & stream, char32_t c );

@@ -1,24 +1,38 @@
 #include "utf8.h"
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <locale>
 #include <codecvt>
-#include <iomanip>
 
 /**
  * Gets the number of bytes a utf8 encoded codepoint has
- * @param first First byte
- * @return Number of bytes
+ * @param first First byte of the utf8 code point sequence
+ * @return Number of bytes to expect (0 if not valid)
  */
-size_t blogator::unicode::utf8::bytes( uint8_t first ) {
-    if( first >= 0b11110000 ) {
-        return 4;
-    } else if( first >= 0b11100000 ) {
-        return 3;
-    } else if( first >= 0b11000000 ) {
-        return 2;
-    } else {
-        return 1;
+size_t blogator::unicode::utf8::bytelength( uint8_t byte ) {
+    if     ( byte < 0x80 ) { return 1; } /* (0xxxxxxx) 0000 0000 -> 0111 1111 */
+    else if( byte < 0xC0 ) { return 0; } /* INVALID */
+    else if( byte < 0xE0 ) { return 2; } /* (110xxxxx) 1000 0000 -> 1101 1111 */
+    else if( byte < 0xF0 ) { return 3; } /* (1110xxxx) 1110 0000 -> 1110 1111 */
+    else if( byte < 0xF8 ) { return 4; } /* (11110xxx) 1111 0000 -> 1111 0111 */
+    else                   { return 0; } /* INVALID */
+}
+
+/**
+ * Convert a UTF8 sequence into a UTF32 code point
+ * @param sequence UTF8 sequence
+ * @param ln Size of sequence in bytes
+ * @return UTF32 code point
+ */
+uint32_t blogator::unicode::utf8::toU32( const uint8_t sequence[4], size_t ln ) {
+    switch( ln ) {
+        case 1: return static_cast<uint32_t>( sequence[0] );
+        case 2: return (uint32_t)( ( sequence[0] & 0x1F ) << 6  ) | ( sequence[1]  & 0x3F );
+        case 3: return (uint32_t)( ( sequence[0] & 0x0F ) << 12 ) | ( ( sequence[1] & 0x3F ) << 6 ) | ( sequence[2] & 0x3F );
+        case 4: return (uint32_t)( ( sequence[0] & 0x07 ) << 18 ) | ( ( sequence[1] & 0x3F ) << 12 ) | ( ( sequence[2] & 0x3F ) << 6 ) | ( sequence[3] & 0x3F );
+        default: throw std::invalid_argument( "Number of bytes given not between 1-4 inclusive." );
     }
 }
 
@@ -47,7 +61,7 @@ std::string blogator::unicode::utf8::toxunicode( uint32_t val, const std::string
  * @param str UTF32 string
  * @return Output stream
  */
-std::ostream &blogator::unicode::utf8::convert( std::ostream &stream, const std::u32string &str ) {
+std::ostream & blogator::unicode::utf8::convert( std::ostream &stream, const std::u32string &str ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
     stream << converter.to_bytes( str );
     return stream;
@@ -59,7 +73,7 @@ std::ostream &blogator::unicode::utf8::convert( std::ostream &stream, const std:
  * @param str UTF32 code point
  * @return Output stream
  */
-std::ostream &blogator::unicode::utf8::convert( std::ostream &stream, char32_t c ) {
+std::ostream & blogator::unicode::utf8::convert( std::ostream &stream, char32_t c ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
     stream << converter.to_bytes( c );
     return stream;
