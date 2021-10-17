@@ -31,8 +31,8 @@ namespace blogator::parser::tokeniser {
         typedef specs::html5::TokeniserState State_e;
         typedef specs::html5::TokenType      Type_e;
 
-        static const uint32_t NULL_CHAR              = 0x0000;
-        static const uint32_t CARRIAGE_RETURN        = 0x000D; //CR
+        static const uint32_t NULL_CHAR              = unicode::NUL;
+        static const uint32_t CARRIAGE_RETURN        = unicode::CR;
         static const uint32_t EXCLAMATION_MARK       = 0x0021; //'!'
         static const uint32_t QUOTATION_MARK         = 0x0022; //'"'
         static const uint32_t NUMBER_SIGN            = 0x0023; //'#'
@@ -65,7 +65,7 @@ namespace blogator::parser::tokeniser {
 
         struct Cache {
             Type_e                                 type          { Type_e::UNKNOWN };
-            TextPos                                position      { 0, 0 }; //TODO dynamically change this after everything is cleared
+            TextPos                                attr_position { 0, 0 }; //used for Tag.attribute duplication errors
             std::vector<uint32_t>                  token_name_buffer;
             std::vector<uint32_t>                  field_buffer_a;          //used for Tag.attribute.name or Doctype.pid
             std::vector<uint32_t>                  field_buffer_b;          //used for Tag.attribute.name or Doctype.sid
@@ -107,6 +107,7 @@ namespace blogator::parser::tokeniser {
         void appendToPendingTokenText( const std::u32string & txt );
         void appendToPendingTokenAttrNameBuffer( uint32_t c );
         void appendToPendingTokenAttrValueBuffer( uint32_t c );
+        void setPendingTokenAttrPosition( TextPos position );
         void appendToPendingTokenPIDBuffer( uint32_t c );
         void appendToPendingTokenSIDBuffer( uint32_t c );
         void setPendingDoctypeTokenQuirksFlag( bool force_quirks );

@@ -3,15 +3,39 @@
 #include <cctype>
 
 /**
- * Check if character is an ASCII alphanumeric
+ * Checks if character a space
  * @param c Character
- * @return Is ASCII alphanumeric
+ * @return Is ASCII space (0x20)
  */
-bool blogator::unicode::ascii::isalnum( uint32_t c ) noexcept {
-    if( c <= 0x7F )
-        return std::isalnum( static_cast<int>( c ) );
-    else
-        return false;
+bool blogator::unicode::ascii::isspace( uint32_t c ) noexcept {
+    return ( c == unicode::SPACE );
+}
+
+/**
+ * Checks if character is a whitespace
+ * @param c Character
+ * @return Is ASCII whitespace (TAB, LF, FF, CR, SPACE)
+ */
+bool blogator::unicode::ascii::iswspace( uint32_t c ) noexcept {
+    return ( c == unicode::TAB || isfeed( c ) || c == unicode::CR || c == unicode::SPACE );
+}
+
+/**
+ * Checks if character is a either LF or FF
+ * @param c Character
+ * @return Is feed character (0x0A || 0x0C)
+ */
+bool blogator::unicode::ascii::isfeed( uint32_t c ) noexcept {
+    return ( c == unicode::LF || c == unicode::FF );
+}
+
+/**
+ * Checks code point is an ASCII tab
+ * @param c Code point
+ * @return Is ASCII tab (0x09)
+ */
+bool blogator::unicode::ascii::istab( uint32_t c ) noexcept {
+    return ( c == unicode::TAB );
 }
 
 /**
@@ -20,11 +44,28 @@ bool blogator::unicode::ascii::isalnum( uint32_t c ) noexcept {
  * @return Is ASCII alphabetic
  */
 bool blogator::unicode::ascii::isalpha( uint32_t c ) noexcept {
-    if( c <= 0x7F )
-        return std::isalpha( static_cast<int>( c ) );
-    else
-        return false;
+    return (uint32_t)( ( 'a' - 1 - ( c | 32 ) ) & ( ( c | 32 ) - ( 'z' + 1 ) ) ) >> 31;
 }
+
+/**
+ * Check if character is an ASCII decimal digit
+ * @param c Character
+ * @return Is ASCII decimal digit
+ */
+bool blogator::unicode::ascii::isdigit( uint32_t c ) noexcept {
+    return (uint32_t)( ( '0' - 1 - c ) & ( c - ( '9' + 1 ) ) ) >> 31;
+}
+
+/**
+ * Check if character is an ASCII alphanumeric
+ * @param c Character
+ * @return Is ASCII alphanumeric
+ */
+bool blogator::unicode::ascii::isalnum( uint32_t c ) noexcept {
+    return ( ascii::isdigit( c ) || ascii::isalpha( c ) );
+}
+
+
 
 /**
  * Check if character is an ASCII blank
@@ -50,17 +91,7 @@ bool blogator::unicode::ascii::iscntrl( uint32_t c ) noexcept {
         return false;
 }
 
-/**
- * Check if character is an ASCII decimal digit
- * @param c Character
- * @return Is ASCII decimal digit
- */
-bool blogator::unicode::ascii::isdigit( uint32_t c ) noexcept {
-    if( c <= 0x7F )
-        return std::isdigit( static_cast<int>( c ) );
-    else
-        return false;
-}
+
 
 /**
  * Check if character is hexadecimal digit
@@ -82,18 +113,6 @@ bool blogator::unicode::ascii::isxdigit( uint32_t c ) noexcept {
 bool blogator::unicode::ascii::isgraph( uint32_t c ) noexcept {
     if( c <= 0x7F )
         return std::isgraph( static_cast<int>( c ) );
-    else
-        return false;
-}
-
-/**
- * Checks if character a space
- * @param c Character
- * @return Is ASCII space
- */
-bool blogator::unicode::ascii::isspace( uint32_t c ) noexcept {
-    if( c <= 0x7F )
-        return std::isspace( static_cast<int>( c ) );
     else
         return false;
 }
@@ -147,21 +166,12 @@ bool blogator::unicode::ascii::ispunct( uint32_t c ) noexcept {
 }
 
 /**
- * Checks code point is an ASCII tab
- * @param c Code point
- * @return Is ASCII tab
- */
-bool blogator::unicode::ascii::istab( uint32_t c ) noexcept {
-    return ( c == 0x0009 );
-}
-
-/**
  * Checks code point is either LF or CR
  * @param c Code point
- * @return Is new line
+ * @return Is new line (0x0A || 0x0D)
  */
 bool blogator::unicode::ascii::isnewline( uint32_t c ) noexcept {
-    return ( c == 0x000A || c == 0x000D );
+    return ( c == LF || c == CR );
 }
 
 /**
@@ -202,4 +212,46 @@ uint32_t blogator::unicode::ascii::toupper( uint32_t c ) noexcept {
     if( c <= 0x7F )
         return std::toupper( static_cast<int>( c ) );
     return c;
+}
+
+/**
+ * Converts a string's ASCII alpha code points into uppercase
+ * @param str String to convert
+ * @return Ref to converted string
+ */
+std::u32string & blogator::unicode::ascii::tolower( std::u32string &str ) {
+    std::for_each( str.begin(), str.end(), []( auto & c ) { c = ascii::tolower( c ); } );
+    return str;
+}
+
+/**
+ * Converts a string's ASCII alpha code points into uppercase
+ * @param str String to convert
+ * @return New string
+ */
+std::u32string blogator::unicode::ascii::tolower( const std::u32string &str ) {
+    auto copy = std::u32string( str );
+    ascii::tolower( copy );
+    return copy;
+}
+
+/**
+ * Converts a string's ASCII alpha code points into lowercase
+ * @param str String to convert
+ * @return Ref to converted string
+ */
+std::u32string & blogator::unicode::ascii::toupper( std::u32string &str ) {
+    std::for_each( str.begin(), str.end(), []( auto & c ) { c = ascii::toupper( c ); } );
+    return str;
+}
+
+/**
+ * Converts a string's ASCII alpha code points into lowercase
+ * @param str String to convert
+ * @return New string
+ */
+std::u32string blogator::unicode::ascii::toupper( const std::u32string &str ) {
+    auto copy = std::u32string( str );
+    ascii::toupper( copy );
+    return copy;
 }

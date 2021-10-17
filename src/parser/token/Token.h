@@ -29,7 +29,7 @@ namespace blogator::parser::token {
         [[nodiscard]] virtual TextPos position() const;
 
       protected:
-        virtual void toStr( std::ostream& os ) const;
+        virtual void toStr( std::ostream & os ) const;
 
       private:
         specs::Context _context;

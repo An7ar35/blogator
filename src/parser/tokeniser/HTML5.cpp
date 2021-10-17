@@ -735,11 +735,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::UNEXPECTED_EQUALS_SIGN_BEFORE_ATTRIBUTE_NAME );
                     clearPendingTokenAttribute();
                     appendToPendingTokenAttrNameBuffer( character );
+                    setPendingTokenAttrPosition( text.position() );
                     setState( State_e::ATTRIBUTE_NAME );
                 } else {
-                    if( !addPendingTokenAttribute() ) {
-                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-                    }
+                    addPendingTokenAttribute();
+                    setPendingTokenAttrPosition( text.position() );
                     reconsume( State_e::ATTRIBUTE_NAME );
                 }
             } break;
@@ -780,14 +780,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::BEFORE_ATTRIBUTE_VALUE );
                 } else if( character == GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
-                    if( !addPendingTokenAttribute() ) {
-                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-                    }
+                    addPendingTokenAttribute();
                     emitPendingToken( text.position() );
                 } else {
-                    if( !addPendingTokenAttribute() ) {
-                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-                    }
+                    addPendingTokenAttribute();
+                    setPendingTokenAttrPosition( text.position() );
                     reconsume( State_e::ATTRIBUTE_NAME );
                 }
             } break;
@@ -814,9 +811,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( character == QUOTATION_MARK ) {
                     setState( State_e::AFTER_ATTRIBUTE_VALUE_QUOTED );
-                    if( !addPendingTokenAttribute() ) {
-                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-                    }
+                    addPendingTokenAttribute();
                 } else if( character == AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_DOUBLE_QUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
@@ -834,9 +829,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( character == APOSTROPHE ) {
                     setState( State_e::AFTER_ATTRIBUTE_VALUE_QUOTED );
-                    if( !addPendingTokenAttribute() ) {
-                        logError( text.position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-                    }
+                    addPendingTokenAttribute();
                 } else if( character == AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_SINGLE_QUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
@@ -1805,9 +1798,7 @@ inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
             _pending.token_name_buffer.cend()
         ) );
 
-        if( !addPendingTokenAttribute() ) {
-            logError( tk->position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-        }
+        addPendingTokenAttribute();
 
         _last_start_tag = tk->name();
 
@@ -1819,9 +1810,7 @@ inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
             _pending.token_name_buffer.cend()
         ) );
 
-        if( !addPendingTokenAttribute() ) {
-            logError( tk->position(), ErrorCode::DUPLICATE_ATTRIBUTE );
-        }
+        addPendingTokenAttribute();
 
         if( !tk->attributes().empty() ) //(13.2.5) "...end tag token is emitted with attributes..."
             logError( position, ErrorCode::END_TAG_WITH_ATTRIBUTES );
@@ -1989,6 +1978,14 @@ inline void tokeniser::HTML5::appendToPendingTokenAttrValueBuffer( uint32_t c ) 
 }
 
 /**
+ * Sets the start position of the attribute about to be added
+ * @param position Position
+ */
+inline void tokeniser::HTML5::setPendingTokenAttrPosition( TextPos position ) {
+    _pending.attr_position = position;
+}
+
+/**
  * Appends a code point to the pending token's PUBLIC ID buffer
  * @param c Code point
  */
@@ -2054,6 +2051,7 @@ inline bool tokeniser::HTML5::addPendingTokenAttribute() {
         tk->addAttribute( std::move( name ),
                           std::u32string( _pending.field_buffer_b.cbegin(), _pending.field_buffer_b.cend() ) );
     } else { //attribute name already exists
+        logError( _pending.attr_position, ErrorCode::DUPLICATE_ATTRIBUTE );
         error = true;
     }
 
@@ -2069,6 +2067,7 @@ inline void tokeniser::HTML5::clearPendingTokenAttribute() {
     _pending.field_buffer_b.clear();
     _pending.not_missing_a = false;
     _pending.not_missing_b = false;
+    _pending.attr_position = { 0, 0 };
 }
 
 /**
