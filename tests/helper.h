@@ -22,6 +22,8 @@ namespace blogator::tests {
     std::vector<std::filesystem::path> getTestFiles( const std::filesystem::path & test_dir );
     nlohmann::json loadJSON( const std::filesystem::path & path );
     std::vector<std::pair<nlohmann::json, std::filesystem::path>> loadJSONTests( const std::filesystem::path &test_dir );
+
+    std::string loadFile( const std::filesystem::path & path );
 }
 
 #endif //BLOGATOR_TESTS_HELPER_H

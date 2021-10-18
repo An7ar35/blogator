@@ -179,7 +179,7 @@ std::string blogator::tests::unescape( const std::string &u8str ) {
     int      char_to_consume = 4;
 
     while( it != u8str.cend() ) {
-        size_t bytes = blogator::unicode::utf8::bytes( *it );
+        size_t bytes = blogator::unicode::utf8::bytelength( *it );
 
         switch( state ) {
             case State::CHARACTER: {
@@ -384,4 +384,23 @@ std::vector<std::pair<nlohmann::json, std::filesystem::path>> blogator::tests::l
     std::cout << "> TOTAL TESTS FOUND: " << test_collection.size() << " (" << test_dir << ")" << std::endl;
 
     return test_collection;
+}
+
+/**
+ * Loads the content of a file into a string
+ * @param path Filepath
+ * @return Content string
+ */
+std::string blogator::tests::loadFile( const std::filesystem::path &path ) {
+    std::ifstream     file;
+    std::stringstream ss;
+
+    file.open( path, std::ios::binary | std::ios::in );
+
+    if( file ) {
+        ss << file.rdbuf();
+        file.close();
+    }
+
+    return ss.str();
 }
