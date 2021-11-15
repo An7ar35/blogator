@@ -2,7 +2,6 @@
 #define BLOGATOR_PARSER_SPECS_HTML5_ERRORCODE_H
 
 #include <string>
-#include <array>
 
 namespace blogator::parser::specs::html5 {
     /**
@@ -12,8 +11,8 @@ namespace blogator::parser::specs::html5 {
     class ErrorCode {
       public:
         enum {
-            NONE = 0,
-            UNKNOWN,
+            NONE    = 0,
+            UNKNOWN = 1,
             ABRUPT_CLOSING_OF_EMPTY_COMMENT,
             ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER,
             ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER,

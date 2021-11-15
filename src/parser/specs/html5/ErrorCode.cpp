@@ -1,6 +1,6 @@
 #include "ErrorCode.h"
 
-#include <string>
+#include <array>
 
 using namespace blogator::parser::specs::html5;
 
@@ -228,7 +228,7 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
 
 /**
  * Gets the description string for an error code
- * @param err html5::ErrorCode::* enum
+ * @param err ::html5::ErrorCode::* enum
  * @return Short description string
  */
 const std::string & ErrorCode::str( int err ) {
@@ -243,7 +243,7 @@ const std::string & ErrorCode::str( int err ) {
 
 /**
  * Gets the detailed description for an error code
- * @param err html5::ErrorCode::* enum
+ * @param err ::html5::ErrorCode::* enum
  * @return Long detailed description string
  */
 const std::string & ErrorCode::detailed( int err ) {
