@@ -11,12 +11,13 @@ Source::Source( std::istream &in, std::filesystem::path path ) :
     _stream( in ),
     _path( std::move( path ) ),
     _format( encoding::Format_e::UNKNOWN ),
-    _confidence( encoding::Confidence_e::TENTATIVE )
+    _confidence( encoding::Confidence_e::TENTATIVE ),
+    _position( TextPos() )
 {}
 
 /**
  * Constructor
- * @param in Input stream
+ * @param in Input byte stream
  * @param path Filepath of source
  * @param format Known source format (with certainty)
  */
@@ -24,7 +25,8 @@ Source::Source( std::istream &in, std::filesystem::path path, encoding::Format_e
     _stream( in ),
     _path( std::move( path ) ),
     _format( format ),
-    _confidence( encoding::Confidence_e::CERTAIN )
+    _confidence( encoding::Confidence_e::CERTAIN ),
+    _position( TextPos() )
 {}
 
 /**
@@ -33,6 +35,14 @@ Source::Source( std::istream &in, std::filesystem::path path, encoding::Format_e
  */
 std::istream &Source::stream() {
     return _stream;
+}
+
+/**
+ * Gets the position tracker
+ * @return Position
+ */
+TextPos &Source::position() {
+    return _position;
 }
 
 /**

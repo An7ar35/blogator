@@ -181,7 +181,7 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
         raw_txt = blogator::tests::unescape( raw_txt );
     }
 
-    auto text        = blogator::parser::U32Text( path, blogator::parser::Tokeniser::preprocess( raw_txt ) );
+    auto text        = blogator::parser::U32Text( path, blogator::parser::Parser::preprocess( raw_txt ) );
     auto init_states = std::vector<std::pair<TokeniserState, std::string>>();
 
     if( test.contains( "initialStates" ) && !test.at( "initialStates" ).empty() ) { //"[ ... ]"

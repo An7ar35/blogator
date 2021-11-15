@@ -132,3 +132,26 @@ TextPos & TextPos::operator -=( const TextPos &rhs ) {
     col  = ( col > rhs.col   ? col - rhs.col   : 1 );
     return *this;
 }
+
+/**
+ * Advance to a new line
+ * @return Result
+ */
+TextPos & TextPos::newline() {
+    ++line;
+    col = 1;
+    return *this;
+}
+
+/**
+ * Increments position by 1
+ * @param new_line New line flag (default: false)
+ * @return Result
+ */
+TextPos & TextPos::increment( bool new_line ) {
+    if( new_line )
+        return newline();
+
+    ++col;
+    return *this;
+}

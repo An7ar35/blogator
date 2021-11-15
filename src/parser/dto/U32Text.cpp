@@ -38,8 +38,7 @@ void U32Text::advanceColTracker( unsigned int n ) {
  * Blindly advances the position tracker by 1 line (pos.line++, pos.col = 1)
  */
 void U32Text::advanceLineTracker() {
-    _position.col = 1;
-    ++_position.line;
+    _position.newline();
 }
 
 /**

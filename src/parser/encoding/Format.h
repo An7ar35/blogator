@@ -10,8 +10,8 @@ namespace blogator::parser::encoding {
         UTF8,
         UTF16_BE,
         UTF16_LE,
-        UTF32,
-
+        UTF32_BE,
+        UTF32_LE,
     } Format_e;
 }
 

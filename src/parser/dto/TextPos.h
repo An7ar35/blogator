@@ -26,6 +26,9 @@ namespace blogator::parser {
         TextPos & operator +=( const TextPos &rhs );
         TextPos & operator -=( const TextPos &rhs );
 
+        TextPos & newline();
+        TextPos & increment( bool new_line = false );
+
         size_t line;
         size_t col;
     };

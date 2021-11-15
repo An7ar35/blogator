@@ -2,56 +2,78 @@
 
 #include <sstream>
 #include <codecvt>
+#include <bit>
+
+#include "../logging/ParserLog.h"
 
 using namespace blogator::parser::encoding;
 
 /**
  * Converts an input byte stream into UTF-32
- * @param in Input byte stream
+ * @param src Source (if format == UNKNOWN then sniffing attempt will be made for the BOM)
  * @param out UTF-32 output
- * @param hint Input format hint (default: UNKNOWN) - bypasses the format sniffing
- * @return Input format
+ * @return Success
+ * @throws std::invalid_argument when format is unknown or unsupported
  */
-Format Transcode::convert( std::istream &in, std::vector<uint32_t> &out, Format hint ) {
+bool Transcode::convert( Source &src, std::vector<uint32_t> &out ) {
+    auto & in = src.stream();
+
     std::deque<uint8_t> buffer;
 
-    if( hint == Format::UNKNOWN ) {
-        for( size_t i = 0; ( !in.eof() && in.good() && i < 3 ); ++i ) {
+    if( src.format() == Format::UNKNOWN ) {
+        const auto BYTE_SAMPLE_SIZE = 4;
+
+        for( size_t i = 0; ( !in.eof() && in.good() && i < BYTE_SAMPLE_SIZE ); ++i ) {
             buffer.emplace_back( in.get() );
         }
 
-        hint = sniffBOM( buffer );
+        src.setFormat( sniffBOM( buffer ) );
+        src.setConfidence( src.format() == Format::UNKNOWN ? Confidence::TENTATIVE : Confidence::CERTAIN );
     }
 
-    switch( hint ) {
-        case Format::UTF8    : { Transcode::U8toU32( buffer, in, out );    } break;
-        case Format::UTF16_BE: { Transcode::U16BEtoU32( buffer, in, out ); } break;
-        case Format::UTF16_LE: { Transcode::U16LEtoU32( buffer, in, out ); } break;
-        case Format::UTF32   : { Transcode::U32toU32( buffer, in, out );   } break;
+    switch( src.format() ) {
+        case Format::UTF8    : return Transcode::U8toU32( buffer, src, out );
+        case Format::UTF16_LE: return Transcode::U16LEtoU32( buffer, src, out );
+        case Format::UTF16_BE: return Transcode::U16BEtoU32( buffer, src, out );
+        case Format::UTF32_LE: return Transcode::U32LEtoU32( buffer, src, out );
+        case Format::UTF32_BE: return Transcode::U32BEtoU32( buffer, src, out );
         case Format::UNKNOWN : throw std::invalid_argument( "Failed to detect format of input." );
         default              : throw std::invalid_argument( "Input format not supported." );
     }
-
-    return hint;
 }
 
 /**
- * BOM sniffing
+ * BOM sniffing (UTF8/16LE/16BE/32LE/32BE)
  * @param bom Buffer containing a BOM at the beginning
  * @return Format deduced from BOM
  */
 Format Transcode::sniffBOM( std::deque<uint8_t> &bom ) {
-    if( bom.size() >= 3 && bom[ 0 ] == 0xEF && bom[ 1 ] == 0xBB && bom[ 2 ] == 0xBF ) { //UTF-8: 0xEF 0xBB 0xBF
-        bom.erase( bom.begin(), std::next( bom.begin(), 3 ) );
+    static const std::array<uint8_t, 4> UTF32_LE_BOM = { 0x00, 0x00, 0xFE, 0xFF };
+    static const std::array<uint8_t, 4> UTF32_BE_BOM = { 0xFF, 0xFE, 0x00, 0x00 };
+    static const std::array<uint8_t, 3> UTF8_BOM     = { 0xEF, 0xBB, 0xBF };
+    static const std::array<uint8_t, 2> UTF16_LE_BOM = { 0xFF, 0xFE };
+    static const std::array<uint8_t, 2> UTF16_BE_BOM = { 0xFE, 0xFF };
+
+
+    if( bom.size() >= UTF32_LE_BOM.size() && std::equal( UTF32_LE_BOM.begin(), UTF32_LE_BOM.end(), bom.begin() ) ) {
+        bom.erase( bom.begin(), std::next( bom.begin(), UTF32_LE_BOM.size() ) );
+        return Format::UTF32_LE;
+
+    } else if( bom.size() >= UTF32_BE_BOM.size() && std::equal( UTF32_BE_BOM.begin(), UTF32_BE_BOM.end(), bom.begin() ) ) {
+        bom.erase( bom.begin(), std::next( bom.begin(), UTF32_BE_BOM.size() ) );
+        return Format::UTF32_BE;
+
+    } else if( bom.size() >= UTF8_BOM.size() && std::equal( UTF8_BOM.begin(), UTF8_BOM.end(), bom.begin() ) ) {
+        bom.erase( bom.begin(), std::next( bom.begin(), UTF8_BOM.size() ) );
         return Format::UTF8;
 
-    } else if( bom.size() >= 2 && bom[ 0 ] == 0xFE && bom[ 1 ] == 0xFF ) { //UTF-16BE: 0xFE 0xFF
-        bom.erase( bom.begin(), std::next( bom.begin(), 2 ) );
-        return Format::UTF16_BE;
-
-    } else if( bom.size() >= 2 && bom[ 0 ] == 0xFF && bom[ 1 ] == 0xFE ) { //UTF-16LE: 0xFF 0xFE
-        bom.erase( bom.begin(), std::next( bom.begin(), 2 ) );
+    } else if( bom.size() >= UTF16_LE_BOM.size() && std::equal( UTF16_LE_BOM.begin(), UTF16_LE_BOM.end(), bom.begin() ) ) {
+        bom.erase( bom.begin(), std::next( bom.begin(), UTF16_LE_BOM.size() ) );
         return Format::UTF16_LE;
+
+    } else if( bom.size() >= UTF16_BE_BOM.size() && std::equal( UTF16_BE_BOM.begin(), UTF16_BE_BOM.end(), bom.begin() ) ) {
+        bom.erase( bom.begin(), std::next( bom.begin(), UTF16_BE_BOM.size() ) );
+        return Format::UTF16_BE;
     }
 
     return Format::UNKNOWN;
@@ -69,11 +91,11 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out ) {
         return false; //EARLY RETURN
     }
 
-    for( const auto & cp : in ) { //TODO little endian (x64 intel) and big endian of source matters! -> template with endianess baked in?
-        out << (char)( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) )
-            << (char)( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >>  8 )
-            << (char)( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
-            << (char)( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 );
+    for( const auto &cp: in ) {
+        out << ( char ) ( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) )
+            << ( char ) ( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >> 8 )
+            << ( char ) ( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
+            << ( char ) ( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 );
     }
 
     return true;
@@ -81,11 +103,13 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out ) {
 
 /**
  * Converts an UTF-8 encoded byte stream to UTF-32
- * @param in Input UTF-8 byte stream
+ * @param src Source
  * @param out UTF-32 collection
- * @throws std::invalid_argument when //TODO
+ * @return Success
  */
-void Transcode::U8toU32( std::istream &in, std::vector<uint32_t> &out ) {
+bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
+    auto  & in  = src.stream();
+    auto  & pos = src.position();
     uint8_t buffer[4];
 
     while( in.good() && !in.eof() && in.peek() >= 0 ) { //TODO optimise
@@ -93,8 +117,13 @@ void Transcode::U8toU32( std::istream &in, std::vector<uint32_t> &out ) {
         auto received = 0;
 
         if( expected == 0 ) {
-            //TODO log
-            throw std::invalid_argument( "Invalid UTF8 start byte: " + unicode::utf8::toxunicode( in.peek(), "" ) );
+            logging::ParserLog::log( src.path(),
+                                     specs::Context::BLOGATOR,
+                                     specs::blogator::ErrorCode::INVALID_UTF8_START_BYTE,
+                                     pos
+            );
+            //TODO log ERROR "Invalid UTF8 start byte: " + unicode::utf8::toxunicode( in.peek(), "" )
+            return false; //EARLY RETURN
         }
 
         while( received < expected && !in.eof() ) {
@@ -103,88 +132,258 @@ void Transcode::U8toU32( std::istream &in, std::vector<uint32_t> &out ) {
         }
 
         if( received == expected ) {
-            out.emplace_back( unicode::utf8::toU32( buffer, received ) );
+            uint32_t codepoint = unicode::utf8::toU32( buffer, received );
+
+            pos.increment( unicode::ascii::isnewline( codepoint ) );
+            out.emplace_back( codepoint );
+
         } else {
-            //TODO log
-            throw std::invalid_argument( "EOF reached mid-codepoint sequence." );
+            logging::ParserLog::log( src.path(),
+                                     specs::Context::BLOGATOR,
+                                     specs::blogator::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
+                                     pos
+            );
+            //TODO log ERROR "EOF reached mid-codepoint sequence."
+            return false; //EARLY RETURN
         }
     }
+
+    return true;
 }
 
 /**
  * Converts an UTF-8 encoded byte stream to UTF-32
  * @param pre_buffer Buffered input bytes
- * @param in Input UTF-8 byte stream
- * @param out UTF-32 collection
- */
-void Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out ) {
-    //TODO pre_buffer
-    U8toU32( in, out );
-
-}
-
-void Transcode::U16BEtoU32( std::istream &in, std::vector<uint32_t> &out ) { //TODO
-}
-
-void Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out ) { //TODO
-    //TODO pre_buffer
-    U16BEtoU32( in, out );
-}
-
-void Transcode::U16LEtoU32( std::istream &in, std::vector<uint32_t> &out ) { //TODO
-
-}
-
-void Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out ) { //TODO
-    //TODO pre_buffer
-    U16LEtoU32( in, out );
-}
-
-/**
- * Converts content of a UTF-32 byte stream to a collection of u32 characters
- * @param in Input byte stream
+ * @param src Source
  * @param out UTF-32 collection
  * @return Success
  */
-void Transcode::U32toU32( std::istream &in, std::vector<uint32_t> &out ) {
-    uint32_t bits;
+bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
+    auto & in  = src.stream();
+    auto & pos = src.position();
+    //TODO pre_buffer
+    return U8toU32( src, out );
 
-    while( in.peek() >= 0 && !in.eof() ) {
-        in.read( ( char * ) &bits, sizeof( bits ) );
-        out.emplace_back( bits );
+}
+
+bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO
+    auto & in  = src.stream();
+    auto & pos = src.position();
+
+    return false;
+}
+
+bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
+    auto & in  = src.stream();
+    auto & pos = src.position();
+    //TODO pre_buffer
+    return U16BEtoU32( src, out );
+}
+
+bool Transcode::U16LEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO
+    auto & in  = src.stream();
+    auto & pos = src.position();
+
+    uint16_t high_surrogate = 0x00;
+    uint16_t low_surrogate  = 0x00;
+
+    while( in.good() && !in.eof() ) {
+
+        uint8_t high_surrogate_bytes[2];
+        uint8_t low_surrogate_bytes [2];
+
+        if constexpr( std::endian::native == std::endian::little ) {
+            high_surrogate_bytes[0] = in.get();
+
+
+
+        } else { //big-endian
+
+        }
+
+
+        in.read( (char *) &high_surrogate_bytes, sizeof( high_surrogate_bytes ) );
+
+        if( high_surrogate <= 0xFFFF ) { //1 x 16 bits
+            if( high_surrogate > 0xD7FF && high_surrogate < 0xE000 ) {
+//                logging::ParserLog::log() //TODO
+            } else {
+                out.emplace_back( (uint32_t) high_surrogate );
+            }
+
+        } else { //0x10000 - 0x10FFFF: 2 x 16 bits
+            in.read( (char *) &low_surrogate_bytes, sizeof( low_surrogate_bytes ) );
+
+            //TODO calculate code point
+        }
+
+        out.emplace_back( high_surrogate );
     }
+
+    return true;
+}
+
+bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
+    auto & in  = src.stream();
+    auto & pos = src.position();
+    //TODO pre_buffer
+    return U16LEtoU32( src, out );
 }
 
 /**
- * Converts content of a UTF-32 byte stream to a collection of u32 characters
- * @param pre_buffer Buffered input bytes
- * @param in Input byte stream
+ * Converts content of a UTF-32 little-endian byte stream to a collection of u32 characters
+ * @param src Source
  * @param out UTF-32 collection
+ * @return Success
  */
-void Transcode::U32toU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out ) {
+bool Transcode::U32LEtoU32( Source &src, std::vector<uint32_t> &out ) {
+    auto & in  = src.stream();
+    auto & pos = src.position();
+
+    uint8_t bytes[4];
+    in.read( ( char * ) &bytes, 4 );
+
+    while( in.good() && !in.eof() ) {
+        uint32_t codepoint = 0x00;
+        codepoint += ( uint32_t ) bytes[0];
+        codepoint += ( uint32_t ) bytes[1] <<  8;
+        codepoint += ( uint32_t ) bytes[2] << 16;
+        codepoint += ( uint32_t ) bytes[3] << 24;
+
+        pos.increment( unicode::ascii::isnewline( codepoint ) );
+        out.emplace_back( codepoint );
+        in.read( ( char * ) &bytes, 4 );
+    }
+
+    return true;
+}
+
+/**
+ * Converts content of a UTF-32 little-endian byte stream to a collection of u32 characters
+ * @param pre_buffer Buffered input bytes
+ * @param src Source
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
+    const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
+
+    auto & in  = src.stream();
+    auto & pos = src.position();
+
     if( !pre_buffer.empty() ) {
-        if( ( pre_buffer.size() % 4 ) > 0  ) { //i.e.: incomplete code point
+        if( hasIncompleteCodePoint( pre_buffer ) ) {
             size_t remainder = ( pre_buffer.size() % 4 );
-            size_t required  = 4 - remainder;
+            size_t required  = ( 4 - remainder );
 
             for( auto i = 0; !in.eof() && in.good() && i < required; ++i ) {
                 pre_buffer.emplace_back( in.get() );
             }
         }
 
-        //TODO what if there isn't enough bytes in the source??
+        const size_t code_point_count = ( pre_buffer.size() / 4 );
 
-        size_t code_point_count = ( pre_buffer.size() / 4 );
+        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
+            uint32_t codepoint = 0x00;
 
-        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) { //TODO byte order will matter based on endianess of source
-            uint32_t codepoint = 0x0;
-            codepoint += (uint32_t) pre_buffer.at( byte_i )        << 24;
-            codepoint += (uint32_t) pre_buffer.at( byte_i + 1 ) << 16;
-            codepoint += (uint32_t) pre_buffer.at( byte_i + 2 ) << 8;
-            codepoint += (uint32_t) pre_buffer.at( byte_i + 3 );
+            codepoint += (uint32_t) pre_buffer.at( byte_i );
+            codepoint += (uint32_t) pre_buffer.at( byte_i + 1 ) <<  8;
+            codepoint += (uint32_t) pre_buffer.at( byte_i + 2 ) << 16;
+            codepoint += (uint32_t) pre_buffer.at( byte_i + 3 ) << 24;
+
+            pos.increment( unicode::ascii::isnewline( codepoint ) );
             out.emplace_back( codepoint );
+        }
+
+        if( hasIncompleteCodePoint( pre_buffer ) ) {
+            logging::ParserLog::log( src.path(),
+                                     specs::Context::BLOGATOR,
+                                     specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
+                                     pos.increment()
+            );
+
+            return false; //EARLY RETURN
         }
     }
 
-    U32toU32( in, out );
+    return U32LEtoU32( src, out );
+}
+
+/**
+ * Converts content of a UTF-32 Big-endian byte stream to a collection of u32 characters
+ * @param src Source
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U32BEtoU32( Source &src, std::vector<uint32_t> &out ) {
+    auto & in  = src.stream();
+    auto & pos = src.position();
+
+    uint8_t bytes[4];
+    in.read( ( char * ) &bytes, 4 );
+
+    while( in.good() && !in.eof() ) {
+        uint32_t codepoint = 0x00;
+        codepoint += ( uint32_t ) bytes[0] << 24;
+        codepoint += ( uint32_t ) bytes[1] << 16;
+        codepoint += ( uint32_t ) bytes[2] <<  8;
+        codepoint += ( uint32_t ) bytes[3];
+
+        pos.increment( unicode::ascii::isnewline( codepoint ) );
+        out.emplace_back( codepoint );
+        in.read( ( char * ) &bytes, 4 );
+    }
+
+    return true;
+}
+
+/**
+ * Converts content of a UTF-32 big-endian byte stream to a collection of u32 characters
+ * @param pre_buffer Buffered input bytes
+ * @param src Source
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
+    const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
+
+    auto & in  = src.stream();
+    auto & pos = src.position();
+
+    if( !pre_buffer.empty() ) {
+        if( hasIncompleteCodePoint( pre_buffer ) ) {
+            size_t remainder = ( pre_buffer.size() % 4 );
+            size_t required  = ( 4 - remainder );
+
+            for( auto i = 0; !in.eof() && in.good() && i < required; ++i ) {
+                pre_buffer.emplace_back( in.get() );
+            }
+        }
+
+        const size_t code_point_count = ( pre_buffer.size() / 4 );
+
+        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
+            uint32_t codepoint = 0x00;
+
+            codepoint += ( uint32_t ) pre_buffer.at( byte_i )        << 24;
+            codepoint += ( uint32_t ) pre_buffer.at( byte_i + 1 ) << 16;
+            codepoint += ( uint32_t ) pre_buffer.at( byte_i + 2 ) <<  8;
+            codepoint += ( uint32_t ) pre_buffer.at( byte_i + 3 );
+
+            pos.increment( unicode::ascii::isnewline( codepoint ) );
+            out.emplace_back( codepoint );
+        }
+
+        if( hasIncompleteCodePoint( pre_buffer ) ) {
+            logging::ParserLog::log( src.path(),
+                                     specs::Context::BLOGATOR,
+                                     specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
+                                     pos.increment()
+            );
+
+            return false; //EARLY RETURN
+        }
+    }
+
+    return U32BEtoU32( src, out );
 }

@@ -1,30 +1,31 @@
-#ifndef BLOGATOR_PARSER_ENCODING_ENCODING_H
-#define BLOGATOR_PARSER_ENCODING_ENCODING_H
+#ifndef BLOGATOR_PARSER_ENCODING_TRANSCODE_H
+#define BLOGATOR_PARSER_ENCODING_TRANSCODE_H
 
 #include <vector>
 #include <deque>
 #include <istream>
 
 #include "../../unicode/unicode.h"
-#include "Confidence.h"
-#include "Format.h"
+#include "../dto/Source.h"
 
 namespace blogator::parser::encoding {
     struct Transcode {
-        static Format convert( std::istream &in, std::vector<uint32_t> &out, Format hint = Format::UNKNOWN );
+        static bool convert( Source &src, std::vector<uint32_t> &out );
         static Format sniffBOM( std::deque<uint8_t> &bom );
 
         static bool U32toByteStream( const std::u32string &in, std::ostream &out );
 
-        static void U8toU32( std::istream &in, std::vector<uint32_t> &out );
-        static void U8toU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out );
-        static void U16BEtoU32( std::istream &in, std::vector<uint32_t> &out );
-        static void U16BEtoU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out );
-        static void U16LEtoU32( std::istream &in, std::vector<uint32_t> &out );
-        static void U16LEtoU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out );
-        static void U32toU32( std::istream &in, std::vector<uint32_t> &out );
-        static void U32toU32( std::deque<uint8_t> &pre_buffer, std::istream &in, std::vector<uint32_t> &out );
+        static bool U8toU32( Source &src, std::vector<uint32_t> &out );
+        static bool U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
+        static bool U16BEtoU32( Source &src, std::vector<uint32_t> &out );
+        static bool U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
+        static bool U16LEtoU32( Source &src, std::vector<uint32_t> &out );
+        static bool U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
+        static bool U32LEtoU32( Source &src, std::vector<uint32_t> &out );
+        static bool U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
+        static bool U32BEtoU32( Source &src, std::vector<uint32_t> &out );
+        static bool U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
     };
 }
 
-#endif //BLOGATOR_PARSER_ENCODING_ENCODING_H
+#endif //BLOGATOR_PARSER_ENCODING_TRANSCODE_H
