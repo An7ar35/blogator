@@ -119,7 +119,7 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
         if( expected == 0 ) {
             logging::ParserLog::log( src.path(),
                                      specs::Context::BLOGATOR,
-                                     specs::blogator::ErrorCode::INVALID_UTF8_START_BYTE,
+                                     specs::blogator::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                      pos
             );
             //TODO log ERROR "Invalid UTF8 start byte: " + unicode::utf8::toxunicode( in.peek(), "" )
@@ -158,12 +158,59 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
  * @param out UTF-32 collection
  * @return Success
  */
-bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
+bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO smoke test
     auto & in  = src.stream();
     auto & pos = src.position();
-    //TODO pre_buffer
-    return U8toU32( src, out );
 
+    if( !pre_buffer.empty() ) {
+        while( !pre_buffer.empty() ) {
+            const auto byte_length   = unicode::utf8::bytelength( pre_buffer.front() );
+            const auto missing_bytes = ( byte_length > pre_buffer.size() ? ( byte_length - pre_buffer.size() ) : 0 );
+
+            for( int b = 0; !in.eof() && in.good() && b < missing_bytes; ++b ) {
+                pre_buffer.emplace_back( in.get() );
+            }
+
+            if( byte_length > pre_buffer.size() ) {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
+                                         pos
+                );
+
+                return false; //EARLY RETURN
+            }
+
+            uint32_t codepoint = 0x00;
+
+            if( byte_length == 1 ) {
+                codepoint = unicode::utf8::toU32( pre_buffer[0] );
+            } else if( byte_length == 2 ) {
+                codepoint = unicode::utf8::toU32( pre_buffer[0], pre_buffer[1] );
+            } else if( byte_length == 3 ) {
+                codepoint = unicode::utf8::toU32( pre_buffer[0], pre_buffer[1], pre_buffer[2] );
+            } else if( byte_length == 4 ) {
+                codepoint = unicode::utf8::toU32( pre_buffer[0], pre_buffer[1], pre_buffer[2], pre_buffer[3] );
+            } else {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
+                                         pos
+                );
+
+                return false; //EARLY RETURN
+            }
+
+            pos.increment( unicode::ascii::isnewline( codepoint ) );
+            out.emplace_back( codepoint );
+
+            for( auto i = 0; i < byte_length; ++i ) {
+                pre_buffer.pop_front();
+            }
+        }
+    }
+
+    return U8toU32( src, out );
 }
 
 bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO

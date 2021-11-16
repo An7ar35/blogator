@@ -25,7 +25,7 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
         "unknown error code",
         "Error code has no description available - pls. check error code falls in the blogator::parser::specs::blogator::ErrorCode enum range."
     };
-    arr[ErrorCode::INVALID_UTF8_START_BYTE] = {
+    arr[ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE] = {
         "invalid utf8 start byte",
         R"(This error occurs if the start byte of a utf8 code point byte sequence is in an invalid range (between 0x80 and 0xC0 or greater than 0xF7).)"
     };

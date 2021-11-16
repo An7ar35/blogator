@@ -9,7 +9,7 @@ namespace blogator::parser::specs::blogator {
         enum {
             NONE    = 0,
             UNKNOWN = 1,
-            INVALID_UTF8_START_BYTE,
+            INVALID_UTF8_CODEPOINT_START_BYTE,
             INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
             INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
 

@@ -7,8 +7,8 @@
 #include <codecvt>
 
 /**
- * Gets the number of bytes a utf8 encoded codepoint has
- * @param first First byte of the utf8 code point sequence
+ * Gets the number of bytes a UTF-8 encoded codepoint has
+ * @param first First byte of the UTF-8 code point sequence
  * @return Number of bytes to expect (0 if not valid)
  */
 size_t blogator::unicode::utf8::bytelength( uint8_t byte ) {
@@ -21,19 +21,62 @@ size_t blogator::unicode::utf8::bytelength( uint8_t byte ) {
 }
 
 /**
- * Convert a UTF8 sequence into a UTF32 code point
+ * Convert a UTF-8 sequence into a UTF-32 code point
  * @param sequence UTF8 sequence
  * @param ln Size of sequence in bytes
  * @return UTF32 code point
+ * @throws std::invalid_argument when byte length is invalid
  */
 uint32_t blogator::unicode::utf8::toU32( const uint8_t sequence[4], size_t ln ) {
     switch( ln ) {
-        case 1: return static_cast<uint32_t>( sequence[0] );
-        case 2: return (uint32_t)( ( sequence[0] & 0x1F ) << 6  ) | ( sequence[1]  & 0x3F );
-        case 3: return (uint32_t)( ( sequence[0] & 0x0F ) << 12 ) | ( ( sequence[1] & 0x3F ) << 6 ) | ( sequence[2] & 0x3F );
-        case 4: return (uint32_t)( ( sequence[0] & 0x07 ) << 18 ) | ( ( sequence[1] & 0x3F ) << 12 ) | ( ( sequence[2] & 0x3F ) << 6 ) | ( sequence[3] & 0x3F );
+        case 1: return toU32( sequence[0] );
+        case 2: return toU32( sequence[0], sequence[1] );
+        case 3: return toU32( sequence[0], sequence[1], sequence[2] );
+        case 4: return toU32( sequence[0], sequence[1], sequence[2], sequence[3] );
         default: throw std::invalid_argument( "Number of bytes given not between 1-4 inclusive." );
     }
+}
+
+/**
+ * Converts a UTF-8 sequence int a UTF-32 code point
+ * @param u8_byte1 1st byte of a 1-byte sequence
+ * @return UTF-32 code point
+ */
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1 ) {
+    return static_cast<uint32_t>( u8_byte1 );
+}
+
+/**
+ * Converts a UTF-8 sequence int a UTF-32 code point
+ * @param u8_byte1 1st byte of a 2-byte sequence
+ * @param u8_byte2 2nd byte of a 2-byte sequence
+ * @return UTF-32 code point
+ */
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2 ) {
+    return (uint32_t)( ( u8_byte1 & 0x1F ) << 6  ) | ( u8_byte2  & 0x3F );;
+}
+
+/**
+ * Converts a UTF-8 sequence int a UTF-32 code point
+ * @param u8_byte1 1st byte of a 3-byte sequence
+ * @param u8_byte2 2nd byte of a 3-byte sequence
+ * @param u8_byte3 3rd byte of a 3-byte sequence
+ * @return UTF-32 code point
+ */
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3 ) {
+    return (uint32_t)( ( u8_byte1 & 0x0F ) << 12 ) | ( ( u8_byte2 & 0x3F ) << 6 ) | ( u8_byte3 & 0x3F );;
+}
+
+/**
+ * Converts a UTF-8 sequence int a UTF-32 code point
+ * @param u8_byte1 1st byte of a 4-byte sequence
+ * @param u8_byte2 2nd byte of a 4-byte sequence
+ * @param u8_byte3 3rd byte of a 4-byte sequence
+ * @param u8_byte4 4th byte of a 4-byte sequence
+ * @return UTF-32 code point
+ */
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3, uint8_t u8_byte4 ) {
+    return (uint32_t)( ( u8_byte1 & 0x07 ) << 18 ) | ( ( u8_byte2 & 0x3F ) << 12 ) | ( ( u8_byte3 & 0x3F ) << 6 ) | ( u8_byte4 & 0x3F );
 }
 
 /**

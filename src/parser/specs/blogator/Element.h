@@ -1,16 +1,34 @@
 #ifndef BLOGATOR_PARSER_SPECS_BLOGATOR_ELEMENTS_H
 #define BLOGATOR_PARSER_SPECS_BLOGATOR_ELEMENTS_H
 
+#include <iostream>
+
 namespace blogator::parser::specs::blogator {
     enum class Element {
-        UNKNOWN = 0,
-        TAG_OPEN,
-        TAG_CLOSE,
+        NONE = 0,
+        WHITESPACE = NONE,
+        UNKNOWN,
 
-        //=== Blogator elements ===
-        PAGE_REF,       //BLOGATOR::PAGE_REF
-        PAGE_REF_SELF,  //BLOGATOR::PAGE_REF_SELF
-        AUTO_TOC,       //BLOGATOR::AUTO_TOC
+        NAMESPACE_OPEN, //'{{'
+        NAMESPACE_CLOSE, //'}}'
+        SECTION_OPEN, //'{'
+        SECTION_CLOSE, //'}'
+
+        VAR_IDENTIFIER,  //'.?'
+        INTEGER_LITERAL, // '1', '-1'
+        DOUBLE_LITERAL,  // '.01', '1.01', '1.'
+        STRING_LITERAL,  // '"..."'
+        ESCAPING_STRING, // '\"'
+        OPERATOR,        // '+', '-', '/', '*', '&&', '||'
+        PARANTHESES,     // '('
+
+        PAGE_REF,       //BL.PAGE_REF="../source/path/post.html";
+        PAGE_REF_SELF,  //BL.PAGE_REF_SELF
+        TITLE,          //BL.POST_TITLE
+        AUTO_TOC,       //BL.AUTO_TOC
+        TIMESTAMP,      //BL.TIMESTAMP
+        DATE,           //BL.DATE
+
 
         ENUM_END //used for iterating enums
     };
