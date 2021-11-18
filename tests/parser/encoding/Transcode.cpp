@@ -6,9 +6,30 @@
 #include <codecvt>
 
 #include "../../helper.h"
+#include "../../../src/parser/logging/ParserLog.h"
 
+using namespace blogator::parser;
 using namespace blogator::parser::encoding;
 using           blogator::parser::Source;
+using           blogator::parser::specs::Context;
+
+/**
+ * Parsing log catcher
+ */
+class ParserLogCatcher {
+  public:
+    void log( const blogator::parser::logging::ErrorObject & e ) {
+        _errors.push_back( e );
+    }
+
+    [[nodiscard]] const std::vector<blogator::parser::logging::ErrorObject> & getErrors() const {
+        return _errors;
+    };
+
+  private:
+    std::vector<blogator::parser::logging::ErrorObject> _errors;
+};
+
 
 TEST( parser_encoding_Transcode, sniffBOM_utf8 ) {
     std::deque<uint8_t> buffer = { 0xEF, 0xBB, 0xBF, 0x74, 0x65, 0x73, 0x74 };
@@ -44,6 +65,182 @@ TEST( parser_encoding_Transcode, sniffBOM_unknown ) {
     std::deque<uint8_t> buffer = { 0xEF, 0x74, 0x65, 0x73, 0x74 };
     ASSERT_EQ( Format::UNKNOWN, Transcode::sniffBOM( buffer ) );
     ASSERT_EQ( 5, buffer.size() );
+}
+
+TEST( parser_encoding_Transcode, fetchCodeUnit_2bytes ) {
+    uint8_t           buffer[3] = { 0, 0, 0 };
+    std::stringstream ss;
+
+    ss << (char) 0x63 << (char) 0x64 << (char) 0x65 << (char) 0x66;
+
+    ASSERT_EQ( 2, Transcode::fetchCodeUnit( ss, buffer, 2 ) );
+    ASSERT_EQ( 0x63, buffer[0] );
+    ASSERT_EQ( 0x64, buffer[1] );
+    ASSERT_EQ( 0x00, buffer[2] );
+}
+
+TEST( parser_encoding_Transcode, fetchCodeUnit_4bytes ) {
+    uint8_t           buffer[4];
+    std::stringstream ss;
+
+    ss << (char) 0x63 << (char) 0x64 << (char) 0x65 << (char) 0x66;
+
+    ASSERT_EQ( 4, Transcode::fetchCodeUnit( ss, buffer, 4 ) );
+    ASSERT_EQ( 0x63, buffer[0] );
+    ASSERT_EQ( 0x64, buffer[1] );
+    ASSERT_EQ( 0x65, buffer[2] );
+    ASSERT_EQ( 0x66, buffer[3] );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::string           test_str = "abcde12345";
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+
+    for( auto c : test_str ) {
+        Transcode::addCodePoint( in_source, 0x00, (uint32_t) c, out_buffer );
+    }
+
+    ASSERT_EQ( 10, out_buffer.size() );
+    ASSERT_EQ( U"abcde12345", std::u32string( out_buffer.begin(), out_buffer.end() ) );
+    ASSERT_TRUE( log_catcher.getErrors().empty() );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_nonchar ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+    uint32_t              test_char = 0x00FDD0;
+
+    Transcode::addCodePoint( in_source, 0x00, test_char, out_buffer );
+
+    auto expected_err = blogator::parser::logging::ErrorObject( "",
+                                                                Context::HTML5,
+                                                                specs::html5::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
+                                                                { 1, 2 } );
+
+    ASSERT_EQ( 1, out_buffer.size() );
+    ASSERT_EQ( test_char, out_buffer.back() );
+    ASSERT_EQ( 1, log_catcher.getErrors().size() );
+    ASSERT_EQ( expected_err, log_catcher.getErrors().back() );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_BELL ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+    uint32_t              test_char = 0x07; //BELL
+
+    Transcode::addCodePoint( in_source, 0x00, test_char, out_buffer );
+
+    auto expected_err = blogator::parser::logging::ErrorObject( "",
+                                                                Context::HTML5,
+                                                                specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                                                { 1, 2 } );
+
+    ASSERT_EQ( 1, out_buffer.size() );
+    ASSERT_EQ( test_char, out_buffer.at( 0 ) );
+    ASSERT_EQ( 1, log_catcher.getErrors().size() );
+    ASSERT_EQ( expected_err, log_catcher.getErrors().at( 0 ) );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_DEL ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+    uint32_t              test_char = 0x7F; //DEL
+
+    Transcode::addCodePoint( in_source, 0x00, test_char, out_buffer );
+
+    auto expected_err = blogator::parser::logging::ErrorObject( "",
+                                                                Context::HTML5,
+                                                                specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                                                { 1, 2 } );
+
+    ASSERT_EQ( 1, out_buffer.size() );
+    ASSERT_EQ( test_char, out_buffer.at( 0 ) );
+    ASSERT_EQ( 1, log_catcher.getErrors().size() );
+    ASSERT_EQ( expected_err, log_catcher.getErrors().at( 0 ) );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_newline_CRLF ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+
+    Transcode::addCodePoint( in_source, 0x00, blogator::unicode::CR, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::CR, blogator::unicode::LF, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::LF, U'A', out_buffer );
+
+    ASSERT_EQ( 2, out_buffer.size() );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 0 ) );
+    ASSERT_EQ( U'A', out_buffer.at( 1 ) );
+    ASSERT_EQ( 0, log_catcher.getErrors().size() );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_newline_LFLF ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+
+    Transcode::addCodePoint( in_source, 0x00, blogator::unicode::LF, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::LF, blogator::unicode::LF, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::LF, U'A', out_buffer );
+
+    ASSERT_EQ( 3, out_buffer.size() );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 0 ) );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 1 ) );
+    ASSERT_EQ( U'A', out_buffer.at( 2 ) );
+    ASSERT_EQ( 0, log_catcher.getErrors().size() );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_newline_CRCR ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+
+    Transcode::addCodePoint( in_source, 0x00, blogator::unicode::CR, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::CR, blogator::unicode::CR, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::CR, U'A', out_buffer );
+
+    ASSERT_EQ( 3, out_buffer.size() );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 0 ) );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 1 ) );
+    ASSERT_EQ( U'A', out_buffer.at( 2 ) );
+    ASSERT_EQ( 0, log_catcher.getErrors().size() );
+}
+
+TEST( parser_encoding_Transcode, addCodePoint_newline_LFCR ) {
+    ParserLogCatcher      log_catcher;
+    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    std::stringstream     in_stream; //unused
+    Source                in_source = Source( in_stream, "", Format::UNKNOWN );
+    std::vector<uint32_t> out_buffer;
+
+    Transcode::addCodePoint( in_source, 0x00, blogator::unicode::LF, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::LF, blogator::unicode::CR, out_buffer );
+    Transcode::addCodePoint( in_source, blogator::unicode::CR, U'A', out_buffer );
+
+    ASSERT_EQ( 3, out_buffer.size() );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 0 ) );
+    ASSERT_EQ( blogator::unicode::LF, out_buffer.at( 1 ) );
+    ASSERT_EQ( U'A', out_buffer.at( 2 ) );
+    ASSERT_EQ( 0, log_catcher.getErrors().size() );
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string0 ) {
@@ -301,10 +498,10 @@ TEST( parser_encoding_Transcode, U8toU32_string2 ) { //with pre-buffered bytes (
 
     std::vector<uint32_t> out_buffer;
     std::u32string        expected_str = U"\U0001FAD6"
-                                         "\U0000210c\U0001d522\U0001d529\U0001d529"
-                                         "\U0001d52c\U0000002c\U00000020\U0001d534"
-                                         "\U0001d52c\U0001d52f\U0001d529\U0001d521"
-                                         "\U00000021";
+                                          "\U0000210c\U0001d522\U0001d529\U0001d529"
+                                          "\U0001d52c\U0000002c\U00000020\U0001d534"
+                                          "\U0001d52c\U0001d52f\U0001d529\U0001d521"
+                                          "\U00000021";
 
     ASSERT_TRUE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
 
@@ -332,10 +529,10 @@ TEST( parser_encoding_Transcode, U8toU32_string3 ) { //with pre-buffered bytes (
 
     std::vector<uint32_t> out_buffer;
     std::u32string        expected_str = U"\U0001FAD6"
-                                         "\U0000210c\U0001d522\U0001d529\U0001d529"
-                                         "\U0001d52c\U0000002c\U00000020\U0001d534"
-                                         "\U0001d52c\U0001d52f\U0001d529\U0001d521"
-                                         "\U00000021";
+                                          "\U0000210c\U0001d522\U0001d529\U0001d529"
+                                          "\U0001d52c\U0000002c\U00000020\U0001d534"
+                                          "\U0001d52c\U0001d52f\U0001d529\U0001d521"
+                                          "\U00000021";
 
     ASSERT_TRUE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
 

@@ -14,6 +14,8 @@ namespace blogator::parser::encoding {
         static Format sniffBOM( std::deque<uint8_t> &bom );
 
         static bool U32toByteStream( const std::u32string &in, std::ostream &out );
+        static size_t fetchCodeUnit( std::istream &stream, uint8_t * buffer, size_t byte_ln );
+        static void addCodePoint( Source &src, uint32_t prev_codepoint, uint32_t new_codepoint, std::vector<uint32_t> &out );
 
         static bool U8toU32( Source &src, std::vector<uint32_t> &out );
         static bool U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );

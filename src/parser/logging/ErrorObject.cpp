@@ -29,6 +29,26 @@ ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err
 {}
 
 /**
+ * Checks if error is the same as another
+ * @param rhs Error object to compare to
+ * @return Equivalence state (filepath is ignored)
+ */
+bool ErrorObject::operator ==( const ErrorObject &rhs ) const {
+    return context()  == rhs.context()
+        && errcode()  == rhs.errcode()
+        && position() == rhs.position();
+}
+
+/**
+ * Checks if error is not the same as another
+ * @param rhs Error object to compare to
+ * @return Non-equivalence state (filepath is ignored)
+ */
+bool ErrorObject::operator !=( const ErrorObject &rhs ) const {
+    return !( *this == rhs );
+}
+
+/**
  * Gets the source filepath string
  * @return Filepath string
  */
@@ -101,7 +121,7 @@ blogator::parser::TextPos ErrorObject::textpos() const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream &ErrorObject::filepath( std::ostream &os ) const {
+std::ostream & ErrorObject::filepath( std::ostream &os ) const {
     os << _src_file.string();
     return os;
 }
@@ -111,7 +131,7 @@ std::ostream &ErrorObject::filepath( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream &ErrorObject::context( std::ostream &os ) const {
+std::ostream & ErrorObject::context( std::ostream &os ) const {
     os << specs::ctxToStr( _context );
     return os;
 }
@@ -121,7 +141,7 @@ std::ostream &ErrorObject::context( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream &ErrorObject::error( std::ostream &os ) const {
+std::ostream & ErrorObject::error( std::ostream &os ) const {
     switch( _context ) {
         case specs::Context::BLOGATOR:
             os << "BLOGATOR"; //TODO
@@ -148,7 +168,7 @@ std::ostream &ErrorObject::error( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream &ErrorObject::detailed( std::ostream &os ) const {
+std::ostream & ErrorObject::detailed( std::ostream &os ) const {
     switch( _context ) {
         case specs::Context::BLOGATOR:
             os << specs::blogator::ErrorCode::detailed( _code );
@@ -175,7 +195,24 @@ std::ostream &ErrorObject::detailed( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream &ErrorObject::position( std::ostream &os ) const {
+std::ostream & ErrorObject::position( std::ostream &os ) const {
     os << _position.line << ":" << _position.col;
     return os;
+}
+
+
+/**
+ * Gets the context code
+ * @return Context
+ */
+blogator::parser::specs::Context ErrorObject::ctxcode() const {
+    return _context;
+}
+
+/**
+ * Gets the error code within the context
+ * @return Contextual error code
+ */
+int ErrorObject::errcode() const {
+    return _code;
 }

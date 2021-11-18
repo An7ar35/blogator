@@ -1,8 +1,6 @@
 #include "Transcode.h"
 
 #include <sstream>
-#include <codecvt>
-#include <bit>
 
 #include "../logging/ParserLog.h"
 
@@ -54,7 +52,6 @@ Format Transcode::sniffBOM( std::deque<uint8_t> &bom ) {
     static const std::array<uint8_t, 2> UTF16_LE_BOM = { 0xFF, 0xFE };
     static const std::array<uint8_t, 2> UTF16_BE_BOM = { 0xFE, 0xFF };
 
-
     if( bom.size() >= UTF32_LE_BOM.size() && std::equal( UTF32_LE_BOM.begin(), UTF32_LE_BOM.end(), bom.begin() ) ) {
         bom.erase( bom.begin(), std::next( bom.begin(), UTF32_LE_BOM.size() ) );
         return Format::UTF32_LE;
@@ -102,19 +99,77 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out ) {
 }
 
 /**
+ * Grabs a code unit of n bytes from a stream
+ * @param stream Source stream
+ * @param buffer Byte buffer
+ * @param byte_ln Number of bytes to get
+ * @return Number of bytes fetched successfully
+ */
+size_t Transcode::fetchCodeUnit(std::istream &stream, uint8_t * buffer, size_t byte_ln ) {
+    size_t byte_n = 0;
+
+    while( stream.good() && byte_n < byte_ln  ) {
+        buffer[ byte_n ] = stream.get();
+        ++byte_n;
+    }
+
+    return byte_n;
+}
+
+/**
+ * Adds a UTF-32 codepoint to an output UTF-32 collection
+ * @param src Source
+ * @param prev_codepoint Previous codepoint (used to help with normalizing newlines)
+ * @param new_codepoint  New codepoint to add
+ * @param out Output collection
+ */
+void Transcode::addCodePoint( Source &src, uint32_t prev_codepoint, uint32_t new_codepoint, std::vector<uint32_t> &out ) {
+    auto & pos = src.position();
+
+    if( unicode::utf32::isnonchar( new_codepoint ) ) {
+        pos.increment( false );
+        out.emplace_back( new_codepoint );
+
+        logging::ParserLog::log( src.path(),
+                                 specs::Context::HTML5,
+                                 specs::html5::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
+                                 pos );
+
+    } else if( new_codepoint != 0x00 && unicode::ascii::iscntrl( new_codepoint ) && !unicode::ascii::iswspace( new_codepoint ) ) {
+        pos.increment( false );
+        out.emplace_back( new_codepoint );
+
+        logging::ParserLog::log( src.path(),
+                                 specs::Context::HTML5,
+                                 specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                 pos );
+
+    } else if( unicode::ascii::isnewline( new_codepoint ) ) {
+        if( !( prev_codepoint == unicode::CR && new_codepoint == unicode::LF ) ) {
+            pos.increment( true );
+            out.emplace_back( unicode::LF );
+        }
+
+    } else {
+        pos.increment( false );
+        out.emplace_back( new_codepoint );
+    }
+}
+
+/**
  * Converts an UTF-8 encoded byte stream to UTF-32
  * @param src Source
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
-    auto  & in  = src.stream();
-    auto  & pos = src.position();
-    uint8_t buffer[4];
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
+    uint8_t  buffer[4];
 
-    while( in.good() && !in.eof() && in.peek() >= 0 ) { //TODO optimise
+    while( in.good() && !in.eof() && in.peek() >= 0 ) {
         auto expected = unicode::utf8::bytelength( in.peek() );
-        auto received = 0;
 
         if( expected == 0 ) {
             logging::ParserLog::log( src.path(),
@@ -126,16 +181,13 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
             return false; //EARLY RETURN
         }
 
-        while( received < expected && !in.eof() ) {
-            buffer[received] = in.get();
-            ++received;
-        }
+        auto received = fetchCodeUnit( in, buffer, expected );
 
         if( received == expected ) {
             uint32_t codepoint = unicode::utf8::toU32( buffer, received );
 
-            pos.increment( unicode::ascii::isnewline( codepoint ) );
-            out.emplace_back( codepoint );
+            Transcode::addCodePoint( src, prev, codepoint, out );
+            prev = codepoint;
 
         } else {
             logging::ParserLog::log( src.path(),
@@ -159,8 +211,9 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
  * @return Success
  */
 bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO smoke test
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
 
     if( !pre_buffer.empty() ) {
         while( !pre_buffer.empty() ) {
@@ -186,11 +239,17 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
             if( byte_length == 1 ) {
                 codepoint = unicode::utf8::toU32( pre_buffer[0] );
             } else if( byte_length == 2 ) {
-                codepoint = unicode::utf8::toU32( pre_buffer[0], pre_buffer[1] );
+                codepoint = unicode::utf8::toU32( pre_buffer[0],
+                                                  pre_buffer[1] );
             } else if( byte_length == 3 ) {
-                codepoint = unicode::utf8::toU32( pre_buffer[0], pre_buffer[1], pre_buffer[2] );
+                codepoint = unicode::utf8::toU32( pre_buffer[0],
+                                                  pre_buffer[1],
+                                                  pre_buffer[2] );
             } else if( byte_length == 4 ) {
-                codepoint = unicode::utf8::toU32( pre_buffer[0], pre_buffer[1], pre_buffer[2], pre_buffer[3] );
+                codepoint = unicode::utf8::toU32( pre_buffer[0],
+                                                  pre_buffer[1],
+                                                  pre_buffer[2],
+                                                  pre_buffer[3] );
             } else {
                 logging::ParserLog::log( src.path(),
                                          specs::Context::BLOGATOR,
@@ -201,8 +260,8 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
                 return false; //EARLY RETURN
             }
 
-            pos.increment( unicode::ascii::isnewline( codepoint ) );
-            out.emplace_back( codepoint );
+            Transcode::addCodePoint( src, prev, codepoint, out );
+            prev = codepoint;
 
             for( auto i = 0; i < byte_length; ++i ) {
                 pre_buffer.pop_front();
@@ -210,61 +269,100 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
         }
     }
 
-    return U8toU32( src, out );
+    return Transcode::U8toU32( src, out );
 }
 
 bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
 
     return false;
 }
 
 bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
     //TODO pre_buffer
-    return U16BEtoU32( src, out );
+    return Transcode::U16BEtoU32( src, out );
 }
 
 bool Transcode::U16LEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
+    bool     eof  = ( in.good() && !in.eof() );
 
-    uint16_t high_surrogate = 0x00;
-    uint16_t low_surrogate  = 0x00;
+    uint8_t high_surrogate_bytes[2];
+    uint8_t low_surrogate_bytes [2];
 
-    while( in.good() && !in.eof() ) {
+    while( !eof ) {
+        uint32_t codepoint = 0x00;
+        size_t   bytes     = fetchCodeUnit( in, high_surrogate_bytes, 2 );
 
-        uint8_t high_surrogate_bytes[2];
-        uint8_t low_surrogate_bytes [2];
+        if( bytes == 2 ) {
+            auto high_surrogate = unicode::utf16::join( high_surrogate_bytes[1], high_surrogate_bytes[0] );
+            auto code_units     = unicode::utf16::codeunits( high_surrogate );
 
-        if constexpr( std::endian::native == std::endian::little ) {
-            high_surrogate_bytes[0] = in.get();
+            switch( code_units ) {
+                case 1: {
+                    codepoint = unicode::utf16::toU32( high_surrogate );
+                } break;
 
+                case 2: {
+                    if( fetchCodeUnit( in, low_surrogate_bytes, 2 ) != 2 ) {
+                        logging::ParserLog::log( src.path(),
+                                                 specs::Context::BLOGATOR,
+                                                 specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                 pos
+                        );
 
+                        return false; //EARLY RETURN
+                    }
 
-        } else { //big-endian
+                    const auto low_surrogate = unicode::utf16::join( low_surrogate_bytes[1], low_surrogate_bytes[0] );
 
-        }
+                    if( !unicode::utf16::islowsurrogate( low_surrogate ) ) {
+                        logging::ParserLog::log( src.path(),
+                                                 specs::Context::HTML5,
+                                                 specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                                 pos );
+                        //TODO log error: low surrogate in invalid range
+                        //TODO decide what to do with that
+                    }
 
+                    codepoint = unicode::utf16::toU32( high_surrogate, low_surrogate );
+                } break;
 
-        in.read( (char *) &high_surrogate_bytes, sizeof( high_surrogate_bytes ) );
+                default: {
+                    codepoint = unicode::utf16::toU32( high_surrogate );
 
-        if( high_surrogate <= 0xFFFF ) { //1 x 16 bits
-            if( high_surrogate > 0xD7FF && high_surrogate < 0xE000 ) {
-//                logging::ParserLog::log() //TODO
-            } else {
-                out.emplace_back( (uint32_t) high_surrogate );
+                    logging::ParserLog::log( src.path(),
+                                             specs::Context::HTML5,
+                                             specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                             pos );
+
+                    //TODO log error: high surrogate in low surrogate range
+                }
             }
 
-        } else { //0x10000 - 0x10FFFF: 2 x 16 bits
-            in.read( (char *) &low_surrogate_bytes, sizeof( low_surrogate_bytes ) );
+            Transcode::addCodePoint( src, prev, codepoint, out );
+            prev = codepoint;
 
-            //TODO calculate code point
+        } else { //EOF and error-control cases
+            if( bytes == 0 ) {
+                eof = true;
+
+            } else {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                         pos
+                );
+
+                return false; //EARLY RETURN
+            }
         }
-
-        out.emplace_back( high_surrogate );
     }
 
     return true;
@@ -274,7 +372,7 @@ bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
     auto & in  = src.stream();
     auto & pos = src.position();
     //TODO pre_buffer
-    return U16LEtoU32( src, out );
+    return Transcode::U16LEtoU32( src, out );
 }
 
 /**
@@ -284,21 +382,21 @@ bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
  * @return Success
  */
 bool Transcode::U32LEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
 
     uint8_t bytes[4];
     in.read( ( char * ) &bytes, 4 );
 
     while( in.good() && !in.eof() ) {
-        uint32_t codepoint = 0x00;
-        codepoint += ( uint32_t ) bytes[0];
-        codepoint += ( uint32_t ) bytes[1] <<  8;
-        codepoint += ( uint32_t ) bytes[2] << 16;
-        codepoint += ( uint32_t ) bytes[3] << 24;
+        uint32_t codepoint = unicode::utf32::join( bytes[3],
+                                                   bytes[2],
+                                                   bytes[1],
+                                                   bytes[0] );
 
-        pos.increment( unicode::ascii::isnewline( codepoint ) );
-        out.emplace_back( codepoint );
+        Transcode::addCodePoint( src, prev, codepoint, out );
+        prev = codepoint;
         in.read( ( char * ) &bytes, 4 );
     }
 
@@ -315,8 +413,9 @@ bool Transcode::U32LEtoU32( Source &src, std::vector<uint32_t> &out ) {
 bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
     const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
 
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
 
     if( !pre_buffer.empty() ) {
         if( hasIncompleteCodePoint( pre_buffer ) ) {
@@ -331,15 +430,13 @@ bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
         const size_t code_point_count = ( pre_buffer.size() / 4 );
 
         for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
-            uint32_t codepoint = 0x00;
+            uint32_t codepoint = unicode::utf32::join( pre_buffer.at( byte_i + 3 ),
+                                                       pre_buffer.at( byte_i + 2 ),
+                                                       pre_buffer.at( byte_i + 1 ),
+                                                       pre_buffer.at( byte_i ) );
 
-            codepoint += (uint32_t) pre_buffer.at( byte_i );
-            codepoint += (uint32_t) pre_buffer.at( byte_i + 1 ) <<  8;
-            codepoint += (uint32_t) pre_buffer.at( byte_i + 2 ) << 16;
-            codepoint += (uint32_t) pre_buffer.at( byte_i + 3 ) << 24;
-
-            pos.increment( unicode::ascii::isnewline( codepoint ) );
-            out.emplace_back( codepoint );
+            Transcode::addCodePoint( src, prev, codepoint, out );
+            prev = codepoint;
         }
 
         if( hasIncompleteCodePoint( pre_buffer ) ) {
@@ -353,7 +450,7 @@ bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
         }
     }
 
-    return U32LEtoU32( src, out );
+    return Transcode::U32LEtoU32( src, out );
 }
 
 /**
@@ -363,21 +460,21 @@ bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
  * @return Success
  */
 bool Transcode::U32BEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
 
     uint8_t bytes[4];
     in.read( ( char * ) &bytes, 4 );
 
     while( in.good() && !in.eof() ) {
-        uint32_t codepoint = 0x00;
-        codepoint += ( uint32_t ) bytes[0] << 24;
-        codepoint += ( uint32_t ) bytes[1] << 16;
-        codepoint += ( uint32_t ) bytes[2] <<  8;
-        codepoint += ( uint32_t ) bytes[3];
+        uint32_t codepoint = unicode::utf32::join( bytes[0],
+                                                   bytes[1],
+                                                   bytes[2],
+                                                   bytes[3] );
 
-        pos.increment( unicode::ascii::isnewline( codepoint ) );
-        out.emplace_back( codepoint );
+        Transcode::addCodePoint( src, prev, codepoint, out );
+        prev = codepoint;
         in.read( ( char * ) &bytes, 4 );
     }
 
@@ -394,8 +491,9 @@ bool Transcode::U32BEtoU32( Source &src, std::vector<uint32_t> &out ) {
 bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
     const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
 
-    auto & in  = src.stream();
-    auto & pos = src.position();
+    auto &   in   = src.stream();
+    auto &   pos  = src.position();
+    uint32_t prev = 0x00;
 
     if( !pre_buffer.empty() ) {
         if( hasIncompleteCodePoint( pre_buffer ) ) {
@@ -410,15 +508,13 @@ bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
         const size_t code_point_count = ( pre_buffer.size() / 4 );
 
         for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
-            uint32_t codepoint = 0x00;
+            uint32_t codepoint = unicode::utf32::join( pre_buffer.at( byte_i ),
+                                                       pre_buffer.at( byte_i + 1 ),
+                                                       pre_buffer.at( byte_i + 2 ),
+                                                       pre_buffer.at( byte_i + 3 ) );
 
-            codepoint += ( uint32_t ) pre_buffer.at( byte_i )        << 24;
-            codepoint += ( uint32_t ) pre_buffer.at( byte_i + 1 ) << 16;
-            codepoint += ( uint32_t ) pre_buffer.at( byte_i + 2 ) <<  8;
-            codepoint += ( uint32_t ) pre_buffer.at( byte_i + 3 );
-
-            pos.increment( unicode::ascii::isnewline( codepoint ) );
-            out.emplace_back( codepoint );
+            Transcode::addCodePoint( src, prev, codepoint, out );
+            prev = codepoint;
         }
 
         if( hasIncompleteCodePoint( pre_buffer ) ) {
@@ -432,5 +528,5 @@ bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
         }
     }
 
-    return U32BEtoU32( src, out );
+    return Transcode::U32BEtoU32( src, out );
 }

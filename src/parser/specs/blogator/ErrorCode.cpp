@@ -33,6 +33,10 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
         "incomplete utf8 code point",
         R"(This error occurs if the input byte stream contains an incomplete UTF-8 codepoint as a result of abrupt read failure or premature EOF.)"
     };
+    arr[ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM] = {
+        "incomplete utf16 code point",
+        R"(This error occurs if the input byte stream contains an incomplete UTF-16 codepoint as a result of abrupt read failure or premature EOF.)"
+    };
     arr[ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM] = {
         "incomplete utf32 code point",
         R"(This error occurs if the input byte stream contains an incomplete UTF-32 codepoint as a result of abrupt read failure or premature EOF.)"

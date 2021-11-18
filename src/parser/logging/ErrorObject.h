@@ -15,12 +15,27 @@ namespace blogator::parser::logging {
         ErrorObject();
         ErrorObject( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position );
 
+        friend std::ostream & operator <<( std::ostream &os, const ErrorObject &err ) {
+            os << "{ path: " << err.filepath()
+               << ", context: " << err.context()
+               << ", description: \"" << err.error() << "\""
+               << ", position: " << err.position()
+               << " }";
+            return os;
+        }
+
+        bool operator ==( const ErrorObject &rhs ) const;
+        bool operator !=( const ErrorObject &rhs ) const;
+
         [[nodiscard]] std::string filepath() const;
         [[nodiscard]] std::string context() const;
         [[nodiscard]] std::string error() const;
         [[nodiscard]] std::string detailed() const;
         [[nodiscard]] std::string position() const;
         [[nodiscard]] TextPos textpos() const;
+
+        [[nodiscard]] specs::Context ctxcode() const;
+        [[nodiscard]] int errcode() const;
 
         std::ostream & filepath( std::ostream & os ) const;
         std::ostream & context( std::ostream & os ) const;
