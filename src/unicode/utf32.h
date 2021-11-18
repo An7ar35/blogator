@@ -5,6 +5,8 @@
 #include <string>
 
 namespace blogator::unicode::utf32 {
+    uint32_t join( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept;
+
     bool issurrogate( uint32_t c ) noexcept;
     bool isscalar( uint32_t c ) noexcept;
     bool isnonchar( uint32_t c ) noexcept;

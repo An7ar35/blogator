@@ -6,6 +6,18 @@
 #include <vector>
 
 /**
+ * Joins 4 bytes into a UTF32 code unit
+ * @param byte1 First most significant byte (XXXX 0000 0000 0000)
+ * @param byte2 Second byte (0000 XXXX 0000 0000)
+ * @param byte3 Third byte  (0000 0000 XXXX 0000)
+ * @param byte4 Fourth byte (0000 0000 0000 XXXX)
+ * @return U32 code unit
+ */
+uint32_t blogator::unicode::utf32::join( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept {
+    return ( (uint32_t) byte1 << 24 ) + ( (uint32_t) byte2 << 16 ) + ( (uint32_t) byte3 << 8 ) + ( (uint32_t) byte4 );
+}
+
+/**
  * Checks if code point is a surrogate
  * @param c Unicode code point
  * @return Is surrogate

@@ -42,7 +42,7 @@ uint32_t blogator::unicode::utf8::toU32( const uint8_t sequence[4], size_t ln ) 
  * @param u8_byte1 1st byte of a 1-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1 ) {
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1 ) noexcept {
     return static_cast<uint32_t>( u8_byte1 );
 }
 
@@ -52,7 +52,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1 ) {
  * @param u8_byte2 2nd byte of a 2-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2 ) {
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2 ) noexcept {
     return (uint32_t)( ( u8_byte1 & 0x1F ) << 6  ) | ( u8_byte2  & 0x3F );;
 }
 
@@ -63,7 +63,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2 ) {
  * @param u8_byte3 3rd byte of a 3-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3 ) {
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3 ) noexcept {
     return (uint32_t)( ( u8_byte1 & 0x0F ) << 12 ) | ( ( u8_byte2 & 0x3F ) << 6 ) | ( u8_byte3 & 0x3F );;
 }
 
@@ -75,7 +75,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uin
  * @param u8_byte4 4th byte of a 4-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3, uint8_t u8_byte4 ) {
+uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3, uint8_t u8_byte4 ) noexcept {
     return (uint32_t)( ( u8_byte1 & 0x07 ) << 18 ) | ( ( u8_byte2 & 0x3F ) << 12 ) | ( ( u8_byte3 & 0x3F ) << 6 ) | ( u8_byte4 & 0x3F );
 }
 

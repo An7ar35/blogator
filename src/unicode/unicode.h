@@ -3,6 +3,7 @@
 
 #include "ascii.h"
 #include "utf8.h"
+#include "utf16.h"
 #include "utf32.h"
 
 namespace blogator::unicode {
