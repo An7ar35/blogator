@@ -4,6 +4,7 @@
 #include <fstream>
 #include <locale>
 #include <codecvt>
+#include <bit>
 
 #include "../../helper.h"
 #include "../../../src/parser/logging/ParserLog.h"
@@ -323,7 +324,12 @@ TEST( parser_encoding_Transcode, U32LEtoU32_file ) {
     Source                in_source = Source( in_stream, "", Format::UTF32_LE );
     std::vector<uint32_t> out_buffer;
 
-    Transcode::U32toByteStream( src_u32, in_stream );
+    if constexpr( std::endian::native == std::endian::little ) {
+        Transcode::U32toByteStream( src_u32, in_stream, Endianness::LE );
+    } else { //std::endian::big
+        Transcode::U32toByteStream( src_u32, in_stream, Endianness::BE );
+    }
+
     ASSERT_TRUE( Transcode::U32LEtoU32( in_source, out_buffer ) );
 
     auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -548,3 +554,62 @@ TEST( parser_encoding_Transcode, U8toU32_string_fail ) { //with pre-buffered byt
 
     ASSERT_FALSE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
 }
+
+TEST( parser_encoding_Transcode, U16LEtoU32_string0 ) {
+    std::stringstream     in_stream;
+    Source                in_source = Source( in_stream, "", Format::UTF16_LE );
+
+    in_stream << (char) 0x0C << (char) 0x21 << (char) 0x35 << (char) 0xD8 //c210 35d8
+              << (char) 0x22 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //22dd 35d8
+              << (char) 0x29 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //29dd 35d8
+              << (char) 0x29 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //29dd 35d8
+              << (char) 0x2C << (char) 0xDD << (char) 0x2C << (char) 0x00 //2cdd 2c00
+              << (char) 0x20 << (char) 0x00 << (char) 0x35 << (char) 0xD8 //2000 35d8
+              << (char) 0x34 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //34dd 35d8
+              << (char) 0x2C << (char) 0xDD << (char) 0x35 << (char) 0xD8 //2cdd 35d8
+              << (char) 0x2F << (char) 0xDD << (char) 0x35 << (char) 0xD8 //2fdd 35d8
+              << (char) 0x29 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //29dd 35d8
+              << (char) 0x21 << (char) 0xDD << (char) 0x21 << (char) 0x00;//21dd 2100
+
+    std::vector<uint32_t> out_buffer;
+    std::u32string        expected_str = U"\U0000210c\U0001d522\U0001d529\U0001d529"
+                                         "\U0001d52c\U0000002c\U00000020\U0001d534"
+                                         "\U0001d52c\U0001d52f\U0001d529\U0001d521"
+                                         "\U00000021"; //"ℌ𝔢𝔩𝔩𝔬, 𝔴𝔬𝔯𝔩𝔡!"
+
+    ASSERT_TRUE( Transcode::U16LEtoU32( in_source, out_buffer ) );
+
+    auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
+    ASSERT_EQ( expected_str, output );
+}
+
+TEST( parser_encoding_Transcode, U16BEtoU32_string0 ) {
+    std::stringstream     in_stream;
+    Source                in_source = Source( in_stream, "", Format::UTF16_BE );
+
+    in_stream << (char) 0x21 << (char) 0x0C << (char) 0xD8 << (char) 0x35 //210c d835
+              << (char) 0xDD << (char) 0x22 << (char) 0xD8 << (char) 0x35 //dd22 d835
+              << (char) 0xDD << (char) 0x29 << (char) 0xD8 << (char) 0x35 //dd29 d835
+              << (char) 0xDD << (char) 0x29 << (char) 0xD8 << (char) 0x35 //dd29 d835
+              << (char) 0xDD << (char) 0x2C << (char) 0x00 << (char) 0x2C //dd2c 002c
+              << (char) 0x00 << (char) 0x20 << (char) 0xD8 << (char) 0x35 //0020 d835
+              << (char) 0xDD << (char) 0x34 << (char) 0xD8 << (char) 0x35 //dd34 d835
+              << (char) 0xDD << (char) 0x2C << (char) 0xD8 << (char) 0x35 //dd2c d835
+              << (char) 0xDD << (char) 0x2F << (char) 0xD8 << (char) 0x35 //dd2f d835
+              << (char) 0xDD << (char) 0x29 << (char) 0xD8 << (char) 0x35 //dd29 d835
+              << (char) 0xDD << (char) 0x21 << (char) 0x00 << (char) 0x21;//dd21 0021
+
+    std::vector<uint32_t> out_buffer;
+    std::u32string        expected_str = U"\U0000210c\U0001d522\U0001d529\U0001d529"
+                                         "\U0001d52c\U0000002c\U00000020\U0001d534"
+                                         "\U0001d52c\U0001d52f\U0001d529\U0001d521"
+                                         "\U00000021"; //"ℌ𝔢𝔩𝔩𝔬, 𝔴𝔬𝔯𝔩𝔡!"
+
+    ASSERT_TRUE( Transcode::U16BEtoU32( in_source, out_buffer ) );
+
+    auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
+    ASSERT_EQ( expected_str, output );
+}
+
+//TODO more UTF16 tests
+//TODO check all error scenarios - use log catcher

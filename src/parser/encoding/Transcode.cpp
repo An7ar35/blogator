@@ -80,19 +80,77 @@ Format Transcode::sniffBOM( std::deque<uint8_t> &bom ) {
  * Converts a UTF-32 string to a 8-bit stream
  * @param in UTF-32 string
  * @param out Output byte stream
+ * @param endianness Output endianness
  * @return Success
  */
-bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out ) {
+bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, Endianness endianness ) {
     if( out.bad() || out.eof() ) {
         //TODO LOG
         return false; //EARLY RETURN
     }
 
-    for( const auto &cp: in ) {
-        out << ( char ) ( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) )
-            << ( char ) ( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >> 8 )
-            << ( char ) ( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
-            << ( char ) ( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 );
+    if( endianness == Endianness::LE ) {
+        for( const auto &cp: in ) {
+            out << ( char ) ( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) )
+                << ( char ) ( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >> 8 )
+                << ( char ) ( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
+                << ( char ) ( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 );
+        }
+
+    } else { //Endianness::BE
+        for( const auto &cp: in ) {
+            out << ( char ) ( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 )
+                << ( char ) ( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
+                << ( char ) ( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >> 8 )
+                << ( char ) ( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) );
+        }
+    }
+
+    out.flush();
+
+    if( out.bad() || out.fail() ) {
+        //TODO log error
+        return false; //EARLY RETURN
+    }
+
+    return true;
+}
+
+/**
+ * Converts a UTF-32 collection to a 8-bit stream
+ * @param in UTF-32 collection
+ * @param out Output byte stream
+ * @param endianness Output endianness
+ * @return Success
+ */
+bool Transcode::U32toByteStream( const std::vector<uint32_t> &in, std::ostream &out, Endianness endianness ) {
+    if( out.bad() || out.eof() ) {
+        //TODO LOG
+        return false; //EARLY RETURN
+    }
+
+    if( endianness == Endianness::LE ) {
+        for( const auto &cp: in ) {
+            out << ( char ) ( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) )
+                << ( char ) ( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >> 8 )
+                << ( char ) ( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
+                << ( char ) ( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 );
+        }
+
+    } else { //Endianness::BE
+        for( const auto &cp: in ) {
+            out << ( char ) ( ( cp & 0b1111'1111'0000'0000'0000'0000'0000'0000 ) >> 24 )
+                << ( char ) ( ( cp & 0b0000'0000'1111'1111'0000'0000'0000'0000 ) >> 16 )
+                << ( char ) ( ( cp & 0b0000'0000'0000'0000'1111'1111'0000'0000 ) >> 8 )
+                << ( char ) ( ( cp & 0b0000'0000'0000'0000'0000'0000'1111'1111 ) );
+        }
+    }
+
+    out.flush();
+
+    if( out.bad() || out.fail() ) {
+        //TODO log error
+        return false; //EARLY RETURN
     }
 
     return true;
@@ -272,12 +330,14 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
     return Transcode::U8toU32( src, out );
 }
 
-bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    uint32_t prev = 0x00;
-
-    return false;
+/**
+ * Converts a UTF-16BE encoded byte stream to UTF-32
+ * @param src Source
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) {
+    return Transcode::U16toU32( src, out, Endianness::BE );
 }
 
 bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
@@ -287,85 +347,14 @@ bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
     return Transcode::U16BEtoU32( src, out );
 }
 
-bool Transcode::U16LEtoU32( Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    uint32_t prev = 0x00;
-    bool     eof  = ( in.good() && !in.eof() );
-
-    uint8_t high_surrogate_bytes[2];
-    uint8_t low_surrogate_bytes [2];
-
-    while( !eof ) {
-        uint32_t codepoint = 0x00;
-        size_t   bytes     = fetchCodeUnit( in, high_surrogate_bytes, 2 );
-
-        if( bytes == 2 ) {
-            auto high_surrogate = unicode::utf16::join( high_surrogate_bytes[1], high_surrogate_bytes[0] );
-            auto code_units     = unicode::utf16::codeunits( high_surrogate );
-
-            switch( code_units ) {
-                case 1: {
-                    codepoint = unicode::utf16::toU32( high_surrogate );
-                } break;
-
-                case 2: {
-                    if( fetchCodeUnit( in, low_surrogate_bytes, 2 ) != 2 ) {
-                        logging::ParserLog::log( src.path(),
-                                                 specs::Context::BLOGATOR,
-                                                 specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
-                                                 pos
-                        );
-
-                        return false; //EARLY RETURN
-                    }
-
-                    const auto low_surrogate = unicode::utf16::join( low_surrogate_bytes[1], low_surrogate_bytes[0] );
-
-                    if( !unicode::utf16::islowsurrogate( low_surrogate ) ) {
-                        logging::ParserLog::log( src.path(),
-                                                 specs::Context::HTML5,
-                                                 specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
-                                                 pos );
-                        //TODO log error: low surrogate in invalid range
-                        //TODO decide what to do with that
-                    }
-
-                    codepoint = unicode::utf16::toU32( high_surrogate, low_surrogate );
-                } break;
-
-                default: {
-                    codepoint = unicode::utf16::toU32( high_surrogate );
-
-                    logging::ParserLog::log( src.path(),
-                                             specs::Context::HTML5,
-                                             specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
-                                             pos );
-
-                    //TODO log error: high surrogate in low surrogate range
-                }
-            }
-
-            Transcode::addCodePoint( src, prev, codepoint, out );
-            prev = codepoint;
-
-        } else { //EOF and error-control cases
-            if( bytes == 0 ) {
-                eof = true;
-
-            } else {
-                logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
-                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
-                                         pos
-                );
-
-                return false; //EARLY RETURN
-            }
-        }
-    }
-
-    return true;
+/**
+ * Converts an UTF-16LE encoded byte stream to UTF-32
+ * @param src Source
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U16LEtoU32( Source &src, std::vector<uint32_t> &out ) {
+    return Transcode::U16toU32( src, out, Endianness::LE );
 }
 
 bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
@@ -529,4 +518,99 @@ bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
     }
 
     return Transcode::U32BEtoU32( src, out );
+}
+
+/**
+ * Converts an UTF-16 encoded byte stream to UTF-32
+ * @param src Source
+ * @param out UTF-32 collection
+ * @param endianness Endianness of the code units
+ * @return Success
+ */
+bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness ) {
+    const auto joinLE = []( uint8_t byte1, uint8_t byte2 ) { return unicode::utf16::join( byte2, byte1 ); };
+    const auto joinBE = []( uint8_t byte1, uint8_t byte2 ) { return unicode::utf16::join( byte1, byte2 ); };
+
+    const auto join  = ( endianness == Endianness::LE ? joinLE : joinBE );
+    auto &     in    = src.stream();
+    auto &     pos   = src.position();
+    uint32_t   prev  = 0x00;
+    bool       eof   = ( in.bad() || in.eof() );
+    bool       error = false;
+
+    uint8_t high_surrogate_bytes[2] = { 0x00, 0x00 };
+    uint8_t low_surrogate_bytes [2] = { 0x00, 0x00 };
+
+    while( !eof ) {
+        uint32_t codepoint = 0x00;
+        size_t   bytes     = fetchCodeUnit( in, high_surrogate_bytes, 2 );
+
+        if( bytes == 2 ) {
+            auto high_surrogate = join( high_surrogate_bytes[0], high_surrogate_bytes[1] );
+            auto code_units     = unicode::utf16::codeunits( high_surrogate );
+
+            switch( code_units ) {
+                case 1: {
+                    codepoint = unicode::utf16::toU32( high_surrogate );
+                    Transcode::addCodePoint( src, prev, codepoint, out );
+                    prev = codepoint;
+                } break;
+
+                case 2: {
+                    if( fetchCodeUnit( in, low_surrogate_bytes, 2 ) != 2 ) {
+                        logging::ParserLog::log( src.path(),
+                                                 specs::Context::BLOGATOR,
+                                                 specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                 pos
+                        );
+
+                        //TODO log error (+hex representation)
+                        return false; //EARLY RETURN
+                    }
+
+                    const auto low_surrogate = join( low_surrogate_bytes[0], low_surrogate_bytes[1] );
+
+                    if( unicode::utf16::islowsurrogate( low_surrogate ) ) {
+                        codepoint = unicode::utf16::toU32( high_surrogate, low_surrogate );
+                        Transcode::addCodePoint( src, prev, codepoint, out );
+                        prev = codepoint;
+
+                    } else {
+                        logging::ParserLog::log( src.path(),
+                                                 specs::Context::HTML5,
+                                                 specs::blogator::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
+                                                 pos );
+
+                        //TODO log error: low surrogate in invalid range (+hex for pair) - ignored
+                    }
+                } break;
+
+                default: {
+                    logging::ParserLog::log( src.path(),
+                                             specs::Context::HTML5,
+                                             specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                             pos );
+
+                    //TODO log error: high surrogate in low surrogate range (+hex representation)
+
+                    codepoint = unicode::utf16::toU32( high_surrogate ); //should be dealt with by the tokeniser
+                    Transcode::addCodePoint( src, prev, codepoint, out );
+                    prev = codepoint;
+                }
+            }
+
+        } else { //EOF and error-control cases
+            if( in && ( error = ( bytes != 0 ) ) ) {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                         pos
+                );
+            }
+
+            eof = true;
+        }
+    }
+
+    return !( error );
 }

@@ -10,6 +10,14 @@ TEST( unicode_utf16, join ) {
     ASSERT_EQ( 0b1111'0000'0000'1111, join( 0b1111'0000, 0b0000'1111 ) );
 }
 
+TEST( unicode_utf16, join_LE ) {
+    ASSERT_EQ( 0xC21, join( 0xC, 0x21 ) );
+}
+
+TEST( unicode_utf16, join_BE ) {
+    ASSERT_EQ( 0x210C, join( 0x21, 0x0C ) );
+}
+
 TEST( unicode_utf16, codeunits_invalid ) {
     ASSERT_EQ( 0, codeunits( 0xDC00 ) );
     ASSERT_EQ( 0, codeunits( 0xDE00 ) );
