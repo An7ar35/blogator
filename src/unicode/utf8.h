@@ -4,7 +4,9 @@
 #include <iostream>
 #include <vector>
 
-
+/**
+ * UTF-8 specific methods for UTF32 code points
+ */
 namespace blogator::unicode::utf8 {
     size_t bytelength( uint8_t first );
 

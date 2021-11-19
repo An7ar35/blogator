@@ -34,6 +34,7 @@ namespace blogator::parser::encoding {
 
       private:
         static bool U16toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness );
+        static bool U32toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness );
     };
 }
 

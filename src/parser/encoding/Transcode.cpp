@@ -371,25 +371,7 @@ bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
  * @return Success
  */
 bool Transcode::U32LEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    uint32_t prev = 0x00;
-
-    uint8_t bytes[4];
-    in.read( ( char * ) &bytes, 4 );
-
-    while( in.good() && !in.eof() ) {
-        uint32_t codepoint = unicode::utf32::join( bytes[3],
-                                                   bytes[2],
-                                                   bytes[1],
-                                                   bytes[0] );
-
-        Transcode::addCodePoint( src, prev, codepoint, out );
-        prev = codepoint;
-        in.read( ( char * ) &bytes, 4 );
-    }
-
-    return true;
+    return Transcode::U32toU32( src, out, Endianness::LE );
 }
 
 /**
@@ -449,25 +431,7 @@ bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
  * @return Success
  */
 bool Transcode::U32BEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    uint32_t prev = 0x00;
-
-    uint8_t bytes[4];
-    in.read( ( char * ) &bytes, 4 );
-
-    while( in.good() && !in.eof() ) {
-        uint32_t codepoint = unicode::utf32::join( bytes[0],
-                                                   bytes[1],
-                                                   bytes[2],
-                                                   bytes[3] );
-
-        Transcode::addCodePoint( src, prev, codepoint, out );
-        prev = codepoint;
-        in.read( ( char * ) &bytes, 4 );
-    }
-
-    return true;
+    return Transcode::U32toU32( src, out, Endianness::BE );
 }
 
 /**
@@ -613,4 +577,34 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out, Endianness en
     }
 
     return !( error );
+}
+
+/**
+ * Converts content of a UTF-32 byte stream to a collection of u32 characters
+ * @param src Source
+ * @param out UTF-32 collection
+ * @param endianness Endianness of the code units
+ * @return Success
+ */
+bool Transcode::U32toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness ) {
+    const auto joinLE = []( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4 ) { return unicode::utf32::join( b4, b3, b2, b1 ); };
+    const auto joinBE = []( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4 ) { return unicode::utf32::join( b1, b2, b3, b4 ); };
+
+    const auto join     = ( endianness == Endianness::LE ? joinLE : joinBE );
+    auto &     in       = src.stream();
+    auto &     pos      = src.position();
+    uint32_t   prev     = 0x00;
+    uint8_t    bytes[4] = { 0x00, 0x00 };
+
+    in.read( ( char * ) &bytes, 4 );
+
+    while( in.good() && !in.eof() ) {
+        uint32_t codepoint = join( bytes[0], bytes[1], bytes[2], bytes[3] );
+
+        Transcode::addCodePoint( src, prev, codepoint, out );
+        prev = codepoint;
+        in.read( ( char * ) &bytes, 4 );
+    }
+
+    return true;
 }

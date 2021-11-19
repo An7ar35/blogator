@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <string>
 
+/**
+ * UTF-32 specific methods
+ */
 namespace blogator::unicode::utf32 {
     uint32_t join( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept;
 

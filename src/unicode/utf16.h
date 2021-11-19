@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <cstddef>
 
+/**
+ * UTF-16 specific methods for UTF-16 code points
+ */
 namespace blogator::unicode::utf16 {
     uint16_t join( uint8_t byte1, uint8_t byte2 ) noexcept;
 
