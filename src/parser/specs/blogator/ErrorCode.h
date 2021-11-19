@@ -10,6 +10,7 @@ namespace blogator::parser::specs::blogator {
             NONE    = 0,
             UNKNOWN = 1,
             INVALID_UTF8_CODEPOINT_START_BYTE,
+            INVALID_UTF16_SURROGATE_PAIR,
             INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
             INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
             INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,

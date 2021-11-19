@@ -10,8 +10,8 @@ using namespace blogator::parser;
 Source::Source( std::istream &in, std::filesystem::path path ) :
     _stream( in ),
     _path( std::move( path ) ),
-    _format( encoding::Format_e::UNKNOWN ),
-    _confidence( encoding::Confidence_e::TENTATIVE ),
+    _format( encoding::Format::UNKNOWN ),
+    _confidence( encoding::Confidence::TENTATIVE ),
     _position( TextPos() )
 {}
 
@@ -21,11 +21,11 @@ Source::Source( std::istream &in, std::filesystem::path path ) :
  * @param path Filepath of source
  * @param format Known source format (with certainty)
  */
-Source::Source( std::istream &in, std::filesystem::path path, encoding::Format_e format ) :
+Source::Source( std::istream &in, std::filesystem::path path, encoding::Format format ) :
     _stream( in ),
     _path( std::move( path ) ),
     _format( format ),
-    _confidence( encoding::Confidence_e::CERTAIN ),
+    _confidence( encoding::Confidence::CERTAIN ),
     _position( TextPos() )
 {}
 
@@ -57,7 +57,7 @@ const std::filesystem::path &Source::path() const {
  * Gets the source format
  * @return Source format
  */
-encoding::Format_e Source::format() const {
+encoding::Format Source::format() const {
     return _format;
 }
 
@@ -65,7 +65,7 @@ encoding::Format_e Source::format() const {
  * Gets the confidence of the source format
  * @return Confidence
  */
-encoding::Confidence_e Source::confidence() const {
+encoding::Confidence Source::confidence() const {
     return _confidence;
 }
 
@@ -73,7 +73,7 @@ encoding::Confidence_e Source::confidence() const {
  * Sets the source format
  * @param format Format
  */
-void Source::setFormat( encoding::Format_e format ) {
+void Source::setFormat( encoding::Format format ) {
     _format = format;
 }
 
@@ -81,6 +81,6 @@ void Source::setFormat( encoding::Format_e format ) {
  * Sets the confidence of the source format
  * @param confidence Confidence
  */
-void Source::setConfidence( encoding::Confidence_e confidence ) {
+void Source::setConfidence( encoding::Confidence confidence ) {
     _confidence = confidence;
 }

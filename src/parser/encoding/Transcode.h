@@ -33,8 +33,13 @@ namespace blogator::parser::encoding {
         static bool U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
 
       private:
-        static bool U16toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness );
-        static bool U32toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness );
+        static uint16_t joinU16LE( uint8_t byte1, uint8_t byte2 ) noexcept;
+        static uint32_t joinU32LE( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept;
+
+        static bool U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
+        static bool U16toU32( Source &src, std::vector<uint32_t> &out );
+        static bool U32toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
+        static bool U32toU32( Source &src, std::vector<uint32_t> &out );
     };
 }
 

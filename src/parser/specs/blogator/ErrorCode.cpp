@@ -29,6 +29,10 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
         "invalid utf8 start byte",
         R"(This error occurs if the start byte of a utf8 code point byte sequence is in an invalid range (between 0x80 and 0xC0 or greater than 0xF7).)"
     };
+    arr[ErrorCode::INVALID_UTF16_SURROGATE_PAIR] = {
+        "invalid utf16 surrogate pair",
+        R"(This error occurs if a valid high surrogate is followed by an invalid low surrogate code unit.)"
+    };
     arr[ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM] = {
         "incomplete utf8 code point",
         R"(This error occurs if the input byte stream contains an incomplete UTF-8 codepoint as a result of abrupt read failure or premature EOF.)"

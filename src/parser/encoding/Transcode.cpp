@@ -332,12 +332,13 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
 
 /**
  * Converts a UTF-16BE encoded byte stream to UTF-32
- * @param src Source
+ * @param src Source (sets its format to `UTF16_BE`)
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    return Transcode::U16toU32( src, out, Endianness::BE );
+    src.setFormat( Format::UTF16_BE );
+    return Transcode::U16toU32( src, out );
 }
 
 bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
@@ -349,12 +350,13 @@ bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
 
 /**
  * Converts an UTF-16LE encoded byte stream to UTF-32
- * @param src Source
+ * @param src Source (sets its format to `UTF16_LE`)
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U16LEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    return Transcode::U16toU32( src, out, Endianness::LE );
+    src.setFormat( Format::UTF16_LE );
+    return Transcode::U16toU32( src, out );
 }
 
 bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
@@ -366,122 +368,71 @@ bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
 
 /**
  * Converts content of a UTF-32 little-endian byte stream to a collection of u32 characters
- * @param src Source
+ * @param src Source (sets its format to `UTF32_LE`)
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U32LEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    return Transcode::U32toU32( src, out, Endianness::LE );
+    src.setFormat( Format::UTF32_LE );
+    return Transcode::U32toU32( src, out );
 }
 
 /**
  * Converts content of a UTF-32 little-endian byte stream to a collection of u32 characters
  * @param pre_buffer Buffered input bytes
- * @param src Source
+ * @param src Source (sets its format to `UTF32_LE`)
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U32LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
-    const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
-
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    uint32_t prev = 0x00;
-
-    if( !pre_buffer.empty() ) {
-        if( hasIncompleteCodePoint( pre_buffer ) ) {
-            size_t remainder = ( pre_buffer.size() % 4 );
-            size_t required  = ( 4 - remainder );
-
-            for( auto i = 0; !in.eof() && in.good() && i < required; ++i ) {
-                pre_buffer.emplace_back( in.get() );
-            }
-        }
-
-        const size_t code_point_count = ( pre_buffer.size() / 4 );
-
-        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
-            uint32_t codepoint = unicode::utf32::join( pre_buffer.at( byte_i + 3 ),
-                                                       pre_buffer.at( byte_i + 2 ),
-                                                       pre_buffer.at( byte_i + 1 ),
-                                                       pre_buffer.at( byte_i ) );
-
-            Transcode::addCodePoint( src, prev, codepoint, out );
-            prev = codepoint;
-        }
-
-        if( hasIncompleteCodePoint( pre_buffer ) ) {
-            logging::ParserLog::log( src.path(),
-                                     specs::Context::BLOGATOR,
-                                     specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
-                                     pos.increment()
-            );
-
-            return false; //EARLY RETURN
-        }
-    }
-
-    return Transcode::U32LEtoU32( src, out );
+    src.setFormat( Format::UTF32_LE );
+    return Transcode::U32toU32( pre_buffer, src, out );
 }
 
 /**
  * Converts content of a UTF-32 Big-endian byte stream to a collection of u32 characters
- * @param src Source
+ * @param src Source (sets its format to `UTF32_BE`)
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U32BEtoU32( Source &src, std::vector<uint32_t> &out ) {
-    return Transcode::U32toU32( src, out, Endianness::BE );
+    src.setFormat( Format::UTF32_BE );
+    return Transcode::U32toU32( src, out );
 }
 
 /**
  * Converts content of a UTF-32 big-endian byte stream to a collection of u32 characters
  * @param pre_buffer Buffered input bytes
- * @param src Source
+ * @param src Source (sets its format to `UTF32_BE`)
  * @param out UTF-32 collection
  * @return Success
  */
 bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
-    const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
+    src.setFormat( Format::UTF32_BE );
+    return Transcode::U32toU32( pre_buffer, src, out );
+}
 
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    uint32_t prev = 0x00;
 
-    if( !pre_buffer.empty() ) {
-        if( hasIncompleteCodePoint( pre_buffer ) ) {
-            size_t remainder = ( pre_buffer.size() % 4 );
-            size_t required  = ( 4 - remainder );
 
-            for( auto i = 0; !in.eof() && in.good() && i < required; ++i ) {
-                pre_buffer.emplace_back( in.get() );
-            }
-        }
+uint16_t Transcode::joinU16LE( uint8_t byte1, uint8_t byte2 ) noexcept {
+    return unicode::utf16::join( byte2, byte1 );
+}
 
-        const size_t code_point_count = ( pre_buffer.size() / 4 );
+uint32_t Transcode::joinU32LE( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept {
+    return unicode::utf32::join( byte4, byte3, byte2, byte1 );
+}
 
-        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
-            uint32_t codepoint = unicode::utf32::join( pre_buffer.at( byte_i ),
-                                                       pre_buffer.at( byte_i + 1 ),
-                                                       pre_buffer.at( byte_i + 2 ),
-                                                       pre_buffer.at( byte_i + 3 ) );
+/**
+ * Converts content of a UTF-32 byte stream to a collection of u32 characters
+ * @param pre_buffer Buffered input bytes
+ * @param src Source (UTF-16 LE/BE format must be set prior)
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
+    //TODO
 
-            Transcode::addCodePoint( src, prev, codepoint, out );
-            prev = codepoint;
-        }
-
-        if( hasIncompleteCodePoint( pre_buffer ) ) {
-            logging::ParserLog::log( src.path(),
-                                     specs::Context::BLOGATOR,
-                                     specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
-                                     pos.increment()
-            );
-
-            return false; //EARLY RETURN
-        }
-    }
-
-    return Transcode::U32BEtoU32( src, out );
+    return U16toU32( src, out );
 }
 
 /**
@@ -491,11 +442,8 @@ bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
  * @param endianness Endianness of the code units
  * @return Success
  */
-bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness ) {
-    const auto joinLE = []( uint8_t byte1, uint8_t byte2 ) { return unicode::utf16::join( byte2, byte1 ); };
-    const auto joinBE = []( uint8_t byte1, uint8_t byte2 ) { return unicode::utf16::join( byte1, byte2 ); };
-
-    const auto join  = ( endianness == Endianness::LE ? joinLE : joinBE );
+bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
+    const auto join  = ( src.format() == Format::UTF16_LE ? Transcode::joinU16LE : unicode::utf16::join );
     auto &     in    = src.stream();
     auto &     pos   = src.position();
     uint32_t   prev  = 0x00;
@@ -581,16 +529,63 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out, Endianness en
 
 /**
  * Converts content of a UTF-32 byte stream to a collection of u32 characters
- * @param src Source
+ * @param pre_buffer Buffered input bytes
+ * @param src Source (UTF-32 LE/BE format must be set prior)
  * @param out UTF-32 collection
- * @param endianness Endianness of the code units
  * @return Success
  */
-bool Transcode::U32toU32( Source &src, std::vector<uint32_t> &out, Endianness endianness ) {
-    const auto joinLE = []( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4 ) { return unicode::utf32::join( b4, b3, b2, b1 ); };
-    const auto joinBE = []( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4 ) { return unicode::utf32::join( b1, b2, b3, b4 ); };
+bool Transcode::U32toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
+    const auto hasIncompleteCodePoint = []( std::deque<uint8_t> &buffer ) { return ( ( buffer.size() % 4 ) > 0 ); };
 
-    const auto join     = ( endianness == Endianness::LE ? joinLE : joinBE );
+    const auto join = ( src.format() == Format::UTF32_LE ? Transcode::joinU32LE : unicode::utf32::join );
+    auto &     in   = src.stream();
+    auto &     pos  = src.position();
+    uint32_t   prev = 0x00;
+
+    if( !pre_buffer.empty() ) {
+        if( hasIncompleteCodePoint( pre_buffer ) ) {
+            size_t remainder = ( pre_buffer.size() % 4 );
+            size_t required  = ( 4 - remainder );
+
+            for( auto i = 0; !in.eof() && in.good() && i < required; ++i ) {
+                pre_buffer.emplace_back( in.get() );
+            }
+        }
+
+        const size_t code_point_count = ( pre_buffer.size() / 4 );
+
+        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
+            uint32_t codepoint = join( pre_buffer.at( byte_i ),
+                                       pre_buffer.at( byte_i + 1 ),
+                                       pre_buffer.at( byte_i + 2 ),
+                                       pre_buffer.at( byte_i + 3 ) );
+
+            Transcode::addCodePoint( src, prev, codepoint, out );
+            prev = codepoint;
+        }
+
+        if( hasIncompleteCodePoint( pre_buffer ) ) {
+            logging::ParserLog::log( src.path(),
+                                     specs::Context::BLOGATOR,
+                                     specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
+                                     pos.increment()
+            );
+
+            return false; //EARLY RETURN
+        }
+    }
+
+    return Transcode::U32toU32( src, out );
+}
+
+/**
+ * Converts content of a UTF-32 byte stream to a collection of u32 characters
+ * @param src Source (UTF-32 LE/BE format must be set prior)
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U32toU32( Source &src, std::vector<uint32_t> &out ) {
+    const auto join     = ( src.format() == Format::UTF32_LE ? Transcode::joinU32LE : unicode::utf32::join );
     auto &     in       = src.stream();
     auto &     pos      = src.position();
     uint32_t   prev     = 0x00;

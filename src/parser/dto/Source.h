@@ -15,22 +15,22 @@ namespace blogator::parser {
     class Source {
       public:
         Source( std::istream & in, std::filesystem::path path );
-        Source( std::istream & in, std::filesystem::path path, encoding::Format_e format );
+        Source( std::istream & in, std::filesystem::path path, encoding::Format format );
 
         std::istream & stream();
         TextPos & position();
         [[nodiscard]] const std::filesystem::path & path() const;
-        [[nodiscard]] encoding::Format_e format() const;
-        [[nodiscard]] encoding::Confidence_e confidence() const;
+        [[nodiscard]] encoding::Format format() const;
+        [[nodiscard]] encoding::Confidence confidence() const;
 
-        void setFormat( encoding::Format_e format );
-        void setConfidence( encoding::Confidence_e confidence );
+        void setFormat( encoding::Format format );
+        void setConfidence( encoding::Confidence confidence );
 
       private:
         std::istream              & _stream;
         const std::filesystem::path _path;
-        encoding::Format_e          _format;
-        encoding::Confidence_e      _confidence;
+        encoding::Format            _format;
+        encoding::Confidence        _confidence;
         TextPos                     _position;
     };
 }
