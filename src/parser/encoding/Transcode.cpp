@@ -168,7 +168,10 @@ size_t Transcode::fetchCodeUnit( std::istream &stream, uint8_t * buffer, size_t 
 
     while( stream.good() && byte_n < byte_ln  ) {
         buffer[ byte_n ] = stream.get();
-        ++byte_n;
+
+        if( stream ) {
+            ++byte_n;
+        }
     }
 
     return byte_n;
@@ -186,7 +189,10 @@ size_t Transcode::fetchCodeUnit( std::istream &stream, std::deque<uint8_t> &buff
 
     while( stream.good() && byte_n < byte_ln  ) {
         buffer.emplace_back( stream.get() );
-        ++byte_n;
+
+        if( stream ) {
+            ++byte_n;
+        }
     }
 
     return byte_n;
@@ -483,7 +489,7 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
             if( pre_buffer.size() == 1 && ( fetchCodeUnit( in, pre_buffer, 1 ) != 1 ) ) {
                 logging::ParserLog::log( src.path(),
                                          specs::Context::BLOGATOR,
-                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
                                          pos
                 );
 
@@ -524,7 +530,7 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
 
                 } else {
                     logging::ParserLog::log( src.path(),
-                                             specs::Context::HTML5,
+                                             specs::Context::BLOGATOR,
                                              specs::blogator::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                              pos );
 

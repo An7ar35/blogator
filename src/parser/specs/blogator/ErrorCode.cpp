@@ -37,6 +37,10 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
         "incomplete utf8 code point",
         R"(This error occurs if the input byte stream contains an incomplete UTF-8 codepoint as a result of abrupt read failure or premature EOF.)"
     };
+    arr[ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM] = {
+        "incomplete utf16 high surrogate code unit",
+        R"(This error occurs if there is not enough bytes available to fully form a high surrogate.)"
+    };
     arr[ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM] = {
         "incomplete utf16 code point",
         R"(This error occurs if the input byte stream contains an incomplete UTF-16 codepoint as a result of abrupt read failure or premature EOF.)"
@@ -46,7 +50,6 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
         R"(This error occurs if the input byte stream contains an incomplete UTF-32 codepoint as a result of abrupt read failure or premature EOF.)"
     };
 
-    //TODO log debug
     error_desc_loaded = true;
 }
 
