@@ -31,10 +31,10 @@ bool Transcode::convert( Source &src, std::vector<uint32_t> &out ) {
 
     switch( src.format() ) {
         case Format::UTF8    : return Transcode::U8toU32( buffer, src, out );
-        case Format::UTF16_LE: return Transcode::U16LEtoU32( buffer, src, out );
-        case Format::UTF16_BE: return Transcode::U16BEtoU32( buffer, src, out );
-        case Format::UTF32_LE: return Transcode::U32LEtoU32( buffer, src, out );
-        case Format::UTF32_BE: return Transcode::U32BEtoU32( buffer, src, out );
+        case Format::UTF16_LE: [[fallthrough]];
+        case Format::UTF16_BE: return Transcode::U16toU32( buffer, src, out );
+        case Format::UTF32_LE: [[fallthrough]];
+        case Format::UTF32_BE: return Transcode::U32toU32( buffer, src, out );
         case Format::UNKNOWN : throw std::invalid_argument( "Failed to detect format of input." );
         default              : throw std::invalid_argument( "Input format not supported." );
     }
@@ -163,11 +163,29 @@ bool Transcode::U32toByteStream( const std::vector<uint32_t> &in, std::ostream &
  * @param byte_ln Number of bytes to get
  * @return Number of bytes fetched successfully
  */
-size_t Transcode::fetchCodeUnit(std::istream &stream, uint8_t * buffer, size_t byte_ln ) {
+size_t Transcode::fetchCodeUnit( std::istream &stream, uint8_t * buffer, size_t byte_ln ) {
     size_t byte_n = 0;
 
     while( stream.good() && byte_n < byte_ln  ) {
         buffer[ byte_n ] = stream.get();
+        ++byte_n;
+    }
+
+    return byte_n;
+}
+
+/**
+ * Grabs a code unit of n bytes from a stream
+ * @param stream Source stream
+ * @param buffer Byte buffer
+ * @param byte_ln Number of bytes to get
+ * @return Number of bytes fetched successfully
+ */
+size_t Transcode::fetchCodeUnit( std::istream &stream, std::deque<uint8_t> &buffer, size_t byte_ln ) {
+    size_t byte_n = 0;
+
+    while( stream.good() && byte_n < byte_ln  ) {
+        buffer.emplace_back( stream.get() );
         ++byte_n;
     }
 
@@ -315,6 +333,8 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
                                          pos
                 );
 
+                //TODO log error
+
                 return false; //EARLY RETURN
             }
 
@@ -341,11 +361,16 @@ bool Transcode::U16BEtoU32( Source &src, std::vector<uint32_t> &out ) {
     return Transcode::U16toU32( src, out );
 }
 
-bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto &   in   = src.stream();
-    auto &   pos  = src.position();
-    //TODO pre_buffer
-    return Transcode::U16BEtoU32( src, out );
+/**
+ * Converts a UTF-16BE encoded byte stream to UTF-32
+ * @param pre_buffer Buffered input bytes
+ * @param src Source (sets its format to `UTF16_BE`)
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U16BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
+    src.setFormat( Format::UTF16_BE );
+    return Transcode::U16toU32( pre_buffer, src, out );
 }
 
 /**
@@ -359,11 +384,16 @@ bool Transcode::U16LEtoU32( Source &src, std::vector<uint32_t> &out ) {
     return Transcode::U16toU32( src, out );
 }
 
-bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO
-    auto & in  = src.stream();
-    auto & pos = src.position();
-    //TODO pre_buffer
-    return Transcode::U16LEtoU32( src, out );
+/**
+ * Converts an UTF-16LE encoded byte stream to UTF-32
+ * @param pre_buffer Buffered input bytes
+ * @param src Source (sets its format to `UTF16_LE`)
+ * @param out UTF-32 collection
+ * @return Success
+ */
+bool Transcode::U16LEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
+    src.setFormat( Format::UTF16_LE );
+    return Transcode::U16toU32( pre_buffer, src, out );
 }
 
 /**
@@ -413,11 +443,24 @@ bool Transcode::U32BEtoU32( std::deque<uint8_t> &pre_buffer, Source &src, std::v
 }
 
 
-
+/**
+ * Byte-joining for U16 little endian
+ * @param byte1 First byte in order
+ * @param byte2 Second byte in order
+ * @return U16 code unit
+ */
 uint16_t Transcode::joinU16LE( uint8_t byte1, uint8_t byte2 ) noexcept {
     return unicode::utf16::join( byte2, byte1 );
 }
 
+/**
+ * Byte joining for U32 little endian
+ * @param byte1 First byte in order
+ * @param byte2 Second byte in order
+ * @param byte3 Third byte in order
+ * @param byte4 Fourth byte in order
+ * @return U32 code unit
+ */
 uint32_t Transcode::joinU32LE( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept {
     return unicode::utf32::join( byte4, byte3, byte2, byte1 );
 }
@@ -430,14 +473,90 @@ uint32_t Transcode::joinU32LE( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint
  * @return Success
  */
 bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
-    //TODO
+    const auto join  = ( src.format() == Format::UTF16_LE ? Transcode::joinU16LE : unicode::utf16::join );
+    auto &     in    = src.stream();
+    auto &     pos   = src.position();
+    uint32_t   prev  = 0x00;
+
+    if( !pre_buffer.empty() ) {
+        while( !pre_buffer.empty() ) {
+            if( pre_buffer.size() == 1 && ( fetchCodeUnit( in, pre_buffer, 1 ) != 1 ) ) {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                         pos
+                );
+
+                //TODO log error
+
+                return false; //EARLY RETURN
+            }
+
+            uint32_t   codepoint      = 0x00;
+            auto       high_surrogate = join( pre_buffer[0], pre_buffer[1] );
+            auto       byte_length    = unicode::utf16::codeunits( high_surrogate ) * 2;
+            const auto missing_bytes  = ( byte_length > pre_buffer.size() ? ( byte_length - pre_buffer.size() ) : 0 );
+
+            if( fetchCodeUnit( in, pre_buffer, missing_bytes ) != missing_bytes ) {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                         pos
+                );
+
+                //TODO log error
+
+                return false; //EARLY RETURN
+            };
+
+            if( byte_length == 2 ) { //i.e. high surrogate code unit
+                codepoint = unicode::utf16::toU32( high_surrogate );
+                Transcode::addCodePoint( src, prev, codepoint, out );
+                prev = codepoint;
+
+            } else if( byte_length == 4 ) { //i.e. high-low surrogate pair
+                auto low_surrogate  = join( pre_buffer[2], pre_buffer[3] );
+
+                if( unicode::utf16::islowsurrogate( low_surrogate ) ) {
+                    codepoint = unicode::utf16::toU32( high_surrogate, low_surrogate );
+                    Transcode::addCodePoint( src, prev, codepoint, out );
+                    prev = codepoint;
+
+                } else {
+                    logging::ParserLog::log( src.path(),
+                                             specs::Context::HTML5,
+                                             specs::blogator::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
+                                             pos );
+
+                    //TODO log error: low surrogate in invalid range (+hex for pair) - ignored
+                }
+
+            } else {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::HTML5,
+                                         specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                         pos );
+
+                //TODO log error: high surrogate in low surrogate range (+hex representation)
+
+                codepoint = unicode::utf16::toU32( high_surrogate ); //should be dealt with by the tokeniser
+                Transcode::addCodePoint( src, prev, codepoint, out );
+                prev        = codepoint;
+                byte_length = ( byte_length == 0 ? 2 : byte_length ); //discard the code unit
+            }
+
+            for( auto i = 0; i < byte_length; ++i ) {
+                pre_buffer.pop_front();
+            }
+        }
+    }
 
     return U16toU32( src, out );
 }
 
 /**
  * Converts an UTF-16 encoded byte stream to UTF-32
- * @param src Source
+ * @param src Source  UTF-16 LE/BE format must be set prior)
  * @param out UTF-32 collection
  * @param endianness Endianness of the code units
  * @return Success
