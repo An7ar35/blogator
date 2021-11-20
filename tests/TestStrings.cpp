@@ -4,16 +4,23 @@
 
 using blogator::tests::TestStrings;
 
-const std::u32string TestStrings::test_str[2] = {
+const std::u32string TestStrings::test_str[COUNT] = {
+    //STR #0: ASCII
     U"Hello, world!",
 
+    //STR #1: Mixed ASCII and unicode high-range
     U"\U0000210c\U0001d522\U0001d529\U0001d529\U0001d52c\U0000002c"
      "\U00000020\U0001d534\U0001d52c\U0001d52f\U0001d529\U0001d521"
-     "\U00000021" //"ℌ𝔢𝔩𝔩𝔬, 𝔴𝔬𝔯𝔩𝔡!"
+     "\U00000021", //"ℌ𝔢𝔩𝔩𝔬, 𝔴𝔬𝔯𝔩𝔡!"
+
+    //STR #2: Unicode high-range
+    U"\U0001f3f4"
+     "\U0001f183\U0001f174\U0001f182\U0001f183\U0001f178\U0001f17d\U0001f176"
+     "\U0001f619", //🏴🆃🅴🆂🆃🅸🅽🅶😙
 };
 
 
-const std::function<void( std::ostream & )> TestStrings::write_u8[2] = {
+const std::function<void( std::ostream & )> TestStrings::write_u8[COUNT] = {
     []( std::ostream & os ) {
         os << (char) 0x48 << (char) 0x65 << (char) 0x6C << (char) 0x6C
            << (char) 0x6F << (char) 0x2C << (char) 0x20 << (char) 0x77
@@ -33,74 +40,114 @@ const std::function<void( std::ostream & )> TestStrings::write_u8[2] = {
            << (char) 0xaf << (char) 0xf0 << (char) 0x9d << (char) 0x94
            << (char) 0xa9 << (char) 0xf0 << (char) 0x9d << (char) 0x94
            << (char) 0xa1 << (char) 0x21;
-    }
-};
-
-const std::function<void( std::ostream & )> TestStrings::write_u16le[2] = {
-    []( std::ostream &os ) {
-        os << (char) 0x48 << (char) 0x00 //4800
-           << (char) 0x65 << (char) 0x00 //6500
-           << (char) 0x6C << (char) 0x00 //6c00
-           << (char) 0x6C << (char) 0x00 //6c00
-           << (char) 0x6F << (char) 0x00 //6f00
-           << (char) 0x2C << (char) 0x00 //2c00
-           << (char) 0x20 << (char) 0x00 //2000
-           << (char) 0x77 << (char) 0x00 //7700
-           << (char) 0x6F << (char) 0x00 //6f00
-           << (char) 0x72 << (char) 0x00 //7200
-           << (char) 0x6C << (char) 0x00 //6c00
-           << (char) 0x64 << (char) 0x00 //6400
-           << (char) 0x21 << (char) 0x00;//2100
     },
 
     []( std::ostream &os ) {
-        os << (char) 0x0C << (char) 0x21 << (char) 0x35 << (char) 0xD8 //c210 35d8
-           << (char) 0x22 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //22dd 35d8
-           << (char) 0x29 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //29dd 35d8
-           << (char) 0x29 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //29dd 35d8
-           << (char) 0x2C << (char) 0xDD << (char) 0x2C << (char) 0x00 //2cdd 2c00
-           << (char) 0x20 << (char) 0x00 << (char) 0x35 << (char) 0xD8 //2000 35d8
-           << (char) 0x34 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //34dd 35d8
-           << (char) 0x2C << (char) 0xDD << (char) 0x35 << (char) 0xD8 //2cdd 35d8
-           << (char) 0x2F << (char) 0xDD << (char) 0x35 << (char) 0xD8 //2fdd 35d8
-           << (char) 0x29 << (char) 0xDD << (char) 0x35 << (char) 0xD8 //29dd 35d8
-           << (char) 0x21 << (char) 0xDD << (char) 0x21 << (char) 0x00;//21dd 2100
+        os << (char) 0xf0 << (char) 0x9f << (char) 0x8f << (char) 0xb4
+           << (char) 0xf0 << (char) 0x9f << (char) 0x86 << (char) 0x83
+           << (char) 0xf0 << (char) 0x9f << (char) 0x85 << (char) 0xb4
+           << (char) 0xf0 << (char) 0x9f << (char) 0x86 << (char) 0x82
+           << (char) 0xf0 << (char) 0x9f << (char) 0x86 << (char) 0x83
+           << (char) 0xf0 << (char) 0x9f << (char) 0x85 << (char) 0xb8
+           << (char) 0xf0 << (char) 0x9f << (char) 0x85 << (char) 0xbd
+           << (char) 0xf0 << (char) 0x9f << (char) 0x85 << (char) 0xb6
+           << (char) 0xf0 << (char) 0x9f << (char) 0x98 << (char) 0x99;
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u16be[2] = {
+const std::function<void( std::ostream & )> TestStrings::write_u16le[COUNT] = {
     []( std::ostream &os ) {
-        os << (char) 0x00 << (char) 0x48 //0048
-           << (char) 0x00 << (char) 0x65 //0065
-           << (char) 0x00 << (char) 0x6C //006c
-           << (char) 0x00 << (char) 0x6C //006c
-           << (char) 0x00 << (char) 0x6F //006f
-           << (char) 0x00 << (char) 0x2C //002c
-           << (char) 0x00 << (char) 0x20 //0020
-           << (char) 0x00 << (char) 0x77 //0077
-           << (char) 0x00 << (char) 0x6F //006f
-           << (char) 0x00 << (char) 0x72 //0072
-           << (char) 0x00 << (char) 0x6C //006c
-           << (char) 0x00 << (char) 0x64 //0064
-           << (char) 0x00 << (char) 0x21;//0021
+        os << (char) 0x48 << (char) 0x00 //0x4800
+           << (char) 0x65 << (char) 0x00 //0x6500
+           << (char) 0x6C << (char) 0x00 //0x6c00
+           << (char) 0x6C << (char) 0x00 //0x6c00
+           << (char) 0x6F << (char) 0x00 //0x6f00
+           << (char) 0x2C << (char) 0x00 //0x2c00
+           << (char) 0x20 << (char) 0x00 //0x2000
+           << (char) 0x77 << (char) 0x00 //0x7700
+           << (char) 0x6F << (char) 0x00 //0x6f00
+           << (char) 0x72 << (char) 0x00 //0x7200
+           << (char) 0x6C << (char) 0x00 //0x6c00
+           << (char) 0x64 << (char) 0x00 //0x6400
+           << (char) 0x21 << (char) 0x00;//0x2100
     },
 
     []( std::ostream &os ) {
-        os << (char) 0x21 << (char) 0x0C << (char) 0xD8 << (char) 0x35 //210c d835
-           << (char) 0xDD << (char) 0x22 << (char) 0xD8 << (char) 0x35 //dd22 d835
-           << (char) 0xDD << (char) 0x29 << (char) 0xD8 << (char) 0x35 //dd29 d835
-           << (char) 0xDD << (char) 0x29 << (char) 0xD8 << (char) 0x35 //dd29 d835
-           << (char) 0xDD << (char) 0x2C << (char) 0x00 << (char) 0x2C //dd2c 002c
-           << (char) 0x00 << (char) 0x20 << (char) 0xD8 << (char) 0x35 //0020 d835
-           << (char) 0xDD << (char) 0x34 << (char) 0xD8 << (char) 0x35 //dd34 d835
-           << (char) 0xDD << (char) 0x2C << (char) 0xD8 << (char) 0x35 //dd2c d835
-           << (char) 0xDD << (char) 0x2F << (char) 0xD8 << (char) 0x35 //dd2f d835
-           << (char) 0xDD << (char) 0x29 << (char) 0xD8 << (char) 0x35 //dd29 d835
-           << (char) 0xDD << (char) 0x21 << (char) 0x00 << (char) 0x21;//dd21 0021
+        os << (char) 0x0C << (char) 0x21                               //0xC210
+           << (char) 0x35 << (char) 0xD8 << (char) 0x22 << (char) 0xDD //0x35D8 0x22DD
+           << (char) 0x35 << (char) 0xD8 << (char) 0x29 << (char) 0xDD //0x35D8 0x29dd
+           << (char) 0x35 << (char) 0xD8 << (char) 0x29 << (char) 0xDD //0x35D8 0x29DD
+           << (char) 0x35 << (char) 0xD8 << (char) 0x2C << (char) 0xDD //0x35D8 0x2CDD
+           << (char) 0x2C << (char) 0x00                               //0x2C00
+           << (char) 0x20 << (char) 0x00                               //0x2000
+           << (char) 0x35 << (char) 0xD8 << (char) 0x34 << (char) 0xDD //0x35D8 0x34DD
+           << (char) 0x35 << (char) 0xD8 << (char) 0x2C << (char) 0xDD //0x35D8 0x2CDD
+           << (char) 0x35 << (char) 0xD8 << (char) 0x2F << (char) 0xDD //0x35D8 0x2FDD
+           << (char) 0x35 << (char) 0xD8 << (char) 0x29 << (char) 0xDD //0x35D8 0x29DD
+           << (char) 0x35 << (char) 0xD8 << (char) 0x21 << (char) 0xDD //0x35D8 0x21DD
+           << (char) 0x21 << (char) 0x00;                              //0x2100
+    },
+
+    []( std::ostream &os ) {
+        os << (char) 0x3C << (char) 0xD8 << (char) 0xF4 << (char) 0xDF //0x3CD8 0xF4DF
+           << (char) 0x3C << (char) 0xD8 << (char) 0x83 << (char) 0xDD //0x3CD8 0x83DD
+           << (char) 0x3C << (char) 0xD8 << (char) 0x74 << (char) 0xDD //0x3CD8 0x74DD
+           << (char) 0x3C << (char) 0xD8 << (char) 0x82 << (char) 0xDD //0x3CD8 0x82DD
+           << (char) 0x3C << (char) 0xD8 << (char) 0x83 << (char) 0xDD //0x3CD8 0x83DD
+           << (char) 0x3C << (char) 0xD8 << (char) 0x78 << (char) 0xDD //0x3CD8 0x78DD
+           << (char) 0x3C << (char) 0xD8 << (char) 0x7D << (char) 0xDD //0x3CD8 0x7DDD
+           << (char) 0x3C << (char) 0xD8 << (char) 0x76 << (char) 0xDD //0x3CD8 0x76DD
+           << (char) 0x3D << (char) 0xD8 << (char) 0x19 << (char) 0xDE;//0x3DD8 0x19DE
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u32le[2] = {
+const std::function<void( std::ostream & )> TestStrings::write_u16be[COUNT] = {
+    []( std::ostream &os ) {
+        os << (char) 0x00 << (char) 0x48 //0x0048
+           << (char) 0x00 << (char) 0x65 //0x0065
+           << (char) 0x00 << (char) 0x6C //0x006c
+           << (char) 0x00 << (char) 0x6C //0x006c
+           << (char) 0x00 << (char) 0x6F //0x006f
+           << (char) 0x00 << (char) 0x2C //0x002c
+           << (char) 0x00 << (char) 0x20 //0x0020
+           << (char) 0x00 << (char) 0x77 //0x0077
+           << (char) 0x00 << (char) 0x6F //0x006f
+           << (char) 0x00 << (char) 0x72 //0x0072
+           << (char) 0x00 << (char) 0x6C //0x006c
+           << (char) 0x00 << (char) 0x64 //0x0064
+           << (char) 0x00 << (char) 0x21;//0x0021
+    },
+
+    []( std::ostream &os ) {
+        os << (char) 0x21 << (char) 0x0C                               //0x210C
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x22 //0xD835 0xDD22
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x29 //0xD835 0xDD29
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x29 //0xD835 0xDD29
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x2C //0xD835 0xDD2C
+           << (char) 0x00 << (char) 0x2C                               //0x002C
+           << (char) 0x00 << (char) 0x20                               //0x0020
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x34 //0xD835 0xDD34
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x2C //0xD835 0xDD2C
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x2F //0xD835 0xDD2F
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x29 //0xD835 0xDD29
+           << (char) 0xD8 << (char) 0x35 << (char) 0xDD << (char) 0x21 //0xD835 0xDD21
+           << (char) 0x00 << (char) 0x21;                              //0x0021
+    },
+
+    []( std::ostream &os ) {
+        os << (char) 0xD8 << (char) 0x3C << (char) 0xDF << (char) 0xF4 //0xD83C 0xDFF4
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x83 //0xD83C 0xDD83
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x74 //0xD83C 0xDD74
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x82 //0xD83C 0xDD82
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x83 //0xD83C 0xDD83
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x78 //0xD83C 0xDD78
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x7D //0xD83C 0xDD7D
+           << (char) 0xD8 << (char) 0x3C << (char) 0xDD << (char) 0x76 //0xD83C 0xDD76
+           << (char) 0xD8 << (char) 0x3D << (char) 0xDE << (char) 0x19;//0xD83D 0xDE19
+    }
+};
+
+const std::function<void( std::ostream & )> TestStrings::write_u32le[COUNT] = {
     []( std::ostream &os ) {
         os << (char) 0x48 << (char) 0x00 << (char) 0x00 << (char) 0x00 //0x48000000
            << (char) 0x65 << (char) 0x00 << (char) 0x00 << (char) 0x00 //0x65000000
@@ -131,10 +178,22 @@ const std::function<void( std::ostream & )> TestStrings::write_u32le[2] = {
            << (char) 0x29 << (char) 0xD5 << (char) 0x01 << (char) 0x00 //0x0001d529
            << (char) 0x21 << (char) 0xD5 << (char) 0x01 << (char) 0x00 //0x0001d521
            << (char) 0x21 << (char) 0x00 << (char) 0x00 << (char) 0x00;//0x00000021
+    },
+
+    []( std::ostream &os ) {
+        os << (char) 0xF4 << (char) 0xF3 << (char) 0x01 << (char) 0x00 //0xf4f30100
+           << (char) 0x83 << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x83f10100
+           << (char) 0x74 << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x74f10100
+           << (char) 0x82 << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x82f10100
+           << (char) 0x83 << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x83f10100
+           << (char) 0x78 << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x78f10100
+           << (char) 0x7D << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x7df10100
+           << (char) 0x76 << (char) 0xF1 << (char) 0x01 << (char) 0x00 //0x76f10100
+           << (char) 0x19 << (char) 0xF6 << (char) 0x01 << (char) 0x00;//0x19f60100
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u32be[2] = {
+const std::function<void( std::ostream & )> TestStrings::write_u32be[COUNT] = {
     []( std::ostream &os ) {
         os << (char) 0x00 << (char) 0x00 << (char) 0x00 << (char) 0x48 //0x00000048
            << (char) 0x00 << (char) 0x00 << (char) 0x00 << (char) 0x65 //0x00000065
@@ -165,7 +224,19 @@ const std::function<void( std::ostream & )> TestStrings::write_u32be[2] = {
            << (char) 0x00 << (char) 0x01 << (char) 0xD5 << (char) 0x29 //0x0001d529
            << (char) 0x00 << (char) 0x01 << (char) 0xD5 << (char) 0x21 //0x0001d521
            << (char) 0x00 << (char) 0x00 << (char) 0x00 << (char) 0x21;//0x00000021
-    }
+    },
+
+    []( std::ostream &os ) {
+        os << (char) 0x00 << (char) 0x01 << (char) 0xF3 << (char) 0xF4 //0x0001f3f4
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x83 //0x0001f183
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x74 //0x0001f174
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x82 //0x0001f182
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x83 //0x0001f183
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x78 //0x0001f178
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x7D //0x0001f17d
+           << (char) 0x00 << (char) 0x01 << (char) 0xF1 << (char) 0x76 //0x0001f176
+           << (char) 0x00 << (char) 0x01 << (char) 0xF6 << (char) 0x19;//0x0001f619
+    },
 };
 
 /**

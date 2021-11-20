@@ -13,7 +13,7 @@ namespace blogator::tests {
         static size_t count();
 
       private:
-        static const size_t                                COUNT { 2 };
+        static const size_t                                COUNT { 3 };
         static const std::u32string                        test_str   [COUNT];
         static const std::function<void( std::ostream & )> write_u8   [COUNT];
         static const std::function<void( std::ostream & )> write_u16le[COUNT];
