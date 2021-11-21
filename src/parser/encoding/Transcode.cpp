@@ -479,10 +479,10 @@ uint32_t Transcode::joinU32LE( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint
  * @return Success
  */
 bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
-    const auto join  = ( src.format() == Format::UTF16_LE ? Transcode::joinU16LE : unicode::utf16::join );
-    auto &     in    = src.stream();
-    auto &     pos   = src.position();
-    uint32_t   prev  = 0x00;
+    const auto join = ( src.format() == Format::UTF16_LE ? Transcode::joinU16LE : unicode::utf16::join );
+    auto &     in   = src.stream();
+    auto &     pos  = src.position();
+    uint32_t   prev = 0x00;
 
     if( !pre_buffer.empty() ) {
         while( !pre_buffer.empty() ) {
@@ -614,7 +614,7 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
 
                     } else {
                         logging::ParserLog::log( src.path(),
-                                                 specs::Context::HTML5,
+                                                 specs::Context::BLOGATOR,
                                                  specs::blogator::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                  pos );
 
@@ -637,7 +637,7 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
             }
 
         } else { //EOF and error-control cases
-            if( in && ( error = ( bytes != 0 ) ) ) {
+            if( ( error = ( bytes != 0 ) ) ) {
                 logging::ParserLog::log( src.path(),
                                          specs::Context::BLOGATOR,
                                          specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
@@ -672,8 +672,14 @@ bool Transcode::U32toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
             size_t remainder = ( pre_buffer.size() % 4 );
             size_t required  = ( 4 - remainder );
 
-            for( auto i = 0; !in.eof() && in.good() && i < required; ++i ) {
-                pre_buffer.emplace_back( in.get() );
+            if( fetchCodeUnit( in, pre_buffer, required ) != required ) {
+                logging::ParserLog::log( src.path(),
+                                         specs::Context::BLOGATOR,
+                                         specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
+                                         pos
+                );
+
+                return false; //EARLY RETURN
             }
         }
 
@@ -687,16 +693,6 @@ bool Transcode::U32toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
 
             Transcode::addCodePoint( src, prev, codepoint, out );
             prev = codepoint;
-        }
-
-        if( hasIncompleteCodePoint( pre_buffer ) ) {
-            logging::ParserLog::log( src.path(),
-                                     specs::Context::BLOGATOR,
-                                     specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
-                                     pos.increment()
-            );
-
-            return false; //EARLY RETURN
         }
     }
 
