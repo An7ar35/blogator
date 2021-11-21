@@ -20,11 +20,11 @@ using           blogator::parser::specs::Context;
  */
 class ParserLogCatcher {
   public:
-    void log( const blogator::parser::logging::ErrorObject & e ) {
+    void log( const logging::ErrorObject & e ) {
         _errors.push_back( e );
     }
 
-    [[nodiscard]] const std::vector<blogator::parser::logging::ErrorObject> & getErrors() const {
+    [[nodiscard]] const std::vector<logging::ErrorObject> & getErrors() const {
         return _errors;
     };
 
@@ -68,6 +68,79 @@ TEST( parser_encoding_Transcode, sniffBOM_unknown ) {
     std::deque<uint8_t> buffer = { 0xEF, 0x74, 0x65, 0x73, 0x74 };
     ASSERT_EQ( Format::UNKNOWN, Transcode::sniffBOM( buffer ) );
     ASSERT_EQ( 5, buffer.size() );
+}
+
+TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32LE ) {
+    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+        const auto &      in_str = blogator::tests::TestStrings::string( str_id );
+        std::stringstream out_stream;
+        std::stringstream expected_stream;
+
+        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, expected_stream );
+
+        ASSERT_TRUE( Transcode::U32toByteStream( in_str, out_stream, Endianness::LE ) );
+        ASSERT_EQ( out_stream.str(), expected_stream.str() );
+    }
+}
+
+TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32BE ) {
+    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+        const auto &      in_str = blogator::tests::TestStrings::string( str_id );
+        std::stringstream out_stream;
+        std::stringstream expected_stream;
+
+        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, expected_stream );
+
+        ASSERT_TRUE( Transcode::U32toByteStream( in_str, out_stream, Endianness::BE ) );
+        ASSERT_EQ( out_stream.str(), expected_stream.str() );
+    }
+}
+
+TEST( parser_encoding_Transcode, U32toByteStream_u32string_fail_1 ) { //bad output stream
+    const size_t      test_string_id = 0;
+    const auto &      in_str = blogator::tests::TestStrings::string( test_string_id );
+    std::stringstream out_stream;
+
+    out_stream.setstate( std::ios::badbit );
+    ASSERT_FALSE( Transcode::U32toByteStream( in_str, out_stream, Endianness::BE ) );
+}
+
+TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32LE ) {
+    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+        const auto &          in_str = blogator::tests::TestStrings::string( str_id );
+        std::vector<uint32_t> in_vec( in_str.begin(), in_str.end() );
+        std::stringstream     out_stream;
+        std::stringstream     expected_stream;
+
+        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, expected_stream );
+
+        ASSERT_TRUE( Transcode::U32toByteStream( in_vec, out_stream, Endianness::LE ) );
+        ASSERT_EQ( out_stream.str(), expected_stream.str() );
+    }
+}
+
+TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32BE ) {
+    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+        const auto &          in_str = blogator::tests::TestStrings::string( str_id );
+        std::vector<uint32_t> in_vec( in_str.begin(), in_str.end() );
+        std::stringstream     out_stream;
+        std::stringstream     expected_stream;
+
+        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, expected_stream );
+
+        ASSERT_TRUE( Transcode::U32toByteStream( in_vec, out_stream, Endianness::BE ) );
+        ASSERT_EQ( out_stream.str(), expected_stream.str() );
+    }
+}
+
+TEST( parser_encoding_Transcode, U32toByteStream_u32collection_fail_1 ) { //bad output stream
+    const size_t          test_string_id = 0;
+    const auto &          in_str = blogator::tests::TestStrings::string( test_string_id );
+    std::vector<uint32_t> in_vec( in_str.begin(), in_str.end() );
+    std::stringstream     out_stream;
+
+    out_stream.setstate( std::ios::badbit );
+    ASSERT_FALSE( Transcode::U32toByteStream( in_vec, out_stream, Endianness::BE ) );
 }
 
 TEST( parser_encoding_Transcode, fetchCodeUnit_array_2bytes ) {
@@ -915,6 +988,3 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_4 ) { //invalid hig
     ASSERT_EQ( 1, log_catcher.getErrors().size() );
     ASSERT_EQ( expected_err, log_catcher.getErrors().at( 0 ) );
 }
-
-//TODO test `U32toByteStream(..)` from u32string
-//TODO test `U32toByteStream(..)` from uint32_t byte collection
