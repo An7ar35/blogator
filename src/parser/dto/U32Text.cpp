@@ -4,9 +4,20 @@ using namespace blogator::parser;
 
 /**
  * Constructor
- * @param text Source text to reference
+ * @param text Source text
  */
 U32Text::U32Text( std::u32string text ) :
+    _src( text.begin(), text.end() ),
+    _position( { 1, 1 } )
+{
+    _iterator = _src.begin();
+}
+
+/**
+ * Constructor
+ * @param text Source text
+ */
+U32Text::U32Text( std::vector<uint32_t> text ) :
     _src( std::move( text ) ),
     _position( { 1, 1 } )
 {
@@ -19,6 +30,19 @@ U32Text::U32Text( std::u32string text ) :
  * @param text Source text to reference
  */
 U32Text::U32Text( std::filesystem::path src_path, std::u32string text ) :
+    _path( std::move( src_path ) ),
+    _src( text.begin(), text.end() ),
+    _position( { 1, 1 } )
+{
+    _iterator = _src.begin();
+}
+
+/**
+ * Constructor
+ * @param src_path Source file path
+ * @param text Source text to reference
+ */
+U32Text::U32Text( std::filesystem::path src_path, std::vector<uint32_t> text ) :
     _path( std::move( src_path ) ),
     _src( std::move( text ) ),
     _position( { 1, 1 } )
@@ -145,6 +169,22 @@ bool U32Text::reachedEnd() const {
  */
 bool U32Text::reachedEnd( const TextIterator_t &it ) const {
     return ( it == _src.cend() );
+}
+
+/**
+ * Gets an iterator to the currently held position
+ * @return Iterator
+ */
+std::vector<uint32_t>::const_iterator U32Text::iteratorCurr() const {
+    return _iterator;
+}
+
+/**
+ * Gets an iterator to the end position
+ * @return Iterator
+ */
+std::vector<uint32_t>::const_iterator U32Text::iteratorEnd() const {
+    return _src.cend();
 }
 
 /**

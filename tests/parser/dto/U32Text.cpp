@@ -150,7 +150,7 @@ TEST( parser_dto_U32Text, reachedEnd ) {
 TEST( parser_dto_U32Text, reachedEnd_with_iterator ) {
     const std::u32string str = U"B123456789E";
     auto text = U32Text( str );
-    auto it   = str.begin();
+    auto it   = text.iteratorCurr();
 
     ASSERT_FALSE( text.reachedEnd( it ) );
     std::advance( it, 10 );
