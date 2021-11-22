@@ -7,17 +7,20 @@
 
 #include "dom/TreeBuilder.h"
 #include "token/Token.h"
+#include "encoding/Transcode.h"
+#include "dto/Source.h"
 
 namespace blogator::parser {
-    class Tokeniser {
+    class Parser {
       public:
-        static Tokens_t parse( std::u32string &u32text, specs::Context ctx = specs::Context::UNKNOWN );
-        static std::u32string preprocess( std::u32string & u32str, const std::filesystem::path & path = "" );
+        static std::unique_ptr<dom::DOM> parse( Source &source, specs::Context ctx = specs::Context::UNKNOWN );
 
       private:
-        static Tokens_t parseBlogator( std::u32string &u32text );
-        static Tokens_t parseHTML( std::u32string &u32text );
-        static Tokens_t parseMarkdown( std::u32string &u32text );
+        static bool parse( U32Text &u32text, dom::TreeBuilder &tree_builder, specs::Context ctx = specs::Context::UNKNOWN );
+
+        static bool parseBlogator( U32Text &u32text, dom::TreeBuilder &tree_builder );
+        static bool parseHTML( U32Text &u32text, dom::TreeBuilder &tree_builder );
+        static bool parseMarkdown( U32Text &u32text, dom::TreeBuilder &tree_builder );
     };
 }
 

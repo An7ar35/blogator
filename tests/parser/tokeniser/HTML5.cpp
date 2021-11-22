@@ -1,3 +1,16 @@
+/**
+ * This is a test harness to run all the html5-lib tokenizer tests from source JSON files
+ *
+ * Note: HTML5-lib is a UTF16 based parser whilst blogator is a UTF32 based parser so some of the
+ *       test cases had to be removed since it only concerns UTF-16. These are (should) recreated
+ *       in the `blogator::parser::encoding::Transcode` test suite.
+ *
+ * Test subjects:
+ * - `blogator::parser::tokeniser::HTML5`: main subject of the tests
+ * - `blogator::parser::encoding::Transcode::addToCodePoint(..)`: tests for some of the stream error messages
+ * - `blogator::parser::logging::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
+ */
+
 #include "gtest/gtest.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/logging/ParserLog.h"
@@ -117,7 +130,7 @@ class ParserLogCatcher {
                    _errors.end(),
                    []( const auto & a, const auto & b ) -> bool { return a.textpos() < b.textpos(); }
         );
-        blogator::tests::jsonifyHtml5Errors( ss, _errors );
+        blogator::tests::jsonifyErrorObjects( ss, _errors );
         auto s = ss.str();
         return nlohmann::json::parse( ss.str() );
     }
@@ -131,6 +144,10 @@ class ParserLogCatcher {
  */
 class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
   public:
+    explicit MockTreeBuilder( blogator::parser::dom::DOM &dom ) :
+        blogator::parser::dom::TreeBuilder( dom )
+    {};
+
     void addToken( std::unique_ptr<HTML5Tk> tk ) override {
         if( tk->type() != blogator::parser::specs::html5::TokenType::END_OF_FILE ) {
             if( tk->type() == blogator::parser::specs::html5::TokenType::CHARACTER
@@ -162,6 +179,27 @@ class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
     }
 };
 
+/**
+ * [HELPER] Passed each code points in a U32 string through the Transcoder global error checks
+ * @param raw  Original raw UTF-32 text
+ * @param path Source path
+ * @return Processed/checked UTF-32 text
+ */
+std::u32string preprocess( std::u32string &raw, const std::filesystem::path &path ) {
+    std::vector<uint32_t> processed_txt;
+    std::stringstream     ss; //not actually used
+
+    auto     source  = blogator::parser::Source( ss, path, blogator::parser::encoding::Format::UTF32_LE );
+    uint32_t prev_cp = 0x00;
+
+    for( auto cp : raw ) {
+        /* This will send errors to the parser logger where appropriate */
+        blogator::parser::encoding::Transcode::addCodePoint( source, prev_cp, cp, processed_txt );
+        prev_cp = cp;
+    }
+
+    return { processed_txt.begin(), processed_txt.end() };
+}
 
 /**
  * Run a test
@@ -170,18 +208,20 @@ class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
  * @return Assert result
  */
 testing::AssertionResult runTest( const nlohmann::json &test, const std::filesystem::path &path ) {
-    MockTreeBuilder  mock_tree_builder;
-    ParserLogCatcher error_catcher;
+    blogator::parser::dom::DOM dom;
+    MockTreeBuilder            mock_tree_builder( dom );
+    ParserLogCatcher           error_catcher;
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
-    std::u32string raw_txt = blogator::unicode::utf32::convert( test.at( "input" ) );
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+    std::u32string raw_txt = converter.from_bytes( test.at( "input" ) );
 
     if( test.contains( "doubleEscaped" ) ) {
         raw_txt = blogator::tests::unescape( raw_txt );
     }
 
-    auto text        = blogator::parser::U32Text( path, blogator::parser::Parser::preprocess( raw_txt ) );
+    auto text        = blogator::parser::U32Text( path, preprocess( raw_txt, path ) );
     auto init_states = std::vector<std::pair<TokeniserState, std::string>>();
 
     if( test.contains( "initialStates" ) && !test.at( "initialStates" ).empty() ) { //"[ ... ]"

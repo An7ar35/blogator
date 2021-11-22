@@ -171,4 +171,5 @@ TEST( Tokeniser_Tests, valid_multi_lines2 ) {
     for( const auto & t : tokeniser )
         std::cout << t << std::endl;
 
+    FAIL();
 }

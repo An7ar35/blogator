@@ -18,8 +18,8 @@ namespace blogator::parser::dom {
 
     class TreeBuilder {
       public:
-        TreeBuilder() = default;
-        virtual ~TreeBuilder() {}; // = default;
+        explicit TreeBuilder( DOM &dom );
+        virtual ~TreeBuilder() = default;;
 
         virtual void addToken( std::unique_ptr<tokeniser::BlogatorToken> token ) {}; //TODO
         virtual void addToken( std::unique_ptr<token::html5::HTML5Tk> token );
@@ -31,6 +31,8 @@ namespace blogator::parser::dom {
         virtual std::pair<HtmlState_e, HtmlNamespace_e> adjustedCurrentNode();
 
         virtual specs::html5::Element lastOpenElement() const {}; //TODO
+
+
 
       private:
         const bool scripting { false };

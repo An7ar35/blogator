@@ -209,22 +209,22 @@ void Transcode::addCodePoint( Source &src, uint32_t prev_codepoint, uint32_t new
     auto & pos = src.position();
 
     if( unicode::utf32::isnonchar( new_codepoint ) ) {
-        pos.increment( false );
-        out.emplace_back( new_codepoint );
-
         logging::ParserLog::log( src.path(),
                                  specs::Context::HTML5,
                                  specs::html5::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
                                  pos );
 
-    } else if( new_codepoint != 0x00 && unicode::ascii::iscntrl( new_codepoint ) && !unicode::ascii::iswspace( new_codepoint ) ) {
         pos.increment( false );
         out.emplace_back( new_codepoint );
 
+    } else if( new_codepoint != 0x00 && unicode::ascii::iscntrl( new_codepoint ) && !unicode::ascii::iswspace( new_codepoint ) ) {
         logging::ParserLog::log( src.path(),
                                  specs::Context::HTML5,
                                  specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
                                  pos );
+
+        pos.increment( false );
+        out.emplace_back( new_codepoint );
 
     } else if( unicode::ascii::isnewline( new_codepoint ) ) {
         if( !( prev_codepoint == unicode::CR && new_codepoint == unicode::LF ) ) {

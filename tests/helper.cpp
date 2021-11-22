@@ -4,114 +4,47 @@
 #include <iostream>
 
 /**
- * Converts any 'uXXXX' unicode literal into a string representation 'U+XXXX'
- * @param str String to process
- * @return Processed string
+ * JSON-ify a collection of HTML5 tokens into a stream
+ * @param os Output stream
+ * @param tokens Tokens
+ * @return Output stream
  */
-std::string blogator::tests::unicodeToRepresentation( const std::string & str ) {
-    std::stringstream out;
+std::ostream & blogator::tests::jsonifyHtml5Tokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::html5::HTML5Tk>> &tokens ) {
+    os << "[";
 
-    enum class State {
-        CHARACTER,
-        ESCAPED,
-        DOUBLE_ESCAPED,
-    };
-
-    State state = State::CHARACTER;
-    auto  it    = str.cbegin();
-
-    while( it != str.cend() ) {
-        switch( state ) {
-            case State::CHARACTER: {
-                switch( *it ) {
-                    case '\?': { out << "U+003F"; } break;
-                    case '\a': { out << "U+0007"; } break;
-                    case '\b': { out << "U+0008"; } break;
-                    case '\f': { out << "U+000C"; } break;
-                    case '\n': { out << "U+000A"; } break;
-                    case '\r': { out << "U+000D"; } break;
-                    case '\t': { out << "U+0009"; } break;
-                    case '\v': { out << "U+000B"; } break;
-                    case '\\': { state = State::ESCAPED; } break;
-                    case '\0': { out << "U+0000"; } break;
-                    default  : { out << *it; } break;
-                }
-            } break;
-
-            case State::ESCAPED: {
-                switch( *it ) {
-                    case '0': {
-                        out << "U+0";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case '?': {
-                        out << "U+003F";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'a': {
-                        out << "U+0007";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'b': {
-                        out << "U+0008";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'f': {
-                        out << "U+000C";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'n': {
-                        out << "U+000A";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'r': {
-                        out << "U+000D";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 't': {
-                        out << "U+0009";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'v': {
-                        out << "U+000B";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case 'u': { //'\u'
-                        out << "U+";
-                        state = State::CHARACTER;
-                    } break;
-
-                    case '\\': { //U+005C;
-                        state = State::DOUBLE_ESCAPED;
-                    } break;
-
-                    case '\'': [[fallthrough]];
-                    case '\"': [[fallthrough]];
-                    default: {
-                        out << *it;
-                        state = State::CHARACTER;
-                    } break;
-                }
-            } break;
-
-            case State::DOUBLE_ESCAPED: {
-                state = State::CHARACTER;
-            } break;
+    for( auto it = tokens.cbegin(); it != tokens.cend(); ++ it ) {
+        os << *( *it );
+        if( std::next( it ) != tokens.cend() ) {
+            os << ", ";
         }
-
-        std::advance( it, 1 );
     }
 
-    return out.str();
+    os << "]";
+    return os;
+}
+
+/**
+ * JSON-ify a collection of error objects into a stream
+ * @param os Output stream
+ * @param err Error objects
+ * @return Output stream
+ */
+std::ostream & blogator::tests::jsonifyErrorObjects( std::ostream & os, const std::vector<blogator::parser::logging::ErrorObject> &err ) {
+    os << "[";
+
+    for( auto it = err.cbegin(); it != err.cend(); ++ it ) {
+        auto code = it->error();
+        auto pos  = it->textpos();
+        std::replace( code.begin(), code.end(), ' ', '-' );
+        std::transform( code.begin(), code.end(), code.begin(), []( auto c ) { return std::tolower( c ); } );
+        os << R"({ "code": ")" << code << R"(", "line": )" << pos.line << ",  \"col\": " << pos.col << " }";
+        if( std::next( it ) != err.cend() ) {
+            os << ", ";
+        }
+    }
+
+    os << "]";
+    return os;
 }
 
 std::u32string blogator::tests::unescape( const std::u32string &str ) {
@@ -260,66 +193,6 @@ std::string blogator::tests::unescape( const std::string &u8str ) {
     }
 
     return ss.str();
-}
-
-
-std::u32string blogator::tests::escape( const std::u32string &str ) {
-    std::vector<char32_t> buffer;
-
-    for( char32_t c : str) {
-        if( unicode::utf32::isnonchar( c ) || unicode::utf32::issurrogate( c ) ) {
-            auto hex = unicode::utf32::toxunicode( c );
-            buffer.insert( buffer.end(), hex.cbegin(), hex.cend() );
-        } else {
-            buffer.emplace_back( c );
-        }
-    }
-
-    return { buffer.cbegin(), buffer.cend() };
-}
-
-/**
- * JSON-ify a collection of HTML5 tokens into a stream
- * @param os Output stream
- * @param tokens Tokens
- * @return Output stream
- */
-std::ostream & blogator::tests::jsonifyHtml5Tokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::html5::HTML5Tk>> &tokens ) {
-    os << "[";
-
-    for( auto it = tokens.cbegin(); it != tokens.cend(); ++ it ) {
-            os << *( *it );
-        if( std::next( it ) != tokens.cend() ) {
-            os << ", ";
-        }
-    }
-
-    os << "]";
-    return os;
-}
-
-/**
- * JSON-ify a collection of HTML5 error objects into a stream
- * @param os Output stream
- * @param err Error objects
- * @return Output stream
- */
-std::ostream & blogator::tests::jsonifyHtml5Errors( std::ostream & os, const std::vector<blogator::parser::logging::ErrorObject> &err ) {
-    os << "[";
-
-    for( auto it = err.cbegin(); it != err.cend(); ++ it ) {
-        auto code = it->error();
-        auto pos  = it->textpos();
-        std::replace( code.begin(), code.end(), ' ', '-' );
-        std::transform( code.begin(), code.end(), code.begin(), []( auto c ) { return std::tolower( c ); } );
-        os << R"({ "code": ")" << code << R"(", "line": )" << pos.line << ",  \"col\": " << pos.col << " }";
-        if( std::next( it ) != err.cend() ) {
-            os << ", ";
-        }
-    }
-
-    os << "]";
-    return os;
 }
 
 /**

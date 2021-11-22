@@ -3,8 +3,10 @@
 #include <utility>
 
 using namespace blogator::parser::dom;
-typedef blogator::parser::specs::html5::TokeniserState HtmlState_e;
-typedef blogator::parser::specs::html5::Namespace      HtmlNamespace_e;
+
+TreeBuilder::TreeBuilder( DOM &dom ) { //TODO
+
+}
 
 //When a start tag token is emitted with its self-closing flag set, if the flag is not acknowledged
 //when it is processed by the tree construction stage, that is a
