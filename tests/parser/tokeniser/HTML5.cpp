@@ -208,14 +208,15 @@ std::u32string preprocess( std::u32string &raw, const std::filesystem::path &pat
  * @return Assert result
  */
 testing::AssertionResult runTest( const nlohmann::json &test, const std::filesystem::path &path ) {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
+
     blogator::parser::dom::DOM dom;
     MockTreeBuilder            mock_tree_builder( dom );
     ParserLogCatcher           error_catcher;
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-    std::u32string raw_txt = converter.from_bytes( test.at( "input" ) );
+    std::u32string raw_txt = converter_U8toU32.from_bytes( test.at( "input" ) );
 
     if( test.contains( "doubleEscaped" ) ) {
         raw_txt = blogator::tests::unescape( raw_txt );
@@ -236,7 +237,7 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
         auto tokeniser = HTML5(
             mock_tree_builder,
             init_states[i].first,
-            ( test.contains( "lastStartTag" ) ? blogator::unicode::utf32::convert( test.at( "lastStartTag" ) ) : U"" )
+            ( test.contains( "lastStartTag" ) ? converter_U8toU32.from_bytes( test.at( "lastStartTag" ) ) : U"" )
         );
 
         tokeniser.parse( text );
