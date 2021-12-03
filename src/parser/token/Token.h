@@ -20,13 +20,13 @@ namespace blogator::parser::token {
             return os;
         }
 
-        virtual void setText( std::u32string text );
+        virtual void setText( std::u32string text ) final;
 
-        [[nodiscard]] virtual specs::Context context() const;
-        [[nodiscard]] virtual std::u32string text() const;
-        [[nodiscard]] virtual size_t lineNum() const;
-        [[nodiscard]] virtual size_t colPos() const;
-        [[nodiscard]] virtual TextPos position() const;
+        [[nodiscard]] virtual specs::Context context() const final;
+        [[nodiscard]] virtual std::u32string text() const final;
+        [[nodiscard]] virtual size_t lineNum() const final;
+        [[nodiscard]] virtual size_t colPos() const final;
+        [[nodiscard]] virtual TextPos position() const final;
 
       protected:
         virtual void toStr( std::ostream & os ) const;

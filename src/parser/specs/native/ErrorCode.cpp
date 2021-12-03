@@ -2,7 +2,7 @@
 
 #include <array>
 
-using namespace blogator::parser::specs::blogator;
+using namespace blogator::parser::specs::native;
 
 struct Description {
     std::string text;
@@ -58,7 +58,7 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
  * @param err ::blogator::ErrorCode::* enum
  * @return Short description string
  */
-const std::string &blogator::parser::specs::blogator::ErrorCode::str( int err ) {
+const std::string &blogator::parser::specs::native::ErrorCode::str( int err ) {
     if( !error_desc_loaded )
         loadErrorStrings( error_descriptions );
 
@@ -73,7 +73,7 @@ const std::string &blogator::parser::specs::blogator::ErrorCode::str( int err ) 
  * @param err ::blogator::ErrorCode::* enum
  * @return Long detailed description string
  */
-const std::string &blogator::parser::specs::blogator::ErrorCode::detailed( int err ) {
+const std::string &blogator::parser::specs::native::ErrorCode::detailed( int err ) {
     if( !error_desc_loaded )
         loadErrorStrings( error_descriptions );
 

@@ -1,26 +1,80 @@
 cmake_minimum_required(VERSION 3.14)
-project(blogator VERSION 1.3.2)
+project(blogator
+        VERSION 2.0.0
+        DESCRIPTION  "Static site generator"
+        HOMEPAGE_URL "eadavison.com")
+
+set(PROJECT_AUTHOR "E.A.Davison")
+set(PROJECT_YEARS  "2019-21")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(PROJECT_AUTHOR "An7ar35")
-set(PROJECT_HOMEPAGE_URL "https://an7ar35.bitbucket.io")
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror=range-loop-construct -pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
-set(CMAKE_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/external")
-set(CMAKE_RESOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resource")
-set(CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-set(TEMP_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tmp")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS --coverage)
 
 include(ExternalProject)
+include(GNUInstallDirs)
+
+#Build directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
+set(CMAKE_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/external")
+
+#External imports/dependencies directories
+set(CMAKE_RESOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+set(CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+set(TEMP_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tmp")
+set(SUBMODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+
+#Installation directories
+set(CTUNE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
+set(CTUNE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
+set(CTUNE_INSTALL_MANDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_MANDIR}/man1)
+
+if(NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_RPATH ${CTUNE_INSTALL_LIBDIR})
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif ()
+
+option(TESTING "Set testing on" ON)
+
+if(TESTING)
+    add_definitions(-DTESTING)
+endif()
+
+#========================================== PRE-CHECKS ============================================#
+include(FindGit)
+find_package(Git)
+
+if (NOT Git_FOUND)
+    message(FATAL_ERROR "Required package 'Git' not found on system.")
+endif ()
+
+#========================================== LIB IMPORTS ===========================================#
+
+####################################################################################################
+# nlohmann/JSON                                                                                    #
+# ------------------------------------------------------------------------------------------------ #
+# https://github.com/nlohmann/json                                                                 #
+####################################################################################################
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(${PROJECT_SOURCE_DIR}/submodules/json)
+
+####################################################################################################
+# International Component for Unicode                                                              #
+# ------------------------------------------------------------------------------------------------ #
+# https://cmake.org/cmake/help/latest/module/FindICU.html                                          #
+# https://icu.unicode.org/                                                                         #
+# Components can include any of: data, i18n, io, le, lx, test, tu and uc.                          #
+####################################################################################################
+find_package(ICU 69 COMPONENTS uc i18n io REQUIRED)
+include_directories(${ICU_INCLUDE_DIRS})
 
 ##########################
 # Blogator Source Files #
@@ -158,8 +212,120 @@ set(SOURCE_FILES
         src/dom/parser/Parser.cpp
         src/dom/parser/Parser.h
         src/dom/parser/Tokeniser.cpp
-        src/dom/parser/Tokeniser.h)
+        src/dom/parser/Tokeniser.h
 
+        src/exception/parsing_failure.cpp
+        src/exception/parsing_failure.h
+
+        src/logger/Logger.cpp
+        src/logger/Logger.h
+
+        src/parser/Parser.cpp
+        src/parser/Parser.h
+
+        src/datastructure/Trie.h
+        src/datastructure/TrieNode.h
+        src/datastructure/TrieTracker.h
+
+        src/parser/dto/TextPos.cpp
+        src/parser/dto/TextPos.h
+        src/parser/dto/U32Text.cpp
+        src/parser/dto/U32Text.h
+        src/parser/dto/Source.cpp
+        src/parser/dto/Source.h
+
+        src/parser/specs/Structure.h
+        src/parser/specs/Context.cpp
+        src/parser/specs/Context.h
+        src/parser/specs/native/Element.cpp
+        src/parser/specs/native/Element.h
+        src/parser/specs/native/InsertionMode.h
+        src/parser/specs/native/Specifications.cpp
+        src/parser/specs/native/Specifications.h
+        src/parser/specs/native/ErrorCode.cpp
+        src/parser/specs/native/ErrorCode.h
+        src/parser/specs/html5/attributes/attributes.h
+        src/parser/specs/html5/tokeniser/TokeniserState.h
+        src/parser/specs/html5/tokeniser/TokenType.h
+        src/parser/specs/html5/ContentModel.h
+        src/parser/specs/html5/Element.h
+        src/parser/specs/html5/Namespace.h
+        src/parser/specs/html5/NamedCharRef.cpp
+        src/parser/specs/html5/NamedCharRef.h
+        src/parser/specs/html5/NumericCharRef.cpp
+        src/parser/specs/html5/NumericCharRef.h
+        src/parser/specs/html5/Specifications.cpp
+        src/parser/specs/html5/Specifications.h
+        src/parser/specs/html5/ErrorCode.h
+        src/parser/specs/html5/ErrorCode.cpp
+        src/parser/specs/html5/InsertionMode.h
+        src/parser/specs/markdown/specifications.cpp
+        src/parser/specs/markdown/specifications.h
+
+        src/parser/token/Token.cpp
+        src/parser/token/Token.h
+        src/parser/token/config/tokens.h
+        src/parser/token/config/ConfigTk.cpp
+        src/parser/token/config/ConfigTk.h
+        src/parser/token/html5/HTML5Tk.cpp
+        src/parser/token/html5/HTML5Tk.h
+        src/parser/token/html5/DoctypeTk.cpp
+        src/parser/token/html5/DoctypeTk.h
+        src/parser/token/html5/CommentTk.cpp
+        src/parser/token/html5/CommentTk.h
+        src/parser/token/html5/CharacterTk.cpp
+        src/parser/token/html5/CharacterTk.h
+        src/parser/token/html5/GenericTagTk.cpp
+        src/parser/token/html5/GenericTagTk.h
+        src/parser/token/html5/StartTagTk.cpp
+        src/parser/token/html5/StartTagTk.h
+        src/parser/token/html5/EndTagTk.cpp
+        src/parser/token/html5/EndTagTk.h
+        src/parser/token/html5/EndOfFileTk.cpp
+        src/parser/token/html5/EndOfFileTk.h
+        src/parser/token/html5/tokens.h
+        src/parser/token/native/NativeTk.cpp
+        src/parser/token/native/NativeTk.h
+        src/parser/token/native/tokens.h
+        src/parser/token/markdown/MarkdownTk.cpp
+        src/parser/token/markdown/MarkdownTk.h
+        src/parser/token/markdown/tokens.h
+
+        src/parser/dom/DOM.cpp
+        src/parser/dom/DOM.h
+        src/parser/dom/TreeBuilder.cpp
+        src/parser/dom/TreeBuilder.h
+        src/parser/dom/node/Node.cpp
+        src/parser/dom/node/Node.h
+        src/parser/dom/node/NodeType.h
+
+        src/parser/tokeniser/Native.cpp
+        src/parser/tokeniser/Native.h
+        src/parser/tokeniser/HTML5.cpp
+        src/parser/tokeniser/HTML5.h
+        src/parser/tokeniser/Markdown.cpp
+        src/parser/tokeniser/Markdown.h
+
+        src/parser/encoding/Transcode.cpp
+        src/parser/encoding/Transcode.h
+        src/parser/encoding/Format.h
+        src/parser/encoding/Confidence.h
+
+        src/parser/logging/ErrorObject.cpp
+        src/parser/logging/ErrorObject.h
+        src/parser/logging/ParserLog.cpp
+        src/parser/logging/ParserLog.h
+
+        src/unicode/ascii.cpp
+        src/unicode/ascii.h
+        src/unicode/utf8.cpp
+        src/unicode/utf8.h
+        src/unicode/utf16.cpp
+        src/unicode/utf16.h
+        src/unicode/utf32.cpp
+        src/unicode/utf32.h
+        src/unicode/unicode.cpp
+        src/unicode/unicode.h src/parser/specs/config/tokeniser/TokenType.h src/parser/tokeniser/Config.cpp src/parser/tokeniser/Config.h src/parser/dom/node/Document.cpp src/parser/dom/node/Document.h src/parser/dom/node/Element.cpp src/parser/dom/node/Element.h src/parser/dom/node/DocumentFragment.cpp src/parser/dom/node/DocumentFragment.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -209,7 +375,23 @@ set(TEST_FILES
         tests/dom/html5/Html5Relationships_tests.cpp
         tests/dom/dto/Attribute.cpp
         tests/dom/html5/kb/KnowledgeBase_Tests.cpp
-)
+        tests/parser/tokeniser/HTML5.cpp
+        tests/parser/tokeniser/Blogator.cpp
+        tests/parser/dto/U32Text.cpp
+        tests/parser/dto/TextPos.cpp
+        tests/datastructure/TrieNode.cpp
+        tests/datastructure/Trie.cpp
+        tests/parser/specs/html5/NamedCharRef.cpp
+        tests/helper.cpp
+        tests/helper.h tests/unicode/ascii.cpp
+        tests/unicode/utf32.cpp
+        tests/unicode/utf8.cpp
+        tests/parser/encoding/Transcode.cpp
+        tests/unicode/utf16.cpp
+        tests/TestStrings.cpp
+        tests/TestStrings.h tests/parser/dom/node/Node.cpp)
+
+configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 
 enable_testing()
 
@@ -223,14 +405,21 @@ if( NOT GTEST_FOUND )
     add_dependencies(blogator_tests googletest)
     target_link_libraries(blogator_tests gtest)
 else()
-    target_link_libraries(blogator_tests gtest)
+    target_link_libraries(blogator_tests pthread gtest gmock nlohmann_json::nlohmann_json)
 endif()
 
 add_test(blogator_tests ${TEST_FILES})
+
+#(debuging) prints cmake vars
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
 
 ############
 # BLOGATOR #
 ############
 include_directories(external)
 add_executable(blogator src/main.cpp ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} stdc++fs)
+target_link_libraries(${PROJECT_NAME} stdc++fs ${ICU_LIBRARIES})

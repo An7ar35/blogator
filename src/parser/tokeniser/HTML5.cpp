@@ -26,7 +26,7 @@ tokeniser::HTML5::HTML5( dom::TreeBuilder &tree_builder ) :
     _current_state( State_e::DATA ),
     _return_state( State_e::DATA )
 {
-    tree_builder.setChangeHTML5TokeniserStateCallback( [this]( State_e s ) { setState( s ); } );
+    tree_builder.setChangeHTML5TokeniserStateCb( [ this ]( State_e s ) { setState( s ); } );
 }
 
 /**

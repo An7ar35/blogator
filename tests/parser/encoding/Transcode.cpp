@@ -244,7 +244,7 @@ TEST( parser_encoding_Transcode, addCodePoint_nonchar ) {
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
                                                                 specs::html5::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
-                                                                { 1, 2 } );
+                                                                { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
     ASSERT_EQ( test_char, out_buffer.back() );
@@ -265,7 +265,7 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_BELL ) {
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
                                                                 specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
-                                                                { 1, 2 } );
+                                                                { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
     ASSERT_EQ( test_char, out_buffer.at( 0 ) );
@@ -286,7 +286,7 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_DEL ) {
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
                                                                 specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
-                                                                { 1, 2 } );
+                                                                { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
     ASSERT_EQ( test_char, out_buffer.at( 0 ) );
@@ -443,7 +443,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_fail ) { //with p
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U32LEtoU32( in_buffer, in_source, out_buffer ) );
@@ -557,7 +557,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_0 ) { //incomplete c
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_source, out_buffer ) );
@@ -577,7 +577,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_1 ) { //invalid code
     in_stream << (char) 0xA0 << (char) 0x61; //invalid byte and 'a'
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
+                                                                specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_source, out_buffer ) );
@@ -666,7 +666,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_0 ) { //incompl
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
@@ -686,7 +686,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_1 ) { //invalid
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
+                                                                specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
@@ -753,7 +753,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_1 ) { //1 bytes a
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_source, out_buffer ) );
@@ -774,7 +774,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_2 ) { //3 bytes a
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_source, out_buffer ) );
@@ -797,7 +797,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_3 ) { //valid hig
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
+                                                                specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                                 { 1, 1 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_source, out_buffer ) );
@@ -912,7 +912,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_1 ) { //1 byte avai
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );
@@ -932,7 +932,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_2 ) { //high surrog
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );
@@ -954,7 +954,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_3 ) { //valid high 
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::BLOGATOR,
-                                                                specs::blogator::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
+                                                                specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                                 { 1, 1 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );

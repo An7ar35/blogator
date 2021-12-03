@@ -1,9 +1,9 @@
-#ifndef BLOGATOR_PARSER_SPECS_BLOGATOR_ERRORCODE_H
-#define BLOGATOR_PARSER_SPECS_BLOGATOR_ERRORCODE_H
+#ifndef BLOGATOR_PARSER_SPECS_NATIVE_ERRORCODE_H
+#define BLOGATOR_PARSER_SPECS_NATIVE_ERRORCODE_H
 
 #include <string>
 
-namespace blogator::parser::specs::blogator {
+namespace blogator::parser::specs::native {
     class ErrorCode {
       public:
         enum {
@@ -24,4 +24,4 @@ namespace blogator::parser::specs::blogator {
     };
 }
 
-#endif //BLOGATOR_PARSER_SPECS_BLOGATOR_ERRORCODE_H
+#endif //BLOGATOR_PARSER_SPECS_NATIVE_ERRORCODE_H

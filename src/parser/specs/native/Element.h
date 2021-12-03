@@ -1,9 +1,9 @@
-#ifndef BLOGATOR_PARSER_SPECS_BLOGATOR_ELEMENTS_H
-#define BLOGATOR_PARSER_SPECS_BLOGATOR_ELEMENTS_H
+#ifndef BLOGATOR_PARSER_SPECS_NATIVE_ELEMENTS_H
+#define BLOGATOR_PARSER_SPECS_NATIVE_ELEMENTS_H
 
 #include <iostream>
 
-namespace blogator::parser::specs::blogator {
+namespace blogator::parser::specs::native {
     enum class Element {
         NONE = 0,
         WHITESPACE = NONE,
@@ -34,4 +34,4 @@ namespace blogator::parser::specs::blogator {
     };
 }
 
-#endif //BLOGATOR_PARSER_SPECS_BLOGATOR_ELEMENTS_H
+#endif //BLOGATOR_PARSER_SPECS_NATIVE_ELEMENTS_H

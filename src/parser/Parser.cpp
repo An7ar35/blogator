@@ -5,7 +5,7 @@
 #include "../exception/parsing_failure.h"
 #include "logging/ParserLog.h"
 #include "encoding/Transcode.h"
-#include "tokeniser/Blogator.h"
+#include "tokeniser/Native.h"
 #include "tokeniser/HTML5.h"
 #include "tokeniser/Markdown.h"
 
@@ -73,7 +73,7 @@ bool Parser::parse( U32Text &u32text, dom::TreeBuilder &tree_builder, specs::Con
 
 
 bool Parser::parseBlogator( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
-    auto blogator_tokeniser = tokeniser::Blogator( tree_builder );
+    auto blogator_tokeniser = tokeniser::Native( tree_builder );
     auto html5_tokeniser    = tokeniser::HTML5( tree_builder );
     auto tokens             = Tokens_t();
     auto current_context    = specs::Context::BLOGATOR;
@@ -103,7 +103,7 @@ bool Parser::parseBlogator( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
 
 bool Parser::parseHTML( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
     auto html5_tokeniser    = tokeniser::HTML5( tree_builder );
-    auto blogator_tokeniser = tokeniser::Blogator( tree_builder );
+    auto blogator_tokeniser = tokeniser::Native( tree_builder );
     auto current_context    = specs::Context::HTML5;
 
     while( !u32text.reachedEnd() ) {
@@ -131,7 +131,7 @@ bool Parser::parseHTML( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
 
 bool Parser::parseMarkdown( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
     auto html5_tokeniser    = tokeniser::HTML5( tree_builder );
-    auto blogator_tokeniser = tokeniser::Blogator( tree_builder );
+    auto blogator_tokeniser = tokeniser::Native( tree_builder );
     auto markdown_tokeniser = tokeniser::Markdown( tree_builder );
     auto tokens             = Tokens_t();
     auto current_context    = specs::Context::MARKDOWN;
