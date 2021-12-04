@@ -325,7 +325,47 @@ set(SOURCE_FILES
         src/unicode/utf32.cpp
         src/unicode/utf32.h
         src/unicode/unicode.cpp
-        src/unicode/unicode.h src/parser/specs/config/tokeniser/TokenType.h src/parser/tokeniser/Config.cpp src/parser/tokeniser/Config.h src/parser/dom/node/Document.cpp src/parser/dom/node/Document.h src/parser/dom/node/Element.cpp src/parser/dom/node/Element.h src/parser/dom/node/DocumentFragment.cpp src/parser/dom/node/DocumentFragment.h)
+        src/unicode/unicode.h
+
+        src/parser/specs/config/tokeniser/TokenType.h
+        src/parser/tokeniser/Config.cpp
+        src/parser/tokeniser/Config.h
+        src/parser/dom/node/Document.cpp
+        src/parser/dom/node/Document.h
+        src/parser/dom/node/Element.cpp
+        src/parser/dom/node/Element.h
+        src/parser/dom/node/DocumentFragment.cpp
+        src/parser/dom/node/DocumentFragment.h
+        src/parser/dom/node/Comment.cpp
+        src/parser/dom/node/Comment.h
+        src/parser/dom/node/Text.cpp
+        src/parser/dom/node/Text.h
+        src/parser/dom/node/DocumentType.cpp
+        src/parser/dom/node/DocumentType.h
+        src/parser/dom/node/Attr.cpp
+        src/parser/dom/node/Attr.h
+        src/parser/dom/node/CDATASection.cpp
+        src/parser/dom/node/CDATASection.h
+        src/parser/dom/node/CharacterData.cpp
+        src/parser/dom/node/CharacterData.h
+        src/parser/dom/node/EventTarget.cpp
+        src/parser/dom/node/EventTarget.h
+
+        src/parser/dom/exception/DOMException.h
+        src/parser/dom/exception/DOMExceptionType.h
+        src/parser/dom/exception/EvalError.cpp
+        src/parser/dom/exception/EvalError.h
+        src/parser/dom/exception/RangeError.cpp
+        src/parser/dom/exception/RangeError.h
+        src/parser/dom/exception/DOMException.cpp
+        src/parser/dom/exception/ReferenceError.cpp
+        src/parser/dom/exception/ReferenceError.h
+        src/parser/dom/exception/TypeError.cpp
+        src/parser/dom/exception/TypeError.h
+        src/parser/dom/exception/URIError.cpp
+        src/parser/dom/exception/URIError.h
+
+        )
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -389,7 +429,9 @@ set(TEST_FILES
         tests/parser/encoding/Transcode.cpp
         tests/unicode/utf16.cpp
         tests/TestStrings.cpp
-        tests/TestStrings.h tests/parser/dom/node/Node.cpp)
+        tests/TestStrings.h tests/parser/dom/node/Node.cpp
+        src/parser/dom/node/EventTarget.cpp
+        src/parser/dom/node/EventTarget.h)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 
