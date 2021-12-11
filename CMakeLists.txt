@@ -254,8 +254,8 @@ set(SOURCE_FILES
         src/parser/specs/html5/NamedCharRef.h
         src/parser/specs/html5/NumericCharRef.cpp
         src/parser/specs/html5/NumericCharRef.h
-        src/parser/specs/html5/Specifications.cpp
-        src/parser/specs/html5/Specifications.h
+        src/parser/specs/html5/specifications.cpp
+        src/parser/specs/html5/specifications.h
         src/parser/specs/html5/ErrorCode.h
         src/parser/specs/html5/ErrorCode.cpp
         src/parser/specs/html5/InsertionMode.h
@@ -365,7 +365,38 @@ set(SOURCE_FILES
         src/parser/dom/exception/URIError.cpp
         src/parser/dom/exception/URIError.h
 
-        )
+        src/parser/dom/exception/exception.h
+        src/exception/failed_expectation.cpp
+
+        src/logger/LoggableException.h
+        src/logger/LoggableException.cpp
+        src/logger/engine/LogQueue.h
+        src/logger/engine/LogWriter.cpp
+        src/logger/engine/LogWriter.h
+        src/logger/formatter/DefaultPrintMono.cpp
+        src/logger/formatter/DefaultPrintMono.h
+        src/logger/formatter/DefaultPrintColour.cpp
+        src/logger/formatter/DefaultPrintColour.h
+        src/logger/formatter/DefaultFile.cpp
+        src/logger/formatter/DefaultFile.h
+        src/logger/output/LogOutput.h
+        src/logger/output/File.cpp
+        src/logger/output/File.h
+        src/logger/output/LogOutput.cpp
+        src/logger/output/Terminal.cpp
+        src/logger/output/Terminal.h
+        src/logger/output/SysLog.cpp
+        src/logger/output/SysLog.h
+        src/logger/global/LogMsg.cpp
+        src/logger/global/LogMsg.h
+        src/logger/global/LogLevel.cpp
+        src/logger/global/LogLevel.h
+        src/logger/global/TimeStamp.cpp
+        src/logger/global/TimeStamp.h
+        src/logger/formatter/LogFormatter.cpp
+        src/logger/formatter/LogFormatter.h
+        src/logger/output/Stream.cpp
+        src/logger/output/Stream.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -430,8 +461,10 @@ set(TEST_FILES
         tests/unicode/utf16.cpp
         tests/TestStrings.cpp
         tests/TestStrings.h tests/parser/dom/node/Node.cpp
-        src/parser/dom/node/EventTarget.cpp
-        src/parser/dom/node/EventTarget.h)
+        tests/logger/global/LogLevel.cpp
+        tests/logger/global/TimeStamp.cpp
+        tests/logger/Logger.cpp
+        tests/logger/engine/LogQueue.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 
