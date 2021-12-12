@@ -20,7 +20,7 @@ namespace blogator::logger::engine {
         explicit LogWriter( std::shared_ptr<LogQueue<LogMsg>> queue );
         ~LogWriter();
 
-        bool setTimeout( uint64_t ms );
+        [[maybe_unused]] bool setTimeout( uint64_t ms );
         void addOutput( LogLevel lvl, std::unique_ptr<formatter::LogFormatter> fmt, std::unique_ptr<output::LogOutput> out );
 
         bool start();

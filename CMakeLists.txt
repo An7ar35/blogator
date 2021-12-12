@@ -109,6 +109,8 @@ set(SOURCE_FILES
         src/exception/file_parsing_failure.h
         src/exception/failed_expectation.h
         src/exception/not_implemented.h
+        src/exception/logger_exception.cpp
+        src/exception/logger_exception.h
         src/dom/exception/DOMException.h
         src/fs/fs.cpp
         src/fs/fs.h

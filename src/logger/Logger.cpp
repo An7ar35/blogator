@@ -33,6 +33,7 @@ bool Logger::running() {
  * @param output Output type
  * @param desc Output description/name/path
  * @return Success
+ * @throws exception::logger_exception when `open()` call fails on the LogOutput
  */
 bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, OutputType_e output, const std::string &desc ) {
     Logger::init();
@@ -46,7 +47,11 @@ bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, OutputType_e output, 
             return true;
         }
 
-    } catch( const std::exception &e ) {}
+    } catch( const exception::logger_exception &e ) {
+        throw e;
+    } catch( const std::invalid_argument &e ) {
+        //discarded
+    }
 
     return false;
 }
@@ -57,6 +62,7 @@ bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, OutputType_e output, 
  * @param fmt Formatter type
  * @param output LogOutput instance
  * @return Success
+ * @throws exception::logger_exception when `open()` call fails on the LogOutput
  */
 bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, std::unique_ptr<Output_t> output ) {
     Logger::init();
@@ -70,7 +76,11 @@ bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, std::unique_ptr<Outpu
             return true;
         }
 
-    } catch( const std::exception &e ) {}
+    } catch( const exception::logger_exception &e ) {
+        throw e;
+    } catch( const std::invalid_argument &e ) {
+        //discarded
+    }
 
     return false;
 }
@@ -82,6 +92,7 @@ bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, std::unique_ptr<Outpu
  * @param output Output type
  * @param desc Output description/name/path
  * @return Success
+ * @throws exception::logger_exception when `open()` call fails on the LogOutput
  */
 bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, OutputType_e output, const std::string &desc ) {
     Logger::init();
@@ -95,7 +106,11 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, OutputTy
             return true;
         }
 
-    } catch( const std::exception &e ) {}
+    } catch( const exception::logger_exception &e ) {
+        throw e;
+    } catch( const std::invalid_argument &e ) {
+        //discarded
+    }
 
     return false;
 }
@@ -106,6 +121,7 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, OutputTy
  * @param fmt LogFormatter instance
  * @param output LogOutput instance
  * @return Success
+ * @throws exception::logger_exception when `open()` call fails on the LogOutput
  */
 bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::unique_ptr<Output_t> output ) {
     Logger::init();
@@ -119,7 +135,11 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::uni
             return true;
         }
 
-    } catch( const std::exception &e ) {}
+    } catch( const exception::logger_exception &e ) {
+        throw e;
+    } catch( const std::invalid_argument &e ) {
+        //discarded
+    }
 
     return false;
 }
@@ -131,6 +151,7 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::uni
  * @param out_stream Custom stream output
  * @param desc Output description/name/path
  * @return Success
+ * @throws exception::logger_exception when `open()` call fails on the LogOutput
  */
 bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::ostream &out_stream, const std::string &desc ) {
     Logger::init();
@@ -144,7 +165,11 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::ost
             return true;
         }
 
-    } catch( const std::exception &e ) {}
+    } catch( const exception::logger_exception &e ) {
+        throw e;
+    } catch( const std::invalid_argument &e ) {
+        //discarded
+    }
 
     return false;
 }

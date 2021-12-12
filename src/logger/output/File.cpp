@@ -22,19 +22,19 @@ File::~File() {
 
 /**
  * Opens output
- * @throws std::runtime_error when output stream fails to open
+ * @throws exception::logger_exception when output stream fails to open
  */
 void File::open() {
     _out->open( _path, std::ios::out | std::ios::ate | std::ios::app ); //std::ios_base::binary | std::ios_base::out
 
     if( !_out->is_open() ) {
-        throw( std::runtime_error( "[Logger] Unable to open file output stream: " + _path.string() ) );
+        throw exception::logger_exception( "[logger::output::File::open()] Unable to open file output stream: " + _path.string() );
     }
 }
 
 /**
  * Closes output
- * @throws std::runtime_error when output stream fails to close
+ * @throws exception::logger_exception when output stream fails to close
  */
 void File::close() {
     if( _out ) {
@@ -42,7 +42,7 @@ void File::close() {
         _out->close();
 
         if( _out->fail() ) {
-            throw( std::runtime_error( "[Logger] Failed to close output stream: " + _path.string() ) );
+            throw( exception::logger_exception( "[logger::output::File::close()] Failed to close output stream: " + _path.string() ) );
         }
     }
 }

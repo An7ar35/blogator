@@ -18,6 +18,11 @@ namespace blogator::logger::formatter {
         explicit LogFormatter( LogFormatterType type );
         virtual ~LogFormatter() = default;
 
+        /**
+         * Formats a LogMsg object into a string
+         * @param obj LogMsg object
+         * @return Formatted string
+         */
         virtual std::string format( const LogMsg &obj ) = 0;
 
         [[nodiscard]] virtual LogFormatterType type() const final;

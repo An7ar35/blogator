@@ -32,7 +32,7 @@ LogWriter::~LogWriter() {
  * @param ms Timeout value in milliseconds
  * @return Success
  */
-bool LogWriter::setTimeout( uint64_t ms ) {
+[[maybe_unused]] bool LogWriter::setTimeout( uint64_t ms ) {
     if( ms >= MIN_SLEEP_TIMEOUT_MS ) {
         _suspend_timeout_ms = Duration_ms_t( ms );
         return true;
@@ -46,9 +46,17 @@ bool LogWriter::setTimeout( uint64_t ms ) {
  * @param lvl Level limit (i.e.: least significant level to be logged)
  * @param fmt Formatter
  * @param out Output
+ * @throws exception::logger_exception when `open()` call fails on the LogOutput (output will be removed if this is the case)
  */
 void LogWriter::addOutput( LogLevel lvl, std::unique_ptr<LogFormatter> fmt, std::unique_ptr<LogOutput> out ) {
     _outputs.emplace_back( Output{ lvl, std::move( fmt), std::move( out ) } );
+    try {
+        _outputs.back().output->open();
+
+    } catch( const exception::logger_exception &e ) {
+        _outputs.pop_back();
+        throw e;
+    }
 }
 
 /**
@@ -127,6 +135,7 @@ void LogWriter::resume() {
 
 /**
  * [PRIVATE] Main worker loop
+ * @throws exception::logger_exception when `close()` on an output fails
  */
 void LogWriter::runLoop() {
     while( !_interrupt ) {
