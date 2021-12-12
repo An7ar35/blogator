@@ -14,6 +14,9 @@ namespace blogator::logger {
 
         friend std::ostream & operator <<( std::ostream & os, const TimeStamp &ts );
 
+        bool operator ==( const TimeStamp &rhs ) const;
+        bool operator !=( const TimeStamp &rhs ) const;
+
         [[nodiscard]] std::string getTime() const;
         [[nodiscard]] std::string getDate() const;
         [[nodiscard]] std::string getTimeStamp( const std::string &formatter ) const;

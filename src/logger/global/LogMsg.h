@@ -11,6 +11,11 @@ namespace blogator::logger {
       public:
         LogMsg( uint64_t id, LogLevel lvl, std::string src_file, int line_num, std::string message );
 
+        bool operator ==( const LogMsg &rhs ) const;
+        bool operator !=( const LogMsg &rhs ) const;
+
+        [[nodiscard]] bool isEquivalent( const LogMsg &rhs ) const;
+
         [[nodiscard]] uint64_t id() const;
         [[nodiscard]] LogLevel level() const;
         [[nodiscard]] const std::string & source() const;

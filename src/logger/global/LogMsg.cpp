@@ -20,6 +20,42 @@ LogMsg::LogMsg( uint64_t id, LogLevel lvl, std::string src_file, int line_num, s
 {}
 
 /**
+ * Equality operator
+ * @param rhs LogMsg to compare to
+ * @return Equality state
+ */
+bool LogMsg::operator ==( const LogMsg &rhs ) const {
+    return _id       == rhs._id
+        && _level    == rhs._level
+        && _ts       == rhs._ts
+        && _src_file == rhs._src_file
+        && _src_line == rhs._src_line
+        && _message  == rhs._message;
+}
+
+/**
+ * Not-equal operator
+ * @param rhs LogMsg to compare to
+ * @return Not-equal state
+ */
+bool LogMsg::operator !=( const LogMsg &rhs ) const {
+    return !( *this == rhs );
+}
+
+/**
+ * Checks equivalence
+ * @param rhs LogMsg to compare to
+ * @return Equivalence (equal except ID)
+ */
+bool LogMsg::isEquivalent( const LogMsg &rhs ) const {
+    return _level    == rhs._level
+        && _ts       == rhs._ts
+        && _src_file == rhs._src_file
+        && _src_line == rhs._src_line
+        && _message  == rhs._message;
+}
+
+/**
  * Gets the log entry id
  * @return ID
  */

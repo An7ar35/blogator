@@ -120,7 +120,6 @@ void LogWriter::resume() {
     {
         std::lock_guard<std::mutex> guard( _sleep_mutex );
         _wakeup_cond.notify_all();
-        std::cout << "waking up..." << std::endl;
     }
 
     //reset suspend timeout timer
@@ -166,7 +165,6 @@ void LogWriter::runLoop() {
 void LogWriter::checkTiredState( LogWriter::TimePoint_t now ) {
     if( !_interrupt && LogWriter::isTimedOut( _last_wakeup_ts, now, _suspend_timeout_ms ) ) {
         _is_sleeping = true;
-        std::cout << "going to sleep..." << std::endl;
     }
 }
 
@@ -190,6 +188,5 @@ void LogWriter::checkSuspendState() {
  */
 bool LogWriter::isTimedOut( const TimePoint_t &start, const TimePoint_t &end, const Duration_ms_t &timeout_ms ) {
     const long elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( end - start ).count();
-    std::cout << "Elapsed: " << elapsed << " / " << timeout_ms.count() << "ms" << std::endl;
     return ( elapsed > timeout_ms.count() );
 }

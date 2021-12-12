@@ -20,6 +20,24 @@ TimeStamp::TimeStamp( std::time_t ts ) :
 {}
 
 /**
+ * Equal operator
+ * @param rhs TimeStamp to compare against
+ * @return Equality
+ */
+bool TimeStamp::operator ==( const TimeStamp &rhs ) const {
+    return ( _ts == rhs._ts );
+}
+
+/**
+ * Not-Equal operator
+ * @param rhs TimeStamp to compare against
+ * @return Not-equal state
+ */
+bool TimeStamp::operator !=( const TimeStamp &rhs ) const {
+    return !( *this == rhs );
+}
+
+/**
  * Get a local time string
  * @return Time represented as HH:MM:SS
  */
