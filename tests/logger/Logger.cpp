@@ -6,7 +6,7 @@
 
 using namespace blogator::logger;
 
-const uint64_t ASYNC_TEST_TIMEOUT = 50; //ms
+const uint64_t ASYNC_TEST_TIMEOUT = 100; //ms
 
 class LogMsgCatcher : public formatter::LogFormatter {
   public:
@@ -59,16 +59,19 @@ class logger_Logger_Tests : public ::testing::Test {
             AwaitNotificationObj->notify( msg );
         };
 
-        ASSERT_FALSE( Logger::ready() );
-
         Logger::addOutput( LogLevel::TRACE,
                            std::make_unique<LogMsgCatcher>( msgs, event_cb ),
                            output::LogOutputType::TERMINAL,
                            "LogMsgCatcher"
         );
 
-        ASSERT_TRUE( Logger::ready() );
-        ASSERT_TRUE( Logger::start() );
+        if( Logger::ready() ) {
+            if( !Logger::start() ) {
+                std::cerr << "[logger_Logger_Tests::SetUpTestSuite()] LOGGER DID NOT START!";
+            }
+        } else {
+            std::cerr << "[logger_Logger_Tests::SetUpTestSuite()] LOGGER NOT READY!";
+        }
     }
 
     void TearDown() override {
@@ -84,7 +87,7 @@ blogator::tests::AsyncNotify<LogMsg> logger_Logger_Tests::async_notify = blogato
 
 
 TEST_F( logger_Logger_Tests, log_notice ) {
-    auto expected_msg = LogMsg( 1, LogLevel::NOTICE, "Logger.cpp", 77, "integer 10" );
+    auto expected_msg = LogMsg( 1, LogLevel::NOTICE, "Logger.cpp", 96, "integer 10" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -92,6 +95,7 @@ TEST_F( logger_Logger_Tests, log_notice ) {
 
     LOG_NOTICE( "integer ", 10 );
 
+    ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
     ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out waiting for LogMsg match.";
 
     logger_Logger_Tests::async_notify.reset();

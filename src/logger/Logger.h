@@ -66,11 +66,13 @@ namespace blogator::logger {
 
         static bool ready();
         static bool start();
+        static bool running();
 
         template<logger::LogLevel event_type, typename...Args> static void print( Source src, Args...args );
 
       private:
         static std::atomic<bool>                         _initialised;
+        static std::atomic<bool>                         _running;
         static std::mutex                                _mutex;
         static uint64_t                                  _counter;
         static std::shared_ptr<engine::LogQueue<LogMsg>> _queue;
@@ -92,8 +94,10 @@ namespace blogator::logger {
      * @param args        Arguments in message
      */
     template<LogLevel event_type, typename...Args> void Logger::print( Source src, Args...args ) {
-        std::stringstream msg_ss;
-        Logger::print_<event_type>( src, msg_ss, args... );
+        if( Logger::running() ) {
+            std::stringstream msg_ss;
+            Logger::print_<event_type>( src, msg_ss, args... );
+        }
     };
 
     /**

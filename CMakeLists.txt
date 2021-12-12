@@ -464,7 +464,8 @@ set(TEST_FILES
         tests/logger/global/LogLevel.cpp
         tests/logger/global/TimeStamp.cpp
         tests/logger/Logger.cpp
-        tests/logger/engine/LogQueue.cpp)
+        tests/logger/engine/LogQueue.cpp
+        tests/AsyncNotify.h)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 

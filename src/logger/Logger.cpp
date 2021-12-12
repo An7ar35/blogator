@@ -12,10 +12,19 @@ using namespace blogator::logger;
 
 //static var initialisation
 std::mutex                                Logger::_mutex;
+std::atomic<bool>                         Logger::_running     = false;
 std::atomic<bool>                         Logger::_initialised = false;
 uint64_t                                  Logger::_counter     = 0;
 std::shared_ptr<engine::LogQueue<LogMsg>> Logger::_queue;
 std::unique_ptr<engine::LogWriter>        Logger::_writer;
+
+/**
+ * Checks if the Logger is running
+ * @return Running state
+ */
+bool Logger::running() {
+    return Logger::_running;
+}
 
 /**
  * Adds a sink to the configuration
@@ -154,7 +163,7 @@ bool Logger::ready() {
  */
 bool Logger::start() {
     if( Logger::ready() ) {
-        return Logger::_writer->start();
+        return ( Logger::_running = Logger::_writer->start() );
 
     } else {
         return false;
