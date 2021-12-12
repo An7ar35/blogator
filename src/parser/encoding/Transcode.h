@@ -11,6 +11,8 @@
 namespace blogator::parser::encoding {
     enum class Endianness { LE, BE };
 
+    std::string endiannessToStr( Endianness e );
+
     struct Transcode {
       public:
         static bool convert( Source &src, std::vector<uint32_t> &out );

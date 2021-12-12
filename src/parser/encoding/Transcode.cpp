@@ -2,9 +2,26 @@
 
 #include <sstream>
 
+#include "../../logger/Logger.h"
 #include "../logging/ParserLog.h"
 
 using namespace blogator::parser::encoding;
+
+/**
+ * Gets a string representation of the Endianness
+ * @param e Endianness enum
+ * @return String representation
+ */
+std::string blogator::parser::encoding::endiannessToStr( Endianness e ) {
+    switch( e ) {
+        case Endianness::LE:
+            return "LE";
+        case Endianness::BE:
+            return "BE";
+    }
+
+    return "UNKNOWN";
+}
 
 /**
  * Converts an input byte stream into UTF-32
@@ -85,7 +102,8 @@ Format Transcode::sniffBOM( std::deque<uint8_t> &bom ) {
  */
 bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, Endianness endianness ) {
     if( out.bad() || out.eof() ) {
-        //TODO LOG
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::u32string &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+                   "Output stream eof/bad bit(s) set." );
         return false; //EARLY RETURN
     }
 
@@ -109,7 +127,8 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, En
     out.flush();
 
     if( out.bad() || out.fail() ) {
-        //TODO log error
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::u32string &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+                   "Output stream eof/bad bit(s) set (post flush)." );
         return false; //EARLY RETURN
     }
 
@@ -125,7 +144,8 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, En
  */
 bool Transcode::U32toByteStream( const std::vector<uint32_t> &in, std::ostream &out, Endianness endianness ) {
     if( out.bad() || out.eof() ) {
-        //TODO LOG
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::vector<uint32_t> &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+                   "Output stream eof/bad bit(s) set." );
         return false; //EARLY RETURN
     }
 
@@ -149,7 +169,8 @@ bool Transcode::U32toByteStream( const std::vector<uint32_t> &in, std::ostream &
     out.flush();
 
     if( out.bad() || out.fail() ) {
-        //TODO log error
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::vector<uint32_t> &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+                   "Output stream eof/bad bit(s) set (post flush)." );
         return false; //EARLY RETURN
     }
 
@@ -259,7 +280,9 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
                                      specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                      pos
             );
-            //TODO log ERROR "Invalid UTF8 start byte: " + unicode::utf8::toxunicode( in.peek(), "" )
+
+            LOG_ERROR( "[parser::encoding::Transcode::U8toU32( Source &, std::vector<uint32_t> & )] "
+                       "Invalid UTF-8 start byte: ", unicode::utf8::toxunicode( (uint8_t) in.peek(), "0x" ) );
             return false; //EARLY RETURN
         }
 
@@ -277,7 +300,15 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
                                      specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                      pos
             );
-            //TODO log ERROR "EOF reached mid-codepoint sequence."
+
+            std::stringstream ss;
+            for( auto i = 0; i < received; ++i ) {
+                ss << " " << unicode::utf8::toxunicode( (uint8_t) buffer[i], "0x" );
+            }
+
+            LOG_ERROR( "[parser::encoding::Transcode::U8toU32( Source &, std::vector<uint32_t> & )] "
+                       "EOF reached mid-codepoint sequence. Got:", ss.str() );
+
             return false; //EARLY RETURN
         }
     }
@@ -292,7 +323,7 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
  * @param out UTF-32 collection
  * @return Success
  */
-bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) { //TODO smoke test
+bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out ) {
     auto &   in   = src.stream();
     auto &   pos  = src.position();
     uint32_t prev = 0x00;
@@ -339,7 +370,8 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
                                          pos
                 );
 
-                //TODO log error
+                LOG_ERROR( "[parser::encoding::Transcode::U8toU32( std::deque<uint8_t> &, Source &, std::vector<uint32_t> & )] "
+                           "Invalid UTF-8 start byte: ", unicode::utf8::toxunicode( pre_buffer[0], "0x" ) );
 
                 return false; //EARLY RETURN
             }
@@ -493,7 +525,8 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
                                          pos
                 );
 
-                //TODO log error
+                LOG_ERROR( "[parser::encoding::Transcode::U16toU32( std::deque<uint8_t> &, Source &, std::vector<uint32_t> & )] "
+                           "Failed to complete high-surrogate: ", unicode::utf8::toxunicode( pre_buffer[0], "0x" ), " 0x??" );
 
                 return false; //EARLY RETURN
             }
@@ -510,7 +543,8 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
                                          pos
                 );
 
-                //TODO log error
+                LOG_ERROR( "[parser::encoding::Transcode::U16toU32( std::deque<uint8_t> &, Source &, std::vector<uint32_t> & )] "
+                           "Failed to complete codepoint: ", unicode::utf8::toxunicode( high_surrogate, "0x" ), " 0x????" );
 
                 return false; //EARLY RETURN
             };
@@ -534,7 +568,9 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
                                              specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                              pos );
 
-                    //TODO log error: low surrogate in invalid range (+hex for pair) - ignored
+                    LOG_WARNING( "[parser::encoding::Transcode::U16toU32( std::deque<uint8_t> &, Source &, std::vector<uint32_t> & )] "
+                                 "Invalid low surrogate: ", unicode::utf8::toxunicode( high_surrogate, "0x" ), " ",
+                                 unicode::utf8::toxunicode( low_surrogate, "0x" ) );
                 }
 
             } else {
@@ -543,7 +579,8 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
                                          specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
                                          pos );
 
-                //TODO log error: high surrogate in low surrogate range (+hex representation)
+                LOG_WARNING( "[parser::encoding::Transcode::U16toU32( std::deque<uint8_t> &, Source &, std::vector<uint32_t> & )] "
+                             "High surrogate in low surrogate range: ", unicode::utf8::toxunicode( high_surrogate, "0x" ) );
 
                 codepoint = unicode::utf16::toU32( high_surrogate ); //should be dealt with by the tokeniser
                 Transcode::addCodePoint( src, prev, codepoint, out );
@@ -601,7 +638,9 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
                                                  pos
                         );
 
-                        //TODO log error (+hex representation)
+                        LOG_ERROR( "[parser::encoding::Transcode::U16toU32( Source &, std::vector<uint32_t> & )] "
+                                   "Failed to complete codepoint: ", unicode::utf8::toxunicode( high_surrogate, "0x" ), " 0x????" );
+
                         return false; //EARLY RETURN
                     }
 
@@ -618,7 +657,9 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
                                                  specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                  pos );
 
-                        //TODO log error: low surrogate in invalid range (+hex for pair) - ignored
+                        LOG_WARNING( "[parser::encoding::Transcode::U16toU32( Source &, std::vector<uint32_t> & )] "
+                                     "Invalid low surrogate: ", unicode::utf8::toxunicode( high_surrogate, "0x" ), " ",
+                                     unicode::utf8::toxunicode( low_surrogate, "0x" ) );
                     }
                 } break;
 
@@ -628,7 +669,8 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
                                              specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
                                              pos );
 
-                    //TODO log error: high surrogate in low surrogate range (+hex representation)
+                    LOG_WARNING( "[parser::encoding::Transcode::U16toU32( Source &, std::vector<uint32_t> & )] "
+                                 "High surrogate in low surrogate range: ", unicode::utf8::toxunicode( high_surrogate, "0x" ) );
 
                     codepoint = unicode::utf16::toU32( high_surrogate ); //should be dealt with by the tokeniser
                     Transcode::addCodePoint( src, prev, codepoint, out );

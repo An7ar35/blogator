@@ -4,8 +4,6 @@
 #include <sstream>
 #include <utility>
 
-#include <iostream>//TODO temp
-
 using namespace blogator::logger::engine;
 using           blogator::logger::formatter::LogFormatter;
 using           blogator::logger::output::LogOutput;
