@@ -16,7 +16,10 @@ namespace blogator::unicode::utf8 {
     uint32_t toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3 ) noexcept;
     uint32_t toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3, uint8_t u8_byte4 ) noexcept;
 
+    std::string toxunicode( uint8_t val, const std::string & prefix = "\\u" );
+    std::string toxunicode( uint16_t val, const std::string & prefix = "\\u" );
     std::string toxunicode( uint32_t val, const std::string & prefix = "\\u" );
+    
     std::ostream & convert( std::ostream & stream, const std::u32string & str );
     std::ostream & convert( std::ostream & stream, char32_t c );
     std::string convert( const std::u32string & str );

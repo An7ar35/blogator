@@ -42,7 +42,7 @@ std::ostream &blogator::unicode::normalize( std::ostream &os, const std::u32stri
 std::ostream &blogator::unicode::normalize( std::ostream &os, const std::string & u8str ) {
     for( auto c : u8str ) {
         if( unicode::ascii::iscntrl( c ) || c == '\'' || c == '\"' || c == '\\' || c == 0x00 ) {
-            os<< unicode::utf8::toxunicode( c );
+            os<< unicode::utf8::toxunicode( (uint8_t) c );
         } else {
             os << c;
         }

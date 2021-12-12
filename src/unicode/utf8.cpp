@@ -5,6 +5,11 @@
 #include <iomanip>
 #include <codecvt>
 
+const char HEX_TABLE[16] = { '0', '1', '2', '3', '4',
+                             '5', '6', '7', '8', '9',
+                             'A', 'B', 'C', 'D', 'E',
+                             'F' };
+
 /**
  * Gets the number of bytes a UTF-8 encoded codepoint has
  * @param first First byte of the UTF-8 code point sequence
@@ -84,17 +89,52 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uin
  * @param prefix Hex code prefix (default="\\u")
  * @return Unicode hex string
  */
+std::string blogator::unicode::utf8::toxunicode( uint8_t val, const std::string &prefix ) {
+    char arr[2] = { 0, 0 };
+
+    arr[1] = HEX_TABLE[ (val % 16) ];
+    val /= 16;
+    arr[0] = HEX_TABLE[ val ];
+
+    return std::string( prefix + arr );
+}
+
+/**
+ * Converts a unicode integer value into its hexadecimal representation
+ * @param val Integer value to convert
+ * @param prefix Hex code prefix (default="\\u")
+ * @return Unicode hex string
+ */
+std::string blogator::unicode::utf8::toxunicode( uint16_t val, const std::string &prefix ) {
+    char arr[4] = { 0, 0, 0, 0 };
+
+    for( int i = 3; i > 0; --i ) {
+        arr[i] = HEX_TABLE[ ( val % 16 ) ];
+        val /= 16;
+    }
+
+    arr[0] = HEX_TABLE[ val ];
+
+    return std::string( prefix + arr );
+}
+
+/**
+ * Converts a unicode integer value into its hexadecimal representation
+ * @param val Integer value to convert
+ * @param prefix Hex code prefix (default="\\u")
+ * @return Unicode hex string
+ */
 std::string blogator::unicode::utf8::toxunicode( uint32_t val, const std::string& prefix ) {
-    std::stringstream ss;
+    char arr[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    ss << prefix
-       << std::setfill( '0' )
-       << std::setw( sizeof( uint32_t ) )
-       << std::hex
-       << std::uppercase
-       << val;
+    for( int i = 7; i > 0; --i ) {
+        arr[i] = HEX_TABLE[ (val % 16) ];
+        val /= 16;
+    }
 
-    return ss.str();
+    arr[0] = HEX_TABLE[ val ];
+
+    return std::string( prefix + arr );
 }
 
 /**

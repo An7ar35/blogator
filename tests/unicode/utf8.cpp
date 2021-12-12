@@ -22,6 +22,39 @@ TEST( unicode_utf8, bytelength ) {
     ASSERT_EQ( 0, bytelength( 0b11111000 ) );
 }
 
+TEST( unicode_utf8, toxunicode_uint8_prefix ) {
+    ASSERT_EQ( "0x00", blogator::unicode::utf8::toxunicode( (uint8_t) 0, "0x" ) );
+}
+
+TEST( unicode_utf8, toxunicode_uint8 ) {
+    ASSERT_EQ( "21", blogator::unicode::utf8::toxunicode( (uint8_t) 33, "" ) );
+    ASSERT_EQ( "9F", blogator::unicode::utf8::toxunicode( (uint8_t) 159, "" ) );
+    ASSERT_EQ( "F0", blogator::unicode::utf8::toxunicode( (uint8_t) 240, "" ) );
+    ASSERT_EQ( "FF", blogator::unicode::utf8::toxunicode( (uint8_t) 255, "" ) );
+}
+
+TEST( unicode_utf8, toxunicode_uint16_prefix ) {
+    ASSERT_EQ( "0x0000", blogator::unicode::utf8::toxunicode( (uint16_t) 0, "0x" ) );
+}
+
+TEST( unicode_utf8, toxunicode_uint16 ) {
+    ASSERT_EQ( "00A0", blogator::unicode::utf8::toxunicode( (uint16_t) 160, "" ) );
+    ASSERT_EQ( "01D5", blogator::unicode::utf8::toxunicode( (uint16_t) 469, "" ) );
+    ASSERT_EQ( "10C0", blogator::unicode::utf8::toxunicode( (uint16_t) 4288, "" ) );
+    ASSERT_EQ( "FFFF", blogator::unicode::utf8::toxunicode( (uint16_t) 65535, "" ) );
+}
+
+TEST( unicode_utf8, toxunicode_uint32_prefix ) {
+    ASSERT_EQ( "0x00000000", blogator::unicode::utf8::toxunicode( (uint32_t) 0, "0x" ) );
+}
+
+TEST( unicode_utf8, toxunicode_uint32 ) {
+    ASSERT_EQ( "00000099", blogator::unicode::utf8::toxunicode( (uint32_t) 153, "" ) );
+    ASSERT_EQ( "0000F122", blogator::unicode::utf8::toxunicode( (uint32_t) 61730, "" ) );
+    ASSERT_EQ( "00A2004C", blogator::unicode::utf8::toxunicode( (uint32_t) 10616908, "" ) );
+    ASSERT_EQ( "FFFFFFFF", blogator::unicode::utf8::toxunicode( (uint32_t) 4294967295, "" ) );
+}
+
 TEST( unicode_utf8, toU32_ASCII ) {
     const uint8_t low   [4] = { 0, 0, 0, 0 }; //NUL
     const uint8_t char_A[4] = { 0x41, 0, 0, 0 }; //'A'
