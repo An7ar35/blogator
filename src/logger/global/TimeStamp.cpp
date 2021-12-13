@@ -8,15 +8,15 @@ using namespace blogator::logger;
  * Constructor
  */
 TimeStamp::TimeStamp() :
-    _ts( std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() ) )
+    _time_point( std::chrono::high_resolution_clock::now() )
 {}
 
 /**
  * Constructor (for testing)
- * @param ts standard lib. timestamp object
+ * @param tp standard lib. high resolution clock time-point
  */
-TimeStamp::TimeStamp( std::time_t ts ) :
-    _ts( ts )
+TimeStamp::TimeStamp( std::chrono::time_point<std::chrono::high_resolution_clock> tp ) :
+    _time_point( tp )
 {}
 
 /**
@@ -25,7 +25,7 @@ TimeStamp::TimeStamp( std::time_t ts ) :
  * @return Equality
  */
 bool TimeStamp::operator ==( const TimeStamp &rhs ) const {
-    return ( _ts == rhs._ts );
+    return ( _time_point == rhs._time_point );
 }
 
 /**
@@ -38,13 +38,12 @@ bool TimeStamp::operator !=( const TimeStamp &rhs ) const {
 }
 
 /**
- * Get a local time string
+ * Gets a local time string
+ * @param fractional_precision Number of digits to show of the fractions of seconds (0-9)
  * @return Time represented as HH:MM:SS
  */
-std::string TimeStamp::getTime() const {
-    std::stringstream ss;
-    ss << std::put_time( std::localtime(&_ts ), "%H:%M:%S");
-    return ss.str();
+std::string TimeStamp::getTime( int fractional_precision ) const {
+    return std::move( getTimeStamp( "%H:%M:%S", fractional_precision ) );
 }
 
 /**
@@ -52,39 +51,73 @@ std::string TimeStamp::getTime() const {
  * @return Date formatted as dd/mm/yy
  */
 std::string TimeStamp::getDate() const {
-    std::stringstream ss;
-    ss << std::put_time( std::localtime( &_ts ), "%d/%m/%Y");
-    return ss.str();
+    return std::move( getTimeStamp( "%d/%m/%Y" ) );
 }
 
 /**
  * Gets a local timestamp
  * @param formatter Formatter string
+ * @param fractional_precision Number of digits to show of the fractions of seconds (0-9)
  * @return Formatted timestamp
  */
-std::string TimeStamp::getTimeStamp( const std::string &formatter ) const {
+std::string TimeStamp::getTimeStamp( const std::string &formatter, int fractional_precision ) const {
+    const auto ts = std::chrono::high_resolution_clock::to_time_t( _time_point );
+
     std::stringstream ss;
-    ss << std::put_time( std::localtime( &_ts ), formatter.c_str() );
+    ss << std::put_time( std::localtime( &ts ), formatter.c_str() );
+
+    if( fractional_precision > 0 ) {
+        getFractional( ss, fractional_precision );
+    }
+
     return ss.str();
 }
 
 /**
- * Gets a UTC formatted timestamp
+ * Gets a UTC formatted timestamp with fractional precision tagged onto the end
+ * @param fractional_precision Number of digits to show of the fractions of seconds (0-9)
  * @return UTC timestamp string
  */
-std::string TimeStamp::getUTC() const {
+std::string TimeStamp::getUTC( int fractional_precision ) const {
+    return std::move( getUTC( "%FT%TZ", fractional_precision ) );
+}
+
+/**
+ * Gets a UTC custom formatted timestamp
+ * @param formatter Formatter string
+ * @param fractional_precision Number of digits to show of the fractions of seconds (0-9)
+ * @return Formatted UTC timestamp
+ */
+std::string TimeStamp::getUTC( const std::string &formatter, int fractional_precision ) const {
+    const auto ts = std::chrono::high_resolution_clock::to_time_t( _time_point );
+
     std::stringstream ss;
-    ss << std::put_time( std::gmtime( &_ts ), "%FT%TZ" );
+    ss << std::put_time( std::gmtime( &ts ), formatter.c_str() );
+
+    if( fractional_precision > 0 ) {
+        ss << '.';
+        getFractional( ss, fractional_precision );
+    }
+
     return ss.str();
 }
 
 /**
- * Gets a UTC formatted timestamp with
- * @param formatter Formatter string
- * @return Formatted UTC timestamp
+ * [PRIVATE] Add fractional representation to a stream
+ * @param os Output stream
+ * @param precision Number of digits to show
  */
-std::string TimeStamp::getUTC( const std::string &formatter ) const {
+void TimeStamp::getFractional( std::ostream &os, int precision ) const {
+    if( precision > 9 ) {
+        precision = 9;
+    }
+
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>( _time_point );
+    const auto fraction = _time_point - seconds;
+
     std::stringstream ss;
-    ss << std::put_time( std::gmtime( &_ts ), formatter.c_str() );
-    return ss.str();
+    ss << std::setfill( '0' ) << std::setw( 9 ) << fraction.count();
+
+    const auto fraction_str = ss.str();
+    os << fraction_str.substr( 0, precision );
 }

@@ -7,6 +7,7 @@
 using namespace blogator::logger;
 
 const uint64_t ASYNC_TEST_TIMEOUT = 100; //ms
+const char *   LOG_OUTPUT_NAME    = "void";
 
 class LogMsgCatcher : public formatter::LogFormatter {
   public:
@@ -36,6 +37,17 @@ class LogMsgCatcher : public formatter::LogFormatter {
     std::shared_ptr<std::vector<LogMsg>>  _messages;
 };
 
+class VoidLogOutput : public output::LogOutput {
+  public:
+    VoidLogOutput() :
+        output::LogOutput( output::LogOutputType::CUSTOM, LOG_OUTPUT_NAME )
+    {}
+
+    void open() override {}
+    void close() override {}
+    void write( LogLevel lvl, const std::string &msg ) override {}
+};
+
 /**
  * Test suite class for `Logger`
  * -----------------------------
@@ -61,16 +73,21 @@ class logger_Logger_Tests : public ::testing::Test {
 
         Logger::addOutput( LogLevel::TRACE,
                            std::make_unique<LogMsgCatcher>( msgs, event_cb ),
-                           output::LogOutputType::TERMINAL,
-                           "LogMsgCatcher"
+                           std::make_unique<VoidLogOutput>()
         );
 
-        if( Logger::ready() ) {
-            if( !Logger::start() ) {
+        if( !Logger::running() ) {
+            if( Logger::ready() && !Logger::start() ) {
                 std::cerr << "[logger_Logger_Tests::SetUpTestSuite()] LOGGER DID NOT START!";
+            } else {
+                std::cerr << "[logger_Logger_Tests::SetUpTestSuite()] LOGGER NOT READY!";
             }
-        } else {
-            std::cerr << "[logger_Logger_Tests::SetUpTestSuite()] LOGGER NOT READY!";
+        }
+    }
+
+    static void TearDownTestSuite() {
+        if( !Logger::removeOutput( LOG_OUTPUT_NAME ) ) {
+            std::cerr << "[logger_Logger_Tests::TearDownTestSuite()] OUTPUT \"" << LOG_OUTPUT_NAME << "\" NOT REMOVED!";
         }
     }
 
@@ -86,8 +103,34 @@ std::shared_ptr<std::vector<LogMsg>> logger_Logger_Tests::msgs = std::make_share
 blogator::tests::AsyncNotify<LogMsg> logger_Logger_Tests::async_notify = blogator::tests::AsyncNotify<LogMsg>();
 
 
+TEST_F( logger_Logger_Tests, log_trace ) {
+    auto expected_msg = LogMsg( 1, LogLevel::TRACE, "Logger.cpp", 113, "string1 string2 1.2345" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    LOG_TRACE( "string1 ", "string2 ", 1.2345 );
+
+    ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+}
+
+TEST_F( logger_Logger_Tests, log_debug ) {
+    auto expected_msg = LogMsg( 1, LogLevel::DEBUG, "Logger.cpp", 126, "1 12345 str" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    LOG_DEBUG( true, " ", 12345, " str" );
+
+    ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+}
+
 TEST_F( logger_Logger_Tests, log_notice ) {
-    auto expected_msg = LogMsg( 1, LogLevel::NOTICE, "Logger.cpp", 96, "integer 10" );
+    auto expected_msg = LogMsg( 1, LogLevel::NOTICE, "Logger.cpp", 139, "integer 10" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -96,8 +139,44 @@ TEST_F( logger_Logger_Tests, log_notice ) {
     LOG_NOTICE( "integer ", 10 );
 
     ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
-    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out waiting for LogMsg match.";
-
-    logger_Logger_Tests::async_notify.reset();
+    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
 }
 
+TEST_F( logger_Logger_Tests, log_info ) {
+    auto expected_msg = LogMsg( 1, LogLevel::INFO, "Logger.cpp", 152, "" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    LOG();
+
+    ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+}
+
+TEST_F( logger_Logger_Tests, log_warning ) {
+    auto expected_msg = LogMsg( 1, LogLevel::WARNING, "Logger.cpp", 165, "12345" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    LOG_WARNING( 1, 2, 3, 4, 5 );
+
+    ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+}
+
+TEST_F( logger_Logger_Tests, log_error ) {
+    auto expected_msg = LogMsg( 1, LogLevel::ERROR, "Logger.cpp", 178, "abcde" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    LOG_ERROR( 'a', 'b', 'c', 'd', 'e' );
+
+    ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+    ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+}

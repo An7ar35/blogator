@@ -64,6 +64,8 @@ namespace blogator::logger {
         static bool addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::unique_ptr<Output_t> output );
         static bool addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::ostream &out_stream, const std::string &desc );
 
+        static bool removeOutput( const std::string &desc );
+
         static bool ready();
         static bool start();
         static bool running();

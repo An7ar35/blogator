@@ -4,22 +4,22 @@
 class logger_TimeStamp_Tests : public testing::Test {
   protected:
     static void SetUpTestSuite() {
-        logger_TimeStamp_Tests::_sys_ts = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );
+        logger_TimeStamp_Tests::_sys_time = std::chrono::high_resolution_clock::now();
     }
 
-    static std::time_t _sys_ts;
+    static blogator::logger::TimeStamp::HiResTimePoint_t _sys_time;
 };
 
-std::time_t logger_TimeStamp_Tests::_sys_ts = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );
+blogator::logger::TimeStamp::HiResTimePoint_t logger_TimeStamp_Tests::_sys_time = std::chrono::high_resolution_clock::now();
 
+using blogator::logger::TimeStamp;
 
 TEST_F( logger_TimeStamp_Tests, ostream_operator ) {
-    using blogator::logger::TimeStamp;
-
-    auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_ts );
+    auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
 
     std::stringstream expected;
-    expected << std::put_time( std::gmtime( &logger_TimeStamp_Tests::_sys_ts ), "%FT%TZ" );
+    const auto tp = std::chrono::high_resolution_clock::to_time_t( logger_TimeStamp_Tests::_sys_time );
+    expected << std::put_time( std::gmtime( &tp ), "%FT%TZ" );
 
     std::stringstream returned;
     returned << ts;
@@ -28,24 +28,54 @@ TEST_F( logger_TimeStamp_Tests, ostream_operator ) {
 }
 
 TEST_F( logger_TimeStamp_Tests, getTime ) {
-    FAIL();
+    const auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+    const auto tp = std::chrono::high_resolution_clock::to_time_t( logger_TimeStamp_Tests::_sys_time );
+
+    std::stringstream expected;
+    expected << std::put_time( std::localtime( &tp ), "%H:%M:%S" );
+
+    ASSERT_EQ( ts.getTime(), expected.str() );
 }
 
 TEST_F( logger_TimeStamp_Tests, getDate ) {
-    FAIL();
+    const auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+    const auto tp = std::chrono::high_resolution_clock::to_time_t( logger_TimeStamp_Tests::_sys_time );
+
+    std::stringstream expected;
+    expected << std::put_time( std::localtime( &tp ), "%d/%m/%Y" );
+
+    ASSERT_EQ( ts.getDate(), expected.str() );
 }
 
 TEST_F( logger_TimeStamp_Tests, getTimeStamp ) {
-    FAIL();
-}
-
-TEST_F( logger_TimeStamp_Tests, getUTC ) {
-    using blogator::logger::TimeStamp;
-
-    auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_ts );
+    const auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+    const auto tp = std::chrono::high_resolution_clock::to_time_t( logger_TimeStamp_Tests::_sys_time );
+    const auto fmt = "%d-%m-%Y %H:%M:%S";
 
     std::stringstream expected;
-    expected << std::put_time( std::gmtime( &logger_TimeStamp_Tests::_sys_ts ), "%FT%TZ" );
+    expected << std::put_time( std::localtime( &tp ), fmt );
+
+    ASSERT_EQ( ts.getTimeStamp( fmt ), expected.str() );
+}
+
+TEST_F( logger_TimeStamp_Tests, getUTC_formatter ) {
+    const auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+    const auto tp = std::chrono::high_resolution_clock::to_time_t( logger_TimeStamp_Tests::_sys_time );
+
+    std::stringstream expected;
+    expected << std::put_time( std::gmtime( &tp ), "%FT%TZ" );
 
     ASSERT_EQ( ts.getUTC(), expected.str() );
+}
+
+TEST_F( logger_TimeStamp_Tests, getUTC_precision ) {
+    const auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>( logger_TimeStamp_Tests::_sys_time );
+    const auto fraction = logger_TimeStamp_Tests::_sys_time - seconds;
+
+    std::stringstream expected;
+    expected << '.' << std::setfill( '0' ) << std::setw( 9 ) << fraction.count();
+
+    ASSERT_EQ( ts.getUTC( "", 9 ), expected.str() );
 }

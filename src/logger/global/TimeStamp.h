@@ -8,8 +8,10 @@
 namespace blogator::logger {
     class TimeStamp {
       public:
+        typedef std::chrono::time_point<std::chrono::high_resolution_clock> HiResTimePoint_t;
+
         TimeStamp();
-        explicit TimeStamp( std::time_t ts );
+        explicit TimeStamp( HiResTimePoint_t tp );
         ~TimeStamp() = default;
 
         friend std::ostream & operator <<( std::ostream & os, const TimeStamp &ts );
@@ -17,24 +19,26 @@ namespace blogator::logger {
         bool operator ==( const TimeStamp &rhs ) const;
         bool operator !=( const TimeStamp &rhs ) const;
 
-        [[nodiscard]] std::string getTime() const;
+        [[nodiscard]] std::string getTime( int fractional_precision = 0 ) const;
         [[nodiscard]] std::string getDate() const;
-        [[nodiscard]] std::string getTimeStamp( const std::string &formatter ) const;
-        [[nodiscard]] std::string getUTC() const;
-        [[nodiscard]] std::string getUTC( const std::string &formatter ) const;
+        [[nodiscard]] std::string getTimeStamp( const std::string &formatter, int fractional_precision = 0 ) const;
+        [[nodiscard]] std::string getUTC( int fractional_precision = 0 ) const;
+        [[nodiscard]] std::string getUTC( const std::string &formatter, int fractional_precision = 0 ) const;
 
       private:
-        std::time_t _ts;
+        HiResTimePoint_t _time_point;
+
+        void getFractional( std::ostream &os, int precision ) const;
     };
 
     /**
      * Output to stream as UTC timestamp
      * @param os Output stream
-     * @param ts Timestamp object
+     * @param timestamp Timestamp object
      * @return Output stream
      */
-    inline std::ostream & operator <<( std::ostream &os, const TimeStamp &ts ) {
-        os << std::put_time( std::gmtime( &ts._ts ), "%FT%TZ" );
+    inline std::ostream & operator <<( std::ostream &os, const TimeStamp &timestamp ) {
+        os << timestamp.getUTC( "%FT%TZ", 0 );
         return os;
     }
 }

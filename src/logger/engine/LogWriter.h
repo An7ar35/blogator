@@ -22,6 +22,7 @@ namespace blogator::logger::engine {
 
         [[maybe_unused]] bool setTimeout( uint64_t ms );
         void addOutput( LogLevel lvl, std::unique_ptr<formatter::LogFormatter> fmt, std::unique_ptr<output::LogOutput> out );
+        bool removeOutput( const std::string &description );
 
         bool start();
         bool stop( uint64_t ms = 1000 );
@@ -41,6 +42,7 @@ namespace blogator::logger::engine {
         std::vector<Output>               _outputs;
 
         std::thread                       _thread;
+        std::mutex                        _output_mutex;
         std::mutex                        _sleep_mutex;
         std::atomic<bool>                 _is_sleeping;
         std::condition_variable           _wakeup_cond;

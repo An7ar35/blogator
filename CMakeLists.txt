@@ -11,7 +11,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror=range-loop-construct -pthread")
+set(CMAKE_HAVE_THREADS_LIBRARY 1)
+set(CMAKE_USE_PTHREADS_INIT 1)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_STANDARD 20)
@@ -65,16 +69,6 @@ endif ()
 ####################################################################################################
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(${PROJECT_SOURCE_DIR}/submodules/json)
-
-####################################################################################################
-# International Component for Unicode                                                              #
-# ------------------------------------------------------------------------------------------------ #
-# https://cmake.org/cmake/help/latest/module/FindICU.html                                          #
-# https://icu.unicode.org/                                                                         #
-# Components can include any of: data, i18n, io, le, lx, test, tu and uc.                          #
-####################################################################################################
-find_package(ICU 69 COMPONENTS uc i18n io REQUIRED)
-include_directories(${ICU_INCLUDE_DIRS})
 
 ##########################
 # Blogator Source Files #
@@ -500,4 +494,4 @@ endforeach()
 ############
 include_directories(external)
 add_executable(blogator src/main.cpp ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} stdc++fs ${ICU_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} stdc++fs)

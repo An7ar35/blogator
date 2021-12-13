@@ -57,7 +57,7 @@ bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, OutputType_e output, 
 }
 
 /**
- * Adds a sink to the configuration
+ * [NOT THREAD-SAFE] Adds a sink to the configuration
  * @param lvl Cut-off log level
  * @param fmt Formatter type
  * @param output LogOutput instance
@@ -86,7 +86,7 @@ bool Logger::addOutput( LogLevel lvl, FormatterType_e fmt, std::unique_ptr<Outpu
 }
 
 /**
- * Adds a sink to the configuration
+ * [NOT THREAD-SAFE] Adds a sink to the configuration
  * @param lvl Cut-off log level
  * @param fmt LogFormatter instance
  * @param output Output type
@@ -116,7 +116,7 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, OutputTy
 }
 
 /**
- * Adds a sink to the configuration
+ * [NOT THREAD-SAFE] Adds a sink to the configuration
  * @param lvl Cut-off log level
  * @param fmt LogFormatter instance
  * @param output LogOutput instance
@@ -145,7 +145,7 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::uni
 }
 
 /**
- * Adds a sink to the configuration
+ * [NOT THREAD-SAFE] Adds an output sink to the Logger
  * @param lvl Cut-off log level
  * @param fmt LogFormatter instance
  * @param out_stream Custom stream output
@@ -175,6 +175,19 @@ bool Logger::addOutput( LogLevel lvl, std::unique_ptr<Formatter_t> fmt, std::ost
 }
 
 /**
+ * Removes a sink from the Logger
+ * @param desc Sink description (as used in the LogOutput of the target sink)
+ * @return Success (found & removed)
+ */
+bool Logger::removeOutput( const std::string &desc ) {
+    if( Logger::_initialised ) {
+        return Logger::_writer->removeOutput( desc );
+    }
+
+    return false;
+}
+
+/**
  * Checks if ready (initialised & has output(s) configured)
  * @return Readiness
  */
@@ -187,7 +200,7 @@ bool Logger::ready() {
  * @return Success
  */
 bool Logger::start() {
-    if( Logger::ready() ) {
+    if( Logger::ready() && !Logger::running() ) {
         return ( Logger::_running = Logger::_writer->start() );
 
     } else {

@@ -11,6 +11,16 @@ namespace blogator::logger {
       public:
         LogMsg( uint64_t id, LogLevel lvl, std::string src_file, int line_num, std::string message );
 
+        friend std::ostream & operator <<( std::ostream &os, const LogMsg & msg ) {
+            os << "{ id: " << msg._id
+               << ", source: " << msg._src_file << ":" << msg._src_line
+               << ", level: " << msg._level
+               << ", timestamp: " << msg._ts
+               << ", message: " << msg._message
+               << " }";
+            return os;
+        }
+
         bool operator ==( const LogMsg &rhs ) const;
         bool operator !=( const LogMsg &rhs ) const;
 

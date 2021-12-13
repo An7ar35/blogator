@@ -60,6 +60,25 @@ void LogWriter::addOutput( LogLevel lvl, std::unique_ptr<LogFormatter> fmt, std:
 }
 
 /**
+ * Removes a formatter and output pair from the list of Outputs
+ * @param description Description used for the LogOutput class used
+ * @return Success
+ */
+bool LogWriter::removeOutput( const std::string &description ) {
+    std::lock_guard<std::mutex> guard( _output_mutex );
+    auto output_it = std::find_if( _outputs.begin(),
+                                                _outputs.end(),
+                                                [&description]( const Output &o ) { return o.output->name() == description; } );
+
+    if( output_it != _outputs.end() ) {
+        _outputs.erase( output_it );
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Starts the log writer (not thread safe!)
  * @return Success
  */
@@ -125,11 +144,11 @@ bool LogWriter::stop( uint64_t ms ) {
 void LogWriter::resume() {
     {
         std::lock_guard<std::mutex> guard( _sleep_mutex );
-        _wakeup_cond.notify_all();
+        _wakeup_cond.notify_one();
     }
 
     //reset suspend timeout timer
-    _is_sleeping    = false;
+    _is_sleeping = false;
     _last_wakeup_ts = std::chrono::steady_clock::now();
 }
 
@@ -148,11 +167,15 @@ void LogWriter::runLoop() {
                 break;
             }
 
-            for( const auto &out : _outputs ) {
-                if( log_msg->level() <= out.lvl_limit ) {
-                    out.output->write( log_msg->level(),
-                                       out.formatter->format( *log_msg )
-                    );
+            {
+                std::lock_guard<std::mutex> guard( _output_mutex );
+
+                for( const auto &out: _outputs ) {
+                    if( log_msg->level() <= out.lvl_limit ) {
+                        out.output->write( log_msg->level(),
+                                           out.formatter->format( *log_msg )
+                        );
+                    }
                 }
             }
         }
