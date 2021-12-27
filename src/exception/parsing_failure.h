@@ -1,14 +1,14 @@
-#ifndef BLOGATOR_EXCEPTION_PARSINGFAILURE_H
-#define BLOGATOR_EXCEPTION_PARSINGFAILURE_H
+#ifndef BLOGATOR_EXCEPTION_PARSING_FAILURE_H
+#define BLOGATOR_EXCEPTION_PARSING_FAILURE_H
 
-#include <stdexcept>
+#include "../logger/LoggableException.h"
 
 namespace blogator::exception {
-    class parsing_failure : public std::logic_error {
+    class parsing_failure : public logger::LoggableException {
       public:
         explicit parsing_failure( const std::string& what );
         explicit parsing_failure( const char * what );
     };
 }
 
-#endif //BLOGATOR_PARSER_EXCEPTION_PARSINGFAILURE_H
+#endif //BLOGATOR_PARSER_EXCEPTION_PARSING_FAILURE_H

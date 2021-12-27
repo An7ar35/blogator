@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "../../logger/Logger.h"
+#include "../../exception/parsing_failure.h"
 #include "../logging/ParserLog.h"
 
 using namespace blogator::parser;
@@ -1540,8 +1541,19 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                             }
 
                         } else {
+                            std::stringstream ss;
+
+                            if( ncr.codepoint2 ) {
+                                ss << unicode::utf8::toxunicode( ncr.codepoint1, "" )
+                                   << unicode::utf8::toxunicode( ncr.codepoint2, "" );
+                            } else {
+                                ss << unicode::utf8::toxunicode( ncr.codepoint1, "" );
+                            }
+
                             appendToTempBuffer( match_buffer.begin(), match_buffer.end() );
-                            //TODO log error (tempbuff will be used as-is)
+
+                            LOG_ERROR( "[parser::tokeniser::HTML5::parse( U32Text &, ", blogator::to_string( starting_ctx ), ")] "
+                                       "Named character reference \\U+", ss.str() , " has no match - temp buffer will be used as-is." );
                         }
 
                         appendToTempBuffer( remainders.begin(), remainders.end() );
@@ -2028,19 +2040,22 @@ inline void tokeniser::HTML5::setPendingDoctypeTokenQuirksFlag( bool force_quirk
 /**
  * Adds the pending attribute name:value in the buffers to the token (clears buffers after)
  * @return Success
+ * @throws exception::parsing_failure when corrupted state occurs
  */
 inline bool tokeniser::HTML5::addPendingTokenAttribute() {
     if( _pending.field_buffer_a.empty() ) //attribute name buffer
         return true; //EARLY RETURN
 
     if( !_pending.token ) {
-        //TODO log error
-        return false;  //TODO replace by throw
+        throw exception::parsing_failure(
+            "[parser::tokeniser::HTML5::addPendingTokenAttribute()] No pending token available."
+        );
     }
 
     if( _pending.token->type() != Type_e::START_TAG && _pending.token->type() != Type_e::END_TAG ) {
-        //TODO log error
-        return false; //TODO replace by throw
+        throw exception::parsing_failure(
+            "[parser::tokeniser::HTML5::addPendingTokenAttribute()] Pending token is neither a START_TAG or END_TAG."
+        );
     }
 
     bool error = false;
@@ -2072,16 +2087,19 @@ inline void tokeniser::HTML5::clearPendingTokenAttribute() {
 
 /**
  * Sets the 'self-close' flag on the pending token
+ * @throws exception::parsing_failure when corrupted state occurs
  */
 inline void tokeniser::HTML5::setPendingTokenSelfCloseFlag() {
     if( !_pending.token ) {
-        //TODO log error
-        //TODO throw
+        throw exception::parsing_failure(
+            "[parser::tokeniser::HTML5::setPendingTokenSelfCloseFlag()] No pending token available."
+        );
     }
 
     if( _pending.token->type() != Type_e::START_TAG && _pending.token->type() != Type_e::END_TAG ) {
-        //TODO log error
-        //TODO throw
+        throw exception::parsing_failure(
+            "[parser::tokeniser::HTML5::setPendingTokenSelfCloseFlag()] Pending token is neither a START_TAG or END_TAG."
+        );
     }
 
     auto * tk = dynamic_cast<token::html5::GenericTagTk *>( _pending.token.get() );

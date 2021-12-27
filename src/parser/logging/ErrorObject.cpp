@@ -61,7 +61,7 @@ std::string ErrorObject::filepath() const {
  * @return Context
  */
 std::string ErrorObject::context() const {
-    return specs::ctxToStr( _context );
+    return blogator::to_string( _context );
 }
 
 /**
@@ -132,7 +132,7 @@ std::ostream & ErrorObject::filepath( std::ostream &os ) const {
  * @return Output stream
  */
 std::ostream & ErrorObject::context( std::ostream &os ) const {
-    os << specs::ctxToStr( _context );
+    os << _context;
     return os;
 }
 

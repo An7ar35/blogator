@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include "../dom/TreeBuilder.h"
-#include "../specs/html5/Specifications.h"
+#include "../specs/html5/specifications.h"
 #include "../token/html5/HTML5Tk.h"
 
 namespace blogator::parser::tokeniser {

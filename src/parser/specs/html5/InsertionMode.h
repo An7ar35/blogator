@@ -1,6 +1,9 @@
 #ifndef BLOGATOR_PARSER_SPECS_HTML5_INSERTIONMODE_H
 #define BLOGATOR_PARSER_SPECS_HTML5_INSERTIONMODE_H
 
+#include <string>
+#include <ostream>
+
 namespace blogator::parser::specs::html5 {
     enum class InsertionMode {
         INITIAL = 0,
@@ -26,7 +29,15 @@ namespace blogator::parser::specs::html5 {
         AFTER_FRAMESET,
         AFTER_AFTER_BODY,
         AFTER_AFTER_FRAMESET,
+
+        ENUM_END = AFTER_AFTER_FRAMESET, //used for iterating enums
     };
+
+    std::ostream & operator <<( std::ostream &os, InsertionMode mode );
+}
+
+namespace blogator {
+    std::string to_string( blogator::parser::specs::html5::InsertionMode mode );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_INSERTIONMODE_H

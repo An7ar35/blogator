@@ -144,8 +144,8 @@ class ParserLogCatcher {
  */
 class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
   public:
-    explicit MockTreeBuilder( blogator::parser::dom::DOM &dom ) :
-        blogator::parser::dom::TreeBuilder( dom )
+    explicit MockTreeBuilder( std::unique_ptr<blogator::parser::dom::DOM> dom ) :
+        blogator::parser::dom::TreeBuilder( std::move( dom ) )
     {};
 
     void addToken( std::unique_ptr<HTML5Tk> tk ) override {
@@ -210,9 +210,8 @@ std::u32string preprocess( std::u32string &raw, const std::filesystem::path &pat
 testing::AssertionResult runTest( const nlohmann::json &test, const std::filesystem::path &path ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
 
-    blogator::parser::dom::DOM dom;
-    MockTreeBuilder            mock_tree_builder( dom );
-    ParserLogCatcher           error_catcher;
+    MockTreeBuilder  mock_tree_builder( std::make_unique<blogator::parser::dom::DOM>() );
+    ParserLogCatcher error_catcher;
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
@@ -272,15 +271,15 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
     return testing::AssertionSuccess();
 }
 
-class HTML5TokeniserTest  : public testing::TestWithParam<std::pair<nlohmann::json, std::filesystem::path>> {};
+class parser_tokeniser_HTML5_Tests : public testing::TestWithParam<std::pair<nlohmann::json, std::filesystem::path>> {};
 
-TEST_P(HTML5TokeniserTest, html5lib_tests) {
+TEST_P( parser_tokeniser_HTML5_Tests, html5lib_tests) {
     auto test = GetParam();
     EXPECT_TRUE( runTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
 INSTANTIATE_TEST_CASE_P(
     HTML5TokeniserTestInstance,
-    HTML5TokeniserTest,
+    parser_tokeniser_HTML5_Tests,
     ::testing::ValuesIn( blogator::tests::loadJSONTests( blogator::tests::HTML5LIB_TOKENIZER_TEST_PATH ) )
 );

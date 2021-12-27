@@ -14,6 +14,20 @@ blogator::logger::TimeStamp::HiResTimePoint_t logger_TimeStamp_Tests::_sys_time 
 
 using blogator::logger::TimeStamp;
 
+TEST_F( logger_TimeStamp_Tests, equal_operator ) {
+    auto ts1 = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+    auto ts2 = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+
+    ASSERT_EQ( ts1, ts2 );
+}
+
+TEST_F( logger_TimeStamp_Tests, not_equal_operator ) {
+    auto ts1 = TimeStamp( logger_TimeStamp_Tests::_sys_time );
+    auto ts2 = TimeStamp( std::chrono::high_resolution_clock::now() );
+
+    ASSERT_NE( ts1, ts2 );
+}
+
 TEST_F( logger_TimeStamp_Tests, ostream_operator ) {
     auto ts = TimeStamp( logger_TimeStamp_Tests::_sys_time );
 

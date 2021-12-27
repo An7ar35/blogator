@@ -1,6 +1,7 @@
 #ifndef BLOGATOR_LOGGER_ENGINE_OGWRITER_H
 #define BLOGATOR_LOGGER_ENGINE_OGWRITER_H
 
+#include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>

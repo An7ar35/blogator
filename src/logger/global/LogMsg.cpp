@@ -43,13 +43,12 @@ bool LogMsg::operator !=( const LogMsg &rhs ) const {
 }
 
 /**
- * Checks equivalence
+ * Checks equivalence (for testing purposes)
  * @param rhs LogMsg to compare to
- * @return Equivalence (equal except ID)
+ * @return Equivalence (equal except ID and timestamp)
  */
 bool LogMsg::isEquivalent( const LogMsg &rhs ) const {
     return _level    == rhs._level
-        && _ts       == rhs._ts
         && _src_file == rhs._src_file
         && _src_line == rhs._src_line
         && _message  == rhs._message;

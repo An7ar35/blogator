@@ -40,10 +40,10 @@ TEST( parser_specs_html5_NamedCharRef_Tests, match_3 ) {
     auto char_n  = 0;
 
     for( uint32_t c : str ) {
-        ASSERT_TRUE( tracker.partial() );
+        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << c;
+        ASSERT_TRUE( c == U'g' ? !tracker.partial() : tracker.partial() );
         ASSERT_TRUE( tracker.matched() );
         ASSERT_TRUE( tracker.matching() );
-        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << c;
         ++char_n;
     }
 

@@ -16,7 +16,7 @@ namespace blogator::logger {
                << ", source: " << msg._src_file << ":" << msg._src_line
                << ", level: " << msg._level
                << ", timestamp: " << msg._ts
-               << ", message: " << msg._message
+               << ", message: \"" << msg._message << "\""
                << " }";
             return os;
         }

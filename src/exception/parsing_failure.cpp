@@ -2,10 +2,18 @@
 
 using namespace blogator::exception;
 
+/**
+ * Constructor
+ * @param what Description
+ */
 parsing_failure::parsing_failure( const char * what ) :
-    logic_error( what )
+    logger::LoggableException( what )
 {}
 
-parsing_failure::parsing_failure( const std::string &what ) :
-    logic_error( what )
+/**
+ * Constructor
+ * @param what Description
+ */
+parsing_failure::parsing_failure( const std::string & what ) :
+    logger::LoggableException( what )
 {}

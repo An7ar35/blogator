@@ -1,95 +1,18 @@
-#include "Specifications.h"
+#include "Element.h"
 
 #include <map>
-#include <set>
 #include <ostream>
-#include <functional>
+#include <sstream>
 
 using namespace blogator::parser::specs::html5;
 
 /**
- * Checks element matches the content model as per the requirements
- * @param element Element to test
- * @param content_model Content model to check against
- * @return Is compatible
- */
-bool Specifications::matchesContentModel( Element element, ContentModel content_model ) {
-    std::map<ContentModel, std::set<Element>> map;
-    typedef std::function<bool(ContentModel, Element /*, tree node or Tokens_t ?*/)> Validation_f;
-    typedef std::pair<Element, Validation_f> pack;
-
-    if( map.empty() ) {
-        map.emplace( ContentModel::NOTHING, std::set<Element>( {} ) );
-        map.emplace( ContentModel::METADATA, std::set<Element>( {
-            Element::HTML5_BASE,
-            Element::HTML5_LINK,
-            Element::HTML5_META,
-            Element::HTML5_NOSCRIPT,
-            Element::HTML5_SCRIPT,
-            Element::HTML5_STYLE,
-            Element::HTML5_TEMPLATE,
-            Element::HTML5_TITLE
-        } ) );
-        map.emplace( ContentModel::FLOW, std::set<Element>( {
-            //TODO
-        } ) );
-        map.emplace( ContentModel::SECTIONING, std::set<Element>( {
-            Element::HTML5_ARTICLE,
-            Element::HTML5_ASIDE,
-            Element::HTML5_NAV,
-            Element::HTML5_SECTION,
-        } ) );
-        map.emplace( ContentModel::HEADING, std::set<Element>( {
-            Element::HTML5_H1,
-            Element::HTML5_H2,
-            Element::HTML5_H3,
-            Element::HTML5_H4,
-            Element::HTML5_H5,
-            Element::HTML5_H6,
-            Element::HTML5_HGROUP
-        } ) );
-        map.emplace( ContentModel::PHRASING, std::set<Element>( {
-            //TODO
-        } ) );
-        map.emplace( ContentModel::EMBEDDED, std::set<Element>( {
-            Element::HTML5_AUDIO,
-            Element::HTML5_CANVAS,
-            Element::HTML5_EMBED,
-            Element::HTML5_IFRAME,
-            Element::HTML5_IMG,
-            Element::MATH,
-            Element::HTML5_OBJECT,
-            Element::HTML5_PICTURE,
-            Element::SVG,
-            Element::HTML5_VIDEO,
-        } ) );
-        map.emplace( ContentModel::INTERACTIVE, std::set<Element>( {
-            //TODO
-        } ) );
-        map.emplace( ContentModel::PALPABLE, std::set<Element>( {
-            //TODO
-        } ) );
-        map.emplace( ContentModel::SCRIPT_SUPPORT, std::set<Element>( {
-            Element::HTML5_SCRIPT,
-            Element::HTML5_TEMPLATE,
-        } ) );
-    }
-
-    if( map.contains( content_model ) ) {
-        return map.at( content_model ).contains( element );
-    }
-
-    //TODO error
-    return false;
-}
-
-
-/**
- * [DEBUG HELPER] Prints a string representation of an element
+ * Output stream operator
  * @param os Output stream
- * @param el Element
+ * @param el Element enum
+ * @return Output stream
  */
-void Specifications::printElement( std::ostream &os, Element el ) {
+std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, blogator::parser::specs::html5::Element el ) {
     static std::map<Element, std::string> map;
 
     if( map.empty() ) {
@@ -159,6 +82,7 @@ void Specifications::printElement( std::ostream &os, Element el ) {
         map.emplace( Element::HTML5_MAP, "HTML5_MAP" );
         map.emplace( Element::HTML5_MARK, "HTML5_MARK" );
         map.emplace( Element::HTML5_META, "HTML5_META" );
+        map.emplace( Element::HTML5_MENU, "HTML5_MENU" );
         map.emplace( Element::HTML5_METER, "HTML5_METER" );
         map.emplace( Element::HTML5_NAV, "HTML5_NAV" );
         map.emplace( Element::HTML5_NOSCRIPT, "HTML5_NOSCRIPT" );
@@ -181,6 +105,7 @@ void Specifications::printElement( std::ostream &os, Element el ) {
         map.emplace( Element::HTML5_SCRIPT, "HTML5_SCRIPT" );
         map.emplace( Element::HTML5_SECTION, "HTML5_SECTION" );
         map.emplace( Element::HTML5_SELECT, "HTML5_SELECT" );
+        map.emplace( Element::HTML5_SLOT, "HTML5_SLOT" );
         map.emplace( Element::HTML5_SMALL, "HTML5_SMALL" );
         map.emplace( Element::HTML5_SOURCE, "HTML5_SOURCE" );
         map.emplace( Element::HTML5_SPAN, "HTML5_SPAN" );
@@ -327,88 +252,19 @@ void Specifications::printElement( std::ostream &os, Element el ) {
     if( map.contains( el ) ) {
         os << map.at( el );
     } else {
-        //TODO log error
-        os << "not found";
+        os << "enum string not found";
     }
+
+    return os;
 }
 
-void Specifications::printContentModel( std::ostream &os, ContentModel model ) {
-    static std::map<ContentModel, std::string> map;
-
-    if( map.empty() ) {
-        map.emplace( ContentModel::NOTHING, "NOTHING" );
-        map.emplace( ContentModel::METADATA, "METADATA" );
-        map.emplace( ContentModel::FLOW, "FLOW" );
-        map.emplace( ContentModel::SECTIONING, "SECTIONING" );
-        map.emplace( ContentModel::HEADING, "HEADING" );
-        map.emplace( ContentModel::PHRASING, "PHRASING" );
-        map.emplace( ContentModel::EMBEDDED, "EMBEDDED" );
-        map.emplace( ContentModel::INTERACTIVE, "INTERACTIVE" );
-        map.emplace( ContentModel::PALPABLE, "PALPABLE" );
-        map.emplace( ContentModel::SCRIPT_SUPPORT, "SCRIPT_SUPPORT" );
-    }
-
-    if( map.contains( model ) ) {
-        os << map.at( model );
-    } else {
-        //TODO log error
-        os << "not found";
-    }
-}
-
-void Specifications::printInsertionMode( std::ostream &os, InsertionMode mode ) {
-    static std::map<InsertionMode, std::string> map;
-
-    if( map.empty() ) {
-        map.emplace( InsertionMode::INITIAL, "INITIAL" );
-        map.emplace( InsertionMode::INITIAL, "INITIAL" );
-        map.emplace( InsertionMode::BEFORE_HTML, "BEFORE_HTML" );
-        map.emplace( InsertionMode::BEFORE_HEAD, "BEFORE_HEAD" );
-        map.emplace( InsertionMode::IN_HEAD, "IN_HEAD" );
-        map.emplace( InsertionMode::IN_HEAD_NOSCRIPT, "IN_HEAD_NOSCRIPT" );
-        map.emplace( InsertionMode::AFTER_HEAD, "AFTER_HEAD" );
-        map.emplace( InsertionMode::IN_BODY, "IN_BODY" );
-        map.emplace( InsertionMode::TEXT, "TEXT" );
-        map.emplace( InsertionMode::IN_TABLE, "IN_TABLE" );
-        map.emplace( InsertionMode::IN_TABLE_TEXT, "IN_TABLE_TEXT" );
-        map.emplace( InsertionMode::IN_CAPTION, "IN_CAPTION" );
-        map.emplace( InsertionMode::IN_COLUMN_GROUP, "IN_COLUMN_GROUP" );
-        map.emplace( InsertionMode::IN_TABLE_BODY, "IN_TABLE_BODY" );
-        map.emplace( InsertionMode::IN_ROW, "IN_ROW" );
-        map.emplace( InsertionMode::IN_CELL, "IN_CELL" );
-        map.emplace( InsertionMode::IN_SELECT, "IN_SELECT" );
-        map.emplace( InsertionMode::IN_SELECT_IN_TABLE, "IN_SELECT_IN_TABLE" );
-        map.emplace( InsertionMode::IN_TEMPLATE, "IN_TEMPLATE" );
-        map.emplace( InsertionMode::AFTER_BODY, "AFTER_BODY" );
-        map.emplace( InsertionMode::IN_FRAMESET, "IN_FRAMESET" );
-        map.emplace( InsertionMode::AFTER_FRAMESET, "AFTER_FRAMESET" );
-        map.emplace( InsertionMode::AFTER_AFTER_BODY, "AFTER_AFTER_BODY" );
-        map.emplace( InsertionMode::AFTER_AFTER_FRAMESET, "AFTER_AFTER_FRAMESET" );
-    }
-
-    if( map.contains( mode ) ) {
-        os << map.at( mode );
-    } else {
-        //TODO log error
-        os << "not found";
-    }
-}
-
-void Specifications::printNamespace( std::ostream &os, Namespace ns ) {
-    static std::map<Namespace, std::string> map;
-
-    if( map.empty() ) {
-        map.emplace( Namespace::UNKNOWN, "UNKNOWN" );
-        map.emplace( Namespace::UNSUPPORTED, "UNSUPPORTED" );
-        map.emplace( Namespace::HTML5, "HTML5" );
-        map.emplace( Namespace::MATHML, "MATHML" );
-        map.emplace( Namespace::SVG, "SVG" );
-    }
-
-    if( map.contains( ns ) ) {
-        os << map.at( ns );
-    } else {
-        //TODO log error
-        os << "not found";
-    }
+/**
+ * Converts a parser::specs::html5::Element enum to a string representation
+ * @param el Element enum
+ * @return String representation
+ */
+std::string blogator::to_string( blogator::parser::specs::html5::Element el ) {
+    std::stringstream ss;
+    ss << el;
+    return ss.str();
 }

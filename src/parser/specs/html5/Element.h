@@ -1,6 +1,9 @@
 #ifndef BLOGATOR_PARSER_SPECS_HTML5_ELEMENTS_H
 #define BLOGATOR_PARSER_SPECS_HTML5_ELEMENTS_H
 
+#include <string>
+#include <ostream>
+
 namespace blogator::parser::specs::html5 {
     enum class Element {
         UNKNOWN = 0,
@@ -20,26 +23,26 @@ namespace blogator::parser::specs::html5 {
         HTML5_I, HTML5_IFRAME, HTML5_IMG, HTML5_INPUT, HTML5_INS,
         HTML5_KBD,
         HTML5_LABEL, HTML5_LEGEND, HTML5_LI, HTML5_LINK,
-        HTML5_MAIN, HTML5_MAP, HTML5_MARK, HTML5_META, HTML5_METER,
+        HTML5_MAIN, HTML5_MAP, HTML5_MARK, HTML5_META, HTML5_MENU, HTML5_METER,
         HTML5_NAV, HTML5_NOSCRIPT,
         HTML5_OBJECT, HTML5_OL, HTML5_OPTGROUP, HTML5_OPTION, HTML5_OUTPUT,
         HTML5_P, HTML5_PARAM, HTML5_PICTURE, HTML5_PRE, HTML5_PROGRESS,
         HTML5_Q,
         HTML5_RP, HTML5_RT, HTML5_RUBY,
-        HTML5_S, HTML5_SAMP, HTML5_SCRIPT, HTML5_SECTION, HTML5_SELECT, HTML5_SMALL, HTML5_SOURCE,
+        HTML5_S, HTML5_SAMP, HTML5_SCRIPT, HTML5_SECTION, HTML5_SELECT, HTML5_SLOT, HTML5_SMALL, HTML5_SOURCE,
             HTML5_SPAN, HTML5_STRONG, HTML5_STYLE, HTML5_SUB, HTML5_SUMMARY, HTML5_SUP,
         HTML5_TABLE, HTML5_TBODY, HTML5_TD, HTML5_TEMPLATE, HTML5_TEXTAREA, HTML5_TFOOT, HTML5_TH,
             HTML5_THEAD, HTML5_TIME, HTML5_TITLE, HTML5_TR, HTML5_TRACK,
         HTML5_U, HTML5_UL,
         HTML5_VAR, HTML5_VIDEO,
         HTML5_WBR,
-        HTML5_NS_END, //Not HTML - used for iterating enums
+        HTML5_NS_END = HTML5_WBR, //Not HTML - used for iterating enums
 
         /**
          * HTML5::MathML3.0 elements
          * (https://developer.mozilla.org/en-US/docs/Web/MathML/Element)
          */
-        MATHML_NS_BEGIN = HTML5_NS_END, //Not HTML - used for iterating enums
+        MATHML_NS_BEGIN, //Not HTML - used for iterating enums
         MATH = MATHML_NS_BEGIN,
         MATHML_MACTION, MATHML_MALIGNGROUP, MATHML_MALIGNMARK,
         MATHML_MENCLOSE, MATHML_MERROR,
@@ -57,13 +60,13 @@ namespace blogator::parser::specs::html5 {
         MATHML_MTABLE, MATHML_MTD, MATHML_MTEXT, MATHML_MTR,
         MATHML_MUNDER, MATHML_MUNDEROVER,
         MATHML_SEMANTICS, MATHML_ANNOTATION, MATHML_ANNOTATION_XML,
-        MATHML_NS_END, //Not HTML - used for iterating enums
+        MATHML_NS_END = MATHML_ANNOTATION_XML, //Not HTML - used for iterating enums
 
         /*
          * HTML::SVG elements
          * https://developer.mozilla.org/en-US/docs/Web/SVG/Element
          */
-        SVG_NS_BEGIN = MATHML_NS_END, //Not HTML - used for iterating enums
+        SVG_NS_BEGIN, //Not HTML - used for iterating enums
         SVG = SVG_NS_BEGIN,
         SVG_A, SVG_ANIMATE, SVG_ANIMATEMOTION, SVG_ANIMATETRANSFORM,
         SVG_CIRCLE, SVG_CLIPPATH, SVG_COLOR_PROFILE,
@@ -93,12 +96,17 @@ namespace blogator::parser::specs::html5 {
         SVG_TEXT, SVG_TEXTPATH, SVG_TITLE, SVG_TSPAN,
         SVG_UNKNOWN, SVG_USE,
         SVG_VIEW,
-        SVG_NS_END, //Not HTML - used for iterating enums
+        SVG_NS_END = SVG_VIEW, //Not HTML - used for iterating enums
 
         ENUM_END = SVG_NS_END//Not HTML - used for iterating enums
     };
 
+    std::ostream & operator <<( std::ostream &os, Element el );
     //TODO create paired, self closing lookup
+}
+
+namespace blogator {
+    std::string to_string( blogator::parser::specs::html5::Element el );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_ELEMENTS_H
