@@ -233,6 +233,8 @@ set(SOURCE_FILES
         src/parser/specs/Structure.h
         src/parser/specs/Context.cpp
         src/parser/specs/Context.h
+        src/parser/specs/html5/Attribute.cpp
+        src/parser/specs/html5/Attribute.h
         src/parser/specs/native/Element.cpp
         src/parser/specs/native/Element.h
         src/parser/specs/native/InsertionMode.h
@@ -240,20 +242,22 @@ set(SOURCE_FILES
         src/parser/specs/native/Specifications.h
         src/parser/specs/native/ErrorCode.cpp
         src/parser/specs/native/ErrorCode.h
-        src/parser/specs/html5/attributes/attributes.h
         src/parser/specs/html5/tokeniser/TokeniserState.h
         src/parser/specs/html5/tokeniser/TokenType.h
+        src/parser/specs/html5/ContentModel.cpp
         src/parser/specs/html5/ContentModel.h
+        src/parser/specs/html5/Element.cpp
         src/parser/specs/html5/Element.h
+        src/parser/specs/html5/Namespace.cpp
         src/parser/specs/html5/Namespace.h
         src/parser/specs/html5/NamedCharRef.cpp
         src/parser/specs/html5/NamedCharRef.h
         src/parser/specs/html5/NumericCharRef.cpp
         src/parser/specs/html5/NumericCharRef.h
-        src/parser/specs/html5/specifications.cpp
         src/parser/specs/html5/specifications.h
         src/parser/specs/html5/ErrorCode.h
         src/parser/specs/html5/ErrorCode.cpp
+        src/parser/specs/html5/InsertionMode.cpp
         src/parser/specs/html5/InsertionMode.h
         src/parser/specs/markdown/specifications.cpp
         src/parser/specs/markdown/specifications.h
@@ -344,8 +348,6 @@ set(SOURCE_FILES
         src/parser/dom/node/CDATASection.h
         src/parser/dom/node/CharacterData.cpp
         src/parser/dom/node/CharacterData.h
-        src/parser/dom/node/EventTarget.cpp
-        src/parser/dom/node/EventTarget.h
 
         src/parser/dom/exception/DOMException.h
         src/parser/dom/exception/DOMExceptionType.h
@@ -392,7 +394,10 @@ set(SOURCE_FILES
         src/logger/formatter/LogFormatter.cpp
         src/logger/formatter/LogFormatter.h
         src/logger/output/Stream.cpp
-        src/logger/output/Stream.h)
+        src/logger/output/Stream.h
+        src/parser/dom/defs.h
+        src/parser/dom/validation/HTML5Validator.cpp
+        src/parser/dom/validation/HTML5Validator.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -461,7 +466,12 @@ set(TEST_FILES
         tests/logger/global/TimeStamp.cpp
         tests/logger/Logger.cpp
         tests/logger/engine/LogQueue.cpp
-        tests/AsyncNotify.h)
+        tests/AsyncNotify.h
+        tests/parser/specs/html5/Element.cpp
+        tests/parser/specs/html5/ContentModel.cpp
+        tests/parser/specs/html5/Namespace.cpp
+        tests/parser/specs/html5/InsertionMode.cpp
+        tests/parser/specs/Context.cpp tests/parser/specs/html5/Attribute.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 
@@ -494,4 +504,4 @@ endforeach()
 ############
 include_directories(external)
 add_executable(blogator src/main.cpp ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} stdc++fs)
+target_link_libraries(${PROJECT_NAME} stdc++fs pthread)

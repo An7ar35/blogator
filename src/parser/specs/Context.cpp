@@ -11,7 +11,7 @@
 std::ostream & blogator::parser::specs::operator <<( std::ostream &os, blogator::parser::specs::Context ctx ) {
     switch( ctx ) {
         case Context::UNKNOWN:  { os << "Unknown";  } break;
-        case Context::BLOGATOR: { os << "Blogator"; } break;
+        case Context::NATIVE: { os << "Blogator"; } break;
         case Context::HTML5:    { os << "HTML5";    } break;
         case Context::MARKDOWN: { os << "Markdown"; } break;
         default:

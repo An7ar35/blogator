@@ -2,6 +2,7 @@
 
 #include <cctype>
 
+#include "../logger/Logger.h"
 #include "../exception/parsing_failure.h"
 #include "logging/ParserLog.h"
 #include "encoding/Transcode.h"
@@ -27,15 +28,14 @@ std::unique_ptr<dom::DOM> Parser::parse( Source &source, specs::Context ctx ) {
     }
 
     auto u32text      = U32Text( codepoints );
-    auto dom          = std::make_unique<dom::DOM>();
-    auto tree_builder = dom::TreeBuilder( *dom );
+    auto tree_builder = dom::TreeBuilder( std::make_unique<dom::DOM>() );
 
     if( !parse( u32text, tree_builder, ctx ) ) {
         //TODO error
         throw exception::parsing_failure( "Failed parsing." );
     }
 
-    return std::move( dom );
+    return std::move( tree_builder.getDOM() );
 }
 
 /**
@@ -49,7 +49,7 @@ bool Parser::parse( U32Text &u32text, dom::TreeBuilder &tree_builder, specs::Con
     switch( ctx ) {
         case specs::Context::UNKNOWN:
             return parseHTML( u32text, tree_builder );
-        case specs::Context::BLOGATOR:
+        case specs::Context::NATIVE:
             return parseBlogator( u32text, tree_builder );
         case specs::Context::HTML5:
             return parseHTML( u32text, tree_builder );
@@ -76,14 +76,14 @@ bool Parser::parseBlogator( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
     auto blogator_tokeniser = tokeniser::Native( tree_builder );
     auto html5_tokeniser    = tokeniser::HTML5( tree_builder );
     auto tokens             = Tokens_t();
-    auto current_context    = specs::Context::BLOGATOR;
+    auto current_context    = specs::Context::NATIVE;
 
     while( !u32text.reachedEnd() ) {
         switch( current_context ) {
-            case specs::Context::BLOGATOR:
+            case specs::Context::NATIVE:
 //                current_context = blogator_tokeniser.parse( u32text, tokens, current_context );
 
-                if( current_context == specs::Context::BLOGATOR && !blogator_tokeniser.finished() ) {
+                if( current_context == specs::Context::NATIVE && !blogator_tokeniser.finished() ) {
                     //TODO LOG error - BLOGATOR namespace not closed (file line:col of opening token)
                 }
                 break;
@@ -108,10 +108,10 @@ bool Parser::parseHTML( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
 
     while( !u32text.reachedEnd() ) {
         switch( current_context ) {
-            case specs::Context::BLOGATOR:
+            case specs::Context::NATIVE:
 //                current_context = blogator_tokeniser.parse( u32text, current_context );
 
-                if( current_context == specs::Context::BLOGATOR && !blogator_tokeniser.finished() ) {
+                if( current_context == specs::Context::NATIVE && !blogator_tokeniser.finished() ) {
                     //TODO LOG error - BLOGATOR namespace not closed (file line:col of opening token)
                 }
                 break;
@@ -138,7 +138,7 @@ bool Parser::parseMarkdown( U32Text &u32text, dom::TreeBuilder &tree_builder ) {
 
     while( !u32text.reachedEnd() ) {
         switch( current_context ) {
-            case specs::Context::BLOGATOR:
+            case specs::Context::NATIVE:
 //                current_context = blogator_tokeniser.parse( u32text, current_context );
                 break;
 

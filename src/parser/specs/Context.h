@@ -7,7 +7,7 @@
 namespace blogator::parser::specs {
     enum class Context {
         UNKNOWN = 0,
-        BLOGATOR,
+        NATIVE,
         HTML5,
         MARKDOWN,
 

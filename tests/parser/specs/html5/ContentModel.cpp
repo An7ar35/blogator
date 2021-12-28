@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/specs/html5/specifications.h"
+#include "../../../src/parser/specs/html5/ContentModel.h"
 
 using namespace blogator::parser::specs::html5;
 
