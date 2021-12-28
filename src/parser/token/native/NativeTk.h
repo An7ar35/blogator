@@ -2,7 +2,7 @@
 #define BLOGATOR_PARSER_TOKEN_NATIVE_NATIVETK_H
 
 #include "../Token.h"
-#include "../../specs/native/Specifications.h"
+#include "../../specs/native/specifications.h"
 
 namespace blogator::parser::token::native {
     class NativeTk : public token::Token {

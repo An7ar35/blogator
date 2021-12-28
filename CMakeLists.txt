@@ -237,11 +237,11 @@ set(SOURCE_FILES
         src/parser/specs/html5/Attribute.h
         src/parser/specs/native/Element.cpp
         src/parser/specs/native/Element.h
-        src/parser/specs/native/InsertionMode.h
-        src/parser/specs/native/Specifications.cpp
-        src/parser/specs/native/Specifications.h
         src/parser/specs/native/ErrorCode.cpp
         src/parser/specs/native/ErrorCode.h
+        src/parser/specs/native/InsertionMode.cpp
+        src/parser/specs/native/InsertionMode.h
+        src/parser/specs/native/specifications.h
         src/parser/specs/html5/tokeniser/TokeniserState.h
         src/parser/specs/html5/tokeniser/TokenType.h
         src/parser/specs/html5/ContentModel.cpp
@@ -259,7 +259,6 @@ set(SOURCE_FILES
         src/parser/specs/html5/ErrorCode.cpp
         src/parser/specs/html5/InsertionMode.cpp
         src/parser/specs/html5/InsertionMode.h
-        src/parser/specs/markdown/specifications.cpp
         src/parser/specs/markdown/specifications.h
 
         src/parser/token/Token.cpp
@@ -471,7 +470,10 @@ set(TEST_FILES
         tests/parser/specs/html5/ContentModel.cpp
         tests/parser/specs/html5/Namespace.cpp
         tests/parser/specs/html5/InsertionMode.cpp
-        tests/parser/specs/Context.cpp tests/parser/specs/html5/Attribute.cpp)
+        tests/parser/specs/Context.cpp
+        tests/parser/specs/html5/Attribute.cpp
+        tests/parser/specs/native/Element.cpp
+        tests/parser/specs/native/InsertionMode.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 

@@ -41,9 +41,7 @@ Element NativeTk::element() const {
  * @param os Output stream
  */
 void NativeTk::toStr( std::ostream &os ) const {
-    os << "NativeTk={ element: ";
-    specs::native::Specifications::printElement( os, element() );
-    os << ", text: \"";
+    os << "NativeTk={ element: '" << element() << "', text: \"";
     unicode::utf8::convert( os, text() );
     os << "\", position: " << lineNum() << ":" << colPos() << " }";
 }

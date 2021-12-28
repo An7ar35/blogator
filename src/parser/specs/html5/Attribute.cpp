@@ -15,7 +15,7 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
     if( map.empty() ) {
         map.emplace( Attribute::UNKNOWN, "UNKNOWN" );
         map.emplace( Attribute::ACCEPT, "accept" );
-        map.emplace( Attribute::ACCEPT_CHARSET, "ACCEPT_CHARSET" );
+        map.emplace( Attribute::ACCEPT_CHARSET, "accept-charset" );
         map.emplace( Attribute::ACCESSKEY, "accesskey" );
         map.emplace( Attribute::ACTION, "action" );
         map.emplace( Attribute::ALT, "alt" );

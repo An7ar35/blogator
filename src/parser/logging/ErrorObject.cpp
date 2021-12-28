@@ -70,7 +70,7 @@ std::string ErrorObject::context() const {
  */
 std::string ErrorObject::error() const {
     switch( _context ) {
-        case specs::Context::BLOGATOR:
+        case specs::Context::NATIVE:
             return specs::native::ErrorCode::str( _code );
         case specs::Context::HTML5:
             return specs::html5::ErrorCode::str( _code );
@@ -87,7 +87,7 @@ std::string ErrorObject::error() const {
  */
 std::string ErrorObject::detailed() const {
     switch( _context ) {
-        case specs::Context::BLOGATOR:
+        case specs::Context::NATIVE:
             return specs::native::ErrorCode::detailed( _code );
         case specs::Context::HTML5:
             return specs::html5::ErrorCode::detailed( _code );
@@ -143,7 +143,7 @@ std::ostream & ErrorObject::context( std::ostream &os ) const {
  */
 std::ostream & ErrorObject::error( std::ostream &os ) const {
     switch( _context ) {
-        case specs::Context::BLOGATOR:
+        case specs::Context::NATIVE:
             os << "BLOGATOR"; //TODO
             break;
 
@@ -170,7 +170,7 @@ std::ostream & ErrorObject::error( std::ostream &os ) const {
  */
 std::ostream & ErrorObject::detailed( std::ostream &os ) const {
     switch( _context ) {
-        case specs::Context::BLOGATOR:
+        case specs::Context::NATIVE:
             os << specs::native::ErrorCode::detailed( _code );
             break;
 

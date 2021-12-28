@@ -1,7 +1,8 @@
 #ifndef BLOGATOR_PARSER_SPECS_NATIVE_ELEMENTS_H
 #define BLOGATOR_PARSER_SPECS_NATIVE_ELEMENTS_H
 
-#include <iostream>
+#include <string>
+#include <ostream>
 
 namespace blogator::parser::specs::native {
     enum class Element {
@@ -30,8 +31,14 @@ namespace blogator::parser::specs::native {
         DATE,           //BL.DATE
 
 
-        ENUM_END //used for iterating enums
+        ENUM_END = DATE //used for iterating enums
     };
+
+    std::ostream & operator <<( std::ostream &os, Element el );
+}
+
+namespace blogator {
+    std::string to_string( blogator::parser::specs::native::Element el );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_NATIVE_ELEMENTS_H

@@ -1,0 +1,8 @@
+#ifndef BLOGATOR_PARSER_SPECS_NATIVE_SPECIFICATIONS_H
+#define BLOGATOR_PARSER_SPECS_NATIVE_SPECIFICATIONS_H
+
+#include "Element.h"
+#include "ErrorCode.h"
+#include "InsertionMode.h"
+
+#endif //BLOGATOR_PARSER_SPECS_NATIVE_SPECIFICATIONS_H

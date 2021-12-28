@@ -16,30 +16,29 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
     static std::map<InsertionMode, std::string> map;
 
     if( map.empty() ) {
-        map.emplace( InsertionMode::INITIAL, "INITIAL" );
-        map.emplace( InsertionMode::INITIAL, "INITIAL" );
-        map.emplace( InsertionMode::BEFORE_HTML, "BEFORE_HTML" );
-        map.emplace( InsertionMode::BEFORE_HEAD, "BEFORE_HEAD" );
-        map.emplace( InsertionMode::IN_HEAD, "IN_HEAD" );
-        map.emplace( InsertionMode::IN_HEAD_NOSCRIPT, "IN_HEAD_NOSCRIPT" );
-        map.emplace( InsertionMode::AFTER_HEAD, "AFTER_HEAD" );
-        map.emplace( InsertionMode::IN_BODY, "IN_BODY" );
-        map.emplace( InsertionMode::TEXT, "TEXT" );
-        map.emplace( InsertionMode::IN_TABLE, "IN_TABLE" );
-        map.emplace( InsertionMode::IN_TABLE_TEXT, "IN_TABLE_TEXT" );
-        map.emplace( InsertionMode::IN_CAPTION, "IN_CAPTION" );
-        map.emplace( InsertionMode::IN_COLUMN_GROUP, "IN_COLUMN_GROUP" );
-        map.emplace( InsertionMode::IN_TABLE_BODY, "IN_TABLE_BODY" );
-        map.emplace( InsertionMode::IN_ROW, "IN_ROW" );
-        map.emplace( InsertionMode::IN_CELL, "IN_CELL" );
-        map.emplace( InsertionMode::IN_SELECT, "IN_SELECT" );
-        map.emplace( InsertionMode::IN_SELECT_IN_TABLE, "IN_SELECT_IN_TABLE" );
-        map.emplace( InsertionMode::IN_TEMPLATE, "IN_TEMPLATE" );
-        map.emplace( InsertionMode::AFTER_BODY, "AFTER_BODY" );
-        map.emplace( InsertionMode::IN_FRAMESET, "IN_FRAMESET" );
-        map.emplace( InsertionMode::AFTER_FRAMESET, "AFTER_FRAMESET" );
-        map.emplace( InsertionMode::AFTER_AFTER_BODY, "AFTER_AFTER_BODY" );
-        map.emplace( InsertionMode::AFTER_AFTER_FRAMESET, "AFTER_AFTER_FRAMESET" );
+        map.emplace( InsertionMode::INITIAL, "initial" );
+        map.emplace( InsertionMode::BEFORE_HTML, "before html" );
+        map.emplace( InsertionMode::BEFORE_HEAD, "before head" );
+        map.emplace( InsertionMode::IN_HEAD, "in head" );
+        map.emplace( InsertionMode::IN_HEAD_NOSCRIPT, "in head noscript" );
+        map.emplace( InsertionMode::AFTER_HEAD, "after head" );
+        map.emplace( InsertionMode::IN_BODY, "in body" );
+        map.emplace( InsertionMode::TEXT, "text" );
+        map.emplace( InsertionMode::IN_TABLE, "in table" );
+        map.emplace( InsertionMode::IN_TABLE_TEXT, "in table text" );
+        map.emplace( InsertionMode::IN_CAPTION, "in caption" );
+        map.emplace( InsertionMode::IN_COLUMN_GROUP, "in column group" );
+        map.emplace( InsertionMode::IN_TABLE_BODY, "in table body" );
+        map.emplace( InsertionMode::IN_ROW, "in row" );
+        map.emplace( InsertionMode::IN_CELL, "in cell" );
+        map.emplace( InsertionMode::IN_SELECT, "in select" );
+        map.emplace( InsertionMode::IN_SELECT_IN_TABLE, "in select in table" );
+        map.emplace( InsertionMode::IN_TEMPLATE, "in template" );
+        map.emplace( InsertionMode::AFTER_BODY, "after body" );
+        map.emplace( InsertionMode::IN_FRAMESET, "in frameset" );
+        map.emplace( InsertionMode::AFTER_FRAMESET, "after frameset" );
+        map.emplace( InsertionMode::AFTER_AFTER_BODY, "after after body" );
+        map.emplace( InsertionMode::AFTER_AFTER_FRAMESET, "after after frameset" );
     }
 
     if( map.contains( mode ) ) {

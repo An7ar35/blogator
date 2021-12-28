@@ -276,7 +276,7 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
 
         if( expected == 0 ) {
             logging::ParserLog::log( src.path(),
-                                     specs::Context::BLOGATOR,
+                                     specs::Context::NATIVE,
                                      specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                      pos
             );
@@ -296,7 +296,7 @@ bool Transcode::U8toU32( Source &src, std::vector<uint32_t> &out ) {
 
         } else {
             logging::ParserLog::log( src.path(),
-                                     specs::Context::BLOGATOR,
+                                     specs::Context::NATIVE,
                                      specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                      pos
             );
@@ -339,7 +339,7 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
 
             if( byte_length > pre_buffer.size() ) {
                 logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
+                                         specs::Context::NATIVE,
                                          specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                          pos
                 );
@@ -365,7 +365,7 @@ bool Transcode::U8toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vect
                                                   pre_buffer[3] );
             } else {
                 logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
+                                         specs::Context::NATIVE,
                                          specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                          pos
                 );
@@ -520,7 +520,7 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
         while( !pre_buffer.empty() ) {
             if( pre_buffer.size() == 1 && ( fetchCodeUnit( in, pre_buffer, 1 ) != 1 ) ) {
                 logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
+                                         specs::Context::NATIVE,
                                          specs::native::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
                                          pos
                 );
@@ -538,7 +538,7 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
 
             if( fetchCodeUnit( in, pre_buffer, missing_bytes ) != missing_bytes ) {
                 logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
+                                         specs::Context::NATIVE,
                                          specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                          pos
                 );
@@ -564,7 +564,7 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
 
                 } else {
                     logging::ParserLog::log( src.path(),
-                                             specs::Context::BLOGATOR,
+                                             specs::Context::NATIVE,
                                              specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                              pos );
 
@@ -633,7 +633,7 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
                 case 2: {
                     if( fetchCodeUnit( in, low_surrogate_bytes, 2 ) != 2 ) {
                         logging::ParserLog::log( src.path(),
-                                                 specs::Context::BLOGATOR,
+                                                 specs::Context::NATIVE,
                                                  specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                  pos
                         );
@@ -653,7 +653,7 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
 
                     } else {
                         logging::ParserLog::log( src.path(),
-                                                 specs::Context::BLOGATOR,
+                                                 specs::Context::NATIVE,
                                                  specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                  pos );
 
@@ -681,7 +681,7 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
         } else { //EOF and error-control cases
             if( ( error = ( bytes != 0 ) ) ) {
                 logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
+                                         specs::Context::NATIVE,
                                          specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                          pos
                 );
@@ -716,7 +716,7 @@ bool Transcode::U32toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
 
             if( fetchCodeUnit( in, pre_buffer, required ) != required ) {
                 logging::ParserLog::log( src.path(),
-                                         specs::Context::BLOGATOR,
+                                         specs::Context::NATIVE,
                                          specs::native::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
                                          pos
                 );

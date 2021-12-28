@@ -16,16 +16,16 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
     static std::map<ContentModel, std::string> map;
 
     if( map.empty() ) {
-        map.emplace( ContentModel::NOTHING, "NOTHING" );
-        map.emplace( ContentModel::METADATA, "METADATA" );
-        map.emplace( ContentModel::FLOW, "FLOW" );
-        map.emplace( ContentModel::SECTIONING, "SECTIONING" );
-        map.emplace( ContentModel::HEADING, "HEADING" );
-        map.emplace( ContentModel::PHRASING, "PHRASING" );
-        map.emplace( ContentModel::EMBEDDED, "EMBEDDED" );
-        map.emplace( ContentModel::INTERACTIVE, "INTERACTIVE" );
-        map.emplace( ContentModel::PALPABLE, "PALPABLE" );
-        map.emplace( ContentModel::SCRIPT_SUPPORT, "SCRIPT_SUPPORT" );
+        map.emplace( ContentModel::NOTHING, "nothing" );
+        map.emplace( ContentModel::METADATA, "metadata" );
+        map.emplace( ContentModel::FLOW, "flow" );
+        map.emplace( ContentModel::SECTIONING, "sectioning" );
+        map.emplace( ContentModel::HEADING, "heading" );
+        map.emplace( ContentModel::PHRASING, "phrasing" );
+        map.emplace( ContentModel::EMBEDDED, "embedded" );
+        map.emplace( ContentModel::INTERACTIVE, "interactive" );
+        map.emplace( ContentModel::PALPABLE, "palpable" );
+        map.emplace( ContentModel::SCRIPT_SUPPORT, "script support" );
     }
 
     if( map.contains( model ) ) {

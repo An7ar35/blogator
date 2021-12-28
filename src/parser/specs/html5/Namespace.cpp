@@ -15,7 +15,7 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
     switch( ns ) {
         case Namespace::UNKNOWN: { os << "UNKNOWN"; } break;
         case Namespace::HTML5:   { os << "HTML5"; } break;
-        case Namespace::MATHML:  { os << "MATHML"; } break;
+        case Namespace::MATHML:  { os << "MathML"; } break;
         case Namespace::SVG:     { os << "SVG"; } break;
         default:                 { os << "enum string not found"; }
     }
