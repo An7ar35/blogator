@@ -442,7 +442,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_fail ) { //with p
     in_stream << (char) 0xFA << (char) 0xFA; //2/4 bytes w/ missing last 0x00
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -556,7 +556,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_0 ) { //incomplete c
     in_stream << (char) 0xf0 << (char) 0x9f; //U+1FAD6 (TEAPOT) - 2/4 bytes
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -576,7 +576,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_1 ) { //invalid code
 
     in_stream << (char) 0xA0 << (char) 0x61; //invalid byte and 'a'
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                                                 { 1, 1 } );
 
@@ -665,7 +665,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_0 ) { //incompl
     std::vector<uint32_t> out_buffer;
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -685,7 +685,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_1 ) { //invalid
     std::vector<uint32_t> out_buffer;
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
                                                                 { 1, 1 } );
 
@@ -752,7 +752,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_1 ) { //1 bytes a
     in_stream << (char) 0xD8;
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -773,7 +773,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_2 ) { //3 bytes a
     in_stream << (char) 0xD8 << (char) 0x3E << (char) 0xDE; //U+1FAD6 (TEAPOT) - 3/4 bytes
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -796,7 +796,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_3 ) { //valid hig
               << (char) 0x00 << (char) 0x61; //single: valid codepoint ('a')
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                                 { 1, 1 } );
 
@@ -911,7 +911,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_1 ) { //1 byte avai
     std::vector<uint32_t>  out_buffer;
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -931,7 +931,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_2 ) { //high surrog
     std::vector<uint32_t>  out_buffer;
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
@@ -953,7 +953,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_3 ) { //valid high 
     std::vector<uint32_t>  out_buffer;
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::BLOGATOR,
+                                                                Context::NATIVE,
                                                                 specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
                                                                 { 1, 1 } );
 
