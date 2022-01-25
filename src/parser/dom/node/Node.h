@@ -1,96 +1,114 @@
 #ifndef BLOGATOR_PARSER_DOM_NODE_NODE_H
 #define BLOGATOR_PARSER_DOM_NODE_NODE_H
 
-#include <string>
 #include <memory>
-#include <list>
-#include <vector>
 
-#include "NodeType.h"
-
-namespace blogator::parser::dom {
-    class DOM;
-
-    namespace node {
-        class Node;
-        class Document;
-        class Element;
-    }
-
-    typedef std::list<const node::Node &>            NodeList_t;
-    typedef std::vector<std::unique_ptr<node::Node>> Nodes_t;
-}
+#include "../defs.h"
+#include "../enum/NodeType.h"
+#include "../exception/exception.h"
+#include "../../specs/html5/specifications.h"
 
 namespace blogator::parser::dom::node {
+    class Document;
+
     /**
-     * Abstract base class for DOM nodes
+     * Base class for DOM nodes
      */
     class Node {
         friend class DOM;
-      public:
-        //Bit masks
-        static const int DOCUMENT_POSITION_DISCONNECTED            { 0b0000'0001 }; // 1
-        static const int DOCUMENT_POSITION_PRECEDING               { 0b0000'0010 }; // 2
-        static const int DOCUMENT_POSITION_FOLLOWING               { 0b0000'0100 }; // 4
-        static const int DOCUMENT_POSITION_CONTAINS                { 0b0000'1000 }; // 8
-        static const int DOCUMENT_POSITION_CONTAINED_BY            { 0b0001'0000 }; //16
-        static const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC { 0b0010'0000 }; //32
 
-        //Constructor/Destructor
+      public:
+        Node();
         explicit Node( NodeType type );
         Node( NodeType type, Node * parent, Node * prev_sibling );
         Node( NodeType type, Node * parent, Node * prev_sibling, Node * next_sibling );
+        Node( const Node &node );
+        Node( Node &&node ) noexcept;
         virtual ~Node();
 
-        //Operators
-        virtual bool operator ==( const Node &rhs ) const;
-        virtual bool operator !=( const Node &rhs ) const;
+        Node & operator =( const Node &node );
+        Node & operator =( Node &&node ) noexcept;
 
-        //Concrete methods
-        [[nodiscard]] virtual NodeType nodeType() const final;
-        [[nodiscard]] virtual bool hasParent() const final;
-        [[nodiscard]] virtual bool hasSiblingPrev() const final;
-        [[nodiscard]] virtual bool hasSiblingNext() const final;
-        [[nodiscard]] virtual const Node & parentNode() const final;
-        [[nodiscard]] virtual const Node & previousSibling() const final;
-        [[nodiscard]] virtual const Node & nextSibling() const final;
-        [[nodiscard]] virtual bool isSameNode( const std::unique_ptr<Node> & node ) const;
+        friend std::ostream & operator <<( std::ostream &os, const Node &node );
+
+        bool operator ==( const Node &rhs ) const;
+        bool operator !=( const Node &rhs ) const;
+
+      public: /* 'Node' interface */
+        [[nodiscard]] virtual NodeType nodeType() const;
+        [[nodiscard]] virtual DOMString_t nodeName() const;
+
+        [[nodiscard]] virtual USVString_t baseURI() const;
+
+        [[nodiscard]] virtual bool isConnected() const;
+        [[nodiscard]] virtual Document * ownerDocument();
+        [[nodiscard]] virtual Node * getRootNode();
+
+        [[nodiscard]] virtual Node * parentNode();
+        [[nodiscard]] virtual const Node * parentNode() const;
+        [[nodiscard]] virtual Element * parentElement();
+        [[nodiscard]] virtual const Element * parentElement() const;
         [[nodiscard]] virtual bool hasChildNodes() const;
-        [[nodiscard]] virtual bool hasValue() const;
+        [[nodiscard]] virtual Nodes_t & childNodes();
+        [[nodiscard]] virtual const Nodes_t & childNodes() const;
+        [[nodiscard]] virtual Node * firstChild();
+        [[nodiscard]] virtual const Node * firstChild() const;
+        [[nodiscard]] virtual Node * lastChild();
+        [[nodiscard]] virtual const Node * lastChild() const;
+        [[nodiscard]] virtual Node * previousSibling();
+        [[nodiscard]] virtual const Node * previousSibling() const;
+        [[nodiscard]] virtual Node * nextSibling();
+        [[nodiscard]] virtual const Node * nextSibling() const;
 
-        //Abstract methods
-        [[nodiscard]] virtual std::string baseURI() const = delete;
-        [[nodiscard]] virtual NodeList_t childNodes() const = delete;
-        [[nodiscard]] virtual const Node * firstChild() const = delete;
-        [[nodiscard]] virtual bool isConnected() const = delete;
-        [[nodiscard]] virtual const Node * lastChild() const = delete;
-        [[nodiscard]] virtual std::u32string nodeName() const = delete;
-        virtual std::u32string & nodeValue() = delete;
-        [[nodiscard]] virtual const Document & ownerDocument() const = delete;
-        [[nodiscard]] virtual bool hasParentElement() const  = delete;
-        [[nodiscard]] virtual const Element & parentElement() const = delete;
-        [[nodiscard]] virtual bool hasTextContent() const = delete;
-        [[nodiscard]] virtual std::u32string textContent() const = delete;
-        virtual void setTextContent( const std::u32string & content ) = delete;
-        virtual void appendChild( std::unique_ptr<Node> node ) = delete;
-        [[nodiscard]] virtual std::unique_ptr<Node> cloneNode() const = delete;
-        [[nodiscard]] virtual int compareDocumentPosition( Node & node ) const = delete;
-        [[nodiscard]] virtual bool contains( Node & node ) const = delete;
-        [[nodiscard]] virtual Node & getRootNode( bool composed ) = delete;
-        [[nodiscard]] virtual Node & insertBefore( std::unique_ptr<Node> new_node, Node & ref_node ) = delete;
-        [[nodiscard]] virtual bool isDefaultNamespace() const = delete;
-        [[nodiscard]] virtual bool isEqualNode( const std::unique_ptr<Node> & node ) const = delete;
-        [[nodiscard]] virtual std::pair<std::u32string, bool> lookupPrefix( const std::u32string & prefix ) = delete;
-        [[nodiscard]] virtual std::pair<std::u32string, bool> lookupNamespaceURI( const std::u32string & prefix ) = delete;
-        virtual void normalize() = delete;
-        virtual void removeChild( Node & node ) = delete;
-        [[nodiscard]] virtual std::unique_ptr<Node> replaceChild( Node & new_child, Node & old_child ) = delete;
+        [[nodiscard]] virtual DOMString_t * nodeValue();
+        [[nodiscard]] virtual DOMString_t textContent() const;
+        [[nodiscard]] virtual size_t length() const;
+        virtual void normalize();
 
-      private:
+        [[nodiscard]] virtual NodePtr_t cloneNode( bool deep ) const; //TODO test realistic DOM tree
+        [[nodiscard]] bool isEqualNode( const NodePtr_t &other ) const;
+        [[nodiscard]] virtual bool isEqualNode( const Node &other ) const;
+        [[nodiscard]] bool isSameNode( const NodePtr_t &other ) const;
+        [[nodiscard]] bool isSameNode( const Node &other ) const;
+
+        static const unsigned short DOCUMENT_POSITION_DISCONNECTED;
+        static const unsigned short DOCUMENT_POSITION_PRECEDING;
+        static const unsigned short DOCUMENT_POSITION_FOLLOWING;
+        static const unsigned short DOCUMENT_POSITION_CONTAINS;
+        static const unsigned short DOCUMENT_POSITION_CONTAINED_BY;
+        static const unsigned short DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC;
+        [[nodiscard]] virtual unsigned short compareDocumentPosition( const Node &other );
+        [[nodiscard]] bool contains( const Node &other ) const;
+
+        [[nodiscard]] virtual DOMString_t lookupPrefix( specs::html5::Namespace ns );
+        [[nodiscard]] virtual DOMString_t lookupNamespaceURI( const DOMString_t &prefix );
+        [[nodiscard]] virtual bool isDefaultNamespace( const DOMString_t &ns ) const;
+        [[nodiscard]] virtual bool isDefaultNamespace( specs::html5::Namespace ns ) const;
+
+        virtual Node * insertBefore( NodePtr_t &node, Node * child );
+        virtual Node * insertBefore( NodePtr_t &&node, Node * child );
+        virtual Node * appendChild( NodePtr_t &node_ptr );
+        virtual Node * appendChild( NodePtr_t &&node_ptr );
+        [[nodiscard]] virtual NodePtr_t replaceChild( NodePtr_t &node, NodePtr_t &child );
+        [[nodiscard]] virtual NodePtr_t replaceChild( NodePtr_t &node, size_t index );
+        [[nodiscard]] virtual NodePtr_t removeChild( NodePtr_t &child );
+        [[nodiscard]] virtual NodePtr_t removeChild( size_t index );
+
+      protected:
+        [[nodiscard]] Nodes_t::iterator getParentChildListIterator( const Node * node );
+        [[nodiscard]] Nodes_t::iterator getChildListIterator( const Node * child );
+        [[nodiscard]] virtual Node * insertNodeBefore( NodePtr_t node, node::Node * child );
+        [[nodiscard]] virtual NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target );
+        [[nodiscard]] virtual NodePtr_t removeChildNode( Nodes_t::iterator it );
+        void setParent( Node * node );
+        void setPrevSibling( Node * node );
+        void setNextSibling( Node * node );
+
+        NodeType _node_type;
         Node *   _parent;
         Node *   _prev_sibling;
         Node *   _next_sibling;
-        NodeType _type;
+        Nodes_t  _children;
     };
 }
 

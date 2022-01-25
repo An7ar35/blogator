@@ -6,17 +6,6 @@ using           blogator::parser::dom::NodeType;
 using           blogator::parser::dom::DOMString_t;
 using           blogator::parser::specs::html5::Namespace;
 
-TEST( parser_dom_node_DocumentType_Tests, nodeName ) {
-    const auto name = DOMString_t( U"testing-name" );
-    const auto node = node::DocumentType( name, U"", U"", nullptr, nullptr );
-    ASSERT_EQ( node.nodeName(), name );
-}
-
-TEST( parser_dom_node_DocumentType_Tests, length ) {
-    const auto node = node::DocumentType( U"name", U"pid", U"sid", nullptr, nullptr );
-    ASSERT_EQ( node.length(), 0 );
-}
-
 TEST( parser_dom_node_DocumentType_Tests, name ) {
     const auto name = DOMString_t( U"testing-name" );
     const auto node = node::DocumentType( name, U"", U"", nullptr, nullptr );

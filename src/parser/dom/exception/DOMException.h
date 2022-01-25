@@ -12,18 +12,18 @@ namespace blogator::parser::dom::exception {
         explicit DOMException( std::string what );
         explicit DOMException( const char * what );
         explicit DOMException( DOMExceptionType type );
-        explicit DOMException( DOMExceptionType type, std::string what );
+        explicit DOMException( DOMExceptionType type, const std::string &what );
         explicit DOMException( DOMExceptionType type, const char * what );
         DOMException( const DOMException & other );
 
         DOMException & operator =( const DOMException & other );
 
         [[nodiscard]] const char * what() const noexcept override;
+        [[nodiscard]] DOMExceptionType type() const noexcept;
 
       private:
-        static std::string errToStr( DOMExceptionType type );
-
-        std::string _message;
+        std::string      _message;
+        DOMExceptionType _type;
     };
 }
 

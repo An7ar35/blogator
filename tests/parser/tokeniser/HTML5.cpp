@@ -21,8 +21,6 @@
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;
 using blogator::parser::specs::html5::TokeniserState;
-using blogator::parser::dom::HtmlState_e;
-using blogator::parser::dom::HtmlNamespace_e;
 using blogator::parser::logging::ParserLog;
 
 TokeniserState getStateEnum( const std::string &str ) {
@@ -145,7 +143,7 @@ class ParserLogCatcher {
 class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
   public:
     explicit MockTreeBuilder( std::unique_ptr<blogator::parser::dom::DOM> dom ) :
-        blogator::parser::dom::TreeBuilder( std::move( dom ) )
+        blogator::parser::dom::TreeBuilder()
     {};
 
     void addToken( std::unique_ptr<HTML5Tk> tk ) override {

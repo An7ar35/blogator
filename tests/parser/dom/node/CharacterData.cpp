@@ -1,10 +1,13 @@
 #include "gtest/gtest.h"
 #include "../../../src/parser/dom/node/CharacterData.h"
+#include "../../../src/parser/dom/exception/DOMException.h"
 
 #include "../../../src/unicode/utf8.h" //for DOMString_t (u32) -> u8 stream output
 
 using namespace blogator::parser::dom::node;
 using           blogator::parser::dom::NodeType;
+using           blogator::parser::dom::exception::DOMException;
+using           blogator::parser::dom::exception::DOMExceptionType;
 using           blogator::parser::dom::DOMString_t;
 
 TEST( parser_dom_node_CharacterData_Tests, Constructor ) {
@@ -211,54 +214,16 @@ TEST( parser_dom_node_CharacterData_Tests, replaceData_fail ) {
     ASSERT_THROW( node.replaceData( 5, 3, U"abc" ), RangeError );
 }
 
-TEST( parser_dom_node_CharacterData_Tests, length ) {
-    auto txt  = DOMString_t( U"comment string" );
-    auto node = CharacterData( NodeType::TEXT_NODE, txt );
+TEST( parser_dom_node_CharacterData_Tests, insertBefore_fail_0 ) { //parent not a Document, DocumentFragment, or Element node
+    auto parent = std::make_unique<CharacterData>( NodeType::TEXT_NODE, U"data" );
+    auto insert = std::make_unique<Node>();
 
-    ASSERT_EQ( node.length(), txt.length() );
-}
-
-TEST( parser_dom_node_CharacterData_Tests, cloneNode ) {
-    std::vector<DOMString_t> strings = { U"A", U"AA", U"AB", U"AC", U"ACA" };
-
-    auto original = CharacterData( NodeType::TEXT_NODE, strings[0] );
-    original.appendChild( std::make_unique<CharacterData>( NodeType::TEXT_NODE, strings[1] ) );
-    original.appendChild( std::make_unique<CharacterData>( NodeType::TEXT_NODE, strings[2] ) );
-    auto * child = original.appendChild( std::make_unique<CharacterData>( NodeType::TEXT_NODE, strings[3] ) );
-    child->appendChild( std::make_unique<CharacterData>( NodeType::TEXT_NODE, strings[4] ) );
-
-    //[CharacterData] 'A'
-    //  |-[CharacterData] 'AA'
-    //  |-[CharacterData] 'AB'
-    //  |-[CharacterData] 'AC'
-    //      |-[CharacterData] 'ACA'
-
-    auto clone = original.cloneNode( true );
-
-    ASSERT_EQ( original.childNodes().size(), 3 );
-    ASSERT_EQ( clone->childNodes().size(), original.childNodes().size() );
-    const auto * recast_clone = dynamic_cast<CharacterData *>( clone.get() );
-    ASSERT_EQ( recast_clone->data(), original.data() );
-
-    auto * origi_child_it = dynamic_cast<CharacterData *>( original.firstChild() );
-    auto * clone_child_it = dynamic_cast<CharacterData *>( clone->firstChild() );
-
-    for( int i = 0; i < original.childNodes().size(); ++i ) {
-        ASSERT_EQ( origi_child_it->nodeType(), clone_child_it->nodeType() );
-        ASSERT_NE( origi_child_it, clone_child_it ); //make sure ptr addresses are different
-        ASSERT_EQ( origi_child_it->data(), clone_child_it->data() );
-
-        if( i < original.childNodes().size() - 1 ) {
-            origi_child_it = dynamic_cast<CharacterData *>( origi_child_it->nextSibling() );
-            clone_child_it = dynamic_cast<CharacterData *>( clone_child_it->nextSibling() );
-        }
+    try {
+        dynamic_cast<Node *>( parent.get() )->insertBefore( insert, nullptr );
+        FAIL() << "Nothing thrown.";
+    } catch( DOMException &e ) {
+        ASSERT_EQ( e.type(), DOMExceptionType::HierarchyRequestError ) << "DOMException thrown with wrong DOMExceptionType.";
+    } catch( std::exception &other ) {
+        FAIL() << "Wrong exception type thrown.";
     }
-
-    ASSERT_EQ( origi_child_it->childNodes().size(), 1 );
-    ASSERT_EQ( origi_child_it->childNodes().size(),
-               clone_child_it->childNodes().size() );
-    ASSERT_EQ( origi_child_it->firstChild()->nodeType(),
-               clone_child_it->firstChild()->nodeType() );
-    ASSERT_EQ( dynamic_cast<CharacterData *>( origi_child_it->firstChild() )->data(),
-               dynamic_cast<CharacterData *>( clone_child_it->firstChild() )->data() );
 }

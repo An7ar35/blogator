@@ -107,11 +107,97 @@ const DOMString_t &CharacterData::data() const {
 }
 
 /**
- * Length of the data
+ * Gets the text content
+ * @return Text content string
+ */
+DOMString_t CharacterData::textContent() const {
+    return _data;
+}
+
+/**
+ * [OVERRRIDE] Length of the data
  * @return Character length of data
  */
 size_t CharacterData::length() const {
     return _data.length();
+}
+
+/**
+ * [OVERRRIDE] Gets the node's value
+ * @return Pointer to node value string
+ */
+blogator::parser::dom::DOMString_t * CharacterData::nodeValue() {
+    return &_data;
+}
+
+/**
+ * [OVERRRIDE] Clones the node
+ * @param deep Deep copy flag
+ * @return Pointer to clone
+ */
+blogator::parser::dom::NodePtr_t CharacterData::cloneNode( bool deep ) const {
+    auto clone = std::make_unique<CharacterData>( _node_type, _data );
+
+    if( deep ) {
+        for( const auto & child : _children ) {
+            clone->appendChild( child->cloneNode( deep ) );
+        }
+    }
+
+    return std::move( clone );
+}
+
+/**
+ * [OVERRIDE] Checks node is equivalent to reference node
+ * @param node Node to check
+ * @return Are equivalent nodes
+ */
+bool CharacterData::isEqualNode( const Node &other ) const {
+    if( this->nodeType()          == other.nodeType() &&
+        this->childNodes().size() == other.childNodes().size() )
+    {
+        const auto * rhs = dynamic_cast<const CharacterData *>( &other );
+
+        if( this->data() == rhs->data() ) {
+            for( size_t i = 0; i < this->childNodes().size(); ++i ) {
+                if( !this->childNodes()[i]->isEqualNode( *other.childNodes()[i] ) ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * [OVERRRIDE] Insert node before a child
+ * @param node Node to insert
+ * @param child Pointer to child (nullptr if append at end)
+ * @return Pointer to inserted child
+ * @throws DOMException when insertion breaks DOM tree validity
+ */
+Node * CharacterData::insertNodeBefore( NodePtr_t node, Node * child ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "CharacterData nodes cannot have children." );
+}
+
+/**
+ * [OVERRIDE] Replace a child node
+ * @param node Node to replace with
+ * @param target Target child node to replace
+ * @return Replaced child node
+ * @throw DOMException when replacement breaks DOM tree validity
+ */
+blogator::parser::dom::NodePtr_t CharacterData::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "CharacterData nodes do not have children." );
 }
 
 /**
@@ -225,21 +311,4 @@ const DOMString_t & CharacterData::replaceData( size_t offset, size_t count, con
     //      (ref: https://dom.spec.whatwg.org/#concept-live-range)
 
     return _data;
-}
-
-/**
- * Clones the node
- * @param deep Deep copy flag
- * @return Pointer to clone
- */
-blogator::parser::dom::NodePtr_t CharacterData::cloneNode( bool deep ) const {
-    auto clone = std::make_unique<CharacterData>( _node_type, _data );
-
-    if( deep ) {
-        for( const auto & child : _children ) {
-            clone->appendChild( child->cloneNode( deep ) );
-        }
-    }
-
-    return std::move( clone );
 }

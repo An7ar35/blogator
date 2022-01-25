@@ -55,3 +55,31 @@ blogator::parser::dom::NodePtr_t CDATASection::cloneNode( bool deep ) const {
 
     return std::move( clone );
 }
+
+/**
+ * [OVERRRIDE] Insert node before a child
+ * @param node Node to insert
+ * @param child Pointer to child (nullptr if append at end)
+ * @return Pointer to inserted child
+ * @throws DOMException when insertion breaks DOM tree validity
+ */
+Node * CDATASection::insertNodeBefore( NodePtr_t node, Node * child ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "CDATASection nodes cannot have children." );
+}
+
+/**
+ * [OVERRIDE] Replace a child node
+ * @param node Node to replace with
+ * @param target Target child node to replace
+ * @return Replaced child node
+ * @throw DOMException when replacement breaks DOM tree validity
+ */
+blogator::parser::dom::NodePtr_t CDATASection::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "CDATASection nodes do not have children." );
+}

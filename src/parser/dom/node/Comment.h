@@ -17,6 +17,9 @@ namespace blogator::parser::dom::node {
       public: /* 'Node' interface override */
         [[nodiscard]] DOMString_t nodeName() const override;
         [[nodiscard]] NodePtr_t cloneNode( bool deep ) const override;
+      protected:
+        Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
+        NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
     };
 }
 

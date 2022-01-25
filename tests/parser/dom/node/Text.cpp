@@ -181,8 +181,3 @@ TEST( parser_dom_node_Text_Tests, wholeText_2 ) { //consecutive Text nodes
     auto returned = dynamic_cast<node::Text *>( child0 )->wholeText();
     ASSERT_EQ( returned, expected );
 }
-
-TEST( parser_dom_node_Text_Tests, nodeName ) {
-    auto node = node::Text( U"", nullptr, nullptr );
-    ASSERT_EQ( node.nodeName(), U"#text" );
-}

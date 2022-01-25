@@ -20,8 +20,14 @@ namespace blogator::parser::dom::node {
         CharacterData & operator =( CharacterData && node ) noexcept;
 
       public: /* 'Node' interface override */
+        [[nodiscard]] DOMString_t textContent() const override;
         [[nodiscard]] size_t length() const override;
+        [[nodiscard]] DOMString_t * nodeValue() override;
         [[nodiscard]] NodePtr_t cloneNode( bool deep ) const override;
+        [[nodiscard]] bool isEqualNode( const Node &other ) const override;
+      protected:
+        Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
+        NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
 
       public: /* 'CharacterData' interface */
         virtual DOMString_t & data();

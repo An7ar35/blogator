@@ -96,9 +96,9 @@ blogator::parser::dom::node::Text * Text::splitText( size_t offset ) {
                 return dynamic_cast<Text *>( _parent->appendChild( std::move( node ) ) );
 
             } else { //insert before next sibling
-                auto sibling_it = this->getChildIterator( _next_sibling ); //can throw `failed_expectation`
+                auto sibling_it = this->getParentChildListIterator( _next_sibling ); //can throw `failed_expectation`
                 this->deleteData( offset, ( this->length() - offset ) );
-                return dynamic_cast<Text *>( this->insertBefore( std::move( node ), *sibling_it ) );
+                return dynamic_cast<Text *>( this->insertBefore( std::move( node ), sibling_it->get() ) );
             }
 
         } else {
@@ -128,7 +128,7 @@ blogator::parser::dom::DOMString_t Text::wholeText() const {
     DOMString_t str = this->data();
 
     if( _next_sibling != nullptr && _next_sibling->nodeType() == NodeType::TEXT_NODE ) {
-        str += reinterpret_cast<node::Text *>( _next_sibling )->wholeText();
+        str += dynamic_cast<node::Text *>( _next_sibling )->wholeText();
     }
 
     return str;
@@ -157,4 +157,32 @@ blogator::parser::dom::NodePtr_t Text::cloneNode( bool deep ) const {
     }
 
     return std::move( clone );
+}
+
+/**
+ * [OVERRRIDE] Insert node before a child
+ * @param node Node to insert
+ * @param child Pointer to child (nullptr if append at end)
+ * @return Pointer to inserted child
+ * @throws DOMException when insertion breaks DOM tree validity
+ */
+Node * Text::insertNodeBefore( NodePtr_t node, Node * child ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "Text nodes cannot have children." );
+}
+
+/**
+ * [OVERRIDE] Replace a child node
+ * @param node Node to replace with
+ * @param target Target child node to replace
+ * @return Replaced child node
+ * @throw DOMException when replacement breaks DOM tree validity
+ */
+blogator::parser::dom::NodePtr_t Text::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "Text nodes do not have children." );
 }

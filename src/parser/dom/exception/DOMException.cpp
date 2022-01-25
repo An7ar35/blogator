@@ -9,15 +9,17 @@ using namespace blogator::parser::dom::exception;
  * @param what description 
  */
 DOMException::DOMException( std::string what ) :
-    _message( std::move( what ) )
+    _message( std::move( what ) ),
+    _type( DOMExceptionType::UnknownExceptionType )
 {}
 
 /**
  * Constructor
  * @param what description 
  */
-DOMException::DOMException( const char *what ) :
-    _message( what )
+DOMException::DOMException( const char * what ) :
+    _message( what ),
+    _type( DOMExceptionType::UnknownExceptionType )
 {}
 
 /**
@@ -25,7 +27,8 @@ DOMException::DOMException( const char *what ) :
  * @param type DOMException type 
  */
 DOMException::DOMException( DOMExceptionType type ) {
-    _message = errToStr( type );
+    _message = blogator::to_string( type );
+    _type    = type;
 }
 
 /**
@@ -33,8 +36,9 @@ DOMException::DOMException( DOMExceptionType type ) {
  * @param type DOMException type
  * @param what Description string
  */
-DOMException::DOMException( DOMExceptionType type, std::string what ) {
-    _message = errToStr( type ) + ": " + what;
+DOMException::DOMException( DOMExceptionType type, const std::string &what ) {
+    _message = blogator::to_string( type ) + ": " + what;
+    _type    = type;
 }
 
 /**
@@ -43,7 +47,8 @@ DOMException::DOMException( DOMExceptionType type, std::string what ) {
  * @param what Description string
  */
 DOMException::DOMException( DOMExceptionType type, const char * what ) {
-    _message = errToStr( type ) + ": " + std::string( what );
+    _message = blogator::to_string( type ) + ": " + std::string( what );
+    _type    = type;
 }
 
 /**
@@ -52,6 +57,7 @@ DOMException::DOMException( DOMExceptionType type, const char * what ) {
  */
 DOMException::DOMException( const DOMException &other ) {
     _message = std::string( other._message );
+    _type    = other._type;
 }
 
 /**
@@ -61,6 +67,7 @@ DOMException::DOMException( const DOMException &other ) {
  */
 DOMException &  DOMException::operator =( const DOMException &other ) {
     _message = other._message;
+    _type    = other._type;
     return *this;
 }
 
@@ -73,43 +80,9 @@ const char * DOMException::what() const noexcept {
 }
 
 /**
- * Converts a DOMExceptionType enum to its string representation
- * @param type DOMExceptionType enum
- * @return String representation
+ * Gets the DOMExceptionType
+ * @return DOMExceptionType
  */
-std::string DOMException::errToStr( DOMExceptionType type ) {
-    switch( type ) {
-        case DOMExceptionType::HierarchyRequestError:      { return "HierarchyRequestError"; };
-        case DOMExceptionType::WrongDocumentError:         { return "WrongDocumentError"; };
-        case DOMExceptionType::InvalidCharacterError:      { return "InvalidCharacterError"; };
-        case DOMExceptionType::NoModificationAllowedError: { return "NoModificationAllowedError"; };
-        case DOMExceptionType::NotFoundError:              { return "NotFoundError"; };
-        case DOMExceptionType::NotSupportedError:          { return "NotSupportedError"; };
-        case DOMExceptionType::InUseAttributeError:        { return "InUseAttributeError"; };
-        case DOMExceptionType::InvalidStateError:          { return "InvalidStateError"; };
-        case DOMExceptionType::SyntaxError:                { return "SyntaxError"; };
-        case DOMExceptionType::InvalidModificationError:   { return "InvalidModificationError"; };
-        case DOMExceptionType::NamespaceError:             { return "NamespaceError"; };
-        case DOMExceptionType::ValidationError:            { return "ValidationError"; };
-        case DOMExceptionType::TypeMismatchError:          { return "TypeMismatchError"; };
-        case DOMExceptionType::SecurityError:              { return "SecurityError"; };
-        case DOMExceptionType::NetworkError:               { return "NetworkError"; };
-        case DOMExceptionType::AbortError:                 { return "AbortError"; };
-        case DOMExceptionType::URLMismatchError:           { return "URLMismatchError"; };
-        case DOMExceptionType::QuotaExceededError:         { return "QuotaExceededError"; };
-        case DOMExceptionType::TimeoutError:               { return "TimeoutError"; };
-        case DOMExceptionType::InvalidNodeTypeError:       { return "InvalidNodeTypeError"; };
-        case DOMExceptionType::DataCloneError:             { return "DataCloneError"; };
-        case DOMExceptionType::EncodingError:              { return "EncodingError"; };
-        case DOMExceptionType::NotReadableError:           { return "NotReadableError"; };
-        case DOMExceptionType::UnknownError:               { return "UnknownError"; };
-        case DOMExceptionType::ConstraintError:            { return "ConstraintError"; };
-        case DOMExceptionType::DataError:                  { return "DataError"; };
-        case DOMExceptionType::TransactionInactiveError:   { return "TransactionInactiveError"; };
-        case DOMExceptionType::ReadOnlyError:              { return "ReadOnlyError"; };
-        case DOMExceptionType::VersionError:               { return "VersionError"; };
-        case DOMExceptionType::OperationError:             { return "OperationError"; };
-        case DOMExceptionType::NotAllowedError:            { return "NotAllowedError"; };
-        default:                                           { return "UnknownExceptionType"; };
-    }
+DOMExceptionType DOMException::type() const noexcept {
+    return _type;
 }

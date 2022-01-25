@@ -126,7 +126,7 @@ const blogator::parser::dom::DOMString_t &DocumentType::systemId() const {
 }
 
 /**
- * Gets the length of the node
+ * [OVERRIDE] Gets the length of the node
  * @return 0
  */
 size_t DocumentType::length() const {
@@ -134,7 +134,7 @@ size_t DocumentType::length() const {
 }
 
 /**
- * Gets the node's name
+ * [OVERRIDE] Gets the node's name
  * @return Name string
  */
 blogator::parser::dom::DOMString_t DocumentType::nodeName() const {
@@ -142,7 +142,7 @@ blogator::parser::dom::DOMString_t DocumentType::nodeName() const {
 }
 
 /**
- * Clones the node
+ * [OVERRIDE] Clones the node
  * @param deep Deep copy flag
  * @return Pointer to clone
  */
@@ -156,4 +156,61 @@ blogator::parser::dom::NodePtr_t DocumentType::cloneNode( bool deep ) const {
     }
 
     return std::move( clone );
+}
+
+/**
+ * [OVERRIDE] Checks node is equivalent to reference node
+ * @param node Node to check
+ * @return Are equivalent nodes
+ */
+bool DocumentType::isEqualNode( const Node &other ) const {
+    if( this->nodeType()          == other.nodeType() &&
+        this->childNodes().size() == other.childNodes().size() )
+    {
+        const auto * rhs = dynamic_cast<const DocumentType *>( &other );
+
+        bool equal = this->name()     == rhs->name()
+                  && this->publicId() == rhs->publicId()
+                  && this->systemId() == rhs->systemId();
+
+        if( equal ) {
+            for( size_t i = 0; i < this->childNodes().size(); ++i ) {
+                if( !this->childNodes()[i]->isEqualNode( *other.childNodes()[i] ) ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * [OVERRIDE] Inserts a child node before a specified child (auto-sets the parent/sibling pointers)
+ * @param node Pointer to Node to insert
+ * @param child Reference to reference node for insertion placement
+ * @return Pointer to inserted node
+ * @throws DOMException when valid hierarchy is violated
+ */
+Node * DocumentType::insertNodeBefore( NodePtr_t node, Node * child ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType nodes cannot have children." );
+}
+
+/**
+ * [OVERRIDE] Replace a child node
+ * @param node Node to replace with
+ * @param target Target child node to replace
+ * @return Replaced child node
+ * @throw DOMException when replacement breaks DOM tree validity
+ */
+blogator::parser::dom::NodePtr_t DocumentType::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+    using exception::DOMException;
+    using exception::DOMExceptionType;
+
+    throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType nodes do not have children." );
 }

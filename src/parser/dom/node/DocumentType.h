@@ -24,6 +24,10 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] size_t length() const override;
         [[nodiscard]] DOMString_t nodeName() const override;
         [[nodiscard]] NodePtr_t cloneNode( bool deep ) const override;
+        [[nodiscard]] bool isEqualNode( const Node &other ) const override;
+      protected:
+        Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
+        NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
 
       private:
         DOMString_t _name;
