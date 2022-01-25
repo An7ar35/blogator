@@ -9,9 +9,12 @@
 #include "../dto/Source.h"
 
 namespace blogator::parser::encoding {
-    enum class Endianness { LE, BE };
+    enum class Endianness {
+        LE,
+        BE
+    };
 
-    std::string endiannessToStr( Endianness e );
+    std::ostream & operator <<( std::ostream &os, Endianness e );
 
     struct Transcode {
       public:
@@ -44,6 +47,10 @@ namespace blogator::parser::encoding {
         static bool U32toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vector<uint32_t> &out );
         static bool U32toU32( Source &src, std::vector<uint32_t> &out );
     };
+}
+
+namespace blogator {
+    std::string to_string( blogator::parser::encoding::Endianness e );
 }
 
 #endif //BLOGATOR_PARSER_ENCODING_TRANSCODE_H

@@ -8,19 +8,19 @@
 using namespace blogator::parser::encoding;
 
 /**
- * Gets a string representation of the Endianness
- * @param e Endianness enum
- * @return String representation
+ * Output stream operator
+ * @param os Output stream
+ * @param type Endianness enum
+ * @return Output stream
  */
-std::string blogator::parser::encoding::endiannessToStr( Endianness e ) {
+std::ostream &blogator::parser::encoding::operator <<( std::ostream &os, Endianness e ) {
     switch( e ) {
-        case Endianness::LE:
-            return "LE";
-        case Endianness::BE:
-            return "BE";
+        case Endianness::LE: { os << "LE";      } break;
+        case Endianness::BE: { os << "BE";      } break;
+        default:             { os << "UNKNOWN"; } break;
     }
 
-    return "UNKNOWN";
+    return os;
 }
 
 /**
@@ -102,7 +102,7 @@ Format Transcode::sniffBOM( std::deque<uint8_t> &bom ) {
  */
 bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, Endianness endianness ) {
     if( out.bad() || out.eof() ) {
-        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::u32string &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::u32string &, std::ostream &, ", blogator::to_string( endianness ), " )] "
                    "Output stream eof/bad bit(s) set." );
         return false; //EARLY RETURN
     }
@@ -127,7 +127,7 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, En
     out.flush();
 
     if( out.bad() || out.fail() ) {
-        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::u32string &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::u32string &, std::ostream &, ", blogator::to_string( endianness ), " )] "
                    "Output stream eof/bad bit(s) set (post flush)." );
         return false; //EARLY RETURN
     }
@@ -144,7 +144,7 @@ bool Transcode::U32toByteStream( const std::u32string &in, std::ostream &out, En
  */
 bool Transcode::U32toByteStream( const std::vector<uint32_t> &in, std::ostream &out, Endianness endianness ) {
     if( out.bad() || out.eof() ) {
-        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::vector<uint32_t> &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::vector<uint32_t> &, std::ostream &, ", blogator::to_string( endianness ), " )] "
                    "Output stream eof/bad bit(s) set." );
         return false; //EARLY RETURN
     }
@@ -169,7 +169,7 @@ bool Transcode::U32toByteStream( const std::vector<uint32_t> &in, std::ostream &
     out.flush();
 
     if( out.bad() || out.fail() ) {
-        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::vector<uint32_t> &, std::ostream &, ", endiannessToStr( endianness ), " )] "
+        LOG_ERROR( "[parser::encoding::Transcode::U32toByteStream( const std::vector<uint32_t> &, std::ostream &, ", blogator::to_string( endianness ), " )] "
                    "Output stream eof/bad bit(s) set (post flush)." );
         return false; //EARLY RETURN
     }
@@ -765,4 +765,15 @@ bool Transcode::U32toU32( Source &src, std::vector<uint32_t> &out ) {
     }
 
     return true;
+}
+
+/**
+ * Gets a string representation of an parser::encoding::Endianness enum
+ * @param e Endianness enum
+ * @return String representation
+ */
+std::string blogator::to_string( blogator::parser::encoding::Endianness e ) {
+    std::stringstream ss;
+    ss << e;
+    return ss.str();
 }
