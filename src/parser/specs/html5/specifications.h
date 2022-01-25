@@ -2,6 +2,7 @@
 #define BLOGATOR_PARSER_HTML5_SPECS_H
 
 #include "ContentModel.h"
+#include "ContentType.h"
 #include "Element.h"
 #include "ErrorCode.h"
 #include "InsertionMode.h"

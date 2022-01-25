@@ -268,3 +268,13 @@ std::string blogator::to_string( blogator::parser::specs::html5::Element el ) {
     ss << el;
     return ss.str();
 }
+
+/**
+ * Converts a parser::specs::html5::Element enum to a string representation
+ * @param el Element enum
+ * @return String representation
+ */
+std::u32string blogator::to_u32string( blogator::parser::specs::html5::Element el ) {
+    const auto u8str = blogator::to_string( el );
+    return { u8str.cbegin(), u8str.cend() };
+}

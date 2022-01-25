@@ -107,6 +107,7 @@ namespace blogator::parser::specs::html5 {
 
 namespace blogator {
     std::string to_string( blogator::parser::specs::html5::Element el );
+    std::u32string to_u32string( blogator::parser::specs::html5::Element el );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_ELEMENTS_H
