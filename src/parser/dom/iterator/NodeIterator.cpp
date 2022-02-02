@@ -50,7 +50,7 @@ NodeIterator::NodeIterator( node::Node * root, std::shared_ptr<NodeFilter> filte
     _curr( ( reverse ? nullptr : root ) ),
     _filter( std::move( filter ) )
 {
-    if( _filter && _root && !_filter->validate( *_root ) ) {
+    if( _filter && _root && _filter->acceptNode( *_root ) != NodeFilter::Result::FILTER_ACCEPT ) {
         ++(*this);
     }
 }
@@ -69,7 +69,7 @@ NodeIterator::NodeIterator( node::Node * root, node::Node * curr, std::shared_pt
     _curr( curr ),
     _filter( std::move( filter ) )
 {
-    if( _filter && _curr && !_filter->validate( *_curr ) ) {
+    if( _filter && _curr && _filter->acceptNode( *_curr ) != NodeFilter::Result::FILTER_ACCEPT ) {
         ++(*this);
     }
 }
@@ -297,7 +297,7 @@ bool NodeIterator::done() const {
 /**
  * Moves the iterator position in the tree forward
  */
-void NodeIterator::iterateForward() {
+inline void NodeIterator::iterateForward() {
     if( _reverse ) {
         _curr = prevNode( _curr );
 
@@ -323,7 +323,7 @@ void NodeIterator::iterateForward() {
 /**
  * Moves the iterator position in the tree backwards
  */
-void NodeIterator::iterateBackward() {
+inline void NodeIterator::iterateBackward() {
     auto * prev = _curr;
 
     if( _reverse ) {
@@ -356,7 +356,7 @@ void NodeIterator::iterateBackward() {
  * @param node Current node pointer
  * @return Next node pre-order (or nullptr when end is reached)
  */
-node::Node * NodeIterator::nextNode( node::Node * node ) const {
+inline node::Node * NodeIterator::nextNode( node::Node * node ) const {
     if( node == nullptr ) {
         return _root; //EARLY RETURN
     }
@@ -392,7 +392,7 @@ node::Node * NodeIterator::nextNode( node::Node * node ) const {
  * @param node Current node pointer (or nullptr to get the last pre-order node in the tree)
  * @return Previous node pre-order (or nullptr if already at root or it has been lost)
  */
-node::Node * NodeIterator::prevNode( node::Node * node ) const {
+inline node::Node * NodeIterator::prevNode( node::Node * node ) const {
     if( node == nullptr ) {
         return lastNode();
     }
@@ -427,7 +427,7 @@ node::Node * NodeIterator::prevNode( node::Node * node ) const {
  * [PRIVATE] Gets the last node in the pre-ordered tree
  * @return Last pre-ordered node in tree
  */
-node::Node * NodeIterator::lastNode() const {
+inline node::Node * NodeIterator::lastNode() const {
     auto * curr = _root;
 
     while( curr && curr->hasChildNodes() ) {

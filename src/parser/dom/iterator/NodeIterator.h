@@ -65,6 +65,8 @@ namespace blogator::parser::dom {
         [[nodiscard]] node::Node * prevNode( node::Node * node ) const;
         [[nodiscard]] node::Node * lastNode() const;
     };
+
+    std::ostream & operator <<( std::ostream &os, const NodeIterator &it );
 }
 
 #endif //BLOGATOR_PARSER_DOM_ITERATOR_NODEITERATOR_H
