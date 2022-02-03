@@ -17,7 +17,7 @@ namespace blogator::parser::dom {
         COMMENT_NODE                =  8,
         DOCUMENT_NODE               =  9,
         DOCUMENT_TYPE_NODE          = 10,
-      //DOCUMENT_FRAGMENT_NODE      = 11, //not implemented
+        DOCUMENT_FRAGMENT_NODE      = 11,
       //NOTATION_NODE               = 12, //not implemented/legacy
     };
 

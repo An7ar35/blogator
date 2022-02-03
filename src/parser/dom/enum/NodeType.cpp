@@ -10,15 +10,16 @@
  */
 std::ostream & blogator::parser::dom::operator <<( std::ostream &os, blogator::parser::dom::NodeType type ) {
     switch( type ) {
-        case NodeType::UNDEFINED:          { os << "undefined";             } break;
-        case NodeType::ELEMENT_NODE:       { os << "Element";               } break;
-        case NodeType::ATTRIBUTE_NODE:     { os << "Attr";                  } break;
-        case NodeType::TEXT_NODE:          { os << "Text";                  } break;
-        case NodeType::CDATA_SECTION_NODE: { os << "CDATASection";          } break;
-        case NodeType::COMMENT_NODE:       { os << "Comment";               } break;
-        case NodeType::DOCUMENT_NODE:      { os << "Document";              } break;
-        case NodeType::DOCUMENT_TYPE_NODE: { os << "DocumentType";          } break;
-        default:                           { os << "enum string not found"; } break;
+        case NodeType::UNDEFINED:              { os << "undefined";             } break;
+        case NodeType::ELEMENT_NODE:           { os << "Element";               } break;
+        case NodeType::ATTRIBUTE_NODE:         { os << "Attr";                  } break;
+        case NodeType::TEXT_NODE:              { os << "Text";                  } break;
+        case NodeType::CDATA_SECTION_NODE:     { os << "CDATASection";          } break;
+        case NodeType::COMMENT_NODE:           { os << "Comment";               } break;
+        case NodeType::DOCUMENT_NODE:          { os << "Document";              } break;
+        case NodeType::DOCUMENT_TYPE_NODE:     { os << "DocumentType";          } break;
+        case NodeType::DOCUMENT_FRAGMENT_NODE: { os << "DocumentFragment";      } break;
+        default:                               { os << "enum string not found"; } break;
     }
 
     return os;
