@@ -26,7 +26,7 @@ TEST( parser_dom_ConstNodeIterator_Tests, iteration_0 ) { //simple pre-order for
 TEST( parser_dom_ConstNodeIterator_Tests, iteration_1 ) { //simple pre-order forward postfix iteration
     std::unique_ptr<node::Node> document;
     auto pre_order = blogator::tests::createTestDOM_1( document );
-    auto reverse   = std::vector<node::Node *>( pre_order.rbegin(), pre_order.rend() );
+    auto reverse   = std::vector<node::Node *>( pre_order.crbegin(), pre_order.crend() );
 
     //increment
     size_t i  = 0;
@@ -75,7 +75,7 @@ TEST( parser_dom_ConstNodeIterator_Tests, iteration_2 ) { //filtered forward ite
     ASSERT_TRUE( it.done() );
 
     //decrement
-    auto reverse_text = std::vector<node::Node *>( pre_order_text.rbegin(), pre_order_text.rend() );
+    auto reverse_text = std::vector<node::Node *>( pre_order_text.crbegin(), pre_order_text.crend() );
 
     i = 0;
 
@@ -90,7 +90,7 @@ TEST( parser_dom_ConstNodeIterator_Tests, iteration_2 ) { //filtered forward ite
 TEST( parser_dom_ConstNodeIterator_Tests, reverse_iteration_0 ) { //simple pre-order backward prefix iteration
     std::unique_ptr<node::Node> document;
     auto pre_order = blogator::tests::createTestDOM_1( document );
-    auto reverse   = std::vector<node::Node *>( pre_order.rbegin(), pre_order.rend() );
+    auto reverse   = std::vector<node::Node *>( pre_order.crbegin(), pre_order.crend() );
 
     size_t i  = 0;
     auto   it = document->crbegin();
@@ -107,7 +107,7 @@ TEST( parser_dom_ConstNodeIterator_Tests, reverse_iteration_0 ) { //simple pre-o
 TEST( parser_dom_ConstNodeIterator_Tests, reverse_iteration_1 ) { //simple pre-order backward postfix iteration
     std::unique_ptr<node::Node> document;
     auto pre_order = blogator::tests::createTestDOM_1( document );
-    auto reverse   = std::vector<node::Node *>( pre_order.rbegin(), pre_order.rend() );
+    auto reverse   = std::vector<node::Node *>( pre_order.crbegin(), pre_order.crend() );
 
     //increment
     size_t i  = 0;
@@ -143,7 +143,7 @@ TEST( parser_dom_ConstNodeIterator_Tests, reverse_iteration_2 ) { //filtered bac
         }
     }
 
-    auto reverse_text = std::vector<node::Node *>( pre_order_text.rbegin(), pre_order_text.rend() );
+    auto reverse_text = std::vector<node::Node *>( pre_order_text.crbegin(), pre_order_text.crend() );
 
     //increment
     size_t i  = 0;
@@ -170,55 +170,55 @@ TEST( parser_dom_ConstNodeIterator_Tests, reverse_iteration_2 ) { //filtered bac
 
 TEST( parser_dom_ConstNodeIterator_Tests, equality_operator_0 ) { //begin/end duplicates
     auto   doc     = node::Document();
-    auto   beg_it  = doc.begin();
-    auto   end_it  = doc.end();
+    auto   beg_it  = doc.cbegin();
+    auto   end_it  = doc.cend();
 
-    ASSERT_EQ( beg_it, doc.begin() );
-    ASSERT_EQ( end_it, doc.end() );
+    ASSERT_EQ( beg_it, doc.cbegin() );
+    ASSERT_EQ( end_it, doc.cend() );
     ASSERT_NE( beg_it, end_it );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, equality_operator_1 ) { //rbegin/rend duplicates
     auto   doc     = node::Document();
-    auto   beg_it  = doc.rbegin();
-    auto   end_it  = doc.rend();
+    auto   beg_it  = doc.crbegin();
+    auto   end_it  = doc.crend();
 
-    ASSERT_EQ( beg_it, doc.rbegin() );
-    ASSERT_EQ( end_it, doc.rend() );
+    ASSERT_EQ( beg_it, doc.crbegin() );
+    ASSERT_EQ( end_it, doc.crend() );
     ASSERT_NE( beg_it, end_it );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, equality_operator_2 ) { //overlapping fwd iterators
     auto   doc     = node::Document();
     auto * comment = doc.appendChild( std::make_unique<node::Comment>( U"comment" ) );
-    auto   beg_it  = doc.begin();
-    auto   end_it  = doc.end();
+    auto   beg_it  = doc.cbegin();
+    auto   end_it  = doc.cend();
 
     ASSERT_EQ( ++beg_it, --end_it );
-    ASSERT_EQ( ++beg_it, doc.end() );
-    ASSERT_EQ( --end_it, doc.begin() );
+    ASSERT_EQ( ++beg_it, doc.cend() );
+    ASSERT_EQ( --end_it, doc.cbegin() );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, equality_operator_3 ) { //overlapping rev iterators
     auto   doc     = node::Document();
     auto * comment = doc.appendChild( std::make_unique<node::Comment>( U"comment" ) );
-    auto   beg_it  = doc.rbegin();
-    auto   end_it  = doc.rend();
+    auto   beg_it  = doc.crbegin();
+    auto   end_it  = doc.crend();
 
     ASSERT_EQ( ++beg_it, --end_it );
-    ASSERT_EQ( ++beg_it, doc.rend() );
-    ASSERT_EQ( --end_it, doc.rbegin() );
+    ASSERT_EQ( ++beg_it, doc.crend() );
+    ASSERT_EQ( --end_it, doc.crbegin() );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, equality_operator_4 ) { //overlapping fwd & rev iterators
     auto   doc        = node::Document();
     auto * comment    = doc.appendChild( std::make_unique<node::Comment>( U"comment" ) );
-    auto   fwd_it1    = doc.begin();
-    auto   fwd_it2    = doc.begin();
-    auto   rev_it1    = doc.rbegin();
-    auto   rev_it2    = doc.rbegin();
-    auto   end_fwd_it = doc.end();
-    auto   end_rev_it = doc.rend();
+    auto   fwd_it1    = doc.cbegin();
+    auto   fwd_it2    = doc.cbegin();
+    auto   rev_it1    = doc.crbegin();
+    auto   rev_it2    = doc.crbegin();
+    auto   end_fwd_it = doc.cend();
+    auto   end_rev_it = doc.crend();
 
     ASSERT_NE( fwd_it1, rev_it1 ); //[Document], [Comment]
     ASSERT_NE( end_fwd_it, end_rev_it ); //end(), rend()
@@ -237,10 +237,10 @@ TEST( parser_dom_ConstNodeIterator_Tests, equality_operator_4 ) { //overlapping 
 
 TEST( parser_dom_ConstNodeIterator_Tests, dereference_operator ) {
     auto doc    = node::Document();
-    auto begin  = doc.begin();
-    auto end    = doc.end();
-    auto rbegin = doc.rbegin();
-    auto rend   = doc.rend();
+    auto begin  = doc.cbegin();
+    auto end    = doc.cend();
+    auto rbegin = doc.crbegin();
+    auto rend   = doc.crend();
 
     ASSERT_NO_THROW( *begin );
     ASSERT_NO_THROW( *rbegin );
@@ -252,10 +252,10 @@ TEST( parser_dom_ConstNodeIterator_Tests, dereference_operator ) {
 
 TEST( parser_dom_ConstNodeIterator_Tests, access_operator ) {
     auto doc    = node::Document();
-    auto begin  = doc.begin();
-    auto end    = doc.end();
-    auto rbegin = doc.rbegin();
-    auto rend   = doc.rend();
+    auto begin  = doc.cbegin();
+    auto end    = doc.cend();
+    auto rbegin = doc.crbegin();
+    auto rend   = doc.crend();
 
     ASSERT_NO_THROW( begin->nodeType() );
     ASSERT_NO_THROW( rbegin->nodeType() );
@@ -265,28 +265,28 @@ TEST( parser_dom_ConstNodeIterator_Tests, access_operator ) {
 
 TEST( parser_dom_ConstNodeIterator_Tests, whatToShow_0 ) { //default
     auto doc = node::Document();
-    auto it  = doc.begin();
+    auto it  = doc.cbegin();
 
     ASSERT_EQ( it.whatToShow(), NodeFilter::SHOW_ALL );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, whatToShow_1 ) { //filtered
     auto doc = node::Document();
-    auto it  = doc.begin( NodeFilter( NodeFilter::SHOW_TEXT & NodeFilter::SHOW_ATTRIBUTE ) );
+    auto it  = doc.cbegin( NodeFilter( NodeFilter::SHOW_TEXT & NodeFilter::SHOW_ATTRIBUTE ) );
 
     ASSERT_EQ( it.whatToShow(), NodeFilter::SHOW_TEXT & NodeFilter::SHOW_ATTRIBUTE );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, nodeFilter_0 ) { //none
     auto doc = node::Document();
-    auto it  = doc.begin();
+    auto it  = doc.cbegin();
 
     ASSERT_FALSE( it.nodeFilter() );
 }
 
 TEST( parser_dom_ConstNodeIterator_Tests, nodeFilter_1 ) { //specified
     auto doc = node::Document();
-    auto it  = doc.begin( NodeFilter( NodeFilter::SHOW_TEXT ) );
+    auto it  = doc.cbegin( NodeFilter( NodeFilter::SHOW_TEXT ) );
 
     ASSERT_TRUE( it.nodeFilter() );
     ASSERT_EQ( it.nodeFilter()->whatToShow(), NodeFilter::SHOW_TEXT );
@@ -311,7 +311,7 @@ TEST( parser_dom_ConstNodeIterator_Tests, nextNode ) {
 TEST( parser_dom_ConstNodeIterator_Tests, previousNode ) {
     std::unique_ptr<node::Node> document;
     auto pre_order = blogator::tests::createTestDOM_1( document );
-    auto reverse   = std::vector<node::Node *>( pre_order.rbegin(), pre_order.rend() );
+    auto reverse   = std::vector<node::Node *>( pre_order.crbegin(), pre_order.crend() );
 
     size_t i  = 0;
     auto   it = document->cend();
