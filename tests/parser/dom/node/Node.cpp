@@ -1424,6 +1424,7 @@ TEST( parser_dom_node_Node_Tests, replaceChild_0 ) { //by unique_ptr reference
     ASSERT_EQ( parent.childNodes().size(), 1 );
     ASSERT_EQ( parent.childNodes()[0].get(), replacement_ptr );
 
+    ASSERT_EQ( removed->ownerDocument(), nullptr );
     ASSERT_EQ( removed->parentNode(), nullptr );
     ASSERT_EQ( removed->previousSibling(), nullptr );
     ASSERT_EQ( removed->nextSibling(), nullptr );
@@ -1446,6 +1447,7 @@ TEST( parser_dom_node_Node_Tests, replaceChild_1 ) { //by index
     ASSERT_EQ( node.childNodes().size(), 1 );
     ASSERT_EQ( node.childNodes()[0].get(), replacement_ptr );
 
+    ASSERT_EQ( removed->ownerDocument(), nullptr );
     ASSERT_EQ( removed->parentNode(), nullptr );
     ASSERT_EQ( removed->previousSibling(), nullptr );
     ASSERT_EQ( removed->nextSibling(), nullptr );

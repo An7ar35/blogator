@@ -6,46 +6,55 @@ using namespace blogator::parser::dom;
 using           blogator::parser::dom::NodeType;
 using           blogator::parser::dom::DOMString_t;
 
-TEST( parser_dom_node_Attr_Tests, localName ) {
-    const auto name  = DOMString_t( U"test-name" );
-    const auto value = DOMString_t( U"test-value" );
-    const auto node  = node::Attr( name, value );
+class parser_dom_node_Attr_Tests : public ::testing::Test {
+  protected:
+    static const DOMString_t prefix;
+    static const DOMString_t name;
+    static const DOMString_t value;
+    static const node::Attr test_attr;
+};
+
+const DOMString_t parser_dom_node_Attr_Tests::prefix    = DOMString_t( U"test-prefix" );
+const DOMString_t parser_dom_node_Attr_Tests::name      = DOMString_t( U"test-name" );
+const DOMString_t parser_dom_node_Attr_Tests::value     = DOMString_t( U"test-value" );
+const node::Attr  parser_dom_node_Attr_Tests::test_attr = node::Attr( prefix, name, value );
+
+
+TEST_F( parser_dom_node_Attr_Tests, localName ) {
+    const auto & name = parser_dom_node_Attr_Tests::name;
+    const auto & node = parser_dom_node_Attr_Tests::test_attr;
 
     ASSERT_EQ( node.localName(), name );
 }
 
-TEST( parser_dom_node_Attr_Tests, name ) {
-    const auto name  = DOMString_t( U"test-name" );
-    const auto value = DOMString_t( U"test-value" );
-    const auto node  = node::Attr( name, value );
+TEST_F( parser_dom_node_Attr_Tests, name ) {
+    const auto & name = parser_dom_node_Attr_Tests::name;
+    const auto & node = parser_dom_node_Attr_Tests::test_attr;
 
     ASSERT_EQ( node.name(), name );
 }
 
-TEST( parser_dom_node_Attr_Tests, value ) {
-    const auto name  = DOMString_t( U"test-name" );
-    const auto value = DOMString_t( U"test-value" );
-    const auto node  = node::Attr( name, value );
+TEST_F( parser_dom_node_Attr_Tests, value ) {
+    const auto & value = parser_dom_node_Attr_Tests::value;
+    const auto & node  = parser_dom_node_Attr_Tests::test_attr;
 
     ASSERT_EQ( node.value(), value );
 }
 
-TEST( parser_dom_node_Attr_Tests, hasValue_false ) {
-    const auto name  = DOMString_t( U"test-name" );
-    const auto value = DOMString_t( U"test-value" );
-    const auto node  = node::Attr( name, value );
+TEST_F( parser_dom_node_Attr_Tests, hasValue_false ) {
+    const auto & node = parser_dom_node_Attr_Tests::test_attr;
 
     ASSERT_TRUE( node.hasValue() );
 }
 
-TEST( parser_dom_node_Attr_Tests, hasValue_true ) {
+TEST_F( parser_dom_node_Attr_Tests, hasValue_true ) {
     const auto name  = DOMString_t( U"test-name" );
     const auto node  = node::Attr( name );
 
     ASSERT_FALSE( node.hasValue() );
 }
 
-TEST( parser_dom_node_Attr_Tests, ownerElement ) {
+TEST_F( parser_dom_node_Attr_Tests, ownerElement ) {
     const auto name   = DOMString_t( U"test-name" );
     const auto value  = DOMString_t( U"test-value" );
     auto       parent = node::Element( U"", U"div" );
@@ -54,7 +63,7 @@ TEST( parser_dom_node_Attr_Tests, ownerElement ) {
     ASSERT_EQ( node.ownerElement(), &parent );
 }
 
-TEST( parser_dom_node_Attr_Tests, ownerElement_none ) {
+TEST_F( parser_dom_node_Attr_Tests, ownerElement_none ) {
     const auto name   = DOMString_t( U"test-name" );
     const auto value  = DOMString_t( U"test-value" );
     auto       node   = node::Attr( name, value );

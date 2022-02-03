@@ -1,7 +1,6 @@
 #ifndef BLOGATOR_PARSER_DOM_ITERATOR_NODEITERATOR_H
 #define BLOGATOR_PARSER_DOM_ITERATOR_NODEITERATOR_H
 
-#include <stack>
 #include <iterator>
 #include <memory>
 #include <ostream>
@@ -19,7 +18,9 @@ namespace blogator::parser::dom {
         using difference_type   = std::ptrdiff_t;
         using value_type        = node::Node;
         using pointer           = node::Node *;
+        using const_pointer     = const pointer;
         using reference         = node::Node &;
+        using const_reference   = const node::Node &;
 
       public:
         NodeIterator( node::Node * root, bool reverse );
@@ -38,7 +39,7 @@ namespace blogator::parser::dom {
         bool operator != ( const NodeIterator &rhs ) const;
 
         reference operator *() const;
-        pointer operator ->();
+        pointer operator ->() const;
         NodeIterator & operator ++();
         NodeIterator operator ++( int );
         NodeIterator & operator --();
@@ -47,23 +48,24 @@ namespace blogator::parser::dom {
         [[nodiscard]] unsigned long whatToShow() const;
         [[nodiscard]] const std::shared_ptr<NodeFilter> & nodeFilter() const;
 
-        [[nodiscard]] node::Node * node();
-        [[nodiscard]] node::Node * nextNode();
-        [[nodiscard]] node::Node * previousNode();
+        [[nodiscard]] pointer node();
+        [[nodiscard]] const_pointer node() const;
+        [[nodiscard]] pointer nextNode();
+        [[nodiscard]] pointer previousNode();
         [[nodiscard]] bool done() const;
 
       private:
         bool                        _reverse;
         bool                        _done;
-        node::Node *                _root;
-        node::Node *                _curr;
+        pointer                     _root;
+        pointer                     _curr;
         std::shared_ptr<NodeFilter> _filter;
 
         void iterateForward();
         void iterateBackward();
-        [[nodiscard]] node::Node * nextNode( node::Node * node ) const;
-        [[nodiscard]] node::Node * prevNode( node::Node * node ) const;
-        [[nodiscard]] node::Node * lastNode() const;
+        [[nodiscard]] pointer nextNode( pointer node ) const;
+        [[nodiscard]] pointer prevNode( pointer node ) const;
+        [[nodiscard]] pointer lastNode() const;
     };
 
     std::ostream & operator <<( std::ostream &os, const NodeIterator &it );

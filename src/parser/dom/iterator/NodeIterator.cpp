@@ -190,7 +190,7 @@ node::Node & NodeIterator::operator *() const {
  * @return Node pointer
  * @throws std::runtime_error when accessing a NULL iterator (i.e.: end())
  */
-NodeIterator::pointer NodeIterator::operator ->() {
+NodeIterator::pointer NodeIterator::operator ->() const {
     if( !_done && _curr ) {
         return _curr;
     }
@@ -262,7 +262,15 @@ const std::shared_ptr<NodeFilter> & NodeIterator::nodeFilter() const {
  * Gets the pointer of the current node pointed to by the iterator
  * @return Pointer to node (or nullptr)
  */
-node::Node * NodeIterator::node() {
+NodeIterator::pointer NodeIterator::node() {
+    return _curr;
+}
+
+/**
+ * Gets the pointer of the current node pointed to by the iterator
+ * @return Const pointer to node (or nullptr)
+ */
+NodeIterator::const_pointer NodeIterator::node() const {
     return _curr;
 }
 
@@ -270,7 +278,7 @@ node::Node * NodeIterator::node() {
  * Gets the current node and moves the position of the iterator up
  * @return Pointer to current node (or nullptr when none)
  */
-node::Node * NodeIterator::nextNode() {
+NodeIterator::pointer NodeIterator::nextNode() {
     auto * tmp = _curr;
     ++(*this);
     return tmp;
@@ -280,7 +288,7 @@ node::Node * NodeIterator::nextNode() {
  * Gets the current node and moves the position of the iterator down
  * @return Pointer to current node (or nullptr when done/none)
  */
-node::Node * NodeIterator::previousNode() {
+NodeIterator::pointer NodeIterator::previousNode() {
     auto * tmp = _curr;
     --(*this);
     return ( tmp == _curr ? nullptr : _curr );
@@ -295,7 +303,7 @@ bool NodeIterator::done() const {
 }
 
 /**
- * Moves the iterator position in the tree forward
+ * [PRIVATE] Moves the iterator position in the tree forward
  */
 inline void NodeIterator::iterateForward() {
     if( _reverse ) {
@@ -321,7 +329,7 @@ inline void NodeIterator::iterateForward() {
 }
 
 /**
- * Moves the iterator position in the tree backwards
+ * [PRIVATE] Moves the iterator position in the tree backwards
  */
 inline void NodeIterator::iterateBackward() {
     auto * prev = _curr;
@@ -356,7 +364,7 @@ inline void NodeIterator::iterateBackward() {
  * @param node Current node pointer
  * @return Next node pre-order (or nullptr when end is reached)
  */
-inline node::Node * NodeIterator::nextNode( node::Node * node ) const {
+inline NodeIterator::pointer NodeIterator::nextNode( NodeIterator::pointer node ) const {
     if( node == nullptr ) {
         return _root; //EARLY RETURN
     }
@@ -392,7 +400,7 @@ inline node::Node * NodeIterator::nextNode( node::Node * node ) const {
  * @param node Current node pointer (or nullptr to get the last pre-order node in the tree)
  * @return Previous node pre-order (or nullptr if already at root or it has been lost)
  */
-inline node::Node * NodeIterator::prevNode( node::Node * node ) const {
+inline NodeIterator::pointer NodeIterator::prevNode( NodeIterator::pointer node ) const {
     if( node == nullptr ) {
         return lastNode();
     }
@@ -427,7 +435,7 @@ inline node::Node * NodeIterator::prevNode( node::Node * node ) const {
  * [PRIVATE] Gets the last node in the pre-ordered tree
  * @return Last pre-ordered node in tree
  */
-inline node::Node * NodeIterator::lastNode() const {
+inline NodeIterator::pointer NodeIterator::lastNode() const {
     auto * curr = _root;
 
     while( curr && curr->hasChildNodes() ) {
