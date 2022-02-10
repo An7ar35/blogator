@@ -5,6 +5,8 @@
 #include <ostream>
 
 namespace blogator::parser::specs::html5 {
+    enum class Namespace;
+
     enum class Element {
         UNKNOWN = 0,
 
@@ -102,6 +104,8 @@ namespace blogator::parser::specs::html5 {
     };
 
     std::ostream & operator <<( std::ostream &os, Element el );
+    specs::html5::Namespace getNamespace( specs::html5::Element el );
+    specs::html5::Element getElementType( const std::u32string &el );
     //TODO create paired, self closing lookup
 }
 

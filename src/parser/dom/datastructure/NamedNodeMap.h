@@ -22,6 +22,8 @@ namespace blogator::parser::dom {
         NamedNodeMap & operator =( const NamedNodeMap &nnp );
         NamedNodeMap & operator =( NamedNodeMap &&nnp ) noexcept;
 
+        void swap( NamedNodeMap &rhs );
+
         [[nodiscard]] const Attributes_t & list() const;
         [[nodiscard]] bool attributeExists( const DOMString_t &qualified_name ) const;
         [[nodiscard]] bool empty() const;
@@ -48,6 +50,8 @@ namespace blogator::parser::dom {
         [[nodiscard]] Attributes_t::iterator getIterator( const node::Attr * ptr );
         node::Attr * appendAttribute( AttrPtr_t &&attr );
     };
+
+    void swap( NamedNodeMap &lhs, NamedNodeMap &rhs );
 }
 
 #endif //BLOGATOR_PARSER_DOM_DATASTRUCTURE_NAMEDNODEMAP_H

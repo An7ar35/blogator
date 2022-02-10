@@ -4,6 +4,8 @@
 #include <ostream>
 #include <sstream>
 
+#include "Namespace.h"
+
 using namespace blogator::parser::specs::html5;
 
 /**
@@ -256,6 +258,53 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
     }
 
     return os;
+}
+
+/**
+ * Gets the an Element's HTML Namespace
+ * @param el Element
+ * @return HTML namespace
+ */
+blogator::parser::specs::html5::Namespace blogator::parser::specs::html5::getNamespace( Element el ) {
+    using blogator::parser::specs::html5::Element;
+    using blogator::parser::specs::html5::Namespace;
+
+    if( el >= Element::HTML5_NS_BEGIN && el <= Element::HTML5_NS_END ) {
+        return Namespace::HTML5;
+    } else if( el >= Element::MATHML_NS_BEGIN && el <= Element::MATHML_NS_END ) {
+        return Namespace::MATHML;
+    } else if( el >= Element::SVG_NS_BEGIN && el <= Element::SVG_NS_END ) {
+        return Namespace::SVG;
+    } else {
+        return Namespace::UNKNOWN;
+    }
+}
+
+/**
+ * Gets a element type from a string
+ * @param el Element string
+ * @return Element type (Element::UNKNOWN if not found)
+ */
+blogator::parser::specs::html5::Element blogator::parser::specs::html5::getElementType( const std::u32string &el ) {
+    static std::map<std::u32string , specs::html5::Element> map;
+
+    if( map.empty() ) {
+        //i = 1 as 'Element::UNKNOWN' (0) can be skipped
+        for( int i = 1; i <= static_cast<int>( blogator::parser::specs::html5::Element::ENUM_END ); ++i ) {
+            //Since string representation of elements are all in ASCII range
+            //conversion to u32 can just be done with direct casting.
+            auto u8str = blogator::to_string( static_cast<specs::html5::Element>( i ) );
+            map.emplace( std::u32string( u8str.cbegin(), u8str.cend() ), static_cast<specs::html5::Element>( i ) );
+        }
+    }
+
+    auto it = map.find( el );
+
+    if( it != map.cend() ) {
+        return it->second;
+    } else {
+        return specs::html5::Element::UNKNOWN;
+    }
 }
 
 /**

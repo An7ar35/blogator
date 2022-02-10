@@ -2,6 +2,8 @@
 #include "../../../src/parser/dom/datastructure/NamedNodeMap.h"
 #include "../../../src/parser/dom/node/Node.h"
 #include "../../../src/parser/dom/node/Attr.h"
+#include "../../../src/parser/dom/node/Document.h"
+#include "../../../src/parser/dom/node/Element.h"
 
 using namespace blogator::parser::dom;
 using           blogator::parser::dom::NamedNodeMap;
@@ -290,4 +292,35 @@ TEST( parser_dom_NamedNodeMap_Tests, removeNamedItem_1 ) {
     auto ptr = nnm.removeNamedItem( attr.nodeName() );
     ASSERT_TRUE( ptr );
     ASSERT_TRUE( attr.equivalent( *ptr ) );
+}
+
+TEST( parser_dom_NamedNodeMap_Tests, swap ) {
+    auto   doc1  = node::Document();
+    auto   doc2  = node::Document();
+    auto * node1 = doc1.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * node2 = doc2.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto   attr1 = node::Attr( U"p", U"name1", U"value1" );
+    auto   attr2 = node::Attr( U"p", U"name2", U"value2" );
+
+    auto   nnm1 = NamedNodeMap( node1 );
+    auto   nnm2 = NamedNodeMap( node2 );
+
+    nnm1.setNamedItem( attr1 );
+    nnm2.setNamedItem( attr2 );
+
+    swap( nnm1, nnm2 );
+
+    ASSERT_EQ( nnm1.ownerNode(), node1 );
+    ASSERT_EQ( nnm1.list().size(), 1 );
+    ASSERT_EQ( nnm1.list()[0]->parentNode(), node1 );
+    ASSERT_EQ( nnm1.list()[0]->ownerElement(), node1 );
+    ASSERT_EQ( nnm1.list()[0]->ownerDocument(), &doc1 );
+    ASSERT_TRUE( nnm1.list()[0]->equivalent( attr2 ) );
+
+    ASSERT_EQ( nnm2.ownerNode(), node2 );
+    ASSERT_EQ( nnm2.list().size(), 1 );
+    ASSERT_EQ( nnm2.list()[0]->parentNode(), node2 );
+    ASSERT_EQ( nnm2.list()[0]->ownerElement(), node2 );
+    ASSERT_EQ( nnm2.list()[0]->ownerDocument(), &doc2 );
+    ASSERT_TRUE( nnm2.list()[0]->equivalent( attr1 ) );
 }

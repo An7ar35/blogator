@@ -6,6 +6,7 @@
 #include "../node/Attr.h"
 #include "../../../unicode/unicode.h"
 #include "../../../logger/Logger.h"
+#include "../validation/XML.h"
 
 using namespace blogator::parser::dom;
 
@@ -66,6 +67,8 @@ NamedNodeMap::NamedNodeMap( NamedNodeMap &&nnp ) noexcept :
 NamedNodeMap & NamedNodeMap::operator =( const NamedNodeMap &nnp ) {
     if( &nnp != this ) {
         this->_parent = nnp._parent;
+        this->_map.clear();
+        this->_nodes.clear();
 
         for( const auto & attr : nnp._nodes ) {
             if( attr ) {
@@ -97,6 +100,8 @@ NamedNodeMap & NamedNodeMap::operator =( const NamedNodeMap &nnp ) {
 NamedNodeMap & NamedNodeMap::operator =( NamedNodeMap &&nnp ) noexcept {
     if( &nnp != this ) {
         this->_parent = nnp._parent;
+        this->_map.clear();
+        this->_nodes.clear();
 
         for( auto & attr : nnp._nodes ) {
             if( attr ) {
@@ -106,6 +111,20 @@ NamedNodeMap & NamedNodeMap::operator =( NamedNodeMap &&nnp ) noexcept {
     }
 
     return *this;
+}
+
+/**
+ * Swaps Element nodes (Note: all attributes will have their document owner and parent pointers reset)
+ * @param rhs NamedNodeMap to swap with
+ */
+void NamedNodeMap::swap( NamedNodeMap &rhs ) {
+    if( &rhs != this ) {
+        std::swap( this->_nodes, rhs._nodes );
+        std::swap( this->_map, rhs._map );
+
+        this->setParent( _parent );
+        rhs.setParent( rhs._parent );
+    }
 }
 
 /**
@@ -158,8 +177,17 @@ const node::Attr * NamedNodeMap::item( size_t index ) const {
  * Gets an attribute by its qualified name
  * @param qualified_name Qualified name string
  * @return Pointer to attribute node (or nullptr)
+ * @throws DOMException when qualified name is invalid
  */
 const node::Attr * NamedNodeMap::getNamedItem( const DOMString_t &qualified_name ) const {
+    if( !dom::validation::XML::isValidName( qualified_name ) ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::NamedNodeMap::getNamedItem( \"" + blogator::unicode::utf8::convert( qualified_name ) + "\" )] "
+            "Invalid qualified name."
+        );
+    }
+
     if( _map.contains( qualified_name ) ) {
         return _map.at( qualified_name );
     }
@@ -171,8 +199,17 @@ const node::Attr * NamedNodeMap::getNamedItem( const DOMString_t &qualified_name
  * Sets an attribute
  * @param attr Attribute node
  * @return Pointer to attribute node edited/added
+ * @throws DOMException when qualified name of node is invalid
  */
 const node::Attr * NamedNodeMap::setNamedItem( const node::Attr & attr ) {
+    if( !dom::validation::XML::isValidName( attr.nodeName() ) ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::NamedNodeMap::setNamedItem( const node::Attr & )] "
+            "Invalid qualified name ('" + blogator::unicode::utf8::convert( attr.nodeName() ) + "')."
+        );
+    }
+
     auto map_it = _map.find( attr.nodeName() );
 
     if( map_it != _map.end() ) {
@@ -204,6 +241,7 @@ const node::Attr * NamedNodeMap::setNamedItem( const node::Attr & attr ) {
  * Sets an attribute
  * @param attr Attribute
  * @return Pointer to attribute node edited/added
+ * @throws DOMException when qualified name of node is invalid
  */
 const node::Attr * NamedNodeMap::setNode( AttrPtr_t attr ) {
     if( !attr ) {
@@ -213,6 +251,14 @@ const node::Attr * NamedNodeMap::setNode( AttrPtr_t attr ) {
         );
 
         return nullptr; //EARLY RETURN
+    }
+
+    if( !dom::validation::XML::isValidName( attr->nodeName() ) ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::NamedNodeMap::setNode( AttrPtr_t )] "
+            "Invalid qualified name ('" + blogator::unicode::utf8::convert( attr->nodeName() ) + "')."
+        );
     }
 
     auto map_it = _map.find( attr->nodeName() );
@@ -324,8 +370,17 @@ AttrPtr_t NamedNodeMap::removeNode( const node::Attr * node ) {
  * Removes an attribute
  * @param qualified_name Qualified name of the attribute to remove
  * @return Removed attribute node
+ * @throws DOMException when qualified name is invalid
  */
 AttrPtr_t NamedNodeMap::removeNamedItem( const DOMString_t &qualified_name ) {
+    if( !dom::validation::XML::isValidName( qualified_name ) ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::NamedNodeMap::removeNamedItem( \"" + blogator::unicode::utf8::convert( qualified_name ) + "\" )] "
+            "Invalid qualified name."
+        );
+    }
+
     auto map_it = _map.find( qualified_name );
 
     if( map_it == _map.end() ) {
@@ -477,4 +532,13 @@ node::Attr * NamedNodeMap::appendAttribute( AttrPtr_t &&attr ) {
     }
 
     return node;
+}
+
+/**
+ * Swaps NamedNodeMap
+ * @param lhs NamedNodeMap
+ * @param rhs NamedNodeMap
+ */
+void blogator::parser::dom::swap( NamedNodeMap &lhs, NamedNodeMap &rhs ) {
+    lhs.swap( rhs );
 }
