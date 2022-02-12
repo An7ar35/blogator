@@ -25,26 +25,25 @@ namespace blogator::parser::dom {
         void swap( NamedNodeMap &rhs );
 
         [[nodiscard]] const Attributes_t & list() const;
-        [[nodiscard]] bool attributeExists( const DOMString_t &qualified_name ) const;
+        [[nodiscard]] bool attributeExists( DOMString_t qualified_name ) const;
         [[nodiscard]] bool empty() const;
         [[nodiscard]] size_t length() const;
         [[nodiscard]] const node::Attr * item( size_t index ) const;
-        [[nodiscard]] const node::Attr * getNamedItem( const DOMString_t & qualified_name ) const;
+        [[nodiscard]] const node::Attr * getNamedItem( DOMString_t qualified_name ) const;
 
         const node::Attr * setNamedItem( const node::Attr & attr );
         const node::Attr * setNode( AttrPtr_t attr );
         AttrPtr_t removeItem( size_t index );
         AttrPtr_t removeNode( const node::Attr * node );
-        AttrPtr_t removeNamedItem( const DOMString_t &qualified_name );
+        AttrPtr_t removeNamedItem( DOMString_t qualified_name );
 
         [[nodiscard]] const node::Node * ownerNode() const;
+        [[nodiscard]] const node::Element * ownerElement() const;
 
       private:
         node::Node *                        _parent;
         std::map<DOMString_t, node::Attr *> _map;
         Attributes_t                        _nodes;
-
-        static bool swap( AttrPtr_t & lhs, AttrPtr_t & rhs );
 
         void setParent( node::Node * parent );
         [[nodiscard]] Attributes_t::iterator getIterator( const node::Attr * ptr );

@@ -4,6 +4,8 @@
 #include <utility>
 
 #include "../node/Attr.h"
+#include "../node/Document.h"
+#include "../node/Element.h"
 #include "../../../unicode/unicode.h"
 #include "../../../logger/Logger.h"
 #include "../validation/XML.h"
@@ -140,7 +142,11 @@ const Attributes_t & NamedNodeMap::list() const {
  * @param qualified_name Qualified name
  * @return Existence state
  */
-bool NamedNodeMap::attributeExists( const DOMString_t &qualified_name ) const {
+bool NamedNodeMap::attributeExists( DOMString_t qualified_name ) const {
+    if( this->ownerElement() && this->ownerElement()->isHtmlNative() ) {
+        unicode::ascii::tolower( qualified_name );
+    }
+
     return ( _map.contains( qualified_name ) );
 }
 
@@ -177,15 +183,10 @@ const node::Attr * NamedNodeMap::item( size_t index ) const {
  * Gets an attribute by its qualified name
  * @param qualified_name Qualified name string
  * @return Pointer to attribute node (or nullptr)
- * @throws DOMException when qualified name is invalid
  */
-const node::Attr * NamedNodeMap::getNamedItem( const DOMString_t &qualified_name ) const {
-    if( !dom::validation::XML::isValidName( qualified_name ) ) {
-        throw exception::DOMException(
-            exception::DOMExceptionType::InvalidCharacterError,
-            "[parser::dom::NamedNodeMap::getNamedItem( \"" + blogator::unicode::utf8::convert( qualified_name ) + "\" )] "
-            "Invalid qualified name."
-        );
+const node::Attr * NamedNodeMap::getNamedItem( DOMString_t qualified_name ) const {
+    if( this->ownerElement() && this->ownerElement()->isHtmlNative() ) {
+        unicode::ascii::tolower( qualified_name );
     }
 
     if( _map.contains( qualified_name ) ) {
@@ -203,10 +204,11 @@ const node::Attr * NamedNodeMap::getNamedItem( const DOMString_t &qualified_name
  */
 const node::Attr * NamedNodeMap::setNamedItem( const node::Attr & attr ) {
     if( !dom::validation::XML::isValidName( attr.nodeName() ) ) {
+        using blogator::unicode::utf8::convert;
+
         throw exception::DOMException(
             exception::DOMExceptionType::InvalidCharacterError,
-            "[parser::dom::NamedNodeMap::setNamedItem( const node::Attr & )] "
-            "Invalid qualified name ('" + blogator::unicode::utf8::convert( attr.nodeName() ) + "')."
+            "[parser::dom::NamedNodeMap::setNamedItem( const node::Attr & )] Invalid qualified name ('" + convert( attr.nodeName() ) + "')."
         );
     }
 
@@ -254,10 +256,11 @@ const node::Attr * NamedNodeMap::setNode( AttrPtr_t attr ) {
     }
 
     if( !dom::validation::XML::isValidName( attr->nodeName() ) ) {
+        using blogator::unicode::utf8::convert;
+
         throw exception::DOMException(
             exception::DOMExceptionType::InvalidCharacterError,
-            "[parser::dom::NamedNodeMap::setNode( AttrPtr_t )] "
-            "Invalid qualified name ('" + blogator::unicode::utf8::convert( attr->nodeName() ) + "')."
+            "[parser::dom::NamedNodeMap::setNode( AttrPtr_t )] Invalid qualified name ('" + convert( attr->nodeName() ) + "')."
         );
     }
 
@@ -370,15 +373,10 @@ AttrPtr_t NamedNodeMap::removeNode( const node::Attr * node ) {
  * Removes an attribute
  * @param qualified_name Qualified name of the attribute to remove
  * @return Removed attribute node
- * @throws DOMException when qualified name is invalid
  */
-AttrPtr_t NamedNodeMap::removeNamedItem( const DOMString_t &qualified_name ) {
-    if( !dom::validation::XML::isValidName( qualified_name ) ) {
-        throw exception::DOMException(
-            exception::DOMExceptionType::InvalidCharacterError,
-            "[parser::dom::NamedNodeMap::removeNamedItem( \"" + blogator::unicode::utf8::convert( qualified_name ) + "\" )] "
-            "Invalid qualified name."
-        );
+AttrPtr_t NamedNodeMap::removeNamedItem( DOMString_t qualified_name ) {
+    if( this->ownerElement() && this->ownerElement()->isHtmlNative() ) {
+        unicode::ascii::tolower( qualified_name );
     }
 
     auto map_it = _map.find( qualified_name );
@@ -421,23 +419,13 @@ const node::Node * NamedNodeMap::ownerNode() const {
 }
 
 /**
- * [PRIVATE] Swaps attribute pointers
- * @param lhs First AttrPtr_t
- * @param rhs Second AttrPtr_t
- * @return Success
+ * Gets the current associated owning Element node
+ * @return Pointer to parent Element node
  */
-bool NamedNodeMap::swap( AttrPtr_t &lhs, AttrPtr_t &rhs ) {
-    if( lhs && rhs ) {
-        std::swap( lhs->_document, rhs->_document );
-        std::swap( lhs->_parent, rhs->_parent );
-        std::swap( lhs->_prev_sibling, rhs->_prev_sibling );
-        std::swap( lhs->_next_sibling, rhs->_next_sibling );
-        std::swap( lhs, rhs );
-
-        return true; //EARLY RETURN
-    }
-
-    return false;
+const node::Element * NamedNodeMap::ownerElement() const {
+    return ( _parent && _parent->nodeType() == NodeType::ELEMENT_NODE
+             ? dynamic_cast<const node::Element *>( _parent )
+             : nullptr );
 }
 
 /**

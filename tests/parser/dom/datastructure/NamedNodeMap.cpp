@@ -175,6 +175,18 @@ TEST( parser_dom_NamedNodeMap_Tests, getNamedItem_2 ) {
     ASSERT_TRUE( returned->equivalent( attr ) );
 }
 
+TEST( parser_dom_NamedNodeMap_Tests, getNamedItem_3 ) { //html doc+element
+    auto   doc  = node::Document();
+    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto   nnm  = NamedNodeMap( node );
+    auto   attr = node::Attr( U"p", U"name", U"value" );
+    nnm.setNode( std::make_unique<node::Attr>( attr ) );
+
+    auto * returned = nnm.getNamedItem( U"P:NAME" );
+    ASSERT_NE( returned, nullptr );
+    ASSERT_TRUE( returned->equivalent( attr ) );
+}
+
 TEST( parser_dom_NamedNodeMap_Tests, setNamedItem_0 ) {
     auto nnm  = NamedNodeMap( nullptr );
     auto attr = node::Attr( U"p", U"name", U"value" );
@@ -200,6 +212,13 @@ TEST( parser_dom_NamedNodeMap_Tests, setNamedItem_1 ) {
     ASSERT_EQ( returned1, returned2 );
     ASSERT_TRUE( returned2->equivalent( attr2 ) );
     ASSERT_EQ( nnm.list().size(), 1 );
+}
+
+TEST( parser_dom_NamedNodeMap_Tests, setNamedItem_fail_0 ) { //invalid name
+    auto nnm  = NamedNodeMap( nullptr );
+    auto attr = node::Attr( U"p", U"na%me", U"value" );
+
+    ASSERT_THROW( std::ignore = nnm.setNamedItem( attr ), blogator::parser::dom::exception::DOMException );
 }
 
 TEST( parser_dom_NamedNodeMap_Tests, setNode_0 ) {
@@ -237,6 +256,14 @@ TEST( parser_dom_NamedNodeMap_Tests, setNode_2 ) {
     ASSERT_EQ( returned1, returned2 );
     ASSERT_TRUE( returned2->equivalent( attr2 ) );
     ASSERT_EQ( nnm.list().size(), 1 );
+}
+
+TEST( parser_dom_NamedNodeMap_Tests, setNode_fail_0 ) { //invalid name
+    auto nnm  = NamedNodeMap( nullptr );
+    auto attr = node::Attr( U"p", U"na%me", U"value" );
+
+    ASSERT_THROW( std::ignore = nnm.setNode( std::make_unique<node::Attr>( attr ) ),
+                  blogator::parser::dom::exception::DOMException );
 }
 
 TEST( parser_dom_NamedNodeMap_Tests, removeItem_0 ) {
@@ -294,6 +321,19 @@ TEST( parser_dom_NamedNodeMap_Tests, removeNamedItem_1 ) {
     ASSERT_TRUE( attr.equivalent( *ptr ) );
 }
 
+TEST( parser_dom_NamedNodeMap_Tests, removeNamedItem_2 ) { //html doc+element
+    auto   doc  = node::Document();
+    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto   nnm  = NamedNodeMap( node );
+    auto   attr = node::Attr( U"p", U"name", U"value" );
+    nnm.setNode( std::make_unique<node::Attr>( attr ) );
+
+    ASSERT_EQ( nnm.list().size(), 1 );
+    auto ptr = nnm.removeNamedItem( U"P:Name" );
+    ASSERT_TRUE( ptr );
+    ASSERT_TRUE( attr.equivalent( *ptr ) );
+}
+
 TEST( parser_dom_NamedNodeMap_Tests, swap ) {
     auto   doc1  = node::Document();
     auto   doc2  = node::Document();
@@ -323,4 +363,16 @@ TEST( parser_dom_NamedNodeMap_Tests, swap ) {
     ASSERT_EQ( nnm2.list()[0]->ownerElement(), node2 );
     ASSERT_EQ( nnm2.list()[0]->ownerDocument(), &doc2 );
     ASSERT_TRUE( nnm2.list()[0]->equivalent( attr1 ) );
+}
+
+TEST( parser_dom_NamedNodeMap_Tests, ownerElement_0 ) {
+    auto node = node::Node();
+    auto nnm  = NamedNodeMap( &node );
+    ASSERT_EQ( nnm.ownerElement(), nullptr );
+}
+
+TEST( parser_dom_NamedNodeMap_Tests, ownerElement_1 ) {
+    auto node = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto nnm  = NamedNodeMap( &node );
+    ASSERT_EQ( nnm.ownerElement(), &node );
 }
