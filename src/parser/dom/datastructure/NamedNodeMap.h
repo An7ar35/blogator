@@ -45,6 +45,7 @@ namespace blogator::parser::dom {
         std::map<DOMString_t, node::Attr *> _map;
         Attributes_t                        _nodes;
 
+        void setOwnerDocument( node::Document * document );
         void setParent( node::Node * parent );
         [[nodiscard]] Attributes_t::iterator getIterator( const node::Attr * ptr );
         node::Attr * appendAttribute( AttrPtr_t &&attr );

@@ -30,7 +30,7 @@ NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::html5::N
         const auto [ it, success ] = _enum_mapping.emplace( std::pair<specs::html5::Namespace, id_t>( ns, i ) );
 
         if( success ) {
-            _namespaces.emplace_back( NS { specs::html5::to_namespaceURI( ns ), ns } );
+            _namespaces.emplace_back( NS { specs::html5::to_namespaceURI( ns ), specs::html5::to_prefix( ns ), ns } );
             return static_cast<id_t>( i ); //BRANCHED RETURN (1/2)
 
         } else {
@@ -47,9 +47,10 @@ NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::html5::N
 /**
  * Sets a namespace
  * @param ns Namespace URI string
+ * @param prefix Namespace prefix (optional)
  * @return Namespace ID (or INVALID on error)
  */
-NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns ) {
+NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns, DOMString_t prefix ) {
     std::lock_guard<std::mutex> guard( _mutex );
 
     if( _str_mapping.contains( ns ) ) {
@@ -60,7 +61,7 @@ NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns ) {
         const auto [ it, success ] = _str_mapping.emplace( std::pair<DOMString_t , id_t>( ns, i ) );
 
         if( success ) {
-            _namespaces.emplace_back( NS { ns, specs::html5::Namespace::OTHER } );
+            _namespaces.emplace_back( NS { ns, std::move( prefix ), specs::html5::Namespace::OTHER } );
             return static_cast<id_t>( i ); //BRANCHED RETURN (1/2)
 
         } else {
@@ -114,6 +115,26 @@ const DOMString_t & NamespaceMap::getNamespaceURI( id_t id ) const {
     }
 
     return _namespaces.at( id ).uri;
+}
+
+/**
+ * Gets a namespace's prefix
+ * @param id Namespace ID
+ * @return Namespace prefix string
+ */
+const DOMString_t & NamespaceMap::getNamespacePrefix( NamespaceMap::id_t id ) const {
+    std::lock_guard<std::mutex> guard( _mutex );
+
+    if( id < 0 || id >= _namespaces.size() ) {
+        LOG_ERROR(
+            "[parser::dom::NamespaceMap::getNamespacePrefix( ", id, " )] "
+            "Namespace mapping may be corrupted."
+        );
+
+        throw std::out_of_range( "NamespaceMap inconsistency detected - see log" );
+    }
+
+    return _namespaces.at( id ).prefix;
 }
 
 /**

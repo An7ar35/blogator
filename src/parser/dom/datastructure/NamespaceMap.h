@@ -21,18 +21,21 @@ namespace blogator::parser::dom {
         typedef int id_t;
 
         id_t setNamespace( specs::html5::Namespace ns );
-        id_t setNamespace( const DOMString_t &ns );
+        id_t setNamespace( const DOMString_t &ns, DOMString_t prefix = DOMString_t() );
 
         [[nodiscard]] specs::html5::Namespace getNamespaceEnum( id_t id ) const;
         [[nodiscard]] const DOMString_t & getNamespaceURI( id_t id ) const;
+        [[nodiscard]] const DOMString_t & getNamespacePrefix( id_t id ) const;
         [[nodiscard]] size_t size() const;
         [[nodiscard]] bool empty() const;
 
         static constexpr int INVALID = -1;
+        static constexpr int NONE    = -1;
 
       private:
         struct NS {
             DOMString_t             uri;
+            DOMString_t             prefix;
             specs::html5::Namespace ns_enum;
         };
 

@@ -87,6 +87,30 @@ TEST( parser_dom_NamespaceMap_Tests, getNamespaceURI_fail_1 ) {
     ASSERT_THROW( std::ignore = nsmap.getNamespaceURI( -1 ), std::out_of_range );
 }
 
+TEST( parser_dom_NamespaceMap_Tests, getNamespacePrefix_0 ) {
+    auto nsmap  = NamespaceMap();
+    auto uri    = DOMString_t( U"namespace/uri" );
+    auto prefix = DOMString_t( U"prefix" );
+    auto id     = nsmap.setNamespace( uri, prefix );
+    ASSERT_EQ( nsmap.getNamespacePrefix( id ), prefix );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, getNamespacePrefix_1 ) {
+    auto nsmap  = NamespaceMap();
+    auto id     = nsmap.setNamespace( Namespace::MATHML );
+    ASSERT_EQ( nsmap.getNamespacePrefix( id ), U"math" );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, getNamespacePrefix_fail_0 ) {
+    auto nsmap = NamespaceMap();
+    ASSERT_THROW( std::ignore = nsmap.getNamespacePrefix( 100 ), std::out_of_range );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, getNamespacePrefix_fail_1 ) {
+    auto nsmap = NamespaceMap();
+    ASSERT_THROW( std::ignore = nsmap.getNamespacePrefix( -1 ), std::out_of_range );
+}
+
 TEST( parser_dom_NamespaceMap_Tests, size ) {
     auto nsmap = NamespaceMap();
     ASSERT_EQ( nsmap.size(), 0 );

@@ -429,7 +429,19 @@ const node::Element * NamedNodeMap::ownerElement() const {
 }
 
 /**
- * [PRIVATE] Sets the parent Element for all the Attr(ibute) nodes
+ * [PRIVATE] Sets the owner document (only) for all the Attr(ibute) nodes
+ * @param document Pointer to new owner document
+ */
+void NamedNodeMap::setOwnerDocument( node::Document * document ) {
+    for( auto & attr : _nodes ) {
+        if( attr ) {
+            attr->setOwnerDocument( document );
+        }
+    }
+}
+
+/**
+ * [PRIVATE] Sets the parent Element and owner Document (from the element) for all the Attr(ibute) nodes
  * @param parent Pointer to parent Element node
  */
 void NamedNodeMap::setParent( node::Node * parent ) {

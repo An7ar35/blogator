@@ -1,7 +1,7 @@
 #include "TreeWalker.h"
 
 #include "../node/Node.h"
-#include "../../../src/unicode/unicode.h"
+#include "../../../unicode/unicode.h"
 
 using namespace blogator::parser::dom;
 

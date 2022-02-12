@@ -1,7 +1,7 @@
 #include "ConstNodeIterator.h"
 
 #include "../node/Node.h"
-#include "../../../src/unicode/unicode.h"
+#include "../../../unicode/unicode.h"
 #include "../../../logger/Logger.h"
 
 using namespace blogator::parser::dom;
