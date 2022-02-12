@@ -139,13 +139,22 @@ Element & Element::operator =( Element &&node ) noexcept {
 }
 
 /**
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void Element::swap( Node &rhs ) {
+    Node::swap( rhs );
+    this->swap( dynamic_cast<Element &>( rhs ) );
+}
+
+/**
  * Shallow swaps Element nodes inclusive of their attributes
  * @param rhs node::Element to swap with
- * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
  */
 void Element::swap( Element &rhs ) {
     if( &rhs != this ) {
-        dynamic_cast<Node &>( *this ).swap( dynamic_cast<Node &>( rhs ) ); //throws
+        Node::swap( rhs );
         std::swap( this->_namespace_id, rhs._namespace_id );
         std::swap( this->_prefix, rhs._prefix );
         std::swap( this->_local_name, rhs._local_name );
@@ -846,7 +855,6 @@ blogator::parser::dom::NodePtr_t Element::replaceChildNode( NodePtr_t &node, Nod
  * Shallow swaps Element nodes
  * @param lhs Element
  * @param rhs Element
- * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
  */
 void blogator::parser::dom::node::swap( Element &lhs, Element &rhs ) {
     lhs.swap( rhs );

@@ -31,6 +31,7 @@ namespace blogator::parser::dom::node {
         Element & operator =( const Element &node );
         Element & operator =( Element &&node ) noexcept;
 
+        void swap( Node &rhs ) override;
         void swap( Element &rhs );
 
       public: /* Non-standard interface */
