@@ -243,7 +243,7 @@ TEST( parser_encoding_Transcode, addCodePoint_nonchar ) {
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
-                                                                specs::html5::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
+                                                                specs::infra::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
@@ -264,7 +264,7 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_BELL ) {
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
-                                                                specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                                                specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
@@ -285,7 +285,7 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_DEL ) {
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
-                                                                specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                                                specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
                                                                 { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
@@ -821,7 +821,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_4 ) { //invalid h
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
-                                                                specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                                                specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
                                                                 { 1, 2 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_source, out_buffer ) );
@@ -977,7 +977,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_4 ) { //invalid hig
 
     auto expected_err = blogator::parser::logging::ErrorObject( "",
                                                                 Context::HTML5,
-                                                                specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                                                specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
                                                                 { 1, 2 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );

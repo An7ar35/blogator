@@ -232,7 +232,7 @@ void Transcode::addCodePoint( Source &src, uint32_t prev_codepoint, uint32_t new
     if( unicode::utf32::isnonchar( new_codepoint ) ) {
         logging::ParserLog::log( src.path(),
                                  specs::Context::HTML5,
-                                 specs::html5::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
+                                 specs::infra::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
                                  pos );
 
         pos.increment( false );
@@ -241,7 +241,7 @@ void Transcode::addCodePoint( Source &src, uint32_t prev_codepoint, uint32_t new
     } else if( new_codepoint != 0x00 && unicode::ascii::iscntrl( new_codepoint ) && !unicode::ascii::iswspace( new_codepoint ) ) {
         logging::ParserLog::log( src.path(),
                                  specs::Context::HTML5,
-                                 specs::html5::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                 specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
                                  pos );
 
         pos.increment( false );
@@ -576,7 +576,7 @@ bool Transcode::U16toU32( std::deque<uint8_t> &pre_buffer, Source &src, std::vec
             } else {
                 logging::ParserLog::log( src.path(),
                                          specs::Context::HTML5,
-                                         specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                         specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
                                          pos );
 
                 LOG_WARNING( "[parser::encoding::Transcode::U16toU32( std::deque<uint8_t> &, Source &, std::vector<uint32_t> & )] "
@@ -666,7 +666,7 @@ bool Transcode::U16toU32( Source &src, std::vector<uint32_t> &out ) {
                 default: {
                     logging::ParserLog::log( src.path(),
                                              specs::Context::HTML5,
-                                             specs::html5::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                             specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
                                              pos );
 
                     LOG_WARNING( "[parser::encoding::Transcode::U16toU32( Source &, std::vector<uint32_t> & )] "

@@ -8,7 +8,7 @@
 
 #include "../../../datastructure/Trie.h"
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     /**
      * DTO for named character references
      * https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state

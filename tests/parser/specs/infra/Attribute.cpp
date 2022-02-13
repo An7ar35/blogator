@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/specs/html5/Attribute.h"
+#include "../../../src/parser/specs/infra/Attribute.h"
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 TEST( parser_specs_html5_Attribute_Tests, output_stream_operator ) {
     for( auto i = 0; i <= static_cast<int>( Attribute::ENUM_END ); ++i ) {

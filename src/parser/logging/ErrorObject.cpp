@@ -73,7 +73,7 @@ std::string ErrorObject::error() const {
         case specs::Context::NATIVE:
             return specs::native::ErrorCode::str( _code );
         case specs::Context::HTML5:
-            return specs::html5::ErrorCode::str( _code );
+            return specs::infra::ErrorCode::str( _code );
         case specs::Context::MARKDOWN:
             return "MARKDOWN"; //TODO
         default:
@@ -90,7 +90,7 @@ std::string ErrorObject::detailed() const {
         case specs::Context::NATIVE:
             return specs::native::ErrorCode::detailed( _code );
         case specs::Context::HTML5:
-            return specs::html5::ErrorCode::detailed( _code );
+            return specs::infra::ErrorCode::detailed( _code );
         case specs::Context::MARKDOWN:
             return "MARKDOWN"; //TODO
         default:
@@ -148,7 +148,7 @@ std::ostream & ErrorObject::error( std::ostream &os ) const {
             break;
 
         case specs::Context::HTML5:
-            os << specs::html5::ErrorCode::str( _code );
+            os << specs::infra::ErrorCode::str( _code );
             break;
 
         case specs::Context::MARKDOWN:
@@ -175,7 +175,7 @@ std::ostream & ErrorObject::detailed( std::ostream &os ) const {
             break;
 
         case specs::Context::HTML5:
-            os << specs::html5::ErrorCode::detailed( _code );
+            os << specs::infra::ErrorCode::detailed( _code );
             break;
 
         case specs::Context::MARKDOWN:

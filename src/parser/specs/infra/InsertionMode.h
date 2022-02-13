@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     enum class InsertionMode {
         INITIAL = 0,
         BEFORE_HTML,
@@ -37,7 +37,7 @@ namespace blogator::parser::specs::html5 {
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::specs::html5::InsertionMode mode );
+    std::string to_string( blogator::parser::specs::infra::InsertionMode mode );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_INSERTIONMODE_H

@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     /**
      * Parsing error codes and descriptions
      * Lifted from: https://html.spec.whatwg.org/multipage/parsing.html#parse-errors

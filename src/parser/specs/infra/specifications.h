@@ -13,4 +13,9 @@
 #include "tokeniser/TokeniserState.h"
 #include "tokeniser/TokenType.h"
 
+/*
+ * Specifications based on the Infra standard
+ * url: https://infra.spec.whatwg.org
+ */
+
 #endif //BLOGATOR_PARSER_HTML5_SPECS_H

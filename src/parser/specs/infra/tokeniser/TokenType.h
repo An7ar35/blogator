@@ -1,7 +1,7 @@
 #ifndef BLOGATOR_PARSER_SPECS_HTML5_TOKENISER_TOKENTYPE_H
 #define BLOGATOR_PARSER_SPECS_HTML5_TOKENISER_TOKENTYPE_H
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     enum class TokenType {
         UNKNOWN = 0,
         DOCTYPE,

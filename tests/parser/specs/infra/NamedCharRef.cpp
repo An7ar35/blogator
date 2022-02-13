@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "../../src/parser/specs/html5/NamedCharRef.h"
+#include "../../src/parser/specs/infra/NamedCharRef.h"
 #include "../../src/unicode/utf8.h"
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 TEST( parser_specs_html5_NamedCharRef_Tests, match_1 ) {
     auto tracker = blogator::TrieTracker<uint32_t>();

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/specs/html5/ContentModel.h"
+#include "../../../src/parser/specs/infra/ContentModel.h"
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 
 TEST( parser_specs_html5_ContentModel_Tests, output_stream_operator ) {

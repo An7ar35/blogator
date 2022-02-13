@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     enum class Attribute {
         UNKNOWN = 0,
 
@@ -80,7 +80,7 @@ namespace blogator::parser::specs::html5 {
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::specs::html5::Attribute el );
+    std::string to_string( blogator::parser::specs::infra::Attribute el );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_ATTRIBUTE_H

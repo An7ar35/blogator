@@ -233,8 +233,7 @@ set(SOURCE_FILES
         src/parser/specs/Structure.h
         src/parser/specs/Context.cpp
         src/parser/specs/Context.h
-        src/parser/specs/html5/Attribute.cpp
-        src/parser/specs/html5/Attribute.h
+        src/parser/specs/config/tokeniser/TokenType.h
         src/parser/specs/native/Element.cpp
         src/parser/specs/native/Element.h
         src/parser/specs/native/ErrorCode.cpp
@@ -242,23 +241,28 @@ set(SOURCE_FILES
         src/parser/specs/native/InsertionMode.cpp
         src/parser/specs/native/InsertionMode.h
         src/parser/specs/native/specifications.h
-        src/parser/specs/html5/tokeniser/TokeniserState.h
-        src/parser/specs/html5/tokeniser/TokenType.h
-        src/parser/specs/html5/ContentModel.cpp
-        src/parser/specs/html5/ContentModel.h
-        src/parser/specs/html5/Element.cpp
-        src/parser/specs/html5/Element.h
-        src/parser/specs/html5/Namespace.cpp
-        src/parser/specs/html5/Namespace.h
-        src/parser/specs/html5/NamedCharRef.cpp
-        src/parser/specs/html5/NamedCharRef.h
-        src/parser/specs/html5/NumericCharRef.cpp
-        src/parser/specs/html5/NumericCharRef.h
-        src/parser/specs/html5/specifications.h
-        src/parser/specs/html5/ErrorCode.h
-        src/parser/specs/html5/ErrorCode.cpp
-        src/parser/specs/html5/InsertionMode.cpp
-        src/parser/specs/html5/InsertionMode.h
+        src/parser/specs/infra/tokeniser/TokeniserState.h
+        src/parser/specs/infra/tokeniser/TokenType.h
+        src/parser/specs/infra/Attribute.cpp
+        src/parser/specs/infra/Attribute.h
+        src/parser/specs/infra/ContentModel.cpp
+        src/parser/specs/infra/ContentModel.h
+        src/parser/specs/infra/ContentType.cpp
+        src/parser/specs/infra/ContentType.h
+        src/parser/specs/infra/Element.cpp
+        src/parser/specs/infra/Element.h
+        src/parser/specs/infra/Namespace.cpp
+        src/parser/specs/infra/Namespace.h
+        src/parser/specs/infra/NamedCharRef.cpp
+        src/parser/specs/infra/NamedCharRef.h
+        src/parser/specs/infra/NumericCharRef.cpp
+        src/parser/specs/infra/NumericCharRef.h
+        src/parser/specs/infra/specifications.h
+        src/parser/specs/infra/ErrorCode.h
+        src/parser/specs/infra/ErrorCode.cpp
+        src/parser/specs/infra/InsertionMode.cpp
+        src/parser/specs/infra/InsertionMode.h
+
         src/parser/specs/markdown/specifications.h
 
         src/parser/token/Token.cpp
@@ -296,7 +300,6 @@ set(SOURCE_FILES
         src/parser/dom/TreeBuilder.h
         src/parser/dom/node/Node.cpp
         src/parser/dom/node/Node.h
-        src/parser/dom/node/NodeType.h
 
         src/parser/tokeniser/Native.cpp
         src/parser/tokeniser/Native.h
@@ -307,6 +310,7 @@ set(SOURCE_FILES
 
         src/parser/encoding/Transcode.cpp
         src/parser/encoding/Transcode.h
+        src/parser/encoding/Format.cpp
         src/parser/encoding/Format.h
         src/parser/encoding/Confidence.h
 
@@ -326,21 +330,25 @@ set(SOURCE_FILES
         src/unicode/unicode.cpp
         src/unicode/unicode.h
 
-        src/parser/specs/config/tokeniser/TokenType.h
         src/parser/tokeniser/Config.cpp
         src/parser/tokeniser/Config.h
+
+        src/parser/dom/enum/NodeType.cpp
+        src/parser/dom/enum/NodeType.h
+        src/parser/dom/enum/QuirksMode.cpp
+        src/parser/dom/enum/QuirksMode.h
         src/parser/dom/node/Document.cpp
         src/parser/dom/node/Document.h
         src/parser/dom/node/Element.cpp
         src/parser/dom/node/Element.h
-        src/parser/dom/node/DocumentFragment.cpp
-        src/parser/dom/node/DocumentFragment.h
         src/parser/dom/node/Comment.cpp
         src/parser/dom/node/Comment.h
         src/parser/dom/node/Text.cpp
         src/parser/dom/node/Text.h
         src/parser/dom/node/DocumentType.cpp
         src/parser/dom/node/DocumentType.h
+        src/parser/dom/node/DocumentFragment.cpp
+        src/parser/dom/node/DocumentFragment.h
         src/parser/dom/node/Attr.cpp
         src/parser/dom/node/Attr.h
         src/parser/dom/node/CDATASection.cpp
@@ -349,6 +357,7 @@ set(SOURCE_FILES
         src/parser/dom/node/CharacterData.h
 
         src/parser/dom/exception/DOMException.h
+        src/parser/dom/exception/DOMExceptionType.cpp
         src/parser/dom/exception/DOMExceptionType.h
         src/parser/dom/exception/EvalError.cpp
         src/parser/dom/exception/EvalError.h
@@ -395,8 +404,26 @@ set(SOURCE_FILES
         src/logger/output/Stream.cpp
         src/logger/output/Stream.h
         src/parser/dom/defs.h
-        src/parser/dom/validation/HTML5Validator.cpp
-        src/parser/dom/validation/HTML5Validator.h)
+        src/parser/dom/validation/Validator.cpp
+        src/parser/dom/validation/Validator.h
+        src/parser/dom/Variables.cpp
+        src/parser/dom/Variables.h
+        src/parser/dom/DOMImplementation.cpp
+        src/parser/dom/DOMImplementation.h
+        src/parser/dom/datastructure/NamedNodeMap.cpp
+        src/parser/dom/datastructure/NamedNodeMap.h
+        src/parser/dom-lite/DOMlite.cpp
+        src/parser/dom-lite/DOMlite.h
+        src/parser/dom/filter/NodeFilter.cpp
+        src/parser/dom/filter/NodeFilter.h
+        src/parser/dom/iterator/NodeIterator.cpp
+        src/parser/dom/iterator/NodeIterator.h
+        src/parser/dom/iterator/ConstNodeIterator.cpp
+        src/parser/dom/iterator/ConstNodeIterator.h
+        src/parser/dom/iterator/TreeWalker.cpp
+        src/parser/dom/iterator/TreeWalker.h
+        src/parser/dom/builders/HtmlBuilder.cpp
+        src/parser/dom/builders/HtmlBuilder.h src/parser/dom/datastructure/NamespaceMap.cpp src/parser/dom/datastructure/NamespaceMap.h src/parser/dom/validation/XML.cpp src/parser/dom/validation/XML.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -452,7 +479,7 @@ set(TEST_FILES
         tests/parser/dto/TextPos.cpp
         tests/datastructure/TrieNode.cpp
         tests/datastructure/Trie.cpp
-        tests/parser/specs/html5/NamedCharRef.cpp
+        tests/parser/specs/infra/NamedCharRef.cpp
         tests/helper.cpp
         tests/helper.h tests/unicode/ascii.cpp
         tests/unicode/utf32.cpp
@@ -466,14 +493,30 @@ set(TEST_FILES
         tests/logger/Logger.cpp
         tests/logger/engine/LogQueue.cpp
         tests/AsyncNotify.h
-        tests/parser/specs/html5/Element.cpp
-        tests/parser/specs/html5/ContentModel.cpp
-        tests/parser/specs/html5/Namespace.cpp
-        tests/parser/specs/html5/InsertionMode.cpp
+        tests/parser/specs/infra/Element.cpp
+        tests/parser/specs/infra/ContentModel.cpp
+        tests/parser/specs/infra/Namespace.cpp
+        tests/parser/specs/infra/InsertionMode.cpp
+        tests/parser/specs/infra/Attribute.cpp
         tests/parser/specs/Context.cpp
-        tests/parser/specs/html5/Attribute.cpp
         tests/parser/specs/native/Element.cpp
-        tests/parser/specs/native/InsertionMode.cpp)
+        tests/parser/specs/native/InsertionMode.cpp
+        tests/parser/dom/node/Element.cpp
+        tests/parser/dom/node/CharacterData.cpp
+        tests/parser/dom/node/Text.cpp
+        tests/parser/dom/node/Comment.cpp
+        tests/parser/dom/node/CDATASection.cpp
+        tests/parser/dom/node/Document.cpp
+        tests/parser/dom/node/DocumentType.cpp
+        tests/parser/dom/node/Attr.cpp
+        tests/parser/dom/filter/NodeFilter.cpp
+        tests/parser/dom/iterator/NodeIterator.cpp
+        tests/parser/dom/iterator/ConstNodeIterator.cpp
+        tests/parser/dom/iterator/TreeWalker.cpp
+        tests/parser/dom/TestDOMs.cpp
+        tests/parser/dom/TestDOMs.h
+        tests/parser/dom/datastructure/NamedNodeMap.cpp
+        tests/parser/dom/datastructure/NamespaceMap.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 

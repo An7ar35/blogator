@@ -7,7 +7,7 @@ using namespace blogator::parser::token::html5;
  * @param position Line:Col position of token in source text
  */
 EndTagTk::EndTagTk( blogator::parser::TextPos position ) :
-    GenericTagTk( specs::html5::TokenType::END_TAG, position )
+    GenericTagTk( specs::infra::TokenType::END_TAG, position )
 {}
 
 /**
@@ -16,7 +16,7 @@ EndTagTk::EndTagTk( blogator::parser::TextPos position ) :
  * @param position Line:Col position of token in source text
  */
 EndTagTk::EndTagTk( std::u32string text, blogator::parser::TextPos position ) :
-    GenericTagTk( specs::html5::TokenType::END_TAG, std::move( text ), position )
+    GenericTagTk( specs::infra::TokenType::END_TAG, std::move( text ), position )
 {}
 
 #ifdef TESTING

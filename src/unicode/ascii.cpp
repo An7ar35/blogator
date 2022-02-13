@@ -215,7 +215,7 @@ uint32_t blogator::unicode::ascii::toupper( uint32_t c ) noexcept {
 }
 
 /**
- * Converts a string's ASCII alpha code points into uppercase
+ * Converts a string's ASCII alpha code points into lowercase
  * @param str String to convert
  * @return Ref to converted string
  */
@@ -225,7 +225,7 @@ std::u32string & blogator::unicode::ascii::tolower( std::u32string &str ) {
 }
 
 /**
- * Converts a string's ASCII alpha code points into uppercase
+ * Converts a string's ASCII alpha code points into lowercase
  * @param str String to convert
  * @return New string
  */
@@ -236,7 +236,7 @@ std::u32string blogator::unicode::ascii::tolower( const std::u32string &str ) {
 }
 
 /**
- * Converts a string's ASCII alpha code points into lowercase
+ * Converts a string's ASCII alpha code points into uppercase
  * @param str String to convert
  * @return Ref to converted string
  */
@@ -246,7 +246,7 @@ std::u32string & blogator::unicode::ascii::toupper( std::u32string &str ) {
 }
 
 /**
- * Converts a string's ASCII alpha code points into lowercase
+ * Converts a string's ASCII alpha code points into uppercase
  * @param str String to convert
  * @return New string
  */

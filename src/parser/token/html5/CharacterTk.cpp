@@ -7,7 +7,7 @@ using namespace blogator::parser::token::html5;
  * @param position Line:Col position of token in source text
  */
 CharacterTk::CharacterTk( TextPos position ) :
-    HTML5Tk( specs::html5::TokenType::CHARACTER, position )
+    HTML5Tk( specs::infra::TokenType::CHARACTER, position )
 {}
 
 /**
@@ -16,7 +16,7 @@ CharacterTk::CharacterTk( TextPos position ) :
  * @param position Line:Col position of token in source text
  */
 CharacterTk::CharacterTk( std::u32string text, TextPos position ) :
-    HTML5Tk( specs::html5::TokenType::CHARACTER, std::move( text ), position )
+    HTML5Tk( specs::infra::TokenType::CHARACTER, std::move( text ), position )
 {}
 
 #ifdef TESTING

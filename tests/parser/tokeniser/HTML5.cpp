@@ -20,7 +20,7 @@
 
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;
-using blogator::parser::specs::html5::TokeniserState;
+using blogator::parser::specs::infra::TokeniserState;
 using blogator::parser::logging::ParserLog;
 
 TokeniserState getStateEnum( const std::string &str ) {
@@ -147,10 +147,10 @@ class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
     {};
 
     void addToken( std::unique_ptr<HTML5Tk> tk ) override {
-        if( tk->type() != blogator::parser::specs::html5::TokenType::END_OF_FILE ) {
-            if( tk->type() == blogator::parser::specs::html5::TokenType::CHARACTER
+        if( tk->type() != blogator::parser::specs::infra::TokenType::END_OF_FILE ) {
+            if( tk->type() == blogator::parser::specs::infra::TokenType::CHARACTER
                 && !_tokens.empty()
-                && _tokens.back()->type() == blogator::parser::specs::html5::TokenType::CHARACTER )
+                && _tokens.back()->type() == blogator::parser::specs::infra::TokenType::CHARACTER )
             {
                 _tokens.back() = concatCharacterTk( std::move( _tokens.back() ), std::move( tk ) );
             } else {

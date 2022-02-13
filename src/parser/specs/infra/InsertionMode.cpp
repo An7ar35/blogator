@@ -4,7 +4,7 @@
 #include <ostream>
 #include <sstream>
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 /**
  * Output stream operator
@@ -12,7 +12,7 @@ using namespace blogator::parser::specs::html5;
  * @param mode InsertionMode enum
  * @return Output stream
  */
-std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, blogator::parser::specs::html5::InsertionMode mode ) {
+std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::InsertionMode mode ) {
     static std::map<InsertionMode, std::string> map;
 
     if( map.empty() ) {
@@ -51,11 +51,11 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
 }
 
 /**
- * Converts a parser::specs::html5::InsertionMode enum to a string representation
+ * Converts a parser::specs::infra::InsertionMode enum to a string representation
  * @param mode InsertionMode enum
  * @return String representation
  */
-std::string blogator::to_string( blogator::parser::specs::html5::InsertionMode mode ) {
+std::string blogator::to_string( blogator::parser::specs::infra::InsertionMode mode ) {
     std::stringstream ss;
     ss << mode;
     return ss.str();

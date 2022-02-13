@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     /**
      * DTO for named character references
      * https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state

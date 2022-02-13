@@ -7,13 +7,13 @@ using namespace blogator::parser::dom;
 
 /**
  * Sets a namespace
- * @param ns specs::html5::Namespace enum
+ * @param ns specs::infra::Namespace enum
  * @return Namespace ID (or INVALID on error)
  */
-NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::html5::Namespace ns ) {
+NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::infra::Namespace ns ) {
     std::lock_guard<std::mutex> guard( _mutex );
 
-    if( ns == specs::html5::Namespace::UNKNOWN || ns ==specs::html5::Namespace::OTHER ) {
+    if( ns == specs::infra::Namespace::UNKNOWN || ns == specs::infra::Namespace::OTHER ) {
         LOG_ERROR(
             "[parser::dom::NamespaceMap::setNamespace( ", blogator::to_string( ns ), " )] "
             "Invalid argument. Use DOMString_t version of setter instead."
@@ -27,10 +27,10 @@ NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::html5::N
 
     } else {
         const auto i               = _namespaces.size();
-        const auto [ it, success ] = _enum_mapping.emplace( std::pair<specs::html5::Namespace, id_t>( ns, i ) );
+        const auto [ it, success ] = _enum_mapping.emplace( std::pair<specs::infra::Namespace, id_t>( ns, i ) );
 
         if( success ) {
-            _namespaces.emplace_back( NS { specs::html5::to_namespaceURI( ns ), specs::html5::to_prefix( ns ), ns } );
+            _namespaces.emplace_back( NS { specs::infra::to_namespaceURI( ns ), specs::infra::to_prefix( ns ), ns } );
             return static_cast<id_t>( i ); //BRANCHED RETURN (1/2)
 
         } else {
@@ -61,7 +61,7 @@ NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns, DOMString_
         const auto [ it, success ] = _str_mapping.emplace( std::pair<DOMString_t , id_t>( ns, i ) );
 
         if( success ) {
-            _namespaces.emplace_back( NS { ns, std::move( prefix ), specs::html5::Namespace::OTHER } );
+            _namespaces.emplace_back( NS { ns, std::move( prefix ), specs::infra::Namespace::OTHER } );
             return static_cast<id_t>( i ); //BRANCHED RETURN (1/2)
 
         } else {
@@ -78,10 +78,10 @@ NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns, DOMString_
 /**
  * Gets an namespace's blogator enum
  * @param id Namespace ID
- * @return specs::html5::Namespace enum
+ * @return specs::infra::Namespace enum
  * @throws std::out_of_range when mapping inconsistency is detected
  */
-blogator::parser::specs::html5::Namespace NamespaceMap::getNamespaceEnum( NamespaceMap::id_t id ) const {
+blogator::parser::specs::infra::Namespace NamespaceMap::getNamespaceEnum( NamespaceMap::id_t id ) const {
     std::lock_guard<std::mutex> guard( _mutex );
 
     if( id < 0 || id >= _namespaces.size() ) {

@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "../defs.h"
-#include "../../specs/html5/Namespace.h"
+#include "../../specs/infra/Namespace.h"
 
 namespace blogator::parser::dom {
     /**
@@ -20,10 +20,10 @@ namespace blogator::parser::dom {
       public:
         typedef int id_t;
 
-        id_t setNamespace( specs::html5::Namespace ns );
+        id_t setNamespace( specs::infra::Namespace ns );
         id_t setNamespace( const DOMString_t &ns, DOMString_t prefix = DOMString_t() );
 
-        [[nodiscard]] specs::html5::Namespace getNamespaceEnum( id_t id ) const;
+        [[nodiscard]] specs::infra::Namespace getNamespaceEnum( id_t id ) const;
         [[nodiscard]] const DOMString_t & getNamespaceURI( id_t id ) const;
         [[nodiscard]] const DOMString_t & getNamespacePrefix( id_t id ) const;
         [[nodiscard]] size_t size() const;
@@ -36,13 +36,13 @@ namespace blogator::parser::dom {
         struct NS {
             DOMString_t             uri;
             DOMString_t             prefix;
-            specs::html5::Namespace ns_enum;
+            specs::infra::Namespace ns_enum;
         };
 
         mutable std::mutex                      _mutex;
         std::vector<NS>                         _namespaces;
         std::map<DOMString_t,             id_t> _str_mapping;
-        std::map<specs::html5::Namespace, id_t> _enum_mapping;
+        std::map<specs::infra::Namespace, id_t> _enum_mapping;
     };
 }
 

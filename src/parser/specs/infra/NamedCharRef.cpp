@@ -1,6 +1,6 @@
 #include "NamedCharRef.h"
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 blogator::Trie<uint32_t>                         NamedCharRef::_ncr_trie;
 std::unique_ptr<NamedCharRef>                    NamedCharRef::_not_found;

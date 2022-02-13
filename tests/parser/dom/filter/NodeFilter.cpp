@@ -46,7 +46,7 @@ TEST( parser_dom_NodeFilter_Tests, validate ) {
     auto doc       = std::make_unique<node::Document>();
     auto doc_frag  = std::make_unique<node::DocumentFragment>();
     auto doc_type  = std::make_unique<node::DocumentType>( U"", U"", U"" );
-    auto element   = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto element   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto text      = std::make_unique<node::Text>( U"" );
     auto undefined = std::make_unique<node::Node>();
 

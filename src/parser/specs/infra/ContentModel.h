@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     /**
      * HTML Content models
      */
@@ -28,7 +28,7 @@ namespace blogator::parser::specs::html5 {
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::specs::html5::ContentModel model );
+    std::string to_string( blogator::parser::specs::infra::ContentModel model );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_CONTENTMODELS_H

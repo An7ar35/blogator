@@ -2,7 +2,7 @@
 #include "../../../src/parser/dom/datastructure/NamespaceMap.h"
 
 using namespace blogator::parser::dom;
-using           blogator::parser::specs::html5::Namespace;
+using           blogator::parser::specs::infra::Namespace;
 
 TEST( parser_dom_NamespaceMap_Tests, setNamespace_0 ) {
     auto nsmap = NamespaceMap();
@@ -51,7 +51,7 @@ TEST( parser_dom_NamespaceMap_Tests, getNamespaceEnum_0 ) {
 TEST( parser_dom_NamespaceMap_Tests, getNamespaceEnum ) {
     auto nsmap = NamespaceMap();
     auto id    = nsmap.setNamespace( Namespace::HTML5 );
-    ASSERT_EQ( nsmap.getNamespaceEnum( id ), blogator::parser::specs::html5::Namespace::HTML5 );
+    ASSERT_EQ( nsmap.getNamespaceEnum( id ), blogator::parser::specs::infra::Namespace::HTML5 );
 }
 
 TEST( parser_dom_NamespaceMap_Tests, getNamespaceEnum_fail_0 ) { //invalid id

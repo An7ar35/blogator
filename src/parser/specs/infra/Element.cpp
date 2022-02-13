@@ -6,7 +6,7 @@
 
 #include "Namespace.h"
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 /**
  * Output stream operator
@@ -14,7 +14,7 @@ using namespace blogator::parser::specs::html5;
  * @param el Element enum
  * @return Output stream
  */
-std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, blogator::parser::specs::html5::Element el ) {
+std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::Element el ) {
     static std::map<Element, std::string> map;
 
     if( map.empty() ) {
@@ -265,9 +265,9 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
  * @param el Element
  * @return HTML namespace
  */
-blogator::parser::specs::html5::Namespace blogator::parser::specs::html5::getNamespace( Element el ) {
-    using blogator::parser::specs::html5::Element;
-    using blogator::parser::specs::html5::Namespace;
+blogator::parser::specs::infra::Namespace blogator::parser::specs::infra::getNamespace( Element el ) {
+    using blogator::parser::specs::infra::Element;
+    using blogator::parser::specs::infra::Namespace;
 
     if( el >= Element::HTML5_NS_BEGIN && el <= Element::HTML5_NS_END ) {
         return Namespace::HTML5;
@@ -285,16 +285,16 @@ blogator::parser::specs::html5::Namespace blogator::parser::specs::html5::getNam
  * @param el Element string
  * @return Element type (Element::UNKNOWN if not found)
  */
-blogator::parser::specs::html5::Element blogator::parser::specs::html5::getElementType( const std::u32string &el ) {
-    static std::map<std::u32string , specs::html5::Element> map;
+blogator::parser::specs::infra::Element blogator::parser::specs::infra::getElementType( const std::u32string &el ) {
+    static std::map<std::u32string , specs::infra::Element> map;
 
     if( map.empty() ) {
         //i = 1 as 'Element::UNKNOWN' (0) can be skipped
-        for( int i = 1; i <= static_cast<int>( blogator::parser::specs::html5::Element::ENUM_END ); ++i ) {
+        for( int i = 1; i <= static_cast<int>( blogator::parser::specs::infra::Element::ENUM_END ); ++i ) {
             //Since string representation of elements are all in ASCII range
             //conversion to u32 can just be done with direct casting.
-            auto u8str = blogator::to_string( static_cast<specs::html5::Element>( i ) );
-            map.emplace( std::u32string( u8str.cbegin(), u8str.cend() ), static_cast<specs::html5::Element>( i ) );
+            auto u8str = blogator::to_string( static_cast<specs::infra::Element>( i ) );
+            map.emplace( std::u32string( u8str.cbegin(), u8str.cend() ), static_cast<specs::infra::Element>( i ) );
         }
     }
 
@@ -303,27 +303,27 @@ blogator::parser::specs::html5::Element blogator::parser::specs::html5::getEleme
     if( it != map.cend() ) {
         return it->second;
     } else {
-        return specs::html5::Element::UNKNOWN;
+        return specs::infra::Element::UNKNOWN;
     }
 }
 
 /**
- * Converts a parser::specs::html5::Element enum to a string representation
+ * Converts a parser::specs::infra::Element enum to a string representation
  * @param el Element enum
  * @return String representation
  */
-std::string blogator::to_string( blogator::parser::specs::html5::Element el ) {
+std::string blogator::to_string( blogator::parser::specs::infra::Element el ) {
     std::stringstream ss;
     ss << el;
     return ss.str();
 }
 
 /**
- * Converts a parser::specs::html5::Element enum to a string representation
+ * Converts a parser::specs::infra::Element enum to a string representation
  * @param el Element enum
  * @return String representation
  */
-std::u32string blogator::to_u32string( blogator::parser::specs::html5::Element el ) {
+std::u32string blogator::to_u32string( blogator::parser::specs::infra::Element el ) {
     const auto u8str = blogator::to_string( el );
     return { u8str.cbegin(), u8str.cend() };
 }

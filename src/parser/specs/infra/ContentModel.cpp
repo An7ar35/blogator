@@ -4,7 +4,7 @@
 #include <ostream>
 #include <sstream>
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 /**
  * Output stream operator
@@ -12,7 +12,7 @@ using namespace blogator::parser::specs::html5;
  * @param model ContentModel enum
  * @return Output stream
  */
-std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, blogator::parser::specs::html5::ContentModel model ) {
+std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::ContentModel model ) {
     static std::map<ContentModel, std::string> map;
 
     if( map.empty() ) {
@@ -38,11 +38,11 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
 }
 
 /**
- * Converts a parser::specs::html5::ContentModel enum to a string representation
+ * Converts a parser::specs::infra::ContentModel enum to a string representation
  * @param model ContentModel enum
  * @return String representation
  */
-std::string blogator::to_string( blogator::parser::specs::html5::ContentModel model ) {
+std::string blogator::to_string( blogator::parser::specs::infra::ContentModel model ) {
     std::stringstream ss;
     ss << model;
     return ss.str();

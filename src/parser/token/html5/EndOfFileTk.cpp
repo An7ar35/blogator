@@ -7,7 +7,7 @@ using namespace blogator::parser::token::html5;
  * @param position Line:Col position of token in source text
  */
 EndOfFileTk::EndOfFileTk( blogator::parser::TextPos position ) :
-    HTML5Tk( specs::html5::TokenType::END_OF_FILE, position )
+    HTML5Tk( specs::infra::TokenType::END_OF_FILE, position )
 {}
 
 #ifdef TESTING

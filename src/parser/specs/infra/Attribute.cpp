@@ -9,7 +9,7 @@
  * @param attr Attribute enum
  * @return Output stream
  */
-std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, blogator::parser::specs::html5::Attribute attr ) {
+std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::Attribute attr ) {
     static std::map<Attribute, std::string> map;
 
     if( map.empty() ) {
@@ -236,11 +236,11 @@ std::ostream & blogator::parser::specs::html5::operator <<( std::ostream &os, bl
 }
 
 /**
- * Converts a parser::specs::html5::Attribute enum to a string representation
+ * Converts a parser::specs::infra::Attribute enum to a string representation
  * @param attr Attribute enum
  * @return String representation
  */
-std::string blogator::to_string( blogator::parser::specs::html5::Attribute attr ) {
+std::string blogator::to_string( blogator::parser::specs::infra::Attribute attr ) {
     std::stringstream ss;
     ss << attr;
     return ss.str();

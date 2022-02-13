@@ -10,8 +10,8 @@
 
 using namespace blogator::parser;
 using           blogator::parser::logging::ParserLog;
-using           blogator::parser::specs::html5::ErrorCode;
-using           blogator::parser::specs::html5::TokeniserState;
+using           blogator::parser::specs::infra::ErrorCode;
+using           blogator::parser::specs::infra::TokeniserState;
 
 //==========================================[ PUBLIC ]==============================================
 
@@ -36,7 +36,7 @@ tokeniser::HTML5::HTML5( dom::TreeBuilder &tree_builder ) :
  * @param init_state Initial state
  * @param last_start_tag Last start tag name (optional)
  */
-tokeniser::HTML5::HTML5( dom::TreeBuilder & tree_builder, specs::html5::TokeniserState init_state, std::u32string last_start_tag ) :
+tokeniser::HTML5::HTML5( dom::TreeBuilder & tree_builder, specs::infra::TokeniserState init_state, std::u32string last_start_tag ) :
     _eof( false ),
     _src_path( "" ),
     _error_count( 0 ),
@@ -929,7 +929,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::DOCTYPE );
                 } else if( next7 == U"[CDATA[" ) {
                     text.advanceCol( 6 );
-                    if( _tree_builder.hasAdjustedCurrentNode() && _tree_builder.adjustedCurrentNode().second != specs::html5::Namespace::HTML5 ) {
+                    if( _tree_builder.hasAdjustedCurrentNode() && _tree_builder.adjustedCurrentNode().second != specs::infra::Namespace::HTML5 ) {
                         setState( State_e::CDATA_SECTION );
                     } else {
                         logError( text.position(), ErrorCode::CDATA_IN_HTML_CONTENT );
@@ -1498,9 +1498,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 auto match_tracker  = TrieTracker<uint32_t>();
                 auto start_position = text.position();
 
-                specs::html5::NamedCharRef::match( match_tracker, AMPERSAND );
+                specs::infra::NamedCharRef::match( match_tracker, AMPERSAND );
 
-                while( specs::html5::NamedCharRef::match( match_tracker, character ) ) {
+                while( specs::infra::NamedCharRef::match( match_tracker, character ) ) {
                     appendToTempBuffer( character );
                     character = getNextChar( text );
                 }
@@ -1520,7 +1520,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                         reconsume( returnState() ); //since next character is already current because of the NamedCharRef::match(..) while loop
 
                     } else {
-                        using specs::html5::NamedCharRef;
+                        using specs::infra::NamedCharRef;
 
                         const auto match_buffer   = match_tracker.lastCompleteMatch();
                         const auto remainders     = match_tracker.remainder();
@@ -1662,7 +1662,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                         logError( text.position(), ErrorCode::CONTROL_CHARACTER_REFERENCE );
                     }
 
-                    auto [found, codepoint] = specs::html5::NumericCharRef::fetch( crc );
+                    auto [found, codepoint] = specs::infra::NumericCharRef::fetch( crc );
 
                     if( found ) {
                         resetCharRefCode( codepoint );
@@ -1967,7 +1967,7 @@ inline bool tokeniser::HTML5::appropriateEndTagToken() {
 /**
  * Checks string is same as temp buffer content
  * @param str String
- * @return Temp buffer equal to string
+ * @return Temp buffer equivalent to string
  */
 inline bool tokeniser::HTML5::isEqualToTempBuffer( const std::u32string &str ) const {
     return std::equal( str.cbegin(), str.cend(), _temp_buffer.cbegin(), _temp_buffer.cend() );

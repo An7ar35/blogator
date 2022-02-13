@@ -1,6 +1,6 @@
 #include "NumericCharRef.h"
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 std::vector<NumericCharRef> NumericCharRef::_char_references;
 

@@ -2,7 +2,7 @@
 
 #include <array>
 
-using namespace blogator::parser::specs::html5;
+using namespace blogator::parser::specs::infra;
 
 struct Description {
     std::string text;
@@ -23,7 +23,7 @@ static void loadErrorStrings( std::array<Description, ErrorCode::ENUM_END> &arr 
     };
     arr[ErrorCode::UNKNOWN] = {
         "unknown error code",
-        "Error code has no description available - pls. check error code falls in the blogator::parser::specs::html5::ErrorCode enum range."
+        "Error code has no description available - pls. check error code falls in the blogator::parser::specs::infra::ErrorCode enum range."
     };
     arr[ErrorCode::ABRUPT_CLOSING_OF_EMPTY_COMMENT] = {
         "abrupt closing of empty comment",

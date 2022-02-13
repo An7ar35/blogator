@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     enum class Namespace;
 
     enum class Element {
@@ -104,14 +104,14 @@ namespace blogator::parser::specs::html5 {
     };
 
     std::ostream & operator <<( std::ostream &os, Element el );
-    specs::html5::Namespace getNamespace( specs::html5::Element el );
-    specs::html5::Element getElementType( const std::u32string &el );
+    specs::infra::Namespace getNamespace( specs::infra::Element el );
+    specs::infra::Element getElementType( const std::u32string &el );
     //TODO create paired, self closing lookup
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::specs::html5::Element el );
-    std::u32string to_u32string( blogator::parser::specs::html5::Element el );
+    std::string to_string( blogator::parser::specs::infra::Element el );
+    std::u32string to_u32string( blogator::parser::specs::infra::Element el );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_ELEMENTS_H

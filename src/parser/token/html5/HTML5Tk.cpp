@@ -7,7 +7,7 @@ using namespace blogator::parser::token;
  * @param type HTML5 token type
  * @param position Line:Col position of token in source text
  */
-html5::HTML5Tk::HTML5Tk( specs::html5::TokenType type, TextPos position ) :
+html5::HTML5Tk::HTML5Tk( specs::infra::TokenType type, TextPos position ) :
     Token( specs::Context::HTML5, position ),
     _type( type )
 {}
@@ -18,7 +18,7 @@ html5::HTML5Tk::HTML5Tk( specs::html5::TokenType type, TextPos position ) :
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
-html5::HTML5Tk::HTML5Tk( specs::html5::TokenType type, std::u32string text, TextPos position ) :
+html5::HTML5Tk::HTML5Tk( specs::infra::TokenType type, std::u32string text, TextPos position ) :
     Token( specs::Context::HTML5, std::move( text ), position ),
     _type( type )
 {}
@@ -27,7 +27,7 @@ html5::HTML5Tk::HTML5Tk( specs::html5::TokenType type, std::u32string text, Text
  * Gets the token type
  * @return Token type
  */
-blogator::parser::specs::html5::TokenType html5::HTML5Tk::type() const {
+blogator::parser::specs::infra::TokenType html5::HTML5Tk::type() const {
     return _type;
 }
 

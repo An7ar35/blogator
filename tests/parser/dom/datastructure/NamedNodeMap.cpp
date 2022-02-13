@@ -177,7 +177,7 @@ TEST( parser_dom_NamedNodeMap_Tests, getNamedItem_2 ) {
 
 TEST( parser_dom_NamedNodeMap_Tests, getNamedItem_3 ) { //html doc+element
     auto   doc  = node::Document();
-    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     auto   nnm  = NamedNodeMap( node );
     auto   attr = node::Attr( U"p", U"name", U"value" );
     nnm.setNode( std::make_unique<node::Attr>( attr ) );
@@ -323,7 +323,7 @@ TEST( parser_dom_NamedNodeMap_Tests, removeNamedItem_1 ) {
 
 TEST( parser_dom_NamedNodeMap_Tests, removeNamedItem_2 ) { //html doc+element
     auto   doc  = node::Document();
-    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     auto   nnm  = NamedNodeMap( node );
     auto   attr = node::Attr( U"p", U"name", U"value" );
     nnm.setNode( std::make_unique<node::Attr>( attr ) );
@@ -337,8 +337,8 @@ TEST( parser_dom_NamedNodeMap_Tests, removeNamedItem_2 ) { //html doc+element
 TEST( parser_dom_NamedNodeMap_Tests, swap ) {
     auto   doc1  = node::Document();
     auto   doc2  = node::Document();
-    auto * node1 = doc1.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
-    auto * node2 = doc2.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * node1 = doc1.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
+    auto * node2 = doc2.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     auto   attr1 = node::Attr( U"p", U"name1", U"value1" );
     auto   attr2 = node::Attr( U"p", U"name2", U"value2" );
 
@@ -372,7 +372,7 @@ TEST( parser_dom_NamedNodeMap_Tests, ownerElement_0 ) {
 }
 
 TEST( parser_dom_NamedNodeMap_Tests, ownerElement_1 ) {
-    auto node = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto nnm  = NamedNodeMap( &node );
     ASSERT_EQ( nnm.ownerElement(), &node );
 }

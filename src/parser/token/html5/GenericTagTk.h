@@ -21,8 +21,8 @@ namespace blogator::parser::token::html5 {
      */
     class GenericTagTk : public HTML5Tk {
       public:
-        GenericTagTk( specs::html5::TokenType type, TextPos position );
-        GenericTagTk( specs::html5::TokenType type, std::u32string text, TextPos position );
+        GenericTagTk( specs::infra::TokenType type, TextPos position );
+        GenericTagTk( specs::infra::TokenType type, std::u32string text, TextPos position );
 
         [[nodiscard]] std::u32string name() const;
         [[nodiscard]] bool selfclosing() const;

@@ -1,7 +1,7 @@
 #ifndef BLOGATOR_PARSER_SPECS_HTML5_TOKENISERSTATE_H
 #define BLOGATOR_PARSER_SPECS_HTML5_TOKENISERSTATE_H
 
-namespace blogator::parser::specs::html5 {
+namespace blogator::parser::specs::infra {
     /**
      * HTML5 tokenization states
      * https://html.spec.whatwg.org/multipage/parsing.html#tokenization

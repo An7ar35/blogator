@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include "../dom/TreeBuilder.h"
-#include "../specs/html5/specifications.h"
+#include "../specs/infra/specifications.h"
 #include "../token/html5/HTML5Tk.h"
 
 namespace blogator::parser::tokeniser {
@@ -20,7 +20,7 @@ namespace blogator::parser::tokeniser {
     class HTML5 {
       public:
         explicit HTML5( dom::TreeBuilder & tree_builder );
-        explicit HTML5( dom::TreeBuilder & tree_builder, specs::html5::TokeniserState init_state, std::u32string  last_start_tag = U"" );
+        explicit HTML5( dom::TreeBuilder & tree_builder, specs::infra::TokeniserState init_state, std::u32string  last_start_tag = U"" );
 
         specs::Context parse( U32Text &source, specs::Context starting_ctx = specs::Context::HTML5 );
         void reset();
@@ -28,8 +28,8 @@ namespace blogator::parser::tokeniser {
         [[nodiscard]] size_t errors() const;
 
       private:
-        typedef specs::html5::TokeniserState State_e;
-        typedef specs::html5::TokenType      Type_e;
+        typedef specs::infra::TokeniserState State_e;
+        typedef specs::infra::TokenType      Type_e;
 
         static const uint32_t NULL_CHAR              = unicode::NUL;
         static const uint32_t CARRIAGE_RETURN        = unicode::CR;
