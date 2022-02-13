@@ -138,6 +138,32 @@ const DOMString_t & NamespaceMap::getNamespacePrefix( NamespaceMap::id_t id ) co
 }
 
 /**
+ * Gets the associated ID for a given existing namespace
+ * @param ns specs::infra::Namespace enum
+ * @return ID (or INVALID if namespace does not exist)
+ */
+NamespaceMap::id_t NamespaceMap::getID( blogator::parser::specs::infra::Namespace ns ) const {
+    if( _enum_mapping.contains( ns ) ) {
+        return _enum_mapping.at( ns );
+    }
+
+    return INVALID;
+}
+
+/**
+ * Gets the associated ID for a given existing namespace
+ * @param ns Namespace string
+ * @return ID (or INVALID if namespace does not exist)
+ */
+NamespaceMap::id_t NamespaceMap::getID( const DOMString_t &ns ) const {
+    if( _str_mapping.contains( ns ) ) {
+        return _str_mapping.at( ns );
+    }
+
+    return INVALID;
+}
+
+/**
  * Gets the number of namespaces declared in the map
  * @return Namespace count
  */

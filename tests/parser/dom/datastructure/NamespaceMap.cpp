@@ -124,3 +124,28 @@ TEST( parser_dom_NamespaceMap_Tests, empty ) {
     nsmap.setNamespace( U"new_namespace" );
     ASSERT_FALSE( nsmap.empty() );
 }
+
+TEST( parser_dom_NamespaceMap_Tests, getID_0 ) {
+    auto nsmap  = NamespaceMap();
+    auto id     = nsmap.setNamespace( Namespace::MATHML );
+    ASSERT_EQ( nsmap.getID( Namespace::HTML5 ), NamespaceMap::INVALID );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, getID_1 ) {
+    auto nsmap  = NamespaceMap();
+    auto id     = nsmap.setNamespace( Namespace::MATHML );
+    ASSERT_EQ( nsmap.getID( Namespace::MATHML ), id );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, getID_2 ) {
+    auto nsmap  = NamespaceMap();
+    auto id     = nsmap.setNamespace( U"namespace/uri" );
+    ASSERT_EQ( nsmap.getID( U"other/uri" ), NamespaceMap::INVALID );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, getID_3 ) {
+    auto nsmap  = NamespaceMap();
+    auto uri    = DOMString_t( U"namespace/uri" );
+    auto id     = nsmap.setNamespace( uri );
+    ASSERT_EQ( nsmap.getID( uri ), id );
+}

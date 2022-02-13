@@ -26,6 +26,8 @@ namespace blogator::parser::dom {
         [[nodiscard]] specs::infra::Namespace getNamespaceEnum( id_t id ) const;
         [[nodiscard]] const DOMString_t & getNamespaceURI( id_t id ) const;
         [[nodiscard]] const DOMString_t & getNamespacePrefix( id_t id ) const;
+        [[nodiscard]] id_t getID( specs::infra::Namespace ns ) const;
+        [[nodiscard]] id_t getID( const DOMString_t &ns ) const;
         [[nodiscard]] size_t size() const;
         [[nodiscard]] bool empty() const;
 
