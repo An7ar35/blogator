@@ -1,8 +1,7 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "../../../src/logger/Logger.h"
 
-#include "../AsyncNotify.h"
+#include "../TestHelpers/AsyncNotify.h"
 
 using namespace blogator::logger;
 
@@ -104,7 +103,7 @@ blogator::tests::AsyncNotify<LogMsg> logger_Logger_Tests::async_notify = blogato
 
 
 TEST_F( logger_Logger_Tests, log_trace ) {
-    auto expected_msg = LogMsg( 1, LogLevel::TRACE, "Logger.cpp", 113, "string1 string2 1.2345" );
+    auto expected_msg = LogMsg( 1, LogLevel::TRACE, "Logger.cpp", 112, "string1 string2 1.2345" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -117,7 +116,7 @@ TEST_F( logger_Logger_Tests, log_trace ) {
 }
 
 TEST_F( logger_Logger_Tests, log_debug ) {
-    auto expected_msg = LogMsg( 1, LogLevel::DEBUG, "Logger.cpp", 126, "1 12345 str" );
+    auto expected_msg = LogMsg( 1, LogLevel::DEBUG, "Logger.cpp", 125, "1 12345 str" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -130,7 +129,7 @@ TEST_F( logger_Logger_Tests, log_debug ) {
 }
 
 TEST_F( logger_Logger_Tests, log_notice ) {
-    auto expected_msg = LogMsg( 1, LogLevel::NOTICE, "Logger.cpp", 139, "integer 10" );
+    auto expected_msg = LogMsg( 1, LogLevel::NOTICE, "Logger.cpp", 138, "integer 10" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -143,7 +142,7 @@ TEST_F( logger_Logger_Tests, log_notice ) {
 }
 
 TEST_F( logger_Logger_Tests, log_info ) {
-    auto expected_msg = LogMsg( 1, LogLevel::INFO, "Logger.cpp", 152, "" );
+    auto expected_msg = LogMsg( 1, LogLevel::INFO, "Logger.cpp", 151, "" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -156,7 +155,7 @@ TEST_F( logger_Logger_Tests, log_info ) {
 }
 
 TEST_F( logger_Logger_Tests, log_warning ) {
-    auto expected_msg = LogMsg( 1, LogLevel::WARNING, "Logger.cpp", 165, "12345" );
+    auto expected_msg = LogMsg( 1, LogLevel::WARNING, "Logger.cpp", 164, "12345" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 
@@ -169,7 +168,7 @@ TEST_F( logger_Logger_Tests, log_warning ) {
 }
 
 TEST_F( logger_Logger_Tests, log_error ) {
-    auto expected_msg = LogMsg( 1, LogLevel::ERROR, "Logger.cpp", 178, "abcde" );
+    auto expected_msg = LogMsg( 1, LogLevel::ERROR, "Logger.cpp", 177, "abcde" );
 
     auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
 

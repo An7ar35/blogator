@@ -7,8 +7,8 @@
 namespace blogator::logger {
     class LoggableException : std::exception {
       public:
-        explicit LoggableException( std::string what );
-        LoggableException( char * src, int line, std::string what );
+        explicit LoggableException( std::string what, bool quiet = false );
+        LoggableException( char * src, int line, std::string what, bool quiet = false );
 
         LoggableException & operator =( const LoggableException & other );
 

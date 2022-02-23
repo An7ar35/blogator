@@ -18,7 +18,9 @@ namespace blogator::parser::dom {
      */
     class NamespaceMap {
       public:
-        typedef int id_t;
+        typedef NamespaceMapID_t id_t;
+
+        NamespaceMap();
 
         id_t setNamespace( specs::infra::Namespace ns );
         id_t setNamespace( const DOMString_t &ns, DOMString_t prefix = DOMString_t() );
@@ -31,8 +33,8 @@ namespace blogator::parser::dom {
         [[nodiscard]] size_t size() const;
         [[nodiscard]] bool empty() const;
 
+        static constexpr int NONE    =  0;
         static constexpr int INVALID = -1;
-        static constexpr int NONE    = -1;
 
       private:
         struct NS {

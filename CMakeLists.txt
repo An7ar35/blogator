@@ -408,8 +408,6 @@ set(SOURCE_FILES
         src/parser/dom/validation/Validator.h
         src/parser/dom/Variables.cpp
         src/parser/dom/Variables.h
-        src/parser/dom/DOMImplementation.cpp
-        src/parser/dom/DOMImplementation.h
         src/parser/dom/datastructure/NamedNodeMap.cpp
         src/parser/dom/datastructure/NamedNodeMap.h
         src/parser/dom-lite/DOMlite.cpp
@@ -452,6 +450,11 @@ endif()
 
 set(TEST_FILES
         tests/main.cpp
+        tests/TestHelpers/AsyncNotify.h
+        tests/TestHelpers/UnicodeTestStrings.cpp
+        tests/TestHelpers/UnicodeTestStrings.h
+        tests/TestHelpers/TestDOMs.cpp
+        tests/TestHelpers/TestDOMs.h
         tests/html/reader/reader.cpp
         tests/dto/DateStamp.cpp
         tests/dto/Templates.cpp
@@ -481,18 +484,17 @@ set(TEST_FILES
         tests/datastructure/Trie.cpp
         tests/parser/specs/infra/NamedCharRef.cpp
         tests/helper.cpp
-        tests/helper.h tests/unicode/ascii.cpp
+        tests/helper.h
+        tests/unicode/ascii.cpp
         tests/unicode/utf32.cpp
         tests/unicode/utf8.cpp
         tests/parser/encoding/Transcode.cpp
         tests/unicode/utf16.cpp
-        tests/TestStrings.cpp
-        tests/TestStrings.h tests/parser/dom/node/Node.cpp
+        tests/parser/dom/node/Node.cpp
         tests/logger/global/LogLevel.cpp
         tests/logger/global/TimeStamp.cpp
         tests/logger/Logger.cpp
         tests/logger/engine/LogQueue.cpp
-        tests/AsyncNotify.h
         tests/parser/specs/infra/Element.cpp
         tests/parser/specs/infra/ContentModel.cpp
         tests/parser/specs/infra/Namespace.cpp
@@ -513,10 +515,8 @@ set(TEST_FILES
         tests/parser/dom/iterator/NodeIterator.cpp
         tests/parser/dom/iterator/ConstNodeIterator.cpp
         tests/parser/dom/iterator/TreeWalker.cpp
-        tests/parser/dom/TestDOMs.cpp
-        tests/parser/dom/TestDOMs.h
         tests/parser/dom/datastructure/NamedNodeMap.cpp
-        tests/parser/dom/datastructure/NamespaceMap.cpp)
+        tests/parser/dom/datastructure/NamespaceMap.cpp tests/parser/specs/infra/ContentType.cpp tests/parser/dom/validation/XML.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 

@@ -12,12 +12,23 @@
 using namespace blogator::parser::dom::node;
 
 /**
- * Constructor
- * @param element
+ * Constructor (null namespace)
+ * @param local_name Local name
  */
-Element::Element( specs::html5::Element element ) :
+Element::Element( DOMString_t local_name ) :
     node::Node( NodeType::ELEMENT_NODE ),
-    _namespace_id( Node::namespace_map.setNamespace( specs::html5::getNamespace( element ) ) ),
+    _namespace_id( NamespaceMap::NONE ),
+    _local_name( std::move( local_name ) ),
+    _attributes( this )
+{}
+
+/**
+ * Constructor
+ * @param element Element enum
+ */
+Element::Element( specs::infra::Element element ) :
+    node::Node( NodeType::ELEMENT_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( specs::infra::getNamespace( element ) ) ),
     _local_name( blogator::to_u32string( element ) ),
     _attributes( this )
 {}
@@ -29,6 +40,19 @@ Element::Element( specs::html5::Element element ) :
  */
 Element::Element( const DOMString_t &ns, DOMString_t name ) :
     node::Node( NodeType::ELEMENT_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( ns ) ),
+    _local_name( std::move( name ) ),
+    _attributes( this )
+{}
+
+/**
+ * Constructor
+ * @param document Pointer to owner document
+ * @param ns Element namespace
+ * @param name Name string
+ */
+Element::Element( Document * document, const DOMString_t &ns, DOMString_t name ) :
+    node::Node( document, NodeType::ELEMENT_NODE ),
     _namespace_id( Node::namespace_map.setNamespace( ns ) ),
     _local_name( std::move( name ) ),
     _attributes( this )
@@ -48,13 +72,41 @@ Element::Element( NamespaceMap::id_t ns_id, DOMString_t name ) :
 
 /**
  * Constructor
+ * @param document Pointer to owner document
+ * @param ns_id Element NamespaceMap id
+ * @param name Name string
+ */
+Element::Element( Document * document, NamespaceMap::id_t ns_id, DOMString_t name ) :
+    node::Node( document, NodeType::ELEMENT_NODE ),
+    _namespace_id( ns_id ),
+    _local_name( std::move( name ) ),
+    _attributes( this )
+{}
+
+/**
+ * Constructor
  * @param ns Namespace
- * @param prefix Prefix namespace
+ * @param prefix Namespace prefix
  * @param name Local name
  */
 Element::Element( const DOMString_t &ns, DOMString_t prefix, DOMString_t name ) :
     node::Node( NodeType::ELEMENT_NODE ),
-    _namespace_id( Node::namespace_map.setNamespace( ns ) ),
+    _namespace_id( Node::namespace_map.setNamespace( ns, prefix ) ),
+    _prefix( std::move( prefix ) ),
+    _local_name( std::move( name ) ),
+    _attributes( this )
+{}
+
+/**
+ * Constructor
+ * @param document Pointer to owner document
+ * @param ns Namespace
+ * @param prefix Namespace prefix
+ * @param name Local name
+ */
+Element::Element( Document * document, const DOMString_t &ns, DOMString_t prefix, DOMString_t name ) :
+    node::Node( document, NodeType::ELEMENT_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( ns, prefix ) ),
     _prefix( std::move( prefix ) ),
     _local_name( std::move( name ) ),
     _attributes( this )
@@ -75,6 +127,21 @@ Element::Element( NamespaceMap::id_t ns_id, DOMString_t prefix, DOMString_t name
 {}
 
 /**
+ * Constructor
+ * @param document Pointer to owner document
+ * @param ns_id Element NamespaceMap id
+ * @param prefix Prefix namespace
+ * @param name Local name
+ */
+Element::Element( Document * document, NamespaceMap::id_t ns_id, DOMString_t prefix, DOMString_t name ) :
+    node::Node( document, NodeType::ELEMENT_NODE ),
+    _namespace_id( ns_id ),
+    _prefix( std::move( prefix ) ),
+    _local_name( std::move( name ) ),
+    _attributes( this )
+{}
+
+/**
  * Copy-constructor
  * @param node Node to copy
  */
@@ -83,7 +150,7 @@ Element::Element( const Element &node ) :
     _namespace_id( node._namespace_id ),
     _prefix( node._prefix ),
     _local_name( node._local_name ),
-    _attributes( ( node._attributes ) )
+    _attributes( node._attributes )
 {
     _attributes.setParent( this );
 }
@@ -109,7 +176,7 @@ Element::Element( Element &&node ) noexcept :
  */
 Element & Element::operator =( const Element &node ) {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( node );
+        Node::operator =( dynamic_cast<const node::Node &>( node ) );
         this->_namespace_id = node._namespace_id;
         this->_prefix       = node._prefix;
         this->_local_name   = node._local_name;
@@ -127,7 +194,7 @@ Element & Element::operator =( const Element &node ) {
  */
 Element & Element::operator =( Element &&node ) noexcept {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( node );
+        Node::operator =( dynamic_cast<node::Node &&>( node ) );
         this->_namespace_id = node._namespace_id;
         this->_prefix       = std::move( node._prefix );
         this->_local_name   = std::move( node._local_name );
@@ -164,10 +231,10 @@ void Element::swap( Element &rhs ) {
 
 /**
  * Gets the element's matching HTML type
- * @return Matching specs::html5::Element enum (UNKNOWN if string not in Element list)
+ * @return Matching specs::infra::Element enum (UNKNOWN if string not in Element list)
  */
-blogator::parser::specs::html5::Element Element::elementType() const {
-    return specs::html5::getElementType( _local_name );
+blogator::parser::specs::infra::Element Element::elementType() const {
+    return specs::infra::getElementType( _local_name );
 }
 
 /**
@@ -197,37 +264,91 @@ blogator::parser::dom::NamespaceMap::id_t Element::namespaceID() const {
 bool Element::isHtmlNative() const {
     return this->ownerDocument()
         && this->ownerDocument()->type() == node::Document::Type::HTML
-        && node::Node::getNamespaceEnum( this->namespaceID() ) == specs::html5::Namespace::HTML5;
+        && node::Node::getNamespaceEnum( this->namespaceID() ) == specs::infra::Namespace::HTML5;
 }
 
 /**
  * Creates and appends an Attr(ibute) Node
- * @param name Name string (unchecked)
+ * @param local_name Name string
  * @return Pointer to newly created Attr(ibute) node
+ * @throws parser::dom::exception::DOMException when local name is invalid
  */
-blogator::parser::dom::node::Attr * Element::createAttribute( const DOMString_t & name ) {
-    return _attributes.appendAttribute( std::make_unique<node::Attr>( DOMString_t(), name ) );
+blogator::parser::dom::node::Attr * Element::createAttribute( DOMString_t local_name ) {
+    if( !dom::validation::XML::checkQName( local_name ) ) {
+        using blogator::unicode::utf8::convert;
+
+        throw dom::exception::DOMException(
+            dom::exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::node::Element::createAttribute( \"" + convert( local_name ) + "\" )] Invalid name."
+        );
+    }
+
+    if( this->isHtmlNative() ) {
+        unicode::ascii::tolower( local_name );
+    }
+
+    return _attributes.appendAttribute( std::make_unique<node::Attr>( local_name ) );
 }
 
 /**
  * Creates and appends an Attr(ibute) Node
- * @param prefix Prefix string (unchecked)
- * @param name Name string (unchecked)
- * @return Pointer to newly created Attr(ibute) node
- */
-blogator::parser::dom::node::Attr * Element::createAttribute( const DOMString_t & prefix, const DOMString_t & name ) {
-    return _attributes.appendAttribute( std::make_unique<node::Attr>( prefix, name ) );
-}
-
-/**
- * Creates and appends an Attr(ibute) Node
- * @param prefix Prefix string (unchecked)
- * @param name Name string (unchecked)
+ * @param local_name Name string
  * @param value Value string (unchecked)
  * @return Pointer to newly created Attr(ibute) node
+ * @throws parser::dom::exception::DOMException when local name is invalid
  */
-blogator::parser::dom::node::Attr * Element::createAttribute( const DOMString_t &prefix, const DOMString_t &name, const DOMString_t &value ) {
-    return _attributes.appendAttribute( std::make_unique<node::Attr>( prefix, name, value ) );
+blogator::parser::dom::node::Attr * Element::createAttribute( DOMString_t local_name, const DOMString_t & value ) {
+    if( !dom::validation::XML::checkQName( local_name ) ) {
+        using blogator::unicode::utf8::convert;
+
+        throw dom::exception::DOMException(
+            dom::exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::node::Element::createAttribute( \"" + convert( local_name ) + "\", \"" + convert( value ) + "\" )] Invalid name."
+        );
+    }
+
+    if( this->isHtmlNative() ) {
+        unicode::ascii::tolower( local_name );
+    }
+
+    return _attributes.appendAttribute( std::make_unique<node::Attr>( local_name, value ) );
+}
+
+/**
+ * Creates and appends an Attr(ibute) Node
+ * @param ns Namespace
+ * @param qualified_name Qualified name
+ * @param value Value
+ * @return Pointer to created attribute
+ * @throws DOMException when validation fails
+ */
+blogator::parser::dom::node::Attr * Element::createAttributeNS( const DOMString_t &ns, const DOMString_t &qualified_name, const DOMString_t &value ) {
+    try {
+        auto v = validation::XML::validateNS( ns, qualified_name );
+
+        if( v.size() == 1 ) {
+            if( value.empty() ) {
+                return this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, U"", v[0] ) ); //EARLY RETURN
+            } else {
+                return this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, U"", v[0], value ) ); //EARLY RETURN
+            }
+
+        } else {
+            if( value.empty() ) {
+                return this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, v[0], v[1] ) ); //EARLY RETURN
+            } else {
+                return this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, v[0], v[1], value ) ); //EARLY RETURN
+            }
+        }
+
+    } catch( const exception::DOMException &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw exception::DOMException(
+            e.type(),
+            "[parser::dom::node::Element::createAttributeNS( \"" + convert( ns ) + "\", \"" + convert( qualified_name ) + "\" )] " + e.what()
+        );
+    }
 }
 
 /**
@@ -238,7 +359,7 @@ blogator::parser::dom::node::Attr * Element::createAttribute( const DOMString_t 
 blogator::parser::dom::node::CDATASection * Element::createCDATASection( const DOMString_t & str ) {
     return dynamic_cast<node::CDATASection *>(
         this->appendChild(
-            std::make_unique<node::CDATASection>( str, this, this->lastChild() )
+            std::make_unique<node::CDATASection>( str )
         )
     );
 }
@@ -251,7 +372,7 @@ blogator::parser::dom::node::CDATASection * Element::createCDATASection( const D
 blogator::parser::dom::node::Comment * Element::createComment( const DOMString_t & comment ) {
     return dynamic_cast<node::Comment *>(
         this->appendChild(
-            std::make_unique<node::Comment>( comment, this, this->lastChild() )
+            std::make_unique<node::Comment>( comment )
         )
     );
 }
@@ -261,34 +382,80 @@ blogator::parser::dom::node::Comment * Element::createComment( const DOMString_t
  * @param type HTML5/SVG/MathML element (enum)
  * @return Pointer to created Element node
  */
-blogator::parser::dom::node::Element * Element::createElement( specs::html5::Element type ) {
-    const auto u8name = blogator::to_string( type );
-
+blogator::parser::dom::node::Element * Element::createElement( specs::infra::Element type ) {
     return dynamic_cast<node::Element *>(
         this->appendChild(
-            std::make_unique<node::Element>(
-                this->_namespace_id,
-                DOMString_t( u8name.cbegin(), u8name.cend() )
-            )
+            std::make_unique<node::Element>( type )
         )
     );
 }
 
 /**
  * Creates and append a child Element node
- * @param ns Element namespace
- * @param name Element name string
+ * @param local_name Local name
  * @return Pointer to created Element node
+ * @throws blogator::parser::dom::exception::DOMException when name is invalid
  */
-Element * Element::createElement( DOMString_t ns, DOMString_t name ) {
+Element * Element::createElement( DOMString_t local_name ) {
+    using blogator::parser::dom::exception::DOMException;
+    using blogator::parser::dom::exception::DOMExceptionType;
+
+    if( !dom::validation::XML::checkNCName( local_name ) ) {
+        using blogator::unicode::utf8::convert;
+
+        throw DOMException(
+            DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::node::Element::createElement( \"" + convert( local_name ) + "\" )] Invalid name."
+        );
+    }
+
+    if( this->ownerDocument() && this->ownerDocument()->type() == Document::Type::HTML ) {
+        blogator::unicode::ascii::tolower( local_name );
+    }
+
     return dynamic_cast<node::Element *>(
         this->appendChild(
-            std::make_unique<node::Element>(
-                std::move( ns ),
-                std::move( name )
+            std::make_unique<Element>(
+                specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 ),
+                std::move( local_name )
             )
         )
     );
+}
+
+/**
+ * Creates and append a child Element node within a namespace
+ * @param ns Namespace
+ * @param qualified_name Qualified name
+ * @return Pointer to created Element node
+ * @throws blogator::parser::dom::exception::DOMException when validation failed
+ */
+Element * Element::createElementNS( const DOMString_t &ns, const DOMString_t &qualified_name ) {
+    try {
+        auto v = validation::XML::validateNS( ns, qualified_name );
+
+        if( v.size() == 1 ) {
+            return dynamic_cast<node::Element *>(
+                this->appendChild(
+                    std::make_unique<Element>( ns, DOMString_t(), v[0] ) //EARLY RETURN
+                )
+            );
+        } else {
+            return dynamic_cast<node::Element *>(
+                this->appendChild(
+                    std::make_unique<node::Element>( ns, v[0], v[1] ) //EARLY RETURN
+                )
+            );
+        }
+
+    } catch( const exception::DOMException &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw exception::DOMException(
+            e.type(),
+            "[parser::dom::node::Element::createElementNS( \"" + convert( ns ) + "\", \"" + convert( qualified_name ) + "\" )] " + e.what()
+        );
+    }
 }
 
 /**
@@ -299,7 +466,7 @@ Element * Element::createElement( DOMString_t ns, DOMString_t name ) {
 blogator::parser::dom::node::Text * Element::createText( const DOMString_t & txt ) {
     return dynamic_cast<Text *>(
         this->appendChild(
-            std::make_unique<Text>( txt, this, this->lastChild() )
+            std::make_unique<Text>( txt )
         )
     );
 }
@@ -374,7 +541,7 @@ blogator::parser::dom::DOMTokenList_t Element::classList() const {
 
     if( attr && attr->value() ) {
         auto list = DOMTokenList_t();
-        auto v    = string::split<char32_t>( *attr->value(), U' ' );
+        auto v    = blogator::string::split<char32_t>( *attr->value(), U' ' );
 
         std::copy_if(v.begin(),
                      v.end(),
@@ -448,21 +615,30 @@ const blogator::parser::dom::DOMString_t * Element::getAttribute( const DOMStrin
 }
 
 /**
+ * Gets an attribute's value within a namespace
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Pointer to value string or nullptr if attribute not found or has no value
+ */
+const blogator::parser::dom::DOMString_t * Element::getAttributeNS( const DOMString_t &ns, const DOMString_t &local_name ) const {
+    auto * attr = this->_attributes.getNamedItemNS( ns, local_name );
+    return ( attr ? attr->value() : nullptr );
+}
+
+/**
  * Sets an attribute
  * @param qualified_name Qualified name
  * @return Success in adding/updating attribute
  * @throws DOMException when qualified name is invalid
  */
 bool Element::setAttribute( const DOMString_t &qualified_name ) {
-    if( dom::validation::XML::isValidName( qualified_name ) ) {
-        auto v = blogator::string::split<char32_t>( qualified_name, ':' );
+    auto v = blogator::string::split<char32_t>( qualified_name, ':' );
 
-        if( v.size() == 1 ) {
-            return ( this->_attributes.setNamedItem( Attr( DOMString_t(), v[0] ) ) != nullptr ); //EARLY RETURN
+    if( v.size() == 1 && dom::validation::XML::checkQName( v[ 0 ] ) ) {
+        return ( this->_attributes.setNamedItem( Attr( v[0] ) ) != nullptr ); //EARLY RETURN
 
-        } else if( v.size() == 2 ) {
-            return ( this->_attributes.setNamedItem( Attr( v[0], v[1] ) ) != nullptr ); //EARLY RETURN
-        }
+    } else if( v.size() == 2 && dom::validation::XML::checkQName( v[ 0 ], v[ 1 ] ) ) {
+        return ( this->_attributes.setNamedItem( Attr( NamespaceMap::NONE, v[0], v[1] ) ) != nullptr ); //EARLY RETURN
     }
 
     using blogator::unicode::utf8::convert;
@@ -474,22 +650,20 @@ bool Element::setAttribute( const DOMString_t &qualified_name ) {
 }
 
 /**
- * Sets a attribute
+ * Sets an attribute
  * @param qualified_name Qualified name
  * @param value Value
  * @return Success in adding/updating attribute
  * @throws DOMException when qualified name is invalid
  */
 bool Element::setAttribute( const DOMString_t &qualified_name, const DOMString_t &value ) {
-    if( dom::validation::XML::isValidName( qualified_name ) ) {
-        auto v = blogator::string::split<char32_t>( qualified_name, ':' );
+    auto v = blogator::string::split<char32_t>( qualified_name, ':' );
 
-        if( v.size() == 1 ) {
-            return ( this->_attributes.setNamedItem( Attr( DOMString_t(), v[0], value ) ) != nullptr ); //EARLY RETURN
+    if( v.size() == 1 && dom::validation::XML::checkQName( v[ 0 ] ) ) {
+        return ( this->_attributes.setNamedItem( Attr( v[0], value ) ) != nullptr ); //EARLY RETURN
 
-        } else if( v.size() == 2 ) {
-            return ( this->_attributes.setNamedItem( Attr( v[0], v[1], value ) ) != nullptr ); //EARLY RETURN
-        }
+    } else if( v.size() == 2 && dom::validation::XML::checkQName( v[ 0 ], v[ 1 ] ) ) {
+        return ( this->_attributes.setNamedItem( Attr( NamespaceMap::NONE, v[0], v[1], value ) ) != nullptr ); //EARLY RETURN
     }
 
     using blogator::unicode::utf8::convert;
@@ -501,12 +675,59 @@ bool Element::setAttribute( const DOMString_t &qualified_name, const DOMString_t
 }
 
 /**
+ * Sets an attribute within a namespace
+ * @param ns Namespace
+ * @param qualified_name Qualified name
+ * @param value Value
+ * @return Success in adding/updating attribute
+ * @throws DOMException when validation fails
+ */
+bool Element::setAttributeNS( const DOMString_t &ns, const DOMString_t &qualified_name, const DOMString_t &value ) {
+    try {
+        auto v = validation::XML::validateNS( ns, qualified_name );
+
+        if( v.size() == 1 ) {
+            if( value.empty() ) {
+                return ( this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, U"", v[0] ) ) != nullptr ); //EARLY RETURN
+            } else {
+                return ( this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, U"", v[0], value ) ) != nullptr ); //EARLY RETURN
+            }
+
+        } else {
+            if( value.empty() ) {
+                return ( this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, v[0], v[1] ) ) != nullptr ); //EARLY RETURN
+            } else {
+                return ( this->_attributes.appendAttributeNS( std::make_unique<node::Attr>( ns, v[0], v[1], value ) ) != nullptr ); //EARLY RETURN
+            }
+        }
+
+    } catch( const exception::DOMException &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw exception::DOMException(
+            e.type(),
+            "[parser::dom::node::Element::setAttributeNS( \"" + convert( ns ) + "\", \"" + convert( qualified_name ) + "\" )] " + e.what()
+        );
+    }
+}
+
+/**
  * Removes an attribute
  * @param qualified_name Qualified name
  * @return Success
  */
 bool Element::removeAttribute( const DOMString_t & qualified_name ) {
     return ( this->_attributes.removeNamedItem( qualified_name ) ).operator bool();
+}
+
+/**
+ * Removes an attribute within a namespace
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Success
+ */
+bool Element::removeAttributeNS( const DOMString_t &ns, const DOMString_t &local_name ) {
+    return ( this->_attributes.removeNamedItemNS( ns, local_name ) ).operator bool();
 }
 
 /**
@@ -581,6 +802,16 @@ bool Element::hasAttribute( const DOMString_t &qualified_name ) const {
 }
 
 /**
+ * Checks attribute within a namespace exists
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Existence state
+ */
+bool Element::hasAttributeNS( const DOMString_t &ns, const DOMString_t &local_name ) const {
+    return this->_attributes.attributeExistsNS( ns, local_name );
+}
+
+/**
  * Gets an attribute
  * @param qualified_name Qualified name
  * @return Pointer to attribute node
@@ -590,12 +821,31 @@ const Attr * Element::getAttributeNode( const DOMString_t &qualified_name ) {
 }
 
 /**
+ * Gets an attribute in a namespace
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Pointer to attribute node
+ */
+const Attr * Element::getAttributeNodeNS( const DOMString_t &ns, const DOMString_t &local_name ) {
+    return this->_attributes.getNamedItemNS( ns, local_name );
+}
+
+/**
  * Sets/updates an attribute
  * @param attr Attribute
  * @return Pointer to added/updated attribute node
  */
 const Attr * Element::setAttributeNode( const Attr &attr ) {
     return this->_attributes.setNamedItem( attr );
+}
+
+/**
+ * Sets/updates an attribute within a namespace
+ * @param attr Attribute
+ * @return Pointer to added/updated attribute node
+ */
+const Attr * Element::setAttributeNodeNS( const node::Attr &attr ) {
+    return this->_attributes.setNamedItemNS( attr );
 }
 
 /**
@@ -653,6 +903,82 @@ blogator::parser::dom::HTMLCollection_t Element::getElementsByTagName( DOMString
         const auto filter_fn = [&qualified_name]( const node::Node &node ) {
             const auto * element = dynamic_cast<const Element *>( &node );
             return ( element->qualifiedName() == qualified_name ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+        };
+
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+        if( it.node() == this ) {
+            ++it;
+        }
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+    }
+
+    return std::move( list );
+}
+
+/**
+ * Get namespaced Elements by their tag names
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Collection of pointers to elements whose namespace and tag names match the ones specified
+ */
+blogator::parser::dom::HTMLCollection_t Element::getElementsByTagNameNS( const DOMString_t &ns, const DOMString_t &local_name ) {
+    //ref: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
+
+    auto list = HTMLCollection_t();
+
+    if( ns == U"*" /* U+002A */ && local_name == U"*" /* U+002A */ ) {
+        auto it = std::next( this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT ) ) );
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else if( ns == U"*" /* U+002A */ ) {
+        const auto filter_fn = [&local_name]( const node::Node &node ) {
+            const auto * element = dynamic_cast<const Element *>( &node );
+            return ( element->localName() == local_name ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+        };
+
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+        if( it.node() == this ) {
+            ++it;
+        }
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else if( local_name == U"*" /* U+002A */ ) {
+        const auto filter_fn = [&ns]( const node::Node &node ) {
+            const auto * element = dynamic_cast<const Element *>( &node );
+            return ( element->namespaceURI() == ns ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+        };
+
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+        if( it.node() == this ) {
+            ++it;
+        }
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else {
+        const auto filter_fn = [&ns, &local_name]( const node::Node &node ) {
+            const auto * element = dynamic_cast<const Element *>( &node );
+            return ( element->namespaceURI() == ns && element->localName() == local_name
+                     ? NodeFilter::Result::FILTER_ACCEPT
+                     : NodeFilter::Result::FILTER_SKIP );
         };
 
         auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
@@ -745,12 +1071,12 @@ blogator::parser::dom::DOMString_t Element::textContent() const {
  * @return HTML-upper-cased qualified name string
  */
 blogator::parser::dom::DOMString_t Element::nodeName() const {
-    using specs::html5::Namespace;
+    using specs::infra::Namespace;
 
     const node::Document * doc = const_cast<Element *>( this )->ownerDocument();
     const auto             el  = this->elementType();
 
-    if( doc && doc->type() == Document::Type::HTML && specs::html5::getNamespace( el ) == Namespace::HTML5 ) {
+    if( doc && doc->type() == Document::Type::HTML && specs::infra::getNamespace( el ) == Namespace::HTML5 ) {
         return unicode::ascii::toupper( _local_name );
 
     } else {
@@ -808,6 +1134,90 @@ bool Element::isEqualNode( const Node &other ) const {
 }
 
 /**
+ * [OVERRIDE] Lookup a namespace's prefix
+ * @param ns Namespace to find prefix for
+ * @return Prefix found (empty string == null)
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t Element::lookupPrefix( const DOMString_t &ns ) const {
+    try {
+        auto id = Node::namespace_map.getID( ns );
+
+        if( id != NamespaceMap::INVALID && id == this->namespaceID() && !_prefix.empty() ) {
+            return _prefix;
+        }
+
+        for( const auto &attr: _attributes.list() ) {
+            if( attr && attr->prefix() == U"xmlns" &&
+                attr->hasValue() && *attr->value() == Node::namespace_map.getNamespaceURI( id ) /* throws */ )
+            {
+                return attr->name();
+            }
+        }
+
+        if( this->parentElement() ) {
+            return this->parentElement()->lookupPrefix( ns );
+        }
+
+        return {};
+
+    } catch ( std::out_of_range &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw blogator::exception::failed_expectation(
+            "[parser::dom::node::Element::lookupPrefix( \"" + convert( ns ) + "\" )] " + e.what()
+        );
+    }
+}
+
+/**
+ * [OVERRIDE] Find the namespace URI of a given prefix
+ * @param prefix Prefix string (empty == null)
+ * @return Namespace URI
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t Element::lookupNamespaceURI( const DOMString_t &prefix ) const {
+    try {
+        if( prefix.empty() || prefix == U"null" ) {
+            for( auto & attr : _attributes.list() ) {
+                if( attr && Node::getNamespaceEnum( attr->namespaceID() ) == specs::infra::Namespace::XMLNS &&
+                  ( attr->prefix().empty() && attr->localName() == U"xmlns" ) )
+                {
+                    return ( attr->hasValue() ? *attr->value() : DOMString_t() ); //EARLY RETURN
+                }
+            }
+
+        } else {
+            if( this->namespaceID() != NamespaceMap::NONE && prefix == Node::namespace_map.getNamespacePrefix( this->namespaceID() ) ) {
+                return Node::namespace_map.getNamespaceURI( this->namespaceID() ); //EARLY RETURN
+            }
+
+            for( auto & attr : _attributes.list() ) {
+                if( attr && Node::getNamespaceEnum( attr->namespaceID() ) == specs::infra::Namespace::XMLNS &&
+                    ( ( attr->prefix() == U"xmlns" && attr->localName() == prefix ) ||
+                      ( attr->prefix().empty()     && attr->localName() == U"xmlns" ) ) )
+                {
+                    return ( attr->hasValue() ? *attr->value() : DOMString_t() ); //EARLY RETURN
+                }
+            }
+        }
+
+        if( this->parentNode() == nullptr || this->parentNode() == this->ownerDocument() ) {
+            return {}; //EARLY RETURN
+        }
+
+        return this->parentNode()->lookupNamespaceURI( prefix );
+
+    } catch ( std::out_of_range &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw blogator::exception::failed_expectation(
+            "[parser::dom::node::Element::lookupNamespaceURI( \"" + convert( prefix ) + "\" )] " + e.what()
+        );
+    }
+}
+
+/**
  * [OVERRIDE] Insert node before a child
  * @param node Node to insert
  * @param child Pointer to child (nullptr if append at end)
@@ -849,6 +1259,15 @@ blogator::parser::dom::NodePtr_t Element::replaceChildNode( NodePtr_t &node, Nod
     } else {
         return Node::replaceChildNode( node, target );
     }
+}
+
+/**
+ * [OVERRIDE] Recursively sets the owner Document for the node, its children and attributes
+ * @param document Pointer to new owning Document
+ */
+void Element::setOwnerDocument( Document * document ) {
+    this->_attributes.setOwnerDocument( document );
+    Node::setOwnerDocument( document );
 }
 
 /**

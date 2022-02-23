@@ -1,8 +1,6 @@
 #include "utf32.h"
 
-#include <ranges>
 #include <locale>
-#include <codecvt>
 #include <vector>
 
 using namespace blogator::unicode;

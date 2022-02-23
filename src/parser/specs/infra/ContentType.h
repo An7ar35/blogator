@@ -4,15 +4,19 @@
 #include <string>
 #include <ostream>
 
+#include "Namespace.h"
+
 namespace blogator::parser::specs::infra {
     enum class ContentType {
         APPLICATION_XHTML_XML,
         APPLICATION_RSS_XML,
         APPLICATION_XML,
         IMAGE_SVG_XML,
+        ENUM_END = IMAGE_SVG_XML
     };
 
     std::ostream & operator <<( std::ostream &os, ContentType content_type );
+    Namespace to_namespace( ContentType content_type );
 }
 
 namespace blogator {

@@ -11,13 +11,15 @@ namespace blogator::parser::dom::node {
     class CharacterData : public node::Node {
       public:
         CharacterData( NodeType type, DOMString_t data );
-        CharacterData( NodeType type, DOMString_t data, node::Node * parent, node::Node * prev_sibling );
-        CharacterData( NodeType type, DOMString_t data, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling );
+        CharacterData( Document * document, NodeType type, DOMString_t data );
         CharacterData( const CharacterData & node );
         CharacterData( CharacterData && node ) noexcept;
 
         CharacterData & operator =( const CharacterData & node );
         CharacterData & operator =( CharacterData && node ) noexcept;
+
+        void swap( Node &rhs ) override;
+        void swap( CharacterData & rhs );
 
       public: /* 'Node' interface override */
         [[nodiscard]] DOMString_t textContent() const override;
@@ -41,6 +43,8 @@ namespace blogator::parser::dom::node {
       private:
         DOMString_t _data;
     };
+
+    void swap( CharacterData & lhs, CharacterData & rhs );
 }
 
 #endif //BLOGATOR_PARSER_DOM_NODE_CHARACTERDATA_H

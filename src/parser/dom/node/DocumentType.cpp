@@ -76,7 +76,7 @@ DocumentType::DocumentType( DocumentType &&node ) noexcept :
  */
 DocumentType & DocumentType::operator =( const DocumentType &node ) {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( node );
+        Node::operator =( dynamic_cast<const node::Node &>( node ) );
         this->_name      = node._name;
         this->_public_id = node._public_id;
         this->_system_id = node._system_id;
@@ -92,13 +92,35 @@ DocumentType & DocumentType::operator =( const DocumentType &node ) {
  */
 DocumentType & DocumentType::operator =( DocumentType &&node ) noexcept {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<node::Node &&>( node );
+        Node::operator =( dynamic_cast<node::Node &&>( node ) );
         this->_name      = std::move( node._name );
         this->_public_id = std::move( node._public_id );
         this->_system_id = std::move( node._system_id );
     }
 
     return *this;
+}
+
+/**
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void DocumentType::swap( Node &rhs ) {
+    Node::swap( rhs );
+    this->swap( dynamic_cast<DocumentType &>( rhs ) );
+}
+
+/**
+ * Shallow swaps DocumentType nodes
+ * @param rhs node::DocumentType to swap with
+ */
+void DocumentType::swap( DocumentType &rhs ) {
+    if( &rhs != this ) {
+        std::swap( this->_name, rhs._name );
+        std::swap( this->_public_id, rhs._public_id );
+        std::swap( this->_system_id, rhs._system_id );
+    }
 }
 
 /**
@@ -188,6 +210,26 @@ bool DocumentType::isEqualNode( const Node &other ) const {
 }
 
 /**
+ * [OVERRIDE] Lookup a namespace's prefix
+ * @param prefix Prefix string (or "null")
+ * @return Namespace URI (or "null")
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t DocumentType::lookupPrefix( const blogator::parser::dom::DOMString_t &ns ) const {
+    return {};
+}
+
+/**
+ * [OVERRIDE] Find the namespace URI of a given prefix
+ * @param prefix Prefix string (empty == null)
+ * @return Namespace URI
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t DocumentType::lookupNamespaceURI( const DOMString_t &prefix ) const {
+    return {};
+}
+
+/**
  * [OVERRIDE] Inserts a child node before a specified child (auto-sets the parent/sibling pointers)
  * @param node Pointer to Node to insert
  * @param child Reference to reference node for insertion placement
@@ -213,4 +255,13 @@ blogator::parser::dom::NodePtr_t DocumentType::replaceChildNode( NodePtr_t &node
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType nodes do not have children." );
+}
+
+/**
+ * Shallow swaps DocumentType nodes
+ * @param lhs DocumentType
+ * @param rhs DocumentType
+ */
+void blogator::parser::dom::node::swap( DocumentType &lhs, DocumentType &rhs ) {
+    lhs.swap( rhs );
 }

@@ -7,23 +7,30 @@ using namespace blogator::logger;
 /**
  * Constructor
  * @param what Description string
+ * @param quiet (optional) Flag to suppress logger call
  */
-LoggableException::LoggableException( std::string what ) :
+LoggableException::LoggableException( std::string what, bool quiet ) :
     _what( std::move( what ) )
 {
-    LOG_ERROR( _what.c_str() );
+    if( !quiet ) {
+        LOG_ERROR( _what.c_str() );
+    }
 }
+
 
 /**
  * Constructor
  * @param src Source file (i.e.: pass the "__FILE__" macro)
  * @param line Line in source file (i.e.: pass the "__LINE__" macro)
  * @param what Description
+ * @param quiet (optional) Flag to suppress logger call
  */
-LoggableException::LoggableException( char * src, int line, std::string what ) :
+LoggableException::LoggableException( char * src, int line, std::string what, bool quiet ) :
     _what( std::move( what ) )
 {
-    Logger::print<LogLevel::ERROR>( { line, src }, what );
+    if( !quiet ) {
+        Logger::print<LogLevel::ERROR>( { line, src }, what );
+    }
 }
 
 /**

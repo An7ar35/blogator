@@ -1,5 +1,5 @@
-#ifndef BLOGATOR_TESTSTRINGS_H
-#define BLOGATOR_TESTSTRINGS_H
+#ifndef BLOGATOR_TESTS_UNICODETESTSTRINGS_H
+#define BLOGATOR_TESTS_UNICODETESTSTRINGS_H
 
 #include <ostream>
 #include <functional>
@@ -7,7 +7,7 @@
 namespace blogator::tests {
     enum class EncodingFmt { UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE };
 
-    struct TestStrings {
+    struct UnicodeTestStrings {
         static void write( size_t id, EncodingFmt fmt, std::ostream &os );
         static const std::u32string & string( size_t id );
         static size_t count();
@@ -23,4 +23,4 @@ namespace blogator::tests {
     };
 }
 
-#endif //BLOGATOR_TESTSTRINGS_H
+#endif //BLOGATOR_TESTS_UNICODETESTSTRINGS_H

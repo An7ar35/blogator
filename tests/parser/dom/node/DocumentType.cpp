@@ -4,7 +4,7 @@
 using namespace blogator::parser::dom;
 using           blogator::parser::dom::NodeType;
 using           blogator::parser::dom::DOMString_t;
-using           blogator::parser::specs::html5::Namespace;
+using           blogator::parser::specs::infra::Namespace;
 
 TEST( parser_dom_node_DocumentType_Tests, name ) {
     const auto name = DOMString_t( U"testing-name" );

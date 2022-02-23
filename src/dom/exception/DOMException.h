@@ -5,6 +5,7 @@
 #include <exception>
 #include <map>
 #include <sstream>
+#include <utility>
 
 namespace blogator::exception {
     enum class DOMErrorType {
@@ -62,13 +63,13 @@ namespace blogator::exception {
             _message( error + ": " + message )
         {};
 
-        DOMException( const std::string &loc_details, const std::string &message, DOMErrorType error_type ) :
-            _provenance( loc_details ),
+        DOMException( std::string loc_details, const std::string &message, DOMErrorType error_type ) :
+            _provenance( std::move( loc_details ) ),
             _message( errorStr( error_type ) + ": " + message )
         {};
 
-        DOMException( const std::string &loc_details, const std::string &message, const std::string &error ) :
-            _provenance( loc_details ),
+        DOMException( std::string loc_details, const std::string &message, const std::string &error ) :
+            _provenance( std::move( loc_details ) ),
             _message( error + ": " + message )
         {};
 

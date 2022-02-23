@@ -12,23 +12,11 @@ Text::Text( blogator::parser::dom::DOMString_t str ) :
 
 /**
  * Constructor
+ * @param document Pointer to owner document
  * @param str Text string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
  */
-Text::Text( DOMString_t str, node::Node * parent, node::Node * prev_sibling ) :
-    node::CharacterData( NodeType::TEXT_NODE, std::move( str ), parent, prev_sibling )
-{}
-
-/**
- * Constructor
- * @param str Text string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
- */
-Text::Text(DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::CharacterData( NodeType::TEXT_NODE, std::move( str ), parent, prev_sibling, next_sibling )
+Text::Text( Document * document, DOMString_t str ) :
+    node::CharacterData( document, NodeType::TEXT_NODE, std::move( str ) )
 {}
 
 /**
@@ -42,26 +30,30 @@ Text::Text( NodeType type, DOMString_t str )
 
 /**
  * Constructor
+ * @param document Pointer to owner document
  * @param type Node type
  * @param str Text string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
  */
-Text::Text( NodeType type, DOMString_t str, node::Node *parent, node::Node *prev_sibling ) :
-    node::CharacterData( type, std::move( str ), parent, prev_sibling )
+Text::Text( Document * document, NodeType type, DOMString_t str )
+    : CharacterData( document, type, std::move( str ) )
 {}
 
 /**
- * Constructor
- * @param type Node type
- * @param str Text string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
+ * [OVERRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
  */
-Text::Text( NodeType type, DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::CharacterData( type, std::move( str ), parent, prev_sibling, next_sibling )
-{}
+void Text::swap( Node &rhs ) {
+    CharacterData::swap( rhs );
+}
+
+/**
+ * Shallow swaps Text nodes inclusive of their attributes
+ * @param rhs node::Text to swap with
+ */
+void Text::swap( Text &rhs ) {
+    CharacterData::swap( dynamic_cast<CharacterData &>( rhs ) );
+}
 
 /**
  * Split the Text node
@@ -185,4 +177,13 @@ blogator::parser::dom::NodePtr_t Text::replaceChildNode( NodePtr_t &node, NodePt
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "Text nodes do not have children." );
+}
+
+/**
+ * Shallow swaps Text nodes
+ * @param lhs Text node
+ * @param rhs Text node
+ */
+void blogator::parser::dom::node::swap( Text &lhs, Text &rhs ) {
+    lhs.swap( rhs );
 }

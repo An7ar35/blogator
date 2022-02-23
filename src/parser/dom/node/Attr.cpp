@@ -1,101 +1,147 @@
 #include "Attr.h"
 
 #include "Element.h"
+#include "../../../unicode/unicode.h"
+#include "../../../exception/failed_expectation.h"
 
 using namespace blogator::parser::dom::node;
 
 /**
  * Constructor
- * @param name Attribute name string
+ * @param local_name Local name
  */
-Attr::Attr( DOMString_t name ) :
+Attr::Attr( DOMString_t local_name ) :
     node::Node( NodeType::ATTRIBUTE_NODE ),
-    _name( std::move( name ) ),
+    _namespace_id( NamespaceMap::NONE ),
+    _name( std::move( local_name ) ),
     _has_value( false )
 {}
 
-/**
- * Constructor
- * @param prefix Namespace prefix
- * @param name Attribute name string
- */
-Attr::Attr( DOMString_t prefix, DOMString_t name ) :
-    node::Node( NodeType::ATTRIBUTE_NODE ),
-    _prefix( std::move( prefix ) ),
-    _name( std::move( name ) ),
-    _has_value( false )
-{}
 
 /**
  * Constructor
- * @param prefix Namespace prefix
- * @param name Attribute name string
- * @param value Attribute value string
+ * @param local_name Attribute name string
  */
-Attr::Attr( DOMString_t prefix, DOMString_t name, DOMString_t value ) :
+Attr::Attr( DOMString_t local_name, DOMString_t value ) :
     node::Node( NodeType::ATTRIBUTE_NODE ),
-    _prefix( std::move( prefix ) ),
-    _name( std::move( name ) ),
+    _namespace_id( NamespaceMap::NONE ),
+    _name( std::move( local_name ) ),
     _value( std::move( value ) ),
     _has_value( true )
 {}
 
 /**
  * Constructor
- * @param prefix Namespace prefix
- * @param name Attribute name string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
+ * @param ns Namespace
+ * @param prefix Prefix
+ * @param local_name Local name
  */
-Attr::Attr( DOMString_t prefix, DOMString_t name, node::Node * parent, node::Node * prev_sibling ) :
-    node::Node( NodeType::ATTRIBUTE_NODE, parent, prev_sibling ),
+Attr::Attr( const DOMString_t & ns, DOMString_t prefix, DOMString_t local_name ) :
+    node::Node( NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( ns, prefix ) ),
     _prefix( std::move( prefix ) ),
-    _name( std::move( name ) ),
+    _name( std::move( local_name ) ),
     _has_value( false )
 {}
 
 /**
  * Constructor
- * @param prefix Namespace prefix
- * @param name Attribute name string
- * @param value Attribute value string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
+ * @param ns_id Namespace ID
+ * @param prefix Prefix
+ * @param local_name Local name
  */
-Attr::Attr( DOMString_t prefix, DOMString_t name, DOMString_t value, node::Node * parent, node::Node * prev_sibling ) :
-    node::Node( NodeType::ATTRIBUTE_NODE, parent, prev_sibling ),
+Attr::Attr( NamespaceMap::id_t ns_id, DOMString_t prefix, DOMString_t local_name ) :
+    node::Node( NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( ns_id ),
     _prefix( std::move( prefix ) ),
-    _name( std::move( name ) ),
+    _name( std::move( local_name ) ),
+    _has_value( false )
+{}
+
+/**
+ * Constructor
+ * @param ns Namespace
+ * @param prefix Prefix
+ * @param local_name Local name
+ * @param value Value string
+ */
+Attr::Attr( const DOMString_t & ns, DOMString_t prefix, DOMString_t local_name, DOMString_t value ) :
+    node::Node( NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( ns, prefix ) ),
+    _prefix( std::move( prefix ) ),
+    _name( std::move( local_name ) ),
     _value( std::move( value ) ),
     _has_value( true )
 {}
 
 /**
  * Constructor
- * @param prefix Namespace prefix
- * @param name Attribute name string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
+ * @param document Pointer to owner document
+ * @param local_name Local name
  */
-Attr::Attr( DOMString_t prefix, DOMString_t name, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::Node( NodeType::ATTRIBUTE_NODE, parent, prev_sibling, next_sibling ),
-    _prefix( std::move( prefix ) ),
-    _name( std::move( name ) ),
+Attr::Attr( Document * document, DOMString_t local_name ) :
+    node::Node( document, NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( NamespaceMap::NONE ),
+    _name( std::move( local_name ) ),
     _has_value( false )
 {}
 
 /**
  * Constructor
- * @param prefix Namespace prefix
- * @param name Attribute name string
- * @param value Attribute value string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
+ * @param document Pointer to owner document
+ * @param local_name Local name
+ * @param value Value string
  */
-Attr::Attr( DOMString_t prefix, DOMString_t name, DOMString_t value, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::Node( NodeType::ATTRIBUTE_NODE, parent, prev_sibling, next_sibling ),
+Attr::Attr( Document * document, DOMString_t local_name, DOMString_t value ) :
+    node::Node( document, NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( NamespaceMap::NONE ),
+    _name( std::move( local_name ) ),
+    _value( std::move( value ) ),
+    _has_value( true )
+{}
+
+/**
+ * Constructor
+ * @param document Pointer to owner document
+ * @param ns Namespace
+ * @param prefix Prefix
+ * @param local_name Local name
+ */
+Attr::Attr( Document * document, const DOMString_t &ns, DOMString_t prefix, DOMString_t local_name ) :
+    node::Node( document, NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( ns, prefix ) ),
+    _prefix( std::move( prefix ) ),
+    _name( std::move( local_name ) ),
+    _has_value( false )
+{}
+
+/**
+ * Constructor
+ * @param document Pointer to owner document
+ * @param ns Namespace
+ * @param prefix Prefix
+ * @param local_name Local name
+ * @param value Value string
+ */
+Attr::Attr( Document * document, const DOMString_t &ns, DOMString_t prefix, DOMString_t local_name, DOMString_t value ) :
+    node::Node( document, NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( Node::namespace_map.setNamespace( ns, prefix ) ),
+    _prefix( std::move( prefix ) ),
+    _name( std::move( local_name ) ),
+    _value( std::move( value ) ),
+    _has_value( true )
+{}
+
+/**
+ * Constructor
+ * @param ns_id Namespace ID
+ * @param prefix Prefix
+ * @param name Local name
+ * @param value Value string
+ */
+Attr::Attr( NamespaceMap::id_t ns_id, DOMString_t prefix, DOMString_t name, DOMString_t value ) :
+    node::Node( NodeType::ATTRIBUTE_NODE ),
+    _namespace_id( ns_id ),
     _prefix( std::move( prefix ) ),
     _name( std::move( name ) ),
     _value( std::move( value ) ),
@@ -108,6 +154,7 @@ Attr::Attr( DOMString_t prefix, DOMString_t name, DOMString_t value, node::Node 
  */
 Attr::Attr( const Attr &node ) :
     node::Node( node ),
+    _namespace_id( node._namespace_id ),
     _prefix( node._prefix ),
     _name( node._name ),
     _has_value( node._has_value ),
@@ -120,6 +167,7 @@ Attr::Attr( const Attr &node ) :
  */
 Attr::Attr( Attr &&node ) noexcept :
     node::Node( std::move( node ) ),
+    _namespace_id( node._namespace_id ),
     _prefix( std::move( node._prefix ) ),
     _name( std::move( node._name ) ),
     _value( std::move( node._value ) ),
@@ -131,13 +179,14 @@ Attr::Attr( Attr &&node ) noexcept :
  * @param node Node to copy
  * @return Copy
  */
-Attr &Attr::operator =( const Attr &node ) {
+Attr & Attr::operator =( const Attr &node ) {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( node );
-        this->_prefix    = node._prefix;
-        this->_name      = node._name;
-        this->_value     = node._value;
-        this->_has_value = node._has_value;
+        Node::operator =( dynamic_cast<const node::Node &>( node ) );
+        this->_namespace_id = node._namespace_id ;
+        this->_prefix       = node._prefix;
+        this->_name         = node._name;
+        this->_value        = node._value;
+        this->_has_value    = node._has_value;
     }
 
     return *this;
@@ -148,16 +197,81 @@ Attr &Attr::operator =( const Attr &node ) {
  * @param node Node to move
  * @return Node
  */
-Attr &Attr::operator =( Attr &&node ) noexcept {
+Attr & Attr::operator =( Attr &&node ) noexcept {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<node::Node &&>( node );
-        this->_prefix    = std::move( node._prefix );
-        this->_name      = std::move( node._name );
-        this->_value     = std::move( node._value );
-        this->_has_value = node._has_value;
+        Node::operator =( dynamic_cast<node::Node &&>( node ) );
+        this->_namespace_id = node._namespace_id ;
+        this->_prefix       = std::move( node._prefix );
+        this->_name         = std::move( node._name );
+        this->_value        = std::move( node._value );
+        this->_has_value    = node._has_value;
     }
 
     return *this;
+}
+
+/**
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void Attr::swap( Node &rhs ) {
+    Node::swap( rhs );
+    this->swap( dynamic_cast<Attr &>( rhs ) );
+}
+
+/**
+ * Shallow swaps Attr nodes
+ * @param rhs node::Attr to swap with
+ */
+void Attr::swap( Attr &rhs ) {
+    if( &rhs != this ) {
+        std::swap( this->_namespace_id, rhs._namespace_id );
+        std::swap( this->_prefix, rhs._prefix );
+        std::swap( this->_name, rhs._name );
+        std::swap( this->_value, rhs._value );
+        std::swap( this->_has_value, rhs._has_value );
+    }
+}
+
+/**
+ * Check equivalence
+ * @param rhs Attribute to compare to
+ * @return Equivalence state
+ */
+bool Attr::equivalent( const Attr &rhs ) const {
+    return this->_namespace_id == rhs._namespace_id
+        && this->_prefix       == rhs._prefix
+        && this->_name         == rhs._name
+        && this->_value        == rhs._value
+        && this->_has_value    == rhs._has_value;
+}
+
+/**
+ * Gets the namespace NamespaceMap ID
+ * @return NamespaceMap ID for the Attribute's namespace
+ */
+blogator::parser::dom::NamespaceMap::id_t Attr::namespaceID() const {
+    return _namespace_id;
+}
+
+/**
+ * Gets the namespace URI
+ * @return Namespace URI
+ * @throws blogator::exception::failed_expectation when namespace ID doesn't exist in global NamespaceMap
+ */
+blogator::parser::dom::DOMString_t Attr::namespaceURI() const {
+    try {
+        return Node::namespace_map.getNamespaceURI( _namespace_id );
+
+    } catch( const std::out_of_range &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw blogator::exception::failed_expectation(
+            "[parser::dom::node::Attr::namespaceURI()] "
+            "Failed to get URI for node '" + convert( this->nodeName() ) + "'."
+        );
+    }
 }
 
 /**
@@ -180,7 +294,7 @@ const blogator::parser::dom::DOMString_t & Attr::localName() const {
  * Gets the name
  * @return Name string
  */
-const blogator::parser::dom::DOMString_t &Attr::name() const {
+const blogator::parser::dom::DOMString_t & Attr::name() const {
     return _name;
 }
 
@@ -188,8 +302,16 @@ const blogator::parser::dom::DOMString_t &Attr::name() const {
  * Gets the value
  * @return Value string
  */
-const blogator::parser::dom::DOMString_t & Attr::value() const {
-    return _value;
+blogator::parser::dom::DOMString_t * Attr::value() {
+    return ( hasValue() ? &_value : nullptr );
+}
+
+/**
+ * Gets the value
+ * @return Value string
+ */
+const blogator::parser::dom::DOMString_t * Attr::value() const {
+    return const_cast<DOMString_t *>( const_cast<Attr *>( this )->value() );
 }
 
 /**
@@ -201,8 +323,8 @@ bool Attr::hasValue() const {
 }
 
 /**
- * Gets owner Element
- * @return Pointer to owner Element (nullptr if orphaned/parent is not Element node)
+ * Gets ownerNode Element
+ * @return Pointer to ownerNode Element (nullptr if orphaned/parent is not Element node)
  */
 blogator::parser::dom::node::Element * Attr::ownerElement() {
     if( this->parentNode() && this->parentNode()->nodeType() == NodeType::ELEMENT_NODE ) {
@@ -255,8 +377,8 @@ size_t Attr::length() const {
  */
 blogator::parser::dom::NodePtr_t Attr::cloneNode( bool deep ) const {
     auto clone = (
-        this->hasValue() ? std::make_unique<Attr>( _prefix, _name, _value )
-                         : std::make_unique<Attr>( _prefix, _name )
+        this->hasValue() ? std::make_unique<Attr>( _namespace_id, _prefix, _name, _value )
+                         : std::make_unique<Attr>( _namespace_id, _prefix, _name )
     );
 
     return std::move( clone );
@@ -273,10 +395,10 @@ bool Attr::isEqualNode( const Node &other ) const {
     {
         const auto * rhs = dynamic_cast<const Attr *>( &other );
 
-        bool equal = this->prefix()   == rhs->prefix()
-                  && this->name()     == rhs->name()
-                  && this->hasValue() == rhs->hasValue()
-                  && this->value()    == rhs->value();
+        bool equal = this->_namespace_id == rhs->_namespace_id
+                  && this->_name         == rhs->_name
+                  && this->_has_value    == rhs->_has_value
+                  && this->_value        == rhs->_value;
 
         if( equal ) {
             for( size_t i = 0; i < this->childNodes().size(); ++i ) {
@@ -290,6 +412,34 @@ bool Attr::isEqualNode( const Node &other ) const {
     }
 
     return false;
+}
+
+/**
+ * [OVERRIDE] Lookup a namespace's prefix
+ * @param ns Namespace to find prefix for
+ * @return Prefix found (empty string == null)
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t Attr::lookupPrefix( const blogator::parser::dom::DOMString_t &ns ) const {
+    if( this->parentElement() ) {
+        return this->parentElement()->lookupPrefix( ns );
+    }
+
+    return {};
+}
+
+/**
+ * [OVERRIDE] Find the namespace URI of a given prefix
+ * @param prefix Prefix string (empty == null)
+ * @return Namespace URI
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t Attr::lookupNamespaceURI( const DOMString_t &prefix ) const {
+    if( this->parentElement() ) {
+        return this->parentElement()->lookupNamespaceURI( prefix );
+    }
+
+    return {};
 }
 
 /**
@@ -318,4 +468,13 @@ blogator::parser::dom::NodePtr_t Attr::replaceChildNode( NodePtr_t &node, NodePt
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "Attr(ibute) nodes do not have children." );
+}
+
+/**
+ * Shallow swaps Attribute nodes
+ * @param lhs Attr
+ * @param rhs Attr
+ */
+void blogator::parser::dom::node::swap( Attr &lhs, Attr &rhs ) {
+    lhs.swap( rhs );
 }

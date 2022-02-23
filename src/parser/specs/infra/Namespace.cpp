@@ -2,6 +2,7 @@
 
 #include <ostream>
 #include <sstream>
+#include <map>
 
 using namespace blogator::parser::specs::infra;
 
@@ -14,6 +15,7 @@ using namespace blogator::parser::specs::infra;
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, specs::infra::Namespace ns ) {
     switch( ns ) {
         case Namespace::UNKNOWN: { os << "UNKNOWN"; } break;
+        case Namespace::NONE:    { os << "NONE";    } break;
         case Namespace::HTML5:   { os << "HTML5";   } break;
         case Namespace::MATHML:  { os << "MathML";  } break;
         case Namespace::SVG:     { os << "SVG";     } break;
@@ -36,6 +38,7 @@ std::u32string blogator::parser::specs::infra::to_namespaceURI( Namespace ns ) {
     //ref: https://infra.spec.whatwg.org/#namespaces
     switch( ns ) {
         case Namespace::UNKNOWN: { return U"UNKNOWN"; }
+        case Namespace::NONE:    { return U""; }
         case Namespace::HTML5:   { return U"http://www.w3.org/1999/xhtml"; }
         case Namespace::MATHML:  { return U"http://www.w3.org/1998/Math/MathML"; }
         case Namespace::SVG:     { return U"http://www.w3.org/2000/svg"; }
@@ -55,6 +58,7 @@ std::u32string blogator::parser::specs::infra::to_namespaceURI( Namespace ns ) {
 std::u32string blogator::parser::specs::infra::to_prefix( Namespace ns ) {
     switch( ns ) {
         case Namespace::UNKNOWN: { return U""; }
+        case Namespace::NONE:    { return U""; }
         case Namespace::HTML5:   { return U""; }
         case Namespace::MATHML:  { return U"math"; }
         case Namespace::SVG:     { return U"svg"; }
@@ -64,6 +68,28 @@ std::u32string blogator::parser::specs::infra::to_prefix( Namespace ns ) {
         case Namespace::OTHER:   [[fallthrough]];
         default:                 { return U""; }
     }
+}
+
+/**
+ * Gets the enum matching a given URI
+ * @param uri Namespace URI string
+ * @return Matching enum (or 'UNKNOWN' when no match is found)
+ */
+Namespace blogator::parser::specs::infra::to_namespace( const std::u32string &uri ) {
+    static std::map<std::u32string, Namespace> map;
+
+    if( map.empty() ) {
+        for( auto i = static_cast<int>( Namespace::URI_DEFS_BEGIN ); i <= static_cast<int>( Namespace::URI_DEFS_END ); ++i ) {
+            map.emplace(
+                std::make_pair<std::u32string, Namespace>( to_namespaceURI( static_cast<Namespace>( i ) ),
+                                                           static_cast<Namespace>( i ) )
+            );
+        }
+    }
+
+    auto it = map.find( uri );
+
+    return ( it == map.end() ? Namespace::UNKNOWN : it->second );
 }
 
 /**

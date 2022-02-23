@@ -12,24 +12,29 @@ Comment::Comment( DOMString_t str ) :
 
 /**
  * Constructor
+ * @param document Pointer to owner document
  * @param str Comment string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
  */
-Comment::Comment( DOMString_t str, node::Node * parent, node::Node * prev_sibling ) :
-    node::CharacterData( NodeType::COMMENT_NODE, std::move( str ), parent, prev_sibling )
+Comment::Comment( Document * document, DOMString_t str ) :
+    node::CharacterData( document, NodeType::COMMENT_NODE, std::move( str ) )
 {}
 
 /**
- * Constructor
- * @param str Comment string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
  */
-Comment::Comment( DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::CharacterData( NodeType::COMMENT_NODE, std::move( str ), parent, prev_sibling, next_sibling )
-{}
+void Comment::swap( Node &rhs ) {
+    CharacterData::swap( rhs );
+}
+
+/**
+ * Shallow swaps Comment nodes
+ * @param rhs node::Comment to swap with
+ */
+void Comment::swap( Comment &rhs ) {
+    CharacterData::swap( dynamic_cast<CharacterData &>( rhs ) );
+}
 
 /**
  * Gets the node's name
@@ -82,4 +87,13 @@ blogator::parser::dom::NodePtr_t Comment::replaceChildNode( NodePtr_t &node, Nod
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "Comment nodes do not have children." );
+}
+
+/**
+ * Shallow swaps Comment nodes
+ * @param lhs Comment node
+ * @param rhs Comment node
+ */
+void blogator::parser::dom::node::swap( Comment &lhs, Comment &rhs ) {
+    lhs.swap( rhs );
 }

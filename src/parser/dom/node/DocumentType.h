@@ -15,6 +15,9 @@ namespace blogator::parser::dom::node {
         DocumentType & operator =( const DocumentType &node );
         DocumentType & operator =( DocumentType &&node ) noexcept;
 
+        void swap( Node &rhs ) override;
+        void swap( DocumentType &rhs );
+
       public: /* 'DocumentType' interface */
         [[nodiscard]] const DOMString_t & name() const;
         [[nodiscard]] const DOMString_t & publicId() const;
@@ -25,6 +28,8 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] DOMString_t nodeName() const override;
         [[nodiscard]] NodePtr_t cloneNode( bool deep ) const override;
         [[nodiscard]] bool isEqualNode( const Node &other ) const override;
+        [[nodiscard]] DOMString_t lookupPrefix( const DOMString_t &ns ) const override;
+        [[nodiscard]] DOMString_t lookupNamespaceURI( const DOMString_t &prefix ) const override;
       protected:
         Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
         NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
@@ -34,6 +39,8 @@ namespace blogator::parser::dom::node {
         DOMString_t _public_id;
         DOMString_t _system_id;
     };
+
+    void swap( DocumentType &lhs, DocumentType &rhs );
 }
 
 #endif //BLOGATOR_PARSER_DOM_NODE_DOCUMENTTYPE_H

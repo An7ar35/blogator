@@ -1,11 +1,10 @@
 #include "Node.h"
 
 #include <stdexcept>
-#include <sstream>
+#include <utility>
 
 #include "Attr.h"
 #include "CDATASection.h"
-#include "CharacterData.h"
 #include "Comment.h"
 #include "Document.h"
 #include "DocumentType.h"
@@ -17,23 +16,13 @@
 
 using namespace blogator::parser::dom::node;
 
-const unsigned short Node::DOCUMENT_POSITION_DISCONNECTED            = 0x01; //0b00'0001 (1)
-const unsigned short Node::DOCUMENT_POSITION_PRECEDING               = 0x02; //0b00'0010 (2)
-const unsigned short Node::DOCUMENT_POSITION_FOLLOWING               = 0x04; //0b00'0100 (4)
-const unsigned short Node::DOCUMENT_POSITION_CONTAINS                = 0x08; //0b00'1000 (8)
-const unsigned short Node::DOCUMENT_POSITION_CONTAINED_BY            = 0x10; //0b01'0000 (16)
-const unsigned short Node::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20; //0b10'0000 (32)
-
-std::ostream & blogator::parser::dom::node::operator <<( std::ostream &os, const Node &node ) {
-    //TODO
-
-    return os;
-}
+blogator::parser::dom::NamespaceMap Node::namespace_map = blogator::parser::dom::NamespaceMap();
 
 /**
  * Constructor
  */
 Node::Node() :
+    _document( nullptr ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
     _next_sibling( nullptr ),
@@ -45,6 +34,20 @@ Node::Node() :
  * @param type Node type
  */
 Node::Node( NodeType type ) :
+    _document( nullptr ),
+    _parent( nullptr ),
+    _prev_sibling( nullptr ),
+    _next_sibling( nullptr ),
+    _node_type( type )
+{}
+
+/**
+ * Constructor
+ * @param document Owner document
+ * @param type Node type
+ */
+Node::Node( Document *document, NodeType type ) :
+    _document( document ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
     _next_sibling( nullptr ),
@@ -58,6 +61,7 @@ Node::Node( NodeType type ) :
  * @param prev_sibling Pointer to previous sibling
  */
 Node::Node( NodeType type, Node * parent, Node * prev_sibling ) :
+    _document( ( parent ? parent->ownerDocument() : nullptr ) ),
     _parent( parent ),
     _prev_sibling( prev_sibling ),
     _next_sibling( nullptr ),
@@ -81,6 +85,7 @@ Node::Node( NodeType type, Node * parent, Node * prev_sibling ) :
  * @param next_sibling Pointer to next sibling
  */
 Node::Node( NodeType type, Node * parent, Node * prev_sibling, Node * next_sibling ) :
+    _document( ( parent ? parent->ownerDocument() : nullptr ) ),
     _parent( parent ),
     _prev_sibling( prev_sibling ),
     _next_sibling( next_sibling ),
@@ -100,6 +105,7 @@ Node::Node( NodeType type, Node * parent, Node * prev_sibling, Node * next_sibli
  * @param node Node to copy
  */
 Node::Node( const Node &node ) :
+    _document( nullptr ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
     _next_sibling( nullptr ),
@@ -115,15 +121,21 @@ Node::Node( const Node &node ) :
  * @param node Node to move
  */
 Node::Node( Node &&node )  noexcept :
+    _document( node._document ),
     _parent( node._parent ),
     _prev_sibling( node._prev_sibling ),
     _next_sibling( node._next_sibling ),
     _node_type( node._node_type )
 {
     for( auto & ptr : node._children ) {
-        _children.emplace_back( std::move( ptr ) );
+        auto & child = _children.emplace_back( std::move( ptr ) );
+
+        if( child ) {
+            child->setParent( this );
+        }
     }
 
+    node._document     = nullptr;
     node._parent       = nullptr;
     node._prev_sibling = nullptr;
     node._next_sibling = nullptr;
@@ -151,10 +163,12 @@ Node::~Node() {
  */
 Node & Node::operator =( const Node &node ) {
     if( &node != this ) {
+        _document     = nullptr;
         _parent       = nullptr;
         _prev_sibling = nullptr;
         _next_sibling = nullptr;
         _node_type    = node._node_type;
+        _children.clear();
 
         for( const auto & child : node._children ) {
             this->appendChild( child->cloneNode( true ) );
@@ -170,15 +184,22 @@ Node & Node::operator =( const Node &node ) {
  */
 Node & Node::operator =( Node &&node ) noexcept {
     if( &node != this ) {
+        _document          = node._document;
         _parent            = node._parent;
         _prev_sibling      = node._prev_sibling;
         _next_sibling      = node._next_sibling;
         _node_type         = node._node_type;
+        _children.clear();
 
         for( auto & ptr: node._children ) {
-            _children.emplace_back( std::move( ptr ) );
+            auto & child = _children.emplace_back( std::move( ptr ) );
+
+            if( child ) {
+                child->setParent( this );
+            }
         }
 
+        node._document     = nullptr;
         node._parent       = nullptr;
         node._prev_sibling = nullptr;
         node._next_sibling = nullptr;
@@ -187,6 +208,18 @@ Node & Node::operator =( Node &&node ) noexcept {
     }
 
     return *this;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param node DOM Node
+ * @return Output stream
+ */
+std::ostream & blogator::parser::dom::node::operator <<( std::ostream &os, const Node &node ) {
+    //TODO
+
+    return os;
 }
 
 /**
@@ -205,6 +238,211 @@ bool Node::operator ==( const node::Node &rhs ) const {
  */
 bool Node::operator !=( const node::Node &rhs ) const {
     return !( *this == rhs );
+}
+
+/**
+ * Gets a begin iterator whose root is this node
+ * @return Iterator
+ */
+Node::iterator Node::begin() {
+    return { this, false };
+}
+
+/**
+ * Gets a begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Iterator
+ */
+Node::iterator Node::begin( NodeFilter filter ) {
+    return { this, std::make_shared<NodeFilter>( std::move( filter ) ) };
+}
+
+
+/**
+ * Gets a begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Iterator
+ */
+Node::iterator Node::begin( std::shared_ptr<NodeFilter> filter ) {
+    return { this, std::move( filter ) };
+}
+
+/**
+ * Gets an end iterator whose root is this node
+ * @return Iterator
+ */
+Node::iterator Node::end() {
+    return { this, nullptr };
+}
+
+/**
+ * Gets a begin iterator whose root is this node
+ * @return Const iterator
+ */
+Node::const_iterator Node::cbegin() const {
+    return { this, false };
+}
+
+/**
+ * Gets a begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Const iterator
+ */
+Node::const_iterator Node::cbegin( blogator::parser::dom::NodeFilter filter ) const {
+    return { this, std::make_shared<NodeFilter>( std::move( filter ) ) };
+}
+
+/**
+ * Gets a begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Const iterator
+ */
+Node::const_iterator Node::cbegin( std::shared_ptr<NodeFilter> filter ) const {
+    return { this, std::move( filter ) };
+}
+
+/**
+ * Gets an end iterator whose root is this node
+ * @return Const iterator
+ */
+Node::const_iterator Node::cend() const {
+    return { this, nullptr };
+}
+
+/**
+ * Gets a reverse begin iterator whose root is this node
+ * @return Reverse iterator
+ */
+Node::iterator Node::rbegin() {
+    return { this, true };
+}
+
+/**
+ * Gets a reverse begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Reverse iterator
+ */
+Node::iterator Node::rbegin( blogator::parser::dom::NodeFilter filter ) {
+    return { this, std::make_shared<NodeFilter>( std::move( filter ) ), true };
+}
+
+/**
+ * Gets a reverse begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Reverse iterator
+ */
+Node::iterator Node::rbegin( std::shared_ptr<NodeFilter> filter ) {
+    return { this, std::move( filter ), true };
+}
+
+/**
+ * Gets a reverse end iterator whose root is this node
+ * @return Reverse iterator
+ */
+Node::iterator Node::rend() {
+    return { this, nullptr, true };
+}
+
+/**
+ * Gets a reverse begin iterator whose root is this node
+ * @return Const reverse iterator
+ */
+Node::const_iterator Node::crbegin() const {
+    return { this, true };
+}
+
+/**
+ * Gets a reverse begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Const reverse iterator
+ */
+Node::const_iterator Node::crbegin( blogator::parser::dom::NodeFilter filter ) const {
+    return { this, std::make_shared<NodeFilter>( std::move( filter ) ), true };
+}
+
+/**
+ * Gets a reverse begin iterator whose root is this node
+ * @param filter Filter to use for the iteration
+ * @return Const reverse iterator
+ */
+Node::const_iterator Node::crbegin( std::shared_ptr<NodeFilter> filter ) const {
+    return { this, std::move( filter ), true };
+}
+
+/**
+ * Gets a const reverse end iterator whose root is this node
+ * @return Const reverse Iterator
+ */
+Node::const_iterator Node::crend() const {
+    return { this, nullptr, true };
+}
+
+/**
+ * Shallow swaps Nodes in-place
+ * @param rhs Node to swap content with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void Node::swap( Node &rhs ) {
+    if( &rhs != this ) {
+        //---------------------------------------------------------------------------------------------
+        // NOTE: Parent, siblings, children and document pointers are not swapped since the node's DOM
+        //       placement in its hierarchy should be left unchanged.
+        //       Only the content itself should be swapped.
+        //---------------------------------------------------------------------------------------------
+
+        if( this->nodeType() != rhs.nodeType() ) {
+            using blogator::parser::dom::exception::DOMException;
+            using blogator::parser::dom::exception::DOMExceptionType;
+
+            throw DOMException(
+                DOMExceptionType::HierarchyRequestError,
+                "Trying to swap different node types "
+                "(" + blogator::to_string( this->nodeType() ) + " <-> " + blogator::to_string( rhs.nodeType() ) + ")"
+            );
+        }
+    }
+}
+
+/**
+ * Helper method to get a Namespace enum from an ID
+ * @param id Namespace ID
+ * @return specs::infra::Namespace enum associated with the ID
+ * @throws blogator::exception::failed_expectation when mapping inconsistency is detected
+ */
+blogator::parser::specs::infra::Namespace Node::getNamespaceEnum( NamespaceMap::id_t id ) {
+    try {
+        return Node::namespace_map.getNamespaceEnum( id ); //throws
+
+    } catch( const std::out_of_range &e ) {
+        throw blogator::exception::failed_expectation(
+            "[parser::dom::node::Node::getNamespaceEnum( " + std::to_string( id ) + " )] " + e.what()
+        );
+    }
+}
+
+/**
+ * Helper method to get a Namespace URI string from an ID
+ * @param id Namespace ID
+ * @return Namespace URI string associated with the ID
+ * @throws blogator::exception::failed_expectation when mapping inconsistency is detected
+ */
+const blogator::parser::dom::DOMString_t & Node::getNamespaceURI( NamespaceMap::id_t id ) {
+    try {
+        return Node::namespace_map.getNamespaceURI( id ); //throws
+
+    } catch( const std::out_of_range &e ) {
+        throw blogator::exception::failed_expectation(
+            "[parser::dom::node::Node::getNamespaceURI( " + std::to_string( id ) + " )] " + e.what()
+        );
+    }
+}
+
+/**
+ * Gets the global namespace mapper
+ * @return Global NamespaceMap
+ */
+blogator::parser::dom::NamespaceMap & Node::namespaceMap() {
+    return Node::namespace_map;
 }
 
 /**
@@ -245,22 +483,24 @@ bool Node::isConnected() const {
 }
 
 /**
- * Gets the owner Document
- * @return Pointer to owner Document
+ * Gets the ownerElement Document
+ * @return Pointer to ownerElement Document
  */
 blogator::parser::dom::node::Document * Node::ownerDocument() {
     if( this->_node_type == NodeType::DOCUMENT_NODE ) {
         return dynamic_cast<Document *>( this );
 
     } else {
-        auto * ptr = this->parentNode();
-
-        while( ptr && ptr->nodeType() != NodeType::DOCUMENT_NODE ) {
-            ptr = ptr->parentNode();
-        }
-
-        return dynamic_cast<Document *>( ptr );
+        return _document;
     }
+}
+
+/**
+ * Gets the ownerElement Document
+ * @return Pointer to ownerElement Document
+ */
+const blogator::parser::dom::node::Document * Node::ownerDocument() const {
+    return const_cast<Document *>( const_cast<Node *>( this )->ownerDocument() );
 }
 
 /**
@@ -298,7 +538,7 @@ blogator::parser::dom::Nodes_t & Node::childNodes() {
  * @return Const reference to children collection
  */
 const blogator::parser::dom::Nodes_t & Node::childNodes() const {
-    return _children;
+    return const_cast<Nodes_t &>( const_cast<Node *>( this )->childNodes() );
 }
 
 /**
@@ -314,7 +554,7 @@ Node * Node::parentNode() {
  * @return parent node (or nullptr if orphaned)
  */
 const Node * Node::parentNode() const {
-    return _parent;
+    return const_cast<Node *>( const_cast<Node *>( this )->parentNode() );
 }
 
 /**
@@ -322,8 +562,8 @@ const Node * Node::parentNode() const {
  * @return Parent Element (nullptr if no parent or not a parent of type Element)
  */
 blogator::parser::dom::node::Element * Node::parentElement() {
-    if( this->parentNode() && this->parentNode()->nodeType() == NodeType::ELEMENT_NODE ) {
-        return dynamic_cast<Element *>( this->parentNode() );
+    if( _parent && _parent->nodeType() == NodeType::ELEMENT_NODE ) {
+        return dynamic_cast<Element *>( _parent );
     } else {
         return nullptr;
     }
@@ -333,12 +573,8 @@ blogator::parser::dom::node::Element * Node::parentElement() {
  * Returns the node's parent Element
  * @return Parent Element (nullptr if no parent or not a parent of type Element)
  */
-const Element *Node::parentElement() const {
-    if( this->parentNode() && this->parentNode()->nodeType() == NodeType::ELEMENT_NODE ) {
-        return dynamic_cast<const Element *>( this->parentNode() );
-    } else {
-        return nullptr;
-    }
+const Element * Node::parentElement() const {
+    return const_cast<Element *>( const_cast<Node *>( this )->parentElement() );
 }
 
 /**
@@ -353,8 +589,8 @@ Node * Node::firstChild() {
  * Gets the first child of the node
  * @return Pointer to first child (or nullptr when there are no children)
  */
-const Node *Node::firstChild() const {
-    return ( hasChildNodes() ? _children.front().get() : nullptr );
+const Node * Node::firstChild() const {
+    return const_cast<Node *>( const_cast<Node *>( this )->firstChild() );
 }
 
 /**
@@ -369,8 +605,8 @@ Node * Node::lastChild() {
  * Gets the last child of the node
  * @return Reference to last child  (or nullptr when there are no children)
  */
-const Node *Node::lastChild() const {
-    return nullptr;
+const Node * Node::lastChild() const {
+    return const_cast<Node *>( const_cast<Node *>( this )->lastChild() );
 }
 
 /**
@@ -386,7 +622,7 @@ Node * Node::previousSibling() {
  * @return Previous sibling (or nullptr)
  */
 const Node * Node::previousSibling() const {
-    return _prev_sibling;
+    return const_cast<Node *>( const_cast<Node *>( this )->previousSibling() );
 }
 
 /**
@@ -402,7 +638,7 @@ Node * Node::nextSibling() {
  * @return Next sibling (or nullptr
  */
 const Node * Node::nextSibling() const {
-    return _next_sibling;
+    return const_cast<Node *>( const_cast<Node *>( this )->nextSibling() );
 }
 
 /**
@@ -570,7 +806,7 @@ unsigned short Node::compareDocumentPosition( const Node &other ) {
         node2 = dynamic_cast<Node *>( attr2->ownerElement() );
 
         if( attr1 && node1 && node2 == node1 ) {
-            for( const AttrPtr_t & attr : dynamic_cast<Element *>( node2 )->attributes() ) {
+            for( const AttrPtr_t & attr : dynamic_cast<Element *>( node2 )->attributes().list() ) {
                 if( *attr == *attr1 ) {
                     return DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC + DOCUMENT_POSITION_PRECEDING;
                 }
@@ -623,20 +859,44 @@ bool Node::contains( const Node &other ) const {
     return false;
 }
 
-blogator::parser::dom::DOMString_t Node::lookupPrefix( specs::html5::Namespace ns ) { //TODO
-    return blogator::parser::dom::DOMString_t();
+/**
+ * Lookup a namespace's prefix
+ * @param ns Namespace to find prefix for
+ * @return Prefix found (empty string == null)
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t Node::lookupPrefix( const DOMString_t & ns ) const {
+    //ref: https://dom.spec.whatwg.org/#dom-node-lookupprefix
+    if( this->parentElement() ) {
+        return this->parentElement()->lookupPrefix( ns );
+    }
+
+    return {};
 }
 
-blogator::parser::dom::DOMString_t Node::lookupNamespaceURI( const DOMString_t &prefix ) { //TODO
-    return blogator::parser::dom::DOMString_t();
+/**
+ * Find the namespace URI of a given prefix
+ * @param prefix Prefix string (or "null")
+ * @return Namespace URI (or "null")
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
+ */
+blogator::parser::dom::DOMString_t Node::lookupNamespaceURI( const DOMString_t &prefix ) const {
+    //ref: https://dom.spec.whatwg.org/#locate-a-namespace (non-null prefix)
+    if( this->parentElement() ) {
+        return this->parentElement()->lookupNamespaceURI( prefix );
+    }
+
+    return {};
 }
 
-bool Node::isDefaultNamespace( const DOMString_t &ns ) const { //TODO
-    return false;
-}
-
-bool Node::isDefaultNamespace( specs::html5::Namespace ns ) const { //TODO
-    return false;
+/**
+ * Checks if given namespace is default
+ * @param ns Namespace string
+ * @return Default state
+ */
+bool Node::isDefaultNamespace( const DOMString_t &ns ) const {
+    //ref: https://dom.spec.whatwg.org/#dom-node-isdefaultnamespace
+    return ( this->lookupNamespaceURI( U"" ) == ns );
 }
 
 /**
@@ -656,6 +916,8 @@ Node * Node::insertBefore( NodePtr_t & node, Node * child ) {
     }
 
     if( this->contains( *node ) ) {
+        //Note: the check for host-including inclusive ancestor of a parent is skipped
+        //      as DocumentFragments will never have hosts in this implementation
         throw DOMException( DOMExceptionType::HierarchyRequestError, "Node is already in this DOM tree." );
     }
 
@@ -762,7 +1024,7 @@ blogator::parser::dom::NodePtr_t Node::replaceChild( NodePtr_t &node, size_t ind
  * @return Removed child node
  * @throws DOMException when child cannot be found in child list
  */
-blogator::parser::dom::NodePtr_t Node::removeChild( NodePtr_t &child ) { //TODO remove map reference of node from Document
+blogator::parser::dom::NodePtr_t Node::removeChild( NodePtr_t &child ) {
     try {
         return Node::removeChildNode( this->getChildListIterator( child.get() ) );
 
@@ -781,7 +1043,7 @@ blogator::parser::dom::NodePtr_t Node::removeChild( NodePtr_t &child ) { //TODO 
  * @return Removed node
  * @throws DOMException when index value outside the children range
  */
-blogator::parser::dom::NodePtr_t Node::removeChild( size_t index ) { //TODO remove map reference of node from Document
+blogator::parser::dom::NodePtr_t Node::removeChild( size_t index ) {
     if( !_children.empty() && index < _children.size() ) {
         return Node::removeChildNode( std::next( _children.begin(), index ) );
 
@@ -866,45 +1128,33 @@ blogator::parser::dom::Nodes_t::iterator Node::getChildListIterator( const Node 
  * @return Pointer to inserted child
  * @throws DOMException when insertion breaks DOM tree validity
  */
-Node * Node::insertNodeBefore( NodePtr_t node, Node * child ) { //TODO add reference to new node to this Document's maps
+Node * Node::insertNodeBefore( NodePtr_t node, Node * child ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 
     if( child ) {
         try {
-            auto   child_it     = getChildListIterator( child ); //throws
-            Node * prev_sibling = child->previousSibling();
-            Node * inserted     = _children.insert( child_it, std::move( node ) )->get();
+            auto child_it = getChildListIterator( child ); //throws
 
-            child->setPrevSibling( inserted );
-
-            if( prev_sibling ) {
-                prev_sibling->setNextSibling( inserted );
+            if( node->nodeType() == NodeType::DOCUMENT_FRAGMENT_NODE ) {
+                return insertNodesBefore( node->childNodes(), child_it );
+            } else {
+                return insertNodeBefore( node, child_it );
             }
 
-            inserted->setParent( this );
-            inserted->setPrevSibling( prev_sibling );
-            inserted->setNextSibling( nullptr );
-
-            return inserted;
-
         } catch( blogator::exception::failed_expectation &e ) {
-            throw DOMException( DOMExceptionType::NotFoundError, "Child specified does not belong to this tree." );
+            throw DOMException(
+                DOMExceptionType::NotFoundError,
+                "Child specified does not belong to this tree."
+            );
         }
 
     } else {
-        Node * prev_sibling = ( this->hasChildNodes() ? _children.back().get() : nullptr );
-        Node * inserted     = _children.emplace_back( std::move( node ) ).get();
-
-        if( prev_sibling ) {
-            prev_sibling->setNextSibling( inserted );
+        if( node->nodeType() == NodeType::DOCUMENT_FRAGMENT_NODE ) {
+            return appendNodes( node->childNodes() );
+        } else {
+            return appendNode( node );
         }
-
-        inserted->setParent( this );
-        inserted->setPrevSibling( prev_sibling );
-        inserted->setNextSibling( nullptr );
-
-        return inserted;
     }
 }
 
@@ -920,6 +1170,8 @@ blogator::parser::dom::NodePtr_t Node::replaceChildNode( NodePtr_t &node, NodePt
     using exception::DOMExceptionType;
 
     if( this->contains( *node ) ) {
+        //Note: the check for host-including inclusive ancestor of a parent is skipped
+        //      as DocumentFragments will never have hosts in this implementation
         throw DOMException( DOMExceptionType::HierarchyRequestError, "Replacement node already in DOM tree." );
     }
 
@@ -952,13 +1204,14 @@ blogator::parser::dom::NodePtr_t Node::replaceChildNode( NodePtr_t &node, NodePt
         };
     }
 
-    //TODO add reference to new node to and remove old one from this Document's maps
     std::swap( node, target );
 
+    target->setOwnerDocument( node->ownerDocument() );
     target->setParent( node->parentNode() );
     target->setPrevSibling( node->previousSibling() );
     target->setNextSibling( node->nextSibling() );
 
+    node->setOwnerDocument( nullptr );
     node->setParent( nullptr );
     node->setPrevSibling( nullptr );
     node->setNextSibling( nullptr );
@@ -982,6 +1235,7 @@ blogator::parser::dom::NodePtr_t Node::removeChildNode( dom::Nodes_t::iterator i
         node->nextSibling()->setPrevSibling( node->previousSibling() );
     }
 
+    node->setOwnerDocument( nullptr );
     node->setParent( nullptr );
     node->setPrevSibling( nullptr );
     node->setNextSibling( nullptr );
@@ -989,6 +1243,18 @@ blogator::parser::dom::NodePtr_t Node::removeChildNode( dom::Nodes_t::iterator i
     _children.erase( it );
 
     return std::move( node );
+}
+
+/**
+ * [PROTECTED] Recursively sets the pointer to the owning Document
+ * @param node Pointer to new document
+ */
+void Node::setOwnerDocument( Document * document ) {
+    _document = document;
+
+    for( auto & child : _children ) {
+        child->setOwnerDocument( document );
+    }
 }
 
 /**
@@ -1013,4 +1279,115 @@ void Node::setPrevSibling( Node * node ) {
  */
 void Node::setNextSibling( Node * node ) {
     _next_sibling = node;
+}
+
+/**
+ * [PRIVATE] Appends a single node to the end of the children list
+ * @param node Node to append
+ * @return Pointer to appended node
+ */
+Node * Node::appendNode( NodePtr_t &node ) {
+    Node * prev_sibling = ( this->hasChildNodes() ? _children.back().get() : nullptr );
+    Node * inserted     = _children.emplace_back( std::move( node ) ).get();
+
+    if( prev_sibling ) {
+        prev_sibling->setNextSibling( inserted );
+    }
+
+    inserted->setOwnerDocument( this->ownerDocument() );
+    inserted->setParent( this );
+    inserted->setPrevSibling( prev_sibling );
+    inserted->setNextSibling( nullptr );
+
+    return inserted;
+}
+
+/**
+ * [PRIVATE] Appends a list of nodes to the end of the children list
+ * @param nodes List of nodes to append
+ * @return Pointer to first appended node
+ */
+Node * Node::appendNodes( Nodes_t &nodes ) {
+    auto   it             = nodes.begin();
+    Node * first_inserted = appendNode( *(it++) );
+
+    while( it != nodes.end() ) {
+        appendNode( *(it++) );
+    }
+
+    nodes.clear(); //clear all NULL unique_ptr
+
+    return first_inserted;
+}
+
+/**
+ * [PRIVATE] Insert a single node before another in the children list
+ * @param node Node to insert
+ * @param it Iterator to the child node to insert before
+ * @return Pointer to inserted node
+ */
+Node * Node::insertNodeBefore( NodePtr_t &node, Nodes_t::iterator it ) {
+    Node * prev_sibling = (*it)->previousSibling();
+    Node * next_sibling = (*it).get();
+    Node * inserted     = _children.insert( it, std::move( node ) )->get();
+
+    next_sibling->setPrevSibling( inserted );
+
+    if( prev_sibling ) {
+        prev_sibling->setNextSibling( inserted );
+    }
+
+    inserted->setOwnerDocument( this->ownerDocument() );
+    inserted->setParent( this );
+    inserted->setPrevSibling( prev_sibling );
+    inserted->setNextSibling( next_sibling );
+
+    return inserted;
+
+}
+
+/**
+ * [PRIVATE] Insert a list of nodes before a child node in the children list
+ * @param nodes List of nodes to insert
+ * @param it Iterator to the child node to insert before
+ * @return Pointer to first inserted node
+ */
+Node * Node::insertNodesBefore( Nodes_t &nodes, Nodes_t::iterator it ) {
+    Node * prev_sibling    = (*it)->previousSibling();
+    Node * next_sibling    = (*it).get();
+    auto   last_new_child  = nodes.back().get();
+    auto   first_new_child = _children.insert( it,
+                                               std::make_move_iterator( nodes.begin() ),
+                                               std::make_move_iterator( nodes.end() ) )->get();
+
+
+    first_new_child->setPrevSibling( prev_sibling );
+    last_new_child->setNextSibling( next_sibling );
+
+    if( prev_sibling ) {
+        prev_sibling->setNextSibling( first_new_child );
+    }
+
+    if( next_sibling ) {
+        next_sibling->setPrevSibling( last_new_child );
+    }
+
+    for( auto * curr = first_new_child; curr != next_sibling; curr = curr->nextSibling() ) {
+        curr->setOwnerDocument( this->ownerDocument() );
+        curr->setParent( this );
+    }
+
+    nodes.clear();
+
+    return first_new_child;
+}
+
+/**
+ * Shallow swaps Nodes
+ * @param lhs Node
+ * @param rhs Node
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void blogator::parser::dom::node::swap( Node &lhs, Node &rhs ) {
+    lhs.swap( rhs );
 }

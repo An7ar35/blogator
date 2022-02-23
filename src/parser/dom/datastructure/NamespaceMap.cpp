@@ -6,6 +6,24 @@
 using namespace blogator::parser::dom;
 
 /**
+ * Constructor
+ * @throws std::runtime_error if default 'NONE' namespace cannot be set
+ */
+NamespaceMap::NamespaceMap() {
+    NamespaceMap::id_t id = INVALID;
+
+    if( ( id = setNamespace( specs::infra::Namespace::NONE ) ) != NONE ) {
+        LOG_CRITICAL(
+            "[parser::dom::NamespaceMap::NamespaceMap()] Failed to create 'NONE' NS entry (returned: " + std::to_string( id ) + ")."
+        );
+
+        throw std::runtime_error(
+            "[parser::dom::NamespaceMap::NamespaceMap()] Default namespace failed to be created."
+        );
+    }
+}
+
+/**
  * Sets a namespace
  * @param ns specs::infra::Namespace enum
  * @return Namespace ID (or INVALID on error)
@@ -26,12 +44,13 @@ NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::infra::N
         return _enum_mapping.at( ns ); //EARLY RETURN
 
     } else {
-        const auto i               = _namespaces.size();
-        const auto [ it, success ] = _enum_mapping.emplace( std::pair<specs::infra::Namespace, id_t>( ns, i ) );
+        const auto i                     = _namespaces.size();
+        const auto [ it1, enum_success ] = _enum_mapping.emplace( std::pair<specs::infra::Namespace, id_t>( ns, i ) );
+        const auto [ it2, str_success  ] = _str_mapping.emplace( std::pair<DOMString_t, id_t>( specs::infra::to_namespaceURI( ns ), i ) );
 
-        if( success ) {
+        if( enum_success && str_success ) {
             _namespaces.emplace_back( NS { specs::infra::to_namespaceURI( ns ), specs::infra::to_prefix( ns ), ns } );
-            return static_cast<id_t>( i ); //BRANCHED RETURN (1/2)
+            return static_cast<id_t>( i ); //EARLY RETURN
 
         } else {
             LOG_CRITICAL(
@@ -39,13 +58,21 @@ NamespaceMap::id_t NamespaceMap::setNamespace( blogator::parser::specs::infra::N
                 "Failed to add enum mapping."
             );
 
-            return INVALID;  //BRANCHED RETURN (2/2)
+            if( enum_success ) {
+                _enum_mapping.erase( it1 );
+            }
+
+            if( str_success ) {
+                _str_mapping.erase( it2 );
+            }
+
+            return INVALID;  //EARLY RETURN
         }
     }
 }
 
 /**
- * Sets a namespace
+ * Sets a namespace/redefine its prefix
  * @param ns Namespace URI string
  * @param prefix Namespace prefix (optional)
  * @return Namespace ID (or INVALID on error)
@@ -54,7 +81,57 @@ NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns, DOMString_
     std::lock_guard<std::mutex> guard( _mutex );
 
     if( _str_mapping.contains( ns ) ) {
-        return _str_mapping.at( ns ); //EARLY RETURN
+        auto id = _str_mapping.at( ns );
+
+        if( prefix != _namespaces.at( id ).prefix ) {
+            using blogator::unicode::utf8::convert;
+
+            LOG_WARNING(
+                "[parser::dom::NamespaceMap::setNamespace( \"", convert( ns ), "\", \"", convert( prefix ), "\" )] "
+                "Redefining already existing namespace with a different prefix ('", convert( _namespaces.at( id ).prefix ),  "' -> '", convert( prefix ), "')."
+            );
+
+            _namespaces.at( id ).prefix = prefix;
+        };
+
+        return id; //EARLY RETURN
+
+    }
+
+    auto ns_enum = specs::infra::to_namespace( ns );
+
+    if( ns_enum != specs::infra::Namespace::UNKNOWN ) {
+        if( _enum_mapping.contains( ns_enum ) ) {
+            return _enum_mapping.at( ns_enum ); //EARLY RETURN
+
+        } else {
+            const auto i                     = _namespaces.size();
+            const auto [ it1, enum_success ] = _enum_mapping.emplace( std::pair<specs::infra::Namespace, id_t>( ns_enum, i ) );
+            const auto [ it2, str_success  ] = _str_mapping.emplace( std::pair<DOMString_t, id_t>( specs::infra::to_namespaceURI( ns_enum ), i ) );
+
+            if( enum_success && str_success ) {
+                _namespaces.emplace_back( NS { specs::infra::to_namespaceURI( ns_enum ), specs::infra::to_prefix( ns_enum ), ns_enum } );
+                return static_cast<id_t>( i ); //EARLY RETURN
+
+            } else {
+                using blogator::unicode::utf8::convert;
+
+                LOG_CRITICAL(
+                    "[parser::dom::NamespaceMap::setNamespace( \"", convert( ns ), "\", \"", convert( prefix ), "\" )] "
+                    "Failed to add enum mapping."
+                );
+
+                if( enum_success ) {
+                    _enum_mapping.erase( it1 );
+                }
+
+                if( str_success ) {
+                    _str_mapping.erase( it2 );
+                }
+
+                return INVALID;  //EARLY RETURN
+            }
+        }
 
     } else {
         const auto i               = _namespaces.size();
@@ -62,15 +139,17 @@ NamespaceMap::id_t NamespaceMap::setNamespace( const DOMString_t &ns, DOMString_
 
         if( success ) {
             _namespaces.emplace_back( NS { ns, std::move( prefix ), specs::infra::Namespace::OTHER } );
-            return static_cast<id_t>( i ); //BRANCHED RETURN (1/2)
+            return static_cast<id_t>( i ); //EARLY RETURN
 
         } else {
+            using blogator::unicode::utf8::convert;
+
             LOG_CRITICAL(
-                "[parser::dom::NamespaceMap::setNamespace( ", blogator::unicode::utf8::convert( ns ), " )] "
+                "[parser::dom::NamespaceMap::setNamespace( \"", convert( ns ), "\", \"", convert( prefix ), "\" )] "
                 "Failed to add string mapping."
             );
 
-            return INVALID;  //BRANCHED RETURN (2/2)
+            return INVALID; //EARLY RETURN
         }
     }
 }

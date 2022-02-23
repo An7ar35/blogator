@@ -14,33 +14,19 @@ using namespace blogator::parser::dom::node;
  * @param type Node type
  * @param data Data string
  */
-CharacterData::CharacterData( blogator::parser::dom::NodeType type, DOMString_t data ) :
+CharacterData::CharacterData( NodeType type, DOMString_t data ) :
     node::Node( type ),
     _data( std::move( data ) )
 {}
 
 /**
  * Constructor
+ * @param document Pointer to owner document
  * @param type Node type
  * @param data Data string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
  */
-CharacterData::CharacterData( NodeType type, DOMString_t data, node::Node * parent, node::Node * prev_sibling ) :
-    node::Node( type, parent, prev_sibling ),
-    _data( std::move( data ) )
-{}
-
-/**
- * Constructor
- * @param type Node type
- * @param data Data string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
- */
-CharacterData::CharacterData( NodeType type, DOMString_t data, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::Node( type, parent, prev_sibling, next_sibling ),
+CharacterData::CharacterData( Document * document, NodeType type, DOMString_t data ) :
+    node::Node( document, type ),
     _data( std::move( data ) )
 {}
 
@@ -69,7 +55,7 @@ CharacterData::CharacterData( CharacterData &&node )  noexcept :
  */
 CharacterData & CharacterData::operator =( const CharacterData & node ) {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( node );
+        Node::operator =( dynamic_cast<const node::Node &>( node ) );
         this->_data = node._data;
     }
 
@@ -83,11 +69,31 @@ CharacterData & CharacterData::operator =( const CharacterData & node ) {
  */
 CharacterData & CharacterData::operator =( CharacterData && node ) noexcept {
     if( &node != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<node::Node &&>( node );
+        Node::operator =( dynamic_cast<node::Node &&>( node ) );
         this->_data = std::move( node._data );
     }
 
     return *this;
+}
+
+/**
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void CharacterData::swap( Node &rhs ) {
+    Node::swap( rhs );
+    this->swap( dynamic_cast<CharacterData &>( rhs ) );
+}
+
+/**
+ * Shallow swaps CharacterData nodes
+ * @param rhs node::CharacterData to swap with
+ */
+void CharacterData::swap( CharacterData &rhs ) {
+    if( &rhs != this ) {
+        std::swap( this->_data, rhs._data );
+    }
 }
 
 /**
@@ -311,4 +317,13 @@ const DOMString_t & CharacterData::replaceData( size_t offset, size_t count, con
     //      (ref: https://dom.spec.whatwg.org/#concept-live-range)
 
     return _data;
+}
+
+/**
+ * Shallow swaps CharacterData nodes
+ * @param lhs CharacterData node
+ * @param rhs CharacterData node
+ */
+void blogator::parser::dom::node::swap( CharacterData &lhs, CharacterData &rhs ) {
+    lhs.swap( rhs );
 }

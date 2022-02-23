@@ -1,19 +1,18 @@
 #include "Document.h"
 
 #include <utility>
+#include <memory>
 
 #include "../../../logger/Logger.h"
+#include "../../../string/helpers.h"
 #include "Attr.h"
 #include "CDATASection.h"
 #include "Comment.h"
 #include "DocumentType.h"
+#include "DocumentFragment.h"
 #include "Element.h"
 #include "Text.h"
-#include "../DOMImplementation.h"
-#include "../validation/HTML5Validator.h"
-#include "../exception/exception.h"
-#include "../iterator/NodeIterator.h"
-#include "../iterator/TreeWalker.h"
+#include "../validation/XML.h"
 #include "../../../unicode/unicode.h"
 
 using namespace blogator::parser::dom::node;
@@ -23,9 +22,29 @@ using namespace blogator::parser::dom::node;
  */
 Document::Document() :
     node::Node( NodeType::DOCUMENT_NODE ),
-    _content_type( specs::html5::ContentType::APPLICATION_XHTML_XML ),
+    _content_type( specs::infra::ContentType::APPLICATION_XHTML_XML ),
     _type( Document::Type::HTML ),
     _quirks( QuirksMode::NO_QUIRKS ),
+    _doctype( nullptr ),
+    _element( nullptr )
+{}
+
+/**
+ * Constructor (Type is auto-set)
+ * @param encoding Encoding
+ * @param content_type ContentType enum
+ * @param url Document URL
+ * @param origin Document origin path
+ * @param quirks (optional) Quirks (default: NO_QUIRKS)
+ */
+Document::Document( USVString_t encoding, specs::infra::ContentType content_type, USVString_t url, std::filesystem::path origin, QuirksMode quirks ) :
+    node::Node( NodeType::DOCUMENT_NODE ),
+    _encoding( std::move( encoding ) ),
+    _content_type( content_type ),
+    _url( std::move( url ) ),
+    _origin( std::move( origin ) ),
+    _type( content_type == specs::infra::ContentType::APPLICATION_XHTML_XML ? Type::HTML : Type::XML ),
+    _quirks( quirks ),
     _doctype( nullptr ),
     _element( nullptr )
 {}
@@ -39,7 +58,7 @@ Document::Document() :
  * @param type Document type
  * @param quirks (optional) Quirks (default: NO_QUIRKS)
  */
-Document::Document( USVString_t encoding, specs::html5::ContentType content_type, USVString_t url, std::filesystem::path origin, Type type, QuirksMode quirks ) :
+Document::Document( USVString_t encoding, specs::infra::ContentType content_type, USVString_t url, std::filesystem::path origin, Type type, QuirksMode quirks ) :
     node::Node( NodeType::DOCUMENT_NODE ),
     _encoding( std::move( encoding ) ),
     _content_type( content_type ),
@@ -151,7 +170,7 @@ Document::Document( Document &&document ) noexcept :
  */
 Document & Document::operator =( const Document &document ) {
     if( &document != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( document );
+        Node::operator =( dynamic_cast<const node::Node &>( document ) );
         this->_encoding     = document._encoding;
         this->_content_type = document._content_type;
         this->_url          = document._url;
@@ -200,7 +219,7 @@ Document & Document::operator =( const Document &document ) {
  */
 Document & Document::operator =( Document &&document ) noexcept {
     if( &document != this ) {
-        dynamic_cast<node::Node &>( *this ) = dynamic_cast<const node::Node &>( document );
+        Node::operator =( dynamic_cast<node::Node &&>( document ) );
         this->_encoding     = std::move( document._encoding );
         this->_content_type = document._content_type;
         this->_url          = std::move( document._url );
@@ -240,6 +259,144 @@ Document & Document::operator =( Document &&document ) noexcept {
     }
 
     return *this;
+}
+
+/**
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
+ */
+void Document::swap( Node &rhs ) {
+    Node::swap( rhs );
+    this->swap( dynamic_cast<Document &>( rhs ) );
+}
+
+/**
+ * Shallow swaps Document nodes
+ * @param rhs node::Document to swap with
+ */
+void Document::swap( Document &rhs ) {
+    if( &rhs != this ) {
+        std::swap( this->_encoding, rhs._encoding );
+        std::swap( this->_content_type, rhs._content_type );
+        std::swap( this->_url, rhs._url );
+        std::swap( this->_origin, rhs._origin );
+        std::swap( this->_type, rhs._type );
+        std::swap( this->_quirks, rhs._quirks );
+        std::swap( this->_doctype, rhs._doctype );
+        std::swap( this->_element, rhs._element );
+    }
+}
+
+/**
+ * Gets the document init type
+ * @return Type (XML/HTML)
+ */
+Document::Type Document::type() const {
+    return _type;
+}
+
+/**
+ * Gets the file path associated with the document
+ * @return Document file path
+ */
+const std::filesystem::path & Document::filepath() const {
+    return _origin;
+}
+
+/**
+ * Gets the document's quirk mode
+ * @return Quirks mode
+ */
+blogator::parser::dom::QuirksMode Document::quirksMode() const {
+    return _quirks;
+}
+
+/**
+ * Sets the 'quirks' flag for the document
+ * @param mode quirks mode
+ */
+void Document::setQuirks( QuirksMode mode ) {
+    _quirks = mode;
+}
+
+/**
+ * Creates this Document's Element node
+ * @param local_name Local name
+ * @return Pointer to created Element
+ * @throws DOMException when an Element already exists or name is invalid
+ */
+Element * Document::createDocumentElement( blogator::parser::dom::DOMString_t local_name ) {
+    using blogator::parser::dom::exception::DOMException;
+    using blogator::parser::dom::exception::DOMExceptionType;
+    using blogator::unicode::utf8::convert;
+
+    if( this->documentElement() ) {
+        throw DOMException(
+            DOMExceptionType::HierarchyRequestError,
+            "[parser::dom::node::Document::createDocumentElement( \"" + convert( local_name ) + "\" )] Document Element already exists."
+        );
+    }
+
+    if( !dom::validation::XML::checkName( local_name ) ) {
+        throw DOMException(
+            DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::node::Document::createDocumentElement( \"" + convert( local_name ) + "\" )] Invalid name."
+        );
+    }
+
+    if( _type == Type::HTML ) {
+        blogator::unicode::ascii::tolower( local_name );
+
+        return dynamic_cast<Element *>(
+            this->appendChild( std::make_unique<Element>(
+                specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 ),
+                std::move( local_name )
+            ) )
+        );
+
+    } else {
+        return dynamic_cast<Element *>(
+            this->appendChild( std::make_unique<Element>(
+                ( _content_type == specs::infra::ContentType::APPLICATION_XHTML_XML
+                  ? specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 )
+                  : U"" ),
+                std::move( local_name )
+            ) )
+        );
+    }
+}
+
+/**
+ * Creates this Document's Element node
+ * @param element_type Element type enum
+ * @return when an Element already exists
+ */
+Element *Document::createDocumentElement( blogator::parser::specs::infra::Element element_type ) {
+    using blogator::parser::dom::exception::DOMException;
+    using blogator::parser::dom::exception::DOMExceptionType;
+    using specs::infra::ContentType;
+    using specs::infra::to_namespaceURI;
+
+    const auto u8name = blogator::to_string( element_type );
+
+    if( this->documentElement() ) {
+        throw DOMException(
+            DOMExceptionType::HierarchyRequestError,
+            "[parser::dom::node::Document::createDocumentElement( \"" + u8name + "\" )] Document Element already exists."
+        );
+    }
+
+    auto ns_str = ( _type == Type::HTML || _content_type == ContentType::APPLICATION_XHTML_XML
+                    ? to_namespaceURI( specs::infra::Namespace::HTML5 )
+                    : DOMString_t() );
+
+    return dynamic_cast<Element *>(
+        this->appendChild( std::make_unique<Element>(
+            std::move( ns_str ),
+            DOMString_t( u8name.cbegin(), u8name.cend() )
+        ) )
+    );
 }
 
 /**
@@ -294,103 +451,318 @@ const blogator::parser::dom::node::DocumentType * Document::doctype() const {
  * Gets the document's Element node
  * @return Element node (or nullptr)
  */
-const blogator::parser::dom::node::Element * Document::documentElement() const {
+blogator::parser::dom::node::Element * Document::documentElement() {
     return _element;
 }
 
-
-
-
-
-
-blogator::parser::dom::HTMLCollection_t Document::getElementsByTagName( const DOMString_t & qualified_name ) {
-    return HTMLCollection_t(); //TODO
-}
-
-blogator::parser::dom::HTMLCollection_t Document::getElementsByTagNameNS( const DOMString_t & ns, const DOMString_t & local_name ) {
-    return HTMLCollection_t(); //TODO
-}
-
-blogator::parser::dom::HTMLCollection_t Document::getElementsByClassName( const DOMString_t & class_name ) {
-    return HTMLCollection_t(); //TODO
+/**
+ * Gets the document's Element node
+ * @return Element node (or nullptr)
+ */
+const blogator::parser::dom::node::Element * Document::documentElement() const {
+    return const_cast<Element *>( const_cast<Document *>( this )->documentElement() );
 }
 
 /**
- * Creates a root element in the document
+ * Gets an Element by its ID
+ * @param id ID string
+ * @return Pointer to Element or nullptr
+ */
+Element * Document::getElementById( const DOMString_t &id ) {
+    const auto filter_fn = [&id]( const node::Node &node ) {
+        const auto * element = dynamic_cast<const Element *>( &node );
+        return ( element->id() == id ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+    };
+
+    auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+    return ( it == this->end()
+             ? nullptr
+             : dynamic_cast<Element *>( it.node() )
+    );
+}
+
+/**
+ * Gets an Element by its ID
+ * @param id ID string
+ * @return Pointer to Element or nullptr
+ */
+const Element * Document::getElementById( const DOMString_t &id ) const {
+    return const_cast<Element *>( const_cast<Document *>( this )->getElementById( id ) );
+}
+
+/**
+ * Get Elements by their tag names
+ * @param qualified_name Qualified name
+ * @return Collection of pointers to elements whose tag names match the qualified name specified
+ */
+blogator::parser::dom::HTMLCollection_t Document::getElementsByTagName( const DOMString_t & qualified_name ) {
+    //ref: https://dom.spec.whatwg.org/#concept-getelementsbytagname
+
+    auto list = HTMLCollection_t();
+
+    if( qualified_name == U"*" /* U+002A */ ) {
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT ) );
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else if( this->type() == Document::Type::HTML ) {
+        const auto lowercase_qname = blogator::unicode::ascii::tolower( qualified_name );
+
+        const auto filter_fn = [&qualified_name, &lowercase_qname]( const node::Node &node ) {
+            const auto * element = dynamic_cast<const Element *>( &node );
+
+            if( Node::namespace_map.getNamespaceEnum( element->namespaceID() ) == specs::infra::Namespace::HTML5 ) {
+                return ( element->qualifiedName() == lowercase_qname ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+            }
+
+            return ( element->qualifiedName() == qualified_name ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+        };
+
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else {
+        const auto filter_fn = [&qualified_name]( const node::Node &node ) {
+            const auto * element = dynamic_cast<const Element *>( &node );
+            return ( element->qualifiedName() == qualified_name ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+        };
+
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+    }
+
+    return std::move( list );
+}
+
+/**
+ * Get Elements by their tag names within a namespace
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Collection of pointers to elements whose tag names match the qualified name specified
+ */
+blogator::parser::dom::HTMLCollection_t Document::getElementsByTagNameNS( const DOMString_t & ns, const DOMString_t & local_name ) {
+    //ref: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
+
+    auto list = HTMLCollection_t();
+
+    if( ns == U"*" /* U+002A */ && local_name == U"*" /* U+002A */ ) {
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT ) );
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else if( ns == U"*" /* U+002A */ ) {
+        const auto filter_fn = [&local_name]( const node::Node &node ) {
+            const auto * element = dynamic_cast<const Element *>( &node );
+            return ( element->localName() == local_name ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+        };
+
+        auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+        while( it != this->end() ) {
+            list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+            ++it;
+        }
+
+    } else if( local_name == U"*" /* U+002A */ ) {
+        auto ns_id = Node::namespace_map.getID( ns );
+
+        if( ns_id != NamespaceMap::INVALID ) {
+            const auto filter_fn = [&ns_id]( const node::Node &node ) {
+                const auto * element = dynamic_cast<const Element *>( &node );
+                return ( element->namespaceID() == ns_id ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+            };
+
+            auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+            while( it != this->end() ) {
+                list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+                ++it;
+            }
+        }
+
+    } else {
+        auto ns_id = Node::namespace_map.getID( ns );
+
+        if( ns_id != NamespaceMap::INVALID ) {
+            const auto filter_fn = [&ns_id, &local_name]( const node::Node &node ) {
+                const auto * element = dynamic_cast<const Element *>( &node );
+                return ( element->namespaceID() == ns_id && element->localName() == local_name
+                         ? NodeFilter::Result::FILTER_ACCEPT
+                         : NodeFilter::Result::FILTER_SKIP );
+            };
+
+            auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+            while( it != this->end() ) {
+                list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+                ++it;
+            }
+        }
+    }
+
+    return std::move( list );
+}
+
+/**
+ * Get Elements by their class names
+ * @param class_names Set of class names
+ * @return Collection of pointers to elements whose class match the class name(s) specified
+ */
+blogator::parser::dom::HTMLCollection_t Document::getElementsByClassName( std::set<DOMString_t> class_names ) {
+    //ref: https://dom.spec.whatwg.org/#concept-getelementsbyclassname
+
+    if( class_names.empty() ) {
+        return {}; //EARLY RETURN
+    }
+
+    HTMLCollection_t                           list;
+    std::function<bool( const DOMString_t & )> compare_fn;
+
+    if( _document && _document->quirksMode() != QuirksMode::NO_QUIRKS ) { //i.e.: 'quirks' mode
+        compare_fn = [&class_names]( auto name ) { return class_names.contains( blogator::unicode::ascii::tolower( name ) ); };
+
+        for( auto & name : class_names ) {
+            blogator::unicode::ascii::tolower( name );
+        }
+
+    } else {
+        compare_fn = [&class_names]( const auto & name ) { return class_names.contains( name ); };
+    }
+
+    const auto filter_fn = [&compare_fn]( const node::Node &node ) {
+        const auto * element    = dynamic_cast<const Element *>( &node );
+        const auto   class_list = element->classList();
+        const auto   it         = std::find_if( class_list.cbegin(), class_list.cend(), compare_fn );
+
+        return ( it != class_list.cend() ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
+    };
+
+    auto it = this->begin( std::make_shared<NodeFilter>( NodeFilter::SHOW_ELEMENT, filter_fn ) );
+
+    while( it != this->end() ) {
+        list.emplace_back( dynamic_cast<Element *>( it.node() ) );
+        ++it;
+    }
+
+    return std::move( list );
+}
+
+/**
+ * Creates a an Element node
  * @param local_name Element name
- * @return Pointer to created Element
+ * @return Pointer to created Element node
  * @throws DOMException when name string is not valid
  */
-std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( DOMString_t local_name ) {
-    if( !dom::validation::HTML5Validator::isValidName( local_name ) ) {
-        throw exception::DOMException( exception::DOMExceptionType::InvalidCharacterError );
+std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( DOMString_t local_name ) const {
+    using blogator::parser::dom::exception::DOMException;
+    using blogator::parser::dom::exception::DOMExceptionType;
+
+    if( !dom::validation::XML::checkNCName( local_name ) ) {
+        using blogator::unicode::utf8::convert;
+
+        throw DOMException(
+            DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::node::Document::createElement( \"" + convert( local_name ) + "\" )] Invalid name."
+        );
     }
 
     if( _type == Type::HTML ) {
-        std::transform( local_name.begin(),
-                        local_name.end(),
-                        local_name.begin(),
-                        []( const auto c ) { return blogator::unicode::ascii::tolower( c ); }
-        );
+        blogator::unicode::ascii::tolower( local_name );
 
         return std::make_unique<Element>(
-            specs::html5::to_namespaceURI( specs::html5::Namespace::HTML5 ),
+            const_cast<Document *>( this ),
+            specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 ),
             std::move( local_name )
         );
 
     } else {
         return std::make_unique<Element>(
-            ( _content_type == specs::html5::ContentType::APPLICATION_XHTML_XML
-              ? specs::html5::to_namespaceURI( specs::html5::Namespace::HTML5 )
-              : U"" ),
+            const_cast<Document *>( this ),
+            specs::infra::to_namespaceURI( specs::infra::to_namespace( _content_type ) ),
             std::move( local_name )
         );
     }
 }
 
 /**
- * Creates a root element in the document
+ * Creates an Element node
  * @param element_type HTML5 Element type enum
- * @return Pointer to created Element
+ * @return Pointer to created Element node
  */
-std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( specs::html5::Element element_type ) {
-    using specs::html5::ContentType;
-    using specs::html5::to_namespaceURI;
+std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( specs::infra::Element element_type ) const {
+    using blogator::parser::dom::exception::DOMException;
+    using blogator::parser::dom::exception::DOMExceptionType;
+    using specs::infra::ContentType;
+    using specs::infra::to_namespaceURI;
 
     const auto u8name = blogator::to_string( element_type );
-    auto       ns_str = ( _type == Type::HTML || _content_type == ContentType::APPLICATION_XHTML_XML
-                          ? to_namespaceURI( specs::html5::Namespace::HTML5 )
-                          : DOMString_t() );
 
-    return std::make_unique<node::Element>(
-        std::move( ns_str ),
-        DOMString_t( u8name.cbegin(), u8name.cend() )
-    );
+    if( _type == Type::HTML || _content_type == ContentType::APPLICATION_XHTML_XML ) {
+        return std::make_unique<node::Element>(
+            const_cast<Document *>( this ),
+            to_namespaceURI( specs::infra::Namespace::HTML5 ),
+            DOMString_t( u8name.cbegin(), u8name.cend() )
+        );
+
+    } else {
+        return std::make_unique<node::Element>(
+            const_cast<Document *>( this ),
+            specs::infra::to_namespaceURI( specs::infra::to_namespace( _content_type ) ),
+            DOMString_t( u8name.cbegin(), u8name.cend() )
+        );
+    }
 }
 
 /**
- * Creates a root element in the document
+ * Creates an Element node
  * @param ns Namespace
- * @param prefix Prefix namespace
- * @param local_name Qualified name
- * @return Pointer to created Element
+ * @param local_name Local name
+ * @return Pointer to created Element node
+ * @throws blogator::parser::dom::exception::DOMException when validation failed
  */
-std::unique_ptr<blogator::parser::dom::node::Element> Document::createElementNS( DOMString_t ns, DOMString_t prefix, DOMString_t local_name ) {
-    //TODO do we need to check the ns and name format?
-    return std::make_unique<node::Element>(
-        std::move( ns ),
-        std::move( prefix ),
-        std::move( local_name )
-    );
+std::unique_ptr<blogator::parser::dom::node::Element> Document::createElementNS( const DOMString_t & ns, const DOMString_t & qualified_name ) const {
+    try {
+        auto v = validation::XML::validateNS( ns, qualified_name );
+
+        if( v.size() == 1 ) {
+            return std::make_unique<Element>( const_cast<Document *>( this ), ns, DOMString_t(), v[0] ); //EARLY RETURN
+        } else {
+            return std::make_unique<node::Element>( const_cast<Document *>( this ), ns, v[0], v[1] ); //EARLY RETURN
+        }
+
+    } catch( const exception::DOMException &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw exception::DOMException(
+            e.type(),
+            "[parser::dom::node::Document::createElementNS( \"" + convert( ns ) + "\", \"" + convert( qualified_name ) + "\" )] " + e.what()
+        );
+    }
 }
 
 /**
- * Creates a Text in the document
+ * Creates a Text node
  * @param data Text data
- * @return Pointer to created Text
+ * @return Pointer to created Text node
  */
-std::unique_ptr<blogator::parser::dom::node::Text> Document::createTextNode( DOMString_t data ) {
+std::unique_ptr<blogator::parser::dom::node::Text> Document::createTextNode( DOMString_t data ) const {
     return std::make_unique<node::Text>(
+        const_cast<Document *>( this ),
         std::move( data )
     );
 }
@@ -400,112 +772,131 @@ std::unique_ptr<blogator::parser::dom::node::Text> Document::createTextNode( DOM
  * @param data Text data
  * @return Pointer to created CDATASection
  */
-std::unique_ptr<blogator::parser::dom::node::CDATASection> Document::createCDATASection( DOMString_t data ) {
+std::unique_ptr<blogator::parser::dom::node::CDATASection> Document::createCDATASection( DOMString_t data ) const {
     return std::make_unique<node::CDATASection>(
+        const_cast<Document *>( this ),
         std::move( data )
     );
 }
 
 /**
- * Creates a Comment in the document
+ * Creates a Comment node whose Document is this
  * @param data Text data
- * @return Pointer to created Comment
+ * @return Pointer to created Comment node
  */
-std::unique_ptr<blogator::parser::dom::node::Comment> Document::createComment( DOMString_t data ) {
+std::unique_ptr<blogator::parser::dom::node::Comment> Document::createComment( DOMString_t data ) const {
     return std::make_unique<node::Comment>(
+        const_cast<Document *>( this ),
         std::move( data )
     );
 }
 
 /**
- * Imports a node
- * @param node Pointer to target node
- * @param deep Deep copy flag
- * @return Copied node
+ * Creates an attribute node whose owner is this Document
+ * @param local_name Local name string
+ * @return Attribute (AttrPtr_t)
  */
-blogator::parser::dom::NodePtr_t Document::importNode( const Node * node, bool deep ) {
-    if( node == nullptr ) {
-        throw blogator::exception::failed_expectation(
-            "[parser::dom::node::Document::importNode( const Node *, deep=" + std::to_string( deep ) + " )] Node is NULL."
+blogator::parser::dom::AttrPtr_t Document::createAttribute( DOMString_t local_name ) {
+    if( !dom::validation::XML::checkNCName( local_name ) ) {
+        using blogator::unicode::utf8::convert;
+
+        throw dom::exception::DOMException(
+            dom::exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::node::Document::createAttribute( \"" + convert( local_name ) + "\" )] Invalid name."
         );
     }
 
-    if( node->nodeType() == NodeType::DOCUMENT_NODE ) {
-        throw exception::DOMException( exception::DOMExceptionType::NotSupportedError, "Cannot import a 'Document' node." );
-
-    } else {
-        return node->cloneNode( deep );
+    if( this->type() == Document::Type::HTML ) {
+        unicode::ascii::tolower( local_name );
     }
+
+    return std::make_unique<node::Attr>( this, local_name ); //EARLY RETURN
 }
 
 /**
- * Adopts a node into the document
- * @param node Node to adopt
- * @return Pointer to adopted node
- * @throws DOMException when action is not supported or node is null
+ * Creates a namespaced attribute node whose owner is this Document
+ * @param ns Namespace URI
+ * @param qualified_name Qualified name
+ * @return Attribute (AttrPtr_t)
+ * @throws blogator::parser::dom::exception::DOMException when validation fails
  */
-blogator::parser::dom::node::Node * Document::adoptNode( NodePtr_t &node ) {
-    if( !node ) {
-        throw blogator::exception::failed_expectation(
-            "[parser::dom::node::Document::adoptNode( NodePtr_t & )] Node is NULL."
+blogator::parser::dom::AttrPtr_t Document::createAttributeNS( const DOMString_t & ns, const DOMString_t &qualified_name ) {
+    try {
+        auto v = validation::XML::validateNS( ns, qualified_name );
+
+        if( v.size() == 1 ) {
+            return std::make_unique<node::Attr>( this, ns, U"", v[0] ); //EARLY RETURN
+        } else {
+            return std::make_unique<node::Attr>( this, ns, v[0], v[1] ); //EARLY RETURN
+        }
+
+    } catch( const exception::DOMException &e ) {
+        using blogator::unicode::utf8::convert;
+
+        throw exception::DOMException(
+            e.type(),
+            "[parser::dom::node::Document::createAttributeNS( \"" + convert( ns ) + "\", \"" + convert( qualified_name ) + "\" )] " + e.what()
         );
     }
+}
 
-    if( node->nodeType() == NodeType::DOCUMENT_NODE ) {
-        throw exception::DOMException( exception::DOMExceptionType::NotSupportedError, "Cannot adopt a 'Document' node." );
+/**
+ * Creates a node iterator
+ * @param root Pointer to root node of the iterator's subtree (nullptr will default to this Document)
+ * @param what_to_show Filter bit-mask
+ * @return Iterator to the start
+ */
+blogator::parser::dom::NodeIterator Document::createNodeIterator( Node * root, unsigned long what_to_show ) {
+    auto * subtree_root = ( root == nullptr ? this : root );
+
+    if( what_to_show == NodeFilter::SHOW_ALL ) {
+        return { subtree_root,
+                 false };
+
     } else {
-        return this->appendChild( this->removeChild( node ) );
+        return { subtree_root,
+                 std::make_shared<NodeFilter>( what_to_show ),
+                 false };
     }
 }
 
-std::unique_ptr<Attr> Document::createAttribute( DOMString_t local_name ) { //TODO
-    //DOMString_t prefix, DOMString_t name, DOMString_t value
-    return {};
-}
-
-std::unique_ptr<Attr> Document::createAttributeNS( DOMString_t ns, DOMString_t qualified_name ) { //TODO
-
-    return {};
-}
-
-//blogator::parser::dom::NodeIterator Document::createNodeIterator( node::Node * root, unsigned long what_to_show ) { //TODO
-//    return blogator::parser::dom::NodeIterator();
-//}
-//
-//blogator::parser::dom::NodeIterator Document::createNodeIterator( node::Node * root, dom::NodeFilter filter ) { //TODO
-//    return blogator::parser::dom::NodeIterator();
-//}
-//
-//blogator::parser::dom::TreeWalker Document::createTreeWalker( node::Node * root, unsigned long what_to_show ) { //TODO
-//    return blogator::parser::dom::TreeWalker();
-//}
-//
-//blogator::parser::dom::TreeWalker Document::createTreeWalker( node::Node * root, dom::NodeFilter filter ) { //TODO
-//    return blogator::parser::dom::TreeWalker();
-//}
-
 /**
- * Gets the document init type
- * @return Type (XML/HTML)
+ * Creates a node iterator
+ * @param root Pointer to root node of the iterator's subtree (nullptr will default to this Document)
+ * @param filter Filter to use
+ * @return Iterator to the start
  */
-Document::Type Document::type() const {
-    return _type;
+blogator::parser::dom::NodeIterator Document::createNodeIterator( Node * root, dom::NodeFilter filter ) {
+    return { ( root == nullptr ? this : root ),
+             std::make_shared<NodeFilter>( std::move( filter ) ),
+             false };
 }
 
 /**
- * Gets the file path associated with the document
- * @return Document file path
+ * Creates a TreeWalker
+ * @param root Pointer to root node of the iterator's subtree (nullptr will default to this Document)
+ * @param what_to_show Filter bit-mask
+ * @return TreeWalker
  */
-const std::filesystem::path & Document::filepath() const {
-    return _origin;
+blogator::parser::dom::TreeWalker Document::createTreeWalker( node::Node * root, unsigned long what_to_show ) {
+    auto * subtree_root = ( root == nullptr ? this : root );
+
+    if( what_to_show == NodeFilter::SHOW_ALL ) {
+        return TreeWalker( subtree_root );
+    } else {
+        return { subtree_root, std::make_shared<NodeFilter>( what_to_show ) };
+    }
 }
 
 /**
- * Sets the 'quirks' flag for the document
- * @param mode quirks mode
+ * Creates a TreeWalker
+ * @param root Pointer to root node of the iterator's subtree (nullptr will default to this Document)
+ * @param filter Filter to use
+ * @return TreeWalker
  */
-void Document::setQuirks( QuirksMode mode ) {
-    _quirks = mode;
+blogator::parser::dom::TreeWalker Document::createTreeWalker( node::Node * root, dom::NodeFilter filter ) {
+    return { ( root == nullptr ? this : root ),
+             std::make_shared<NodeFilter>( std::move( filter ) ) };
 }
 
 /**
@@ -541,105 +932,27 @@ blogator::parser::dom::NodePtr_t Document::cloneNode( bool deep ) const {
 }
 
 /**
- * [OVERRRIDE] Appends a child node to the children list (auto-sets the parent/sibling pointers)
- * @param node_ptr Pointer to child node to append
- * @return Pointer to newly created child
+ * [OVERRIDE] Lookup a namespace's prefix
+ * @param ns Namespace to find prefix for
+ * @return Prefix found (empty string == null)
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
  */
-Node * Document::appendChild( NodePtr_t &node_ptr ) {
-    auto * child = Node::appendChild( std::move( node_ptr ) );
-
-    if( child->nodeType() == NodeType::ELEMENT_NODE ) {
-        _element = dynamic_cast<Element *>( child );
-    } else if( child->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
-        _doctype = dynamic_cast<DocumentType *>( child );
-    }
-
-    return child;
+blogator::parser::dom::DOMString_t Document::lookupPrefix( const blogator::parser::dom::DOMString_t &ns ) const {
+    return Node::lookupPrefix( ns );
 }
 
 /**
- * [OVERRRIDE] Appends a child node to the children list (auto-sets the parent/sibling pointers)
- * @param node_ptr Pointer to child node to append
- * @return Pointer to newly created child
+ * [OVERRIDE] Find the namespace URI of a given prefix
+ * @param prefix Prefix string (empty == null)
+ * @return Namespace URI
+ * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
  */
-Node * Document::appendChild( NodePtr_t &&node_ptr ) {
-    auto * child = Node::appendChild( std::move( node_ptr ) );
-
-    if( child->nodeType() == NodeType::ELEMENT_NODE ) {
-        _element = dynamic_cast<Element *>( child );
-    } else if( child->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
-        _doctype = dynamic_cast<DocumentType *>( child );
+blogator::parser::dom::DOMString_t Document::lookupNamespaceURI( const DOMString_t &prefix ) const {
+    if( this->documentElement() ) {
+        return this->documentElement()->lookupNamespaceURI( prefix );
     }
 
-    return child;
-}
-
-/**
- * [OVERRRIDE] Inserts a child node before a specified child (auto-sets the parent/sibling pointers)
- * @param node Pointer to Node to insert
- * @param child Pointer to reference node for insertion placement
- * @return Pointer to inserted node
- * @throws DOMException when valid hierarchy is violated
- * @throws std::invalid_argument if node is null
- */
-Node * Document::insertBefore( NodePtr_t &node, Node *child ) {
-    auto * inserted = Node::insertBefore( node, child );
-
-    if( child->nodeType() == NodeType::ELEMENT_NODE ) {
-        _element = dynamic_cast<Element *>( inserted );
-    } else if( child->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
-        _doctype = dynamic_cast<DocumentType *>( inserted );
-    }
-
-    return inserted;
-}
-
-/**
-* [OVERRRIDE] Inserts a child node before a specified child (auto-sets the parent/sibling pointers)
-* @param node Pointer to Node to insert
-* @param child Pointer to reference node for insertion placement
-* @return Pointer to inserted node
-* @throws DOMException when valid hierarchy is violated
-* @throws std::invalid_argument if node is null
-*/
-Node * Document::insertBefore( NodePtr_t && node, Node * child ) {
-    auto * inserted = Node::insertBefore( node, child );
-
-    if( child->nodeType() == NodeType::ELEMENT_NODE ) {
-        _element = dynamic_cast<Element *>( inserted );
-    } else if( child->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
-        _doctype = dynamic_cast<DocumentType *>( inserted );
-    }
-
-    return inserted;
-}
-
-/**
- * [OVERRRIDE]
- * @param node
- * @param child
- * @return
- */
-blogator::parser::dom::NodePtr_t Document::replaceChild( NodePtr_t &node, NodePtr_t &child ) { //TODO
-    auto * replacement = node.get();
-    auto   replaced    = Node::replaceChild( node, child );
-
-    if( replacement->nodeType() == NodeType::ELEMENT_NODE ) {
-        _element = dynamic_cast<Element *>( replacement );
-    } else if( replacement->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
-        _doctype = dynamic_cast<DocumentType *>( replacement );
-    }
-
-    return std::move( replaced );
-}
-
-/**
- * [OVERRRIDE]
- * @param child
- * @return
- */
-blogator::parser::dom::NodePtr_t Document::removeChild( NodePtr_t &child ) { //TODO
-    return Node::removeChild( child );
+    return {};
 }
 
 /**
@@ -663,7 +976,7 @@ Node * Document::insertNodeBefore( NodePtr_t node, Node * child ) {
         } break;
 
         case NodeType::ATTRIBUTE_NODE: {
-            throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Attr children" );
+            throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Attr children." );
         }
 
         case NodeType::ELEMENT_NODE: {
@@ -690,6 +1003,31 @@ Node * Document::insertNodeBefore( NodePtr_t node, Node * child ) {
             }
         } break;
 
+        case NodeType::DOCUMENT_FRAGMENT_NODE: {
+            size_t element_count = 0;
+
+            for( const auto & node_child : node->childNodes() ) {
+                if( ( node_child->nodeType() == NodeType::ELEMENT_NODE && ++element_count > 1 ) ) {
+                    throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have more than 1 child Element." );
+                } else if( node_child->nodeType() == NodeType::TEXT_NODE ) {
+                    throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Text children." );
+                }
+            }
+
+            if( element_count == 1 ) {
+                if( this->documentElement() != nullptr ) {
+                    throw DOMException( DOMExceptionType::HierarchyRequestError, "Document node already has a child Element." );
+
+                } else {
+                    for( auto * sibling = child; sibling != nullptr; sibling = sibling->nextSibling() ) {
+                        if( sibling->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
+                            throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType cannot be inserted after an Element." );
+                        }
+                    }
+                }
+            }
+        } break;
+
         case NodeType::TEXT_NODE: {
             throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Text children." );
         };
@@ -698,7 +1036,15 @@ Node * Document::insertNodeBefore( NodePtr_t node, Node * child ) {
             break;
     }
 
-    return Node::insertNodeBefore( std::move( node ), child );
+    auto * inserted = Node::insertNodeBefore( std::move( node ), child );
+
+    if( inserted && inserted->nodeType() == NodeType::ELEMENT_NODE ) {
+        _element = dynamic_cast<Element *>( inserted );
+    } else if( inserted && inserted->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
+        _doctype = dynamic_cast<DocumentType *>( inserted );
+    }
+
+    return inserted;
 }
 
 /**
@@ -712,14 +1058,24 @@ blogator::parser::dom::NodePtr_t Document::replaceChildNode( NodePtr_t &node, No
     using exception::DOMException;
     using exception::DOMExceptionType;
 
+    const auto * child = target.get();
+
     switch( node->nodeType() ) {
         case NodeType::ELEMENT_NODE: {
-            if( this->documentElement() && this->documentElement() != target.get() ) {
+            if( this->documentElement() && this->documentElement() != child ) {
                 throw DOMException( DOMExceptionType::HierarchyRequestError, "Document Element already exists." );
             }
-            if( target && target->nextSibling() && target->nextSibling()->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
-                throw DOMException( DOMExceptionType::HierarchyRequestError, "Element cannot be inserted before a DocumentType." );
+
+            auto * curr = ( target ? target->nextSibling() : nullptr );
+
+            while( curr != nullptr ) {
+                if( curr->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
+                    throw DOMException( DOMExceptionType::HierarchyRequestError, "Element cannot be inserted before a DocumentType." );
+                }
+
+                curr = curr->nextSibling();
             }
+
         } break;
 
         case NodeType::TEXT_NODE: {
@@ -727,11 +1083,11 @@ blogator::parser::dom::NodePtr_t Document::replaceChildNode( NodePtr_t &node, No
         }
 
         case NodeType::DOCUMENT_NODE: {
-            throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Document children." ); //TODO
+            throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Document children." );
         }
 
         case NodeType::DOCUMENT_TYPE_NODE: {
-            if( this->doctype() && this->doctype() != target.get() ) {
+            if( this->doctype() && this->doctype() != child ) {
                 throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType already exists in Document." );
             }
             if( target && target->previousSibling() && target->previousSibling()->nodeType() == NodeType::ELEMENT_NODE ) {
@@ -739,9 +1095,77 @@ blogator::parser::dom::NodePtr_t Document::replaceChildNode( NodePtr_t &node, No
             }
         } break;
 
+        case NodeType::DOCUMENT_FRAGMENT_NODE: {
+            node::Node * node_child_element = nullptr; //pointer to first found
+
+            for( const auto & node_child : node->childNodes() ) {
+                if( node_child->nodeType() == NodeType::ELEMENT_NODE ) {
+                    if( node_child_element ) { //
+                        throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have more than 1 child Element." );
+                    } else {
+                        node_child_element = node_child.get();
+                    }
+
+                } else if( node_child->nodeType() == NodeType::TEXT_NODE ) {
+                    throw DOMException( DOMExceptionType::HierarchyRequestError, "Document nodes cannot have Text children." );
+                }
+            }
+
+            if( node_child_element ) {
+                if( this->documentElement() && this->documentElement() != child ) {
+                    throw DOMException( DOMExceptionType::HierarchyRequestError, "Document node already has a child Element." );
+
+                } else if( child ) {
+                    for( auto * sibling = child->nextSibling(); sibling != nullptr; sibling = sibling->nextSibling() ) {
+                        if( sibling->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
+                            throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType cannot be inserted after an Element." );
+                        }
+                    }
+                }
+            }
+
+        } break;
+
         default:
             break;
     }
 
-    return Node::replaceChildNode( node, target );
+    auto * replacement = node.get();
+    auto   replaced    = Node::replaceChildNode( node, target );
+
+    if( replacement->nodeType() == NodeType::ELEMENT_NODE ) {
+        _element = dynamic_cast<Element *>( replacement );
+    } else if( replacement->nodeType() == NodeType::DOCUMENT_TYPE_NODE ) {
+        _doctype = dynamic_cast<DocumentType *>( replacement );
+    }
+
+    return std::move( replaced );
+}
+
+/**
+ * [OVERRIDE] Removes a child node
+ * @param it Child iterator to node to remove
+ * @return Removed node
+ */
+blogator::parser::dom::NodePtr_t Document::removeChildNode( Nodes_t::iterator it ) {
+    auto removed = Node::removeChildNode( it );
+
+    if( removed ) {
+        if( _element == removed.get() ) {
+            _element = nullptr;
+        } else if( _doctype == removed.get() ) {
+            _doctype = nullptr;
+        }
+    }
+
+    return std::move( removed );
+}
+
+/**
+ * Shallow swaps Document nodes
+ * @param lhs Document
+ * @param rhs Document
+ */
+void blogator::parser::dom::node::swap( Document &lhs, Document &rhs ) {
+    lhs.swap( rhs );
 }

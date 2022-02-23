@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "../../../src/parser/dom/iterator/NodeIterator.h"
 
-#include "../TestDOMs.h"
+#include "../../../TestHelpers/TestDOMs.h"
 
 using namespace blogator::parser::dom;
 using           blogator::parser::dom::NodeIterator;

@@ -30,18 +30,39 @@ NamedNodeMap::NamedNodeMap( const NamedNodeMap &nnp ) :
 {
     for( const auto & attr : nnp._nodes ) {
         if( attr ) {
-            if( attr->value() ) {
-                this->appendAttribute( std::make_unique<node::Attr>(
-                    attr->prefix(),
-                    attr->name(),
-                    *attr->value()
-                ) );
+            if( attr->namespaceID() == NamespaceMap::NONE ) {
+                if( attr->value() ) {
+                    this->appendAttribute( std::make_unique<node::Attr>(
+                        attr->namespaceID(),
+                        attr->prefix(),
+                        attr->name(),
+                        *attr->value()
+                    ) );
+
+                } else {
+                    this->appendAttribute( std::make_unique<node::Attr>(
+                        attr->namespaceID(),
+                        attr->prefix(),
+                        attr->name()
+                    ) );
+                }
 
             } else {
-                this->appendAttribute( std::make_unique<node::Attr>(
-                    attr->prefix(),
-                    attr->name()
-                ) );
+                if( attr->value() ) {
+                    this->appendAttributeNS( std::make_unique<node::Attr>(
+                        attr->namespaceID(),
+                        attr->prefix(),
+                        attr->name(),
+                        *attr->value()
+                    ) );
+
+                } else {
+                    this->appendAttributeNS( std::make_unique<node::Attr>(
+                        attr->namespaceID(),
+                        attr->prefix(),
+                        attr->name()
+                    ) );
+                }
             }
         }
     }
@@ -56,7 +77,11 @@ NamedNodeMap::NamedNodeMap( NamedNodeMap &&nnp ) noexcept :
 {
     for( auto & attr : nnp._nodes ) {
         if( attr ) {
-            this->appendAttribute( std::move( attr ) );
+            if( attr->namespaceID() == NamespaceMap::NONE ) {
+                this->appendAttribute( std::move( attr ) );
+            } else {
+                this->appendAttributeNS( std::move( attr ) );
+            }
         }
     }
 }
@@ -74,18 +99,39 @@ NamedNodeMap & NamedNodeMap::operator =( const NamedNodeMap &nnp ) {
 
         for( const auto & attr : nnp._nodes ) {
             if( attr ) {
-                if( attr->value() ) {
-                    this->appendAttribute( std::make_unique<node::Attr>(
-                        attr->prefix(),
-                        attr->name(),
-                        *attr->value()
-                    ) );
+                if( attr->namespaceID() == NamespaceMap::NONE ) {
+                    if( attr->value() ) {
+                        this->appendAttribute( std::make_unique<node::Attr>(
+                            attr->namespaceID(),
+                            attr->prefix(),
+                            attr->name(),
+                            *attr->value()
+                        ) );
+
+                    } else {
+                        this->appendAttribute( std::make_unique<node::Attr>(
+                            attr->namespaceID(),
+                            attr->prefix(),
+                            attr->name()
+                        ) );
+                    }
 
                 } else {
-                    this->appendAttribute( std::make_unique<node::Attr>(
-                        attr->prefix(),
-                        attr->name()
-                    ) );
+                    if( attr->value() ) {
+                        this->appendAttributeNS( std::make_unique<node::Attr>(
+                            attr->namespaceID(),
+                            attr->prefix(),
+                            attr->name(),
+                            *attr->value()
+                        ) );
+
+                    } else {
+                        this->appendAttributeNS( std::make_unique<node::Attr>(
+                            attr->namespaceID(),
+                            attr->prefix(),
+                            attr->name()
+                        ) );
+                    }
                 }
             }
         }
@@ -107,7 +153,11 @@ NamedNodeMap & NamedNodeMap::operator =( NamedNodeMap &&nnp ) noexcept {
 
         for( auto & attr : nnp._nodes ) {
             if( attr ) {
-                this->appendAttribute( std::move( attr ) );
+                if( attr->namespaceID() == NamespaceMap::NONE ) {
+                    this->appendAttribute( std::move( attr ) );
+                } else {
+                    this->appendAttributeNS( std::move( attr ) );
+                }
             }
         }
     }
@@ -148,6 +198,16 @@ bool NamedNodeMap::attributeExists( DOMString_t qualified_name ) const {
     }
 
     return ( _map.contains( qualified_name ) );
+}
+
+/**
+ * Checks if an attribute exists within a namespace [O(n)]
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Existence state
+ */
+bool NamedNodeMap::attributeExistsNS( const DOMString_t &ns, const DOMString_t &local_name ) const {
+    return ( const_cast<NamedNodeMap *>( this )->getIteratorNS( ns, local_name ) ) != _nodes.end();
 }
 
 /**
@@ -197,15 +257,33 @@ const node::Attr * NamedNodeMap::getNamedItem( DOMString_t qualified_name ) cons
 }
 
 /**
+ * Gets an attribute in a namespace [O(n)]
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Pointer to attribute node (or nullptr)
+ */
+const node::Attr * NamedNodeMap::getNamedItemNS( const DOMString_t &ns, const DOMString_t &local_name ) const {
+    auto it = const_cast<NamedNodeMap *>( this )->getIteratorNS( ns, local_name );
+    return ( it == _nodes.cend() ? nullptr : it->get() );
+}
+
+/**
  * Sets an attribute
  * @param attr Attribute node
  * @return Pointer to attribute node edited/added
- * @throws DOMException when qualified name of node is invalid
+ * @throws DOMException when attribute already has an Element or qualified name of node is invalid
  */
 const node::Attr * NamedNodeMap::setNamedItem( const node::Attr & attr ) {
-    if( !dom::validation::XML::isValidName( attr.nodeName() ) ) {
-        using blogator::unicode::utf8::convert;
+    using blogator::unicode::utf8::convert;
 
+    if( attr.parentElement() ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InUseAttributeError,
+            "[parser::dom::NamedNodeMap::setNamedItem( const node::Attr & )] Attribute '" + convert( attr.nodeName() ) + "' is already in use."
+        );
+    }
+
+    if( !dom::validation::XML::checkQName( attr.prefix(), attr.localName() ) ) {
         throw exception::DOMException(
             exception::DOMExceptionType::InvalidCharacterError,
             "[parser::dom::NamedNodeMap::setNamedItem( const node::Attr & )] Invalid qualified name ('" + convert( attr.nodeName() ) + "')."
@@ -227,16 +305,43 @@ const node::Attr * NamedNodeMap::setNamedItem( const node::Attr & attr ) {
             _map.erase( map_it );
 
         } else if( *old != attr ) {
-            old->_prefix    = attr.prefix();
-            old->_name      = attr.name();
-            old->_value     = ( attr.value() ? *attr.value() : DOMString_t() );
-            old->_has_value = attr.hasValue();
+            old->_namespace_id = attr.namespaceID();
+            old->_prefix       = attr.prefix();
+            old->_name         = attr.name();
+            old->_value        = ( attr.value() ? *attr.value() : DOMString_t() );
+            old->_has_value    = attr.hasValue();
 
             return old; //EARLY RETURN
         }
     }
 
     return this->appendAttribute( std::make_unique<node::Attr>( attr ) );
+}
+
+/**
+ * Sets an attribute in a namespace [O(n)]
+ * @param attr Attribute node
+ * @return Pointer to attribute node edited/added
+ * @throws DOMException when attribute already has an Element or name of node is invalid
+ */
+const node::Attr * NamedNodeMap::setNamedItemNS( const node::Attr &attr ) {
+    using blogator::unicode::utf8::convert;
+
+    if( attr.parentElement() ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InUseAttributeError,
+            "[parser::dom::NamedNodeMap::setNamedItemNS( const node::Attr & )] Attribute '" + convert( attr.nodeName() ) + "' is already in use."
+        );
+    }
+
+    if( !dom::validation::XML::checkQName( attr.prefix(), attr.localName() ) ) {
+        throw exception::DOMException(
+            exception::DOMExceptionType::InvalidCharacterError,
+            "[parser::dom::NamedNodeMap::setNamedItemNS( const node::Attr & )] Invalid qualified name ('" + convert( attr.nodeName() ) + "')."
+        );
+    }
+
+    return this->appendAttributeNS( std::make_unique<node::Attr>( attr ) );
 }
 
 /**
@@ -255,7 +360,7 @@ const node::Attr * NamedNodeMap::setNode( AttrPtr_t attr ) {
         return nullptr; //EARLY RETURN
     }
 
-    if( !dom::validation::XML::isValidName( attr->nodeName() ) ) {
+    if( !dom::validation::XML::checkQName( attr->prefix(), attr->localName() ) ) {
         using blogator::unicode::utf8::convert;
 
         throw exception::DOMException(
@@ -318,7 +423,7 @@ AttrPtr_t NamedNodeMap::removeItem( size_t index ) {
             _nodes.erase( it );
         }
 
-        return std::move( removed ); //BRANCHED RETURN (1/2)
+        return std::move( removed );
 
     } else {
         if( it != _nodes.end() ) {
@@ -330,7 +435,7 @@ AttrPtr_t NamedNodeMap::removeItem( size_t index ) {
             "Attribute's `unique_ptr` was null - position was cleaned-up."
         );
 
-        return {}; //BRANCHED RETURN (2/2)
+        return {};
     }
 }
 
@@ -397,16 +502,46 @@ AttrPtr_t NamedNodeMap::removeNamedItem( DOMString_t qualified_name ) {
 
         _nodes.erase( node_it );
 
-        return std::move( removed ); //BRANCHED RETURN (1/2)
+        return std::move( removed );
 
     } else {
+        using blogator::unicode::utf8::convert;
+
         LOG_ERROR(
-            "[parser::dom::NamedNodeMap::removeItem( ", blogator::unicode::utf8::convert( qualified_name ), " )] "
+            "[parser::dom::NamedNodeMap::removeNamedItem( ", convert( qualified_name ), " )] "
             "Could not find the attribute iterator to be removed despite finding it in the map "
-            "('", ( node_ptr ? blogator::unicode::utf8::convert( node_ptr->nodeName() ) : "NULL" ), "')."
+            "('", ( node_ptr ? convert( node_ptr->nodeName() ) : "NULL" ), "')."
         );
 
-        return {}; //BRANCHED RETURN (2/2)
+        return {};
+    }
+}
+
+/**
+ * Removes an attribute within a namespace [O(n)]
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Removed attribute node
+ */
+AttrPtr_t NamedNodeMap::removeNamedItemNS( const DOMString_t &ns, const DOMString_t &local_name ) {
+    auto node_it = getIteratorNS( ns, local_name );
+
+    if( node_it != _nodes.end() ) {
+        auto removed = std::move( *node_it );
+
+        _nodes.erase( node_it );
+
+        return std::move( removed );
+
+    } else {
+        using blogator::unicode::utf8::convert;
+
+        LOG_DEBUG(
+            "[parser::dom::NamedNodeMap::removeNamedItemNS( \"", convert( ns ), "\", \"", convert( local_name ), "\" )] "
+            "Could not find the attribute iterator to be removed."
+        );
+
+        return {};
     }
 }
 
@@ -470,6 +605,38 @@ Attributes_t::iterator NamedNodeMap::getIterator( const node::Attr * ptr ) {
 }
 
 /**
+ * [PRIVATE] Gets the iterator in the attribute list that match the arguments given
+ * @param ns Namespace
+ * @param local_name Local name
+ * @return Iterator pointing to matching node (or end() if not found)
+ */
+Attributes_t::iterator NamedNodeMap::getIteratorNS( const DOMString_t & ns, const DOMString_t & local_name ) {
+    return std::find_if( _nodes.begin(),
+                         _nodes.end(),
+                         [&ns, &local_name]( const AttrPtr_t & attr ) {
+                            return attr
+                                && attr->namespaceURI() == ns
+                                && attr->localName()    == local_name;
+                         } );
+}
+
+/**
+ * [PRIVATE] Gets the iterator in the attribute list that match the arguments given
+ * @param ns_id NamespaceMap ID
+ * @param local_name Local name
+ * @return Iterator pointing to matching node (or end() if not found)
+ */
+Attributes_t::iterator NamedNodeMap::getIteratorNS( NamespaceMapID_t ns_id, const DOMString_t &local_name ) {
+    return std::find_if( _nodes.begin(),
+                         _nodes.end(),
+                         [&ns_id, &local_name]( const AttrPtr_t & attr ) {
+                             return attr
+                                    && attr->namespaceID() == ns_id
+                                    && attr->localName()   == local_name;
+                         } );
+}
+
+/**
  * [PRIVATE] Appends an Attr(ibute) node to the list of attributes
  * @param attr Pointer to Attr(ibute) node
  * @return Pointer to appended node (or nullptr when failed)
@@ -487,21 +654,15 @@ node::Attr * NamedNodeMap::appendAttribute( AttrPtr_t &&attr ) {
     }
 
     if( _map.contains( attr->nodeName() ) ) {
-        auto   map_it       = _map.find( attr->nodeName() );
-        auto   attr_it      = getIterator( map_it->second );
-        auto * prev_sibling = (*attr_it)->previousSibling();
-        auto * next_sibling = (*attr_it)->nextSibling();
+        auto map_it = _map.find( attr->nodeName() );
 
-        (*attr_it) = std::move( attr );
-        (*attr_it)->setParent( _parent );
-        (*attr_it)->setPrevSibling( prev_sibling );
-        (*attr_it)->setNextSibling( next_sibling );
+        node = map_it->second;
 
-        if( _parent ) {
-            (*attr_it)->setOwnerDocument( _parent->ownerDocument() );
-        }
-
-        node = (*attr_it).get();
+        node->_namespace_id = attr->_namespace_id;
+        node->_prefix       = attr->_prefix;
+        node->_name         = attr->_name;
+        node->_value        = attr->_value;
+        node->_has_value    = attr->_has_value;
 
     } else {
         auto * last     = ( _nodes.empty() ? nullptr : _nodes.back().get() );
@@ -528,6 +689,56 @@ node::Attr * NamedNodeMap::appendAttribute( AttrPtr_t &&attr ) {
                 "[parser::dom::NamedNodeMap::appendAttribute( ", blogator::unicode::utf8::convert( inserted->nodeName() ), " )] "
                 "Failed to insert mapping for attribute."
             );
+        }
+    }
+
+    return node;
+}
+
+/**
+ * [PRIVATE] Appends an Attr(ibute) node within a namespace to the list of attributes
+ * @param attr Pointer to Attr(ibute) node
+ * @return Pointer to appended node (or nullptr when failed)
+ */
+node::Attr * NamedNodeMap::appendAttributeNS( AttrPtr_t &&attr ) {
+    node::Attr * node = nullptr;
+
+    if( !attr ) {
+        LOG_WARNING(
+            "[parser::dom::NamedNodeMap::appendAttributeNS( nullptr )] "
+            "Trying to add empty AttrPtr_t."
+        );
+
+        return nullptr; //EARLY RETURN
+    }
+
+    auto attr_it = getIteratorNS( attr->namespaceID(), attr->localName() );
+
+    if( attr_it != _nodes.end() ) {
+        node = (*attr_it).get();
+
+        node->_namespace_id = attr->_namespace_id;
+        node->_prefix       = attr->_prefix;
+        node->_name         = attr->_name;
+        node->_value        = attr->_value;
+        node->_has_value    = attr->_has_value;
+
+    } else {
+        auto * last     = ( _nodes.empty() ? nullptr : _nodes.back().get() );
+        auto & inserted = _nodes.emplace_back( std::move( attr ) );
+
+        node = dynamic_cast<node::Attr *>( inserted.get() );
+
+        if( last ) {
+            last->setNextSibling( node );
+        }
+
+        node->setParent( _parent );
+        node->setPrevSibling( last );
+        node->setNextSibling( nullptr );
+
+        if( _parent ) {
+            node->setOwnerDocument( _parent->ownerDocument() );
         }
     }
 

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg985"
+   version="1.1"
+   viewBox="0 0 148.95974 148.95973"
+   height="148.95975mm"
+   width="148.95975mm"
+   sodipodi:docname="logo2_sml.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview9"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.68264456"
+     inkscape:cx="354.50367"
+     inkscape:cy="465.10295"
+     inkscape:window-width="1920"
+     inkscape:window-height="1139"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg985"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <defs
+     id="defs979" />
+  <metadata
+     id="metadata982">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     id="path901"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:95.25px;line-height:59.5312px;font-family:'Hard Gothic';-inkscape-font-specification:'Hard Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.38125"
+     d="m 148.56282,72.336753 -36.3855,-20.955 v 8.382 l 22.38375,12.573 -22.38375,12.668249 v 8.382 z M 58.879041,103.8645 H 88.978062 V 75.861003 H 58.879041 Z M 88.978062,39.475503 v 30.76575 0 h 7.0485 V 109.48425 H 51.925791 V 39.475503 Z m -6.953263,5.61975 H 58.879041 v 25.146 h 23.145758 z m -81.6278683,26.57475 36.3855203,-20.955 v 8.382 l -22.38377,12.573 22.38377,13.334999 v 7.62 z" />
+</svg>

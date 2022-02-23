@@ -13,7 +13,7 @@ using           blogator::parser::dom::DOMString_t;
 class CorruptibleTextNode : public node::Text {
   public:
     explicit CorruptibleTextNode( DOMString_t str ) :
-        node::Text( std::move( str ), nullptr, nullptr )
+        node::Text( std::move( str ) )
     {}
 
     void setPointers( node::Node * parent, node::Node * prev = nullptr, node::Node * next = nullptr ) {
@@ -30,7 +30,7 @@ class CorruptibleTextNode : public node::Text {
 TEST( parser_dom_node_Text_Tests, splitText_0 ) { //empty/no offset - should return pointer to original node
     DOMString_t  txt    = U"";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     auto split = dynamic_cast<node::Text *>( child )->splitText( 0 );
 
@@ -42,7 +42,7 @@ TEST( parser_dom_node_Text_Tests, splitText_0 ) { //empty/no offset - should ret
 TEST( parser_dom_node_Text_Tests, splitText_1 ) { //no offset - should return pointer to original node
     DOMString_t  txt    = U"123";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     auto split = dynamic_cast<node::Text *>( child )->splitText( 0 );
 
@@ -54,7 +54,7 @@ TEST( parser_dom_node_Text_Tests, splitText_1 ) { //no offset - should return po
 TEST( parser_dom_node_Text_Tests, splitText_2 ) { //offset == length
     DOMString_t  txt    = U"12345";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     auto split = dynamic_cast<node::Text *>( child )->splitText( txt.size() );
 
@@ -66,7 +66,7 @@ TEST( parser_dom_node_Text_Tests, splitText_2 ) { //offset == length
 TEST( parser_dom_node_Text_Tests, splitText_3 ) { //lower bound
     DOMString_t  txt    = U"12345";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     auto split = dynamic_cast<node::Text *>( child )->splitText( 1 );
 
@@ -79,7 +79,7 @@ TEST( parser_dom_node_Text_Tests, splitText_3 ) { //lower bound
 TEST( parser_dom_node_Text_Tests, splitText_4 ) { //upper bound
     DOMString_t  txt    = U"12345";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     auto split = dynamic_cast<node::Text *>( child )->splitText( txt.size() - 1 );
 
@@ -92,7 +92,7 @@ TEST( parser_dom_node_Text_Tests, splitText_4 ) { //upper bound
 TEST( parser_dom_node_Text_Tests, splitText_5 ) { //middle offset
     DOMString_t  txt    = U"12345";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     auto split = dynamic_cast<node::Text *>( child )->splitText( 3 );
 
@@ -108,7 +108,7 @@ TEST( parser_dom_node_Text_Tests, splitText_fail_0 ) { //bad offset - throw `blo
 
     DOMString_t  txt    = U"123";
     auto         parent = node::Node();
-    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt, &parent, nullptr ) );
+    node::Node * child  = parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     EXPECT_THROW( dynamic_cast<node::Text *>( child )->splitText( 4 ), RangeError );
 }
@@ -116,8 +116,8 @@ TEST( parser_dom_node_Text_Tests, splitText_fail_0 ) { //bad offset - throw `blo
 TEST( parser_dom_node_Text_Tests, splitText_fail_1 ) { //no parent - throw `blogator::exception::failed_expectation`
     using blogator::exception::failed_expectation;
 
-    DOMString_t  txt    = U"123";
-    auto child  = std::make_unique<node::Text>( txt, nullptr, nullptr ); //no parent/orphaned
+    DOMString_t txt   = U"123";
+    auto        child = std::make_unique<node::Text>( txt ); //no parent/orphaned
 
     EXPECT_THROW( child->splitText( 2 ), failed_expectation );
 }
@@ -129,7 +129,7 @@ TEST( parser_dom_node_Text_Tests, splitText_fail_2 ) { //wrong parent - throw `b
     auto         real_parent = node::Node();
     auto         fake_parent = node::Node();
     node::Node * child       = real_parent.appendChild( std::make_unique<CorruptibleTextNode>( txt ) );
-    node::Node * sibling     = real_parent.appendChild( std::make_unique<node::Text>( txt, &real_parent, child ) );
+    node::Node * sibling     = real_parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     dynamic_cast<CorruptibleTextNode *>( child )->setPointers( &fake_parent ); //corrupt parent
 
@@ -156,14 +156,14 @@ TEST( parser_dom_node_Text_Tests, splitText_fail_3 ) { //wrong sibling parent - 
 
 TEST( parser_dom_node_Text_Tests, wholeText_0 ) { //no text
     auto text = DOMString_t( U"" );
-    auto node = node::Text( text, nullptr, nullptr, nullptr );
+    auto node = node::Text( text );
 
     ASSERT_EQ( node.wholeText(), text );
 }
 
 TEST( parser_dom_node_Text_Tests, wholeText_1 ) { //self
     auto text = DOMString_t( U"testing..." );
-    auto node = node::Text( text, nullptr, nullptr, nullptr );
+    auto node = node::Text( text );
 
     ASSERT_EQ( node.wholeText(), text );
 }
@@ -171,13 +171,33 @@ TEST( parser_dom_node_Text_Tests, wholeText_1 ) { //self
 TEST( parser_dom_node_Text_Tests, wholeText_2 ) { //consecutive Text nodes
     auto strings = std::vector<DOMString_t>{ U"A", U"B", U"C", U"E" };
     auto parent  = node::Node();
-    auto child0 = parent.appendChild( std::make_unique<node::Text>( strings[0], &parent, nullptr ) );
-    auto child1 = parent.appendChild( std::make_unique<node::Text>( strings[1], &parent, child0 ) );
-    auto child2 = parent.appendChild( std::make_unique<node::Text>( strings[2], &parent, child1 ) );
+    auto child0 = parent.appendChild( std::make_unique<node::Text>( strings[0] ) );
+    auto child1 = parent.appendChild( std::make_unique<node::Text>( strings[1] ) );
+    auto child2 = parent.appendChild( std::make_unique<node::Text>( strings[2] ) );
     auto child3 = parent.appendChild( std::make_unique<node::Node>( NodeType::UNDEFINED, &parent, child2 ) );
-    parent.appendChild( std::make_unique<node::Text>( strings[3], &parent, child3 ) );
+    parent.appendChild( std::make_unique<node::Text>( strings[3] ) );
 
     auto expected = strings[0] + strings[1] + strings[2]; //"ABC"
     auto returned = dynamic_cast<node::Text *>( child0 )->wholeText();
     ASSERT_EQ( returned, expected );
+}
+
+TEST( parser_dom_node_Text_Tests, swap_0 ) {
+    auto text1 = node::Text( U"text1" );
+    auto text2 = node::Text( U"text2" );
+
+    blogator::parser::dom::node::swap( dynamic_cast<node::Node &>( text1 ), dynamic_cast<node::Node &>( text2 ) );
+
+    ASSERT_EQ( text1.data(), U"text2" );
+    ASSERT_EQ( text2.data(), U"text1" );
+}
+
+TEST( parser_dom_node_Text_Tests, swap_1 ) {
+    auto text1 = node::Text( U"text1" );
+    auto text2 = node::Text( U"text2" );
+
+    blogator::parser::dom::node::swap( text1, text2 );
+
+    ASSERT_EQ( text1.data(), U"text2" );
+    ASSERT_EQ( text2.data(), U"text1" );
 }

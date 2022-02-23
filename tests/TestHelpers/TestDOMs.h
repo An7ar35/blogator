@@ -1,5 +1,5 @@
-#ifndef BLOGATOR_TESTDOMS_H
-#define BLOGATOR_TESTDOMS_H
+#ifndef BLOGATOR_TESTS_TESTDOMS_H
+#define BLOGATOR_TESTS_TESTDOMS_H
 
 #include <memory>
 #include <vector>
@@ -15,6 +15,8 @@
 
 namespace blogator::tests {
     std::vector<blogator::parser::dom::node::Node *> createTestDOM_1( std::unique_ptr<blogator::parser::dom::node::Node> &root );
+    std::vector<blogator::parser::dom::node::Node *> createTestDOM_2( std::unique_ptr<blogator::parser::dom::node::Node> &root );
+    std::vector<blogator::parser::dom::node::Node *> createTestDOM_3( std::unique_ptr<blogator::parser::dom::node::Node> &root );
 }
 
-#endif //BLOGATOR_TESTDOMS_H
+#endif //BLOGATOR_TESTS_TESTDOMS_H

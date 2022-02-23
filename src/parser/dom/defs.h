@@ -25,6 +25,7 @@ namespace blogator::parser::dom {
     typedef std::vector<NodePtr_t>                     Nodes_t;
     typedef std::unique_ptr<node::Attr>                AttrPtr_t;
     typedef std::vector<AttrPtr_t>                     Attributes_t;
+    typedef int                                        NamespaceMapID_t;
 
     typedef std::vector<node::Element *>               HTMLCollection_t;
     typedef std::vector<DOMString_t>                   DOMTokenList_t;

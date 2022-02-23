@@ -5,9 +5,12 @@
 #include "../../../src/parser/dom/node/Comment.h"
 #include "../../../src/parser/dom/node/Document.h"
 #include "../../../src/parser/dom/node/DocumentType.h"
+#include "../../../src/parser/dom/node/DocumentFragment.h"
 #include "../../../src/parser/dom/node/Element.h"
 #include "../../../src/parser/dom/node/Text.h"
 #include "../../../src/exception/failed_expectation.h"
+#include "../../../../src/unicode/unicode.h"
+#include "../../../TestHelpers/TestDOMs.h"
 
 #include <memory>
 #include <vector>
@@ -127,6 +130,55 @@ TEST( parser_dom_node_Node_Tests, Desctructor_w_siblings ) { //checks that when 
     ASSERT_EQ( node2->nextSibling(), nullptr );
 }
 
+TEST( parser_dom_node_Node_Tests, getNamespaceEnum_0 ) {
+    auto node = node::Element( blogator::parser::specs::infra::Element::MATH );
+    ASSERT_EQ( node.getNamespaceEnum( node.namespaceID() ), blogator::parser::specs::infra::Namespace::MATHML );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceEnum_1 ) {
+    auto node = node::Element( U"namespace/uri", U"tag" );
+    ASSERT_EQ( node.getNamespaceEnum( node.namespaceID() ), blogator::parser::specs::infra::Namespace::OTHER );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceEnum_fail_0 ) {
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_HTML );
+    ASSERT_THROW( node.getNamespaceEnum( -1 ), blogator::exception::failed_expectation );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceEnum_fail_1 ) {
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_HTML );
+    ASSERT_THROW( node.getNamespaceEnum( 100 ), blogator::exception::failed_expectation );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceURI_0 ) {
+    auto node = node::Element( blogator::parser::specs::infra::Element::MATH );
+    ASSERT_EQ( node.getNamespaceURI( node.namespaceID() ),
+               blogator::parser::specs::infra::to_namespaceURI( blogator::parser::specs::infra::Namespace::MATHML ) );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceURI_1 ) {
+    auto node = node::Element( U"namespace/uri", U"tag" );
+    ASSERT_EQ( node.getNamespaceURI( node.namespaceID() ), U"namespace/uri" );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceURI_fail_0 ) {
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_HTML );
+    ASSERT_THROW( node.getNamespaceURI( -1 ), blogator::exception::failed_expectation );
+}
+
+TEST( parser_dom_node_Node_Tests, getNamespaceURI_fail_1 ) {
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_HTML );
+    ASSERT_THROW( node.getNamespaceURI( 100 ), blogator::exception::failed_expectation );
+}
+
+TEST( parser_dom_node_Node_Tests, namespaceMap ) {
+    using blogator::parser::specs::infra::Element::HTML5_HTML;
+    using blogator::parser::specs::infra::getNamespace;
+
+    auto node = node::Element( HTML5_HTML );
+    ASSERT_NE( node.namespaceMap().getID( getNamespace( HTML5_HTML ) ), NamespaceMap::INVALID );
+}
+
 TEST( parser_dom_node_Node_Tests, nodeType_0 ) { //default
     auto node = std::make_unique<node::Node>();
     ASSERT_EQ( node->nodeType(), NodeType::UNDEFINED );
@@ -143,7 +195,7 @@ TEST( parser_dom_node_Node_Tests, nodeName_0 ) { //generic
 }
 
 TEST( parser_dom_node_Node_Tests, nodeName_1 ) { //CDATASection
-    auto node = node::CDATASection( U"", nullptr, nullptr );
+    auto node = node::CDATASection( U"" );
     ASSERT_EQ( node.nodeName(), U"#cdata-section" );
 }
 
@@ -153,7 +205,7 @@ TEST( parser_dom_node_Node_Tests, nodeName_2 ) { //Document
 }
 
 TEST( parser_dom_node_Node_Tests, nodeName_3 ) { //Text
-    auto node = node::Text( U"", nullptr, nullptr );
+    auto node = node::Text( U"" );
     ASSERT_EQ( node.nodeName(), U"#text" );
 }
 
@@ -164,24 +216,24 @@ TEST( parser_dom_node_Node_Tests, nodeName_4 ) { //DocumentType
 }
 
 TEST( parser_dom_node_Node_Tests, nodeName_5 ) { //Comment
-    auto node = node::Comment( U"", nullptr, nullptr );
+    auto node = node::Comment( U"" );
     ASSERT_EQ( node.nodeName(), U"#comment" );
 }
 
 TEST( parser_dom_node_Node_Tests, nodeName_6 ) { //Element orphaned
-    auto node = node::Element( blogator::parser::specs::html5::Element::HTML5_SECTION );
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_SECTION );
     ASSERT_EQ( node.nodeName(), U"section" );
 }
 
 TEST( parser_dom_node_Node_Tests, nodeName_7 ) { //Element attached to HTML Document
     auto doc = node::Document();
-    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SECTION ) );
+    auto * node = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SECTION ) );
     ASSERT_EQ( node->nodeName(), U"SECTION" );
 }
 
 TEST( parser_dom_node_Node_Tests, baseURI_0 ) { //Document, self
     auto doc = node::Document( U"UTF-8",
-                               blogator::parser::specs::html5::ContentType::APPLICATION_XHTML_XML,
+                               blogator::parser::specs::infra::ContentType::APPLICATION_XHTML_XML,
                                U"url",
                                "/filepath/to/origin",
                                node::Document::Type::HTML,
@@ -197,12 +249,12 @@ TEST( parser_dom_node_Node_Tests, baseURI_1 ) { //self, orphaned
 
 TEST( parser_dom_node_Node_Tests, baseURI_2 ) { //Connected tree
     auto doc = node::Document( U"UTF-8",
-                               blogator::parser::specs::html5::ContentType::APPLICATION_XHTML_XML,
+                               blogator::parser::specs::infra::ContentType::APPLICATION_XHTML_XML,
                                U"url",
                                "/filepath/to/origin",
                                node::Document::Type::HTML,
                                QuirksMode::NO_QUIRKS );
-    auto * element = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_BODY ) );
+    auto * element = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_BODY ) );
 
     ASSERT_EQ( element->baseURI(), U"url" );
 }
@@ -214,17 +266,17 @@ TEST( parser_dom_node_Node_Tests, isConnected_0 ) { //connected to self
 
 TEST( parser_dom_node_Node_Tests, isConnected_1 ) { //connected to ancestor
     auto   doc   = node::Document();
-    auto * child = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_BODY ) );
+    auto * child = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_BODY ) );
     ASSERT_TRUE( child->isConnected() );
 }
 
 TEST( parser_dom_node_Node_Tests, isConnected_2 ) { //not connected, orphaned
-    auto element = node::Element( blogator::parser::specs::html5::Element::HTML5_BODY );
+    auto element = node::Element( blogator::parser::specs::infra::Element::HTML5_BODY );
     ASSERT_FALSE( element.isConnected() );
 }
 
 TEST( parser_dom_node_Node_Tests, isConnected_3 ) { //not connected, has parent
-    auto   element = node::Element( blogator::parser::specs::html5::Element::HTML5_BODY );
+    auto   element = node::Element( blogator::parser::specs::infra::Element::HTML5_BODY );
     auto * text    = element.appendChild( std::make_unique<node::Text>( U"text" ) );
     ASSERT_FALSE( text->isConnected() );
 }
@@ -236,11 +288,11 @@ TEST( parser_dom_node_Node_Tests, ownerDocument_0 ) { //has owner Document
     v.emplace_back( &doc );
     v.emplace_back( doc.appendChild( std::make_unique<node::Comment>( U"comment" ) ) );
     v.emplace_back( doc.appendChild( std::make_unique<node::CDATASection>( U"data" ) ) );
-    v.emplace_back( doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_BODY ) ) );
+    v.emplace_back( doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_BODY ) ) );
     auto * body = v.back();
-    v.emplace_back( body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) ) );
-    v.emplace_back( body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) ) );
-    v.emplace_back( dynamic_cast<node::Element *>( v.back() )->createAttribute( U"prefix", U"name" ) );
+    v.emplace_back( body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) ) );
+    v.emplace_back( body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) ) );
+    v.emplace_back( dynamic_cast<node::Element *>( v.back() )->createAttribute( U"attr-name", U"attr-value" ) );
 
     //             [Document]
     //            /     |     \
@@ -254,18 +306,18 @@ TEST( parser_dom_node_Node_Tests, ownerDocument_0 ) { //has owner Document
 
 
     for( auto p : v ) {
-        ASSERT_EQ( p->ownerDocument(), &doc );
+        ASSERT_EQ( p->ownerDocument(), &doc ) << "Failed on '" << blogator::unicode::utf8::convert( p->nodeName() ) << "'.";
     }
 }
 
 TEST( parser_dom_node_Node_Tests, ownerDocument_1 ) { //no owner Document
     auto v      = std::vector<node::Node *>();
-    auto parent = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto parent = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     v.emplace_back( parent.get() );
-    v.emplace_back( parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) ) );
+    v.emplace_back( parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) ) );
     auto * div = v.back();
-    v.emplace_back( div->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SPAN ) ) );
-    v.emplace_back( div->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_IMG ) ) );
+    v.emplace_back( div->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) ) );
+    v.emplace_back( div->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_IMG ) ) );
     v.emplace_back( dynamic_cast<node::Element *>( v.back() )->createAttribute( U"prefix", U"name" ) );
 
     //          [Element:DIV]
@@ -312,19 +364,19 @@ TEST( parser_dom_node_Node_Tests, parentNode_not_null ) {
 }
 
 TEST( parser_dom_node_Node_Tests, parentElement_0 ) { //Element parent
-    auto   element = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto   element = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto * attr    = element.createAttribute( U"name" );
     ASSERT_EQ( attr->parentElement(), &element );
 }
 
 TEST( parser_dom_node_Node_Tests, parentElement_1 ) { //non Element parent
     auto document = node::Document();
-    auto element  = document.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto element  = document.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     ASSERT_EQ( element->parentElement(), nullptr );
 }
 
 TEST( parser_dom_node_Node_Tests, parentElement_2 ) { //orphaned node
-    auto element = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto element = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
     ASSERT_EQ( element.parentElement(), nullptr );
 }
 
@@ -393,7 +445,7 @@ TEST( parser_dom_node_Node_Tests, nodeValue ) {
 }
 
 TEST( parser_dom_node_Node_Tests, textContent_0 ) { //Attr node
-    auto node = std::make_unique<node::Attr>( U"prefix", U"name", U"value" );
+    auto node = std::make_unique<node::Attr>( U"", U"prefix", U"name", U"value" );
     ASSERT_EQ( dynamic_cast<node::Node *>( node.get() )->textContent(), U"value" );
 }
 
@@ -423,30 +475,44 @@ TEST( parser_dom_node_Node_Tests, textContent_5 ) { //Text node
 }
 
 TEST( parser_dom_node_Node_Tests, textContent_6 ) { //Element node, empty
-    auto node = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto node = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     ASSERT_EQ( dynamic_cast<node::Node *>( node.get() )->textContent(), U"" );
 }
 
 TEST( parser_dom_node_Node_Tests, textContent_7 ) { //Element node with text content
-    auto node = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto node = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     node->appendChild( std::make_unique<node::Text>( U"Hello, " ) );
     node->appendChild( std::make_unique<node::Text>( U"world!" ) );
     ASSERT_EQ( dynamic_cast<node::Node *>( node.get() )->textContent(), U"Hello, world!" );
 }
 
-TEST( parser_dom_node_Node_Tests, textContent_8 ) { //DOM tree with various nodes
+TEST( parser_dom_node_Node_Tests, textContent_8 ) { //Element node with hierarchy of text content
+    auto   node   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
+    node->appendChild( std::make_unique<node::Text>( U"H" ) );
+    auto * el1 = node->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
+    el1->appendChild( std::make_unique<node::Text>( U"ello" ) );
+    el1->appendChild( std::make_unique<node::Text>( U", " ) );
+    node->appendChild( std::make_unique<node::Text>( U"w" ) );
+    auto * el2 = node->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
+    el2->appendChild( std::make_unique<node::Text>( U"orld" ) );
+    el2->appendChild( std::make_unique<node::Text>( U"!" ) );
+
+    ASSERT_EQ( dynamic_cast<node::Node *>( node.get() )->textContent(), U"Hello, world!" );
+}
+
+TEST( parser_dom_node_Node_Tests, textContent_9 ) { //DOM tree with various nodes
     auto doc = node::Document();
     auto * comment = doc.appendChild( std::make_unique<node::Comment>( U"comment" ) );
     auto * cdata   = doc.appendChild( std::make_unique<node::CDATASection>( U"cdata" ) );
-    auto * body    = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_BODY ) );
-    auto * div1    = body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * body    = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_BODY ) );
+    auto * div1    = body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     div1->appendChild( std::make_unique<node::Text>( U"A" ) );
     div1->appendChild( std::make_unique<node::Text>( U"B" ) );
-    auto * div2    = body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * div2    = body->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     auto * attr    = dynamic_cast<node::Element *>( div2 )->createAttribute( U"name", U"value" );
     div2->appendChild( std::make_unique<node::Text>( U"-a-" ) );
-    auto * div3    = div2->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
-    auto * span    = div3->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SPAN ) );
+    auto * div3    = div2->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
+    auto * span    = div3->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
     span->appendChild( std::make_unique<node::Text>( U"span" ) );
     div3->appendChild( std::make_unique<node::Text>( U"div3" ) );
     div2->appendChild( std::make_unique<node::Text>( U"" ) );
@@ -481,8 +547,8 @@ TEST( parser_dom_node_Node_Tests, length_0 ) { //generic
 
 TEST( parser_dom_node_Node_Tests, length_1 ) { //Element
     auto node = blogator::parser::dom::node::Element(
-        blogator::parser::specs::html5::to_namespaceURI(
-            blogator::parser::specs::html5::Namespace::HTML5
+        blogator::parser::specs::infra::to_namespaceURI(
+            blogator::parser::specs::infra::Namespace::HTML5
         ),
         U"div"
     );
@@ -545,7 +611,7 @@ TEST( parser_dom_node_Node_Tests, normalize_1 ) { //contiguous Comment with mix 
 }
 
 TEST( parser_dom_node_Node_Tests, normalize_2 ) { //Mix of contiguous Comment and Text with length > 0
-    auto element = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto element = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
     element.appendChild( std::make_unique<node::Comment>( U"a" ) );
     element.appendChild( std::make_unique<node::Comment>( U"b" ) );
     element.appendChild( std::make_unique<node::Text>( U"A" ) );
@@ -578,10 +644,10 @@ TEST( parser_dom_node_Node_Tests, normalize_3 ) { //Tree with mix of nodes
     doc.appendChild( std::make_unique<node::Comment>( U"doc" ) );
     doc.appendChild( std::make_unique<node::Comment>( U"-" ) );
     doc.appendChild( std::make_unique<node::Comment>( U"comment" ) );
-    auto * element = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * element = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     element->appendChild( std::make_unique<node::Text>( U"te" ) );
     element->appendChild( std::make_unique<node::Text>( U"xt" ) );
-    auto * child = element->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SPAN ) );
+    auto * child = element->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
     child->appendChild( std::make_unique<node::Text>( U"Hello, " ) );
     child->appendChild( std::make_unique<node::Text>( U"" ) );
     child->appendChild( std::make_unique<node::Text>( U"world!" ) );
@@ -640,35 +706,66 @@ TEST( parser_dom_node_Node_Tests, copy_constructor ) {
     original.appendChild( std::make_unique<node::Node>( NodeType::DOCUMENT_TYPE_NODE ) );
     original.appendChild( std::make_unique<node::Node>( NodeType::COMMENT_NODE ) );
     auto * child = original.appendChild( std::make_unique<node::Node>( NodeType::ELEMENT_NODE ) );
-    child->appendChild( std::make_unique<node::Node>( NodeType::ATTRIBUTE_NODE ) );
+    child->appendChild( std::make_unique<node::Node>( NodeType::TEXT_NODE ) );
 
     //[Document]
     //  |-[DocumentType]
     //  |-[Comment]
     //  |-[Element]
-    //      |-[Attr]
+    //      |-[Text]
 
-    auto clone = original; //copy-constructor
+    auto copy = original; //copy-constructor
 
     ASSERT_EQ( original.length(), 3 );
-    ASSERT_EQ( clone.length(), original.length() );
+    ASSERT_EQ( copy.length(), original.length() );
 
     auto * origi_child_it = original.firstChild();
-    auto * clone_child_it = clone.firstChild();
+    auto * copy_child_it = copy.firstChild();
 
     for( int i = 0; i < original.length(); ++i ) {
-        ASSERT_EQ( origi_child_it->nodeType(), clone_child_it->nodeType() );
-        ASSERT_NE( origi_child_it, clone_child_it ); //make sure ptr addresses are different
+        ASSERT_EQ( origi_child_it->nodeType(), copy_child_it->nodeType() );
+        ASSERT_NE( origi_child_it, copy_child_it ); //make sure ptr addresses are different
 
         if( i < original.length() - 1 ) {
             origi_child_it = origi_child_it->nextSibling();
-            clone_child_it = clone_child_it->nextSibling();
+            copy_child_it = copy_child_it->nextSibling();
         }
     }
 
     ASSERT_EQ( origi_child_it->length(), 1 );
-    ASSERT_EQ( origi_child_it->length(), clone_child_it->length() );
-    ASSERT_EQ( origi_child_it->firstChild()->nodeType(), clone_child_it->firstChild()->nodeType() );
+    ASSERT_EQ( origi_child_it->length(), copy_child_it->length() );
+    ASSERT_EQ( origi_child_it->firstChild()->nodeType(), copy_child_it->firstChild()->nodeType() );
+}
+
+TEST( parser_dom_node_Node_Tests, move_constructor ) {
+    auto original = node::Node( NodeType::DOCUMENT_NODE );
+    original.appendChild( std::make_unique<node::Node>( NodeType::DOCUMENT_TYPE_NODE ) );
+    original.appendChild( std::make_unique<node::Node>( NodeType::COMMENT_NODE ) );
+    auto * child = original.appendChild( std::make_unique<node::Node>( NodeType::ELEMENT_NODE ) );
+    child->appendChild( std::make_unique<node::Node>( NodeType::TEXT_NODE ) );
+
+    //[Document]
+    //  |-[DocumentType]
+    //  |-[Comment]
+    //  |-[Element]
+    //      |-[Text]
+
+    auto length = original.length();
+    auto moved  = std::move( original ); //move-constructor
+
+    ASSERT_EQ( moved.length(), length );
+    ASSERT_EQ( moved.childNodes().size(), 3 );
+
+    ASSERT_EQ( moved.childNodes()[0]->nodeType(), NodeType::DOCUMENT_TYPE_NODE );
+    ASSERT_EQ( moved.childNodes()[0]->parentNode(), &moved );
+    ASSERT_EQ( moved.childNodes()[0]->childNodes().size(), 0 );
+    ASSERT_EQ( moved.childNodes()[1]->nodeType(), NodeType::COMMENT_NODE );
+    ASSERT_EQ( moved.childNodes()[1]->parentNode(), &moved );
+    ASSERT_EQ( moved.childNodes()[1]->childNodes().size(), 0 );
+    ASSERT_EQ( moved.childNodes()[2]->nodeType(), NodeType::ELEMENT_NODE );
+    ASSERT_EQ( moved.childNodes()[2]->parentNode(), &moved );
+    ASSERT_EQ( moved.childNodes()[2]->childNodes().size(), 1 );
+    ASSERT_EQ( moved.childNodes()[2].get(), child );
 }
 
 TEST( parser_dom_node_Node_Tests, copy_assignment ) {
@@ -676,73 +773,105 @@ TEST( parser_dom_node_Node_Tests, copy_assignment ) {
     original.appendChild( std::make_unique<node::Node>( NodeType::DOCUMENT_TYPE_NODE ) );
     original.appendChild( std::make_unique<node::Node>( NodeType::COMMENT_NODE ) );
     auto * child = original.appendChild( std::make_unique<node::Node>( NodeType::ELEMENT_NODE ) );
-    child->appendChild( std::make_unique<node::Node>( NodeType::ATTRIBUTE_NODE ) );
+    child->appendChild( std::make_unique<node::Node>( NodeType::TEXT_NODE ) );
 
     //[Document]
     //  |-[DocumentType]
     //  |-[Comment]
     //  |-[Element]
-    //      |-[Attr]
+    //      |-[Text]
 
-    node::Node clone;
-    clone = original; //copy-operator
+    node::Node copy;
+    copy = original; //copy-operator
 
     ASSERT_EQ( original.length(), 3 );
-    ASSERT_EQ( clone.length(), original.length() );
+    ASSERT_EQ( copy.length(), original.length() );
 
     auto * origi_child_it = original.firstChild();
-    auto * clone_child_it = clone.firstChild();
+    auto * copy_child_it = copy.firstChild();
 
     for( int i = 0; i < original.length(); ++i ) {
-        ASSERT_EQ( origi_child_it->nodeType(), clone_child_it->nodeType() );
-        ASSERT_NE( origi_child_it, clone_child_it ); //make sure ptr addresses are different
+        ASSERT_EQ( origi_child_it->nodeType(), copy_child_it->nodeType() );
+        ASSERT_NE( origi_child_it, copy_child_it ); //make sure ptr addresses are different
 
         if( i < original.length() - 1 ) {
             origi_child_it = origi_child_it->nextSibling();
-            clone_child_it = clone_child_it->nextSibling();
+            copy_child_it = copy_child_it->nextSibling();
         }
     }
 
     ASSERT_EQ( origi_child_it->length(), 1 );
-    ASSERT_EQ( origi_child_it->length(), clone_child_it->length() );
-    ASSERT_EQ( origi_child_it->firstChild()->nodeType(), clone_child_it->firstChild()->nodeType() );
+    ASSERT_EQ( origi_child_it->length(), copy_child_it->length() );
+    ASSERT_EQ( origi_child_it->firstChild()->nodeType(), copy_child_it->firstChild()->nodeType() );
+}
+
+TEST( parser_dom_node_Node_Tests, move_assignment ) {
+    auto original = node::Node( NodeType::DOCUMENT_NODE );
+    original.appendChild( std::make_unique<node::Node>( NodeType::DOCUMENT_TYPE_NODE ) );
+    original.appendChild( std::make_unique<node::Node>( NodeType::COMMENT_NODE ) );
+    auto * child = original.appendChild( std::make_unique<node::Node>( NodeType::ELEMENT_NODE ) );
+    child->appendChild( std::make_unique<node::Node>( NodeType::TEXT_NODE ) );
+
+    //[Document]
+    //  |-[DocumentType]
+    //  |-[Comment]
+    //  |-[Element]
+    //      |-[Text]
+
+    auto length = original.length();
+    node::Node moved;
+    moved = std::move( original ); //move-operator
+
+    ASSERT_EQ( moved.length(), length );
+    ASSERT_EQ( moved.childNodes().size(), 3 );
+
+    ASSERT_EQ( moved.childNodes()[0]->nodeType(), NodeType::DOCUMENT_TYPE_NODE );
+    ASSERT_EQ( moved.childNodes()[0]->parentNode(), &moved );
+    ASSERT_EQ( moved.childNodes()[0]->childNodes().size(), 0 );
+    ASSERT_EQ( moved.childNodes()[1]->nodeType(), NodeType::COMMENT_NODE );
+    ASSERT_EQ( moved.childNodes()[1]->parentNode(), &moved );
+    ASSERT_EQ( moved.childNodes()[1]->childNodes().size(), 0 );
+    ASSERT_EQ( moved.childNodes()[2]->nodeType(), NodeType::ELEMENT_NODE );
+    ASSERT_EQ( moved.childNodes()[2]->parentNode(), &moved );
+    ASSERT_EQ( moved.childNodes()[2]->childNodes().size(), 1 );
+    ASSERT_EQ( moved.childNodes()[2].get(), child );
 }
 
 TEST( parser_dom_node_Node_Tests, cloneNode_0 ) { //Element with Attr nodes
-    const auto attr1_prefix = DOMString_t( U"attr1-prefix" );
     const auto attr1_name   = DOMString_t( U"attr1-name" );
     const auto attr1_value  = DOMString_t( U"attr1-value" );
-    const auto attr2_prefix = DOMString_t( U"attr2-name" );
     const auto attr2_name   = DOMString_t( U"attr2-name" );
     const auto attr2_value  = DOMString_t( U"attr2-value" );
-    auto       element      = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
-    auto *     attr1        = dynamic_cast<node::Element *>( element.get() )->createAttribute( attr1_prefix, attr1_name, attr1_value );
-    auto *     attr2        = dynamic_cast<node::Element *>( element.get() )->createAttribute( attr2_prefix, attr2_name, attr2_value );
+    auto       element      = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
+    auto *     attr1        = dynamic_cast<node::Element *>( element.get() )->createAttribute( attr1_name, attr1_value );
+    auto *     attr2        = dynamic_cast<node::Element *>( element.get() )->createAttribute( attr2_name, attr2_value );
 
-    ASSERT_EQ( element->attributes().size(), 2 );
+    ASSERT_EQ( element->attributes().length(), 2 );
 
     auto clone = element->cloneNode( true );
 
     ASSERT_EQ( clone->nodeType(), element->nodeType() );
     const auto * recast_clone = dynamic_cast<node::Element *>( clone.get() );
     ASSERT_EQ( recast_clone->tagName(), U"DIV" );
-    ASSERT_EQ( recast_clone->attributes().size(), element->attributes().size() );
+    ASSERT_EQ( recast_clone->attributes().length(), element->attributes().length() );
 
-    const auto * cloned_attr1 = recast_clone->attributes()[0].get();
+    const auto * cloned_attr1 = recast_clone->attributes().list()[0].get();
     ASSERT_NE( cloned_attr1, nullptr );
     ASSERT_EQ( cloned_attr1->nodeType(), attr1->nodeType() );
+    ASSERT_EQ( cloned_attr1->parentNode(), clone.get() );
     ASSERT_EQ( cloned_attr1->prefix(), attr1->prefix() );
     ASSERT_EQ( cloned_attr1->name(), attr1->name() );
     ASSERT_EQ( cloned_attr1->hasValue(), attr1->hasValue() );
-    ASSERT_EQ( cloned_attr1->value(), attr1->value() );
+    ASSERT_EQ( *cloned_attr1->value(), *attr1->value() );
 
-    const auto * cloned_attr2 = recast_clone->attributes()[1].get();
+    const auto * cloned_attr2 = recast_clone->attributes().list()[1].get();
     ASSERT_NE( cloned_attr2, nullptr );
     ASSERT_EQ( cloned_attr2->nodeType(), attr2->nodeType() );
+    ASSERT_EQ( cloned_attr2->parentNode(), clone.get() );
     ASSERT_EQ( cloned_attr2->prefix(), attr2->prefix() );
     ASSERT_EQ( cloned_attr2->name(), attr2->name() );
     ASSERT_EQ( cloned_attr2->hasValue(), attr2->hasValue() );
-    ASSERT_EQ( cloned_attr2->value(), attr2->value() );
+    ASSERT_EQ( *cloned_attr2->value(), *attr2->value() );
 }
 
 TEST( parser_dom_node_Node_Tests, cloneNode_1 ) { //Element with CharacterData nodes
@@ -751,11 +880,11 @@ TEST( parser_dom_node_Node_Tests, cloneNode_1 ) { //Element with CharacterData n
     const auto comment_str  = DOMString_t( U"comment" );
     const auto span_txt_str = DOMString_t( U"span-txt" );
 
-    auto   element  = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto   element  = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto * cdata    = element->appendChild( std::make_unique<node::CDATASection>( cdata_str ) );
     auto * text     = element->appendChild( std::make_unique<node::Text>( text_str ) );
     auto * comment  = element->appendChild( std::make_unique<node::Comment>( comment_str ) );
-    auto * span     = element->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SPAN ) );
+    auto * span     = element->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
     auto * span_txt = span->appendChild( std::make_unique<node::Text>( span_txt_str ) );
 
     ASSERT_EQ( element->childNodes().size(), 4 );
@@ -831,6 +960,38 @@ TEST( parser_dom_node_Node_Tests, cloneNode_2 ) { //Mixed tree from Document roo
     ASSERT_EQ( origi_child_it->firstChild()->nodeType(), clone_child_it->firstChild()->nodeType() );
 }
 
+TEST( parser_dom_node_Node_Tests, cloneNode_3 ) { //full DOM tree
+    std::unique_ptr<node::Node> root;
+    auto v = blogator::tests::createTestDOM_1( root );
+
+    auto clone = root->cloneNode( true );
+
+    auto it1     = root->cbegin();
+    auto it2     = clone->cbegin();
+    auto counter = 0;
+
+    while( it1 != root->cend() && it2 != clone->cend() ) {
+        ASSERT_EQ( it1->nodeType(), it2->nodeType() );
+        ASSERT_EQ( it1->nodeName(), it2->nodeName() );
+
+        if( it1->nodeValue() ) {
+            ASSERT_NE( it2->nodeValue(), nullptr );
+            ASSERT_EQ( *it1->nodeValue(), *it2->nodeValue() );
+        } else {
+            ASSERT_EQ( it2->nodeValue(), nullptr );
+        }
+
+        ASSERT_EQ( it1->ownerDocument(), root.get() );
+        ASSERT_EQ( it2->ownerDocument(), clone.get() );
+
+        ++it1; ++it2; ++counter;
+    }
+
+    ASSERT_EQ( it1, root->cend() );
+    ASSERT_EQ( it2, clone->cend() );
+    ASSERT_EQ( counter, v.size() );
+}
+
 TEST( parser_dom_node_Node_Tests, isEqualNode_fail_0 ) { //invalid (null)
     node::Node                  node1 = node::Node( NodeType::UNDEFINED );
     std::unique_ptr<node::Node> node2;
@@ -895,7 +1056,17 @@ TEST( parser_dom_node_Node_Tests, isEqualNode_fail_8 ) { //valid/different Eleme
     ASSERT_FALSE( node1.isEqualNode( *node2 ) );
 }
 
-TEST( parser_dom_node_Node_Tests, isEqualNode_fail_9 ) { //valid/equivalent Document nodes with different children
+TEST( parser_dom_node_Node_Tests, isEqualNode_fail_9 ) { //valid/equivalent Element nodes with different children
+    auto node1 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+    auto node2 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+
+    node1.createElement( blogator::parser::specs::infra::Element::HTML5_SPAN );
+    node2.createElement( blogator::parser::specs::infra::Element::HTML5_H1 );
+
+    ASSERT_FALSE( node1.isEqualNode( node2 ) );
+}
+
+TEST( parser_dom_node_Node_Tests, isEqualNode_fail_10 ) { //valid/equivalent Document nodes with different children
     auto node1 = node::Document();
     node1.appendChild( std::make_unique<node::CDATASection>( U"data" ) );
     node1.appendChild( std::make_unique<node::Element>( U"namespace", U"prefix-a", U"name") );
@@ -955,7 +1126,37 @@ TEST( parser_dom_node_Node_Tests, isEqualNode_same_6 ) { //valid/equivalent Elem
     ASSERT_TRUE( node1.isEqualNode( *node2 ) );
 }
 
-TEST( parser_dom_node_Node_Tests, isEqualNode_same_7 ) { //valid/equivalent Document nodes with equivalent children
+TEST( parser_dom_node_Node_Tests, isEqualNode_same_7 ) { //valid/equivalent Element nodes with equivalent children
+    auto node1 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+    auto node2 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+
+    node1.createElement( blogator::parser::specs::infra::Element::HTML5_SPAN );
+    node2.createElement( blogator::parser::specs::infra::Element::HTML5_SPAN );
+
+    ASSERT_TRUE( node1.isEqualNode( node2 ) );
+}
+
+TEST( parser_dom_node_Node_Tests, isEqualNode_same_8 ) { //valid/equivalent Element nodes with equivalent attributes
+    auto node1 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+    auto node2 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+
+    node1.createAttribute( U"name", U"value" );
+    node2.createAttribute( U"name", U"value" );
+
+    ASSERT_TRUE( node1.isEqualNode( node2 ) );
+}
+
+TEST( parser_dom_node_Node_Tests, isEqualNode_same_9 ) { //valid/equivalent Element nodes with different attributes
+    auto node1 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+    auto node2 = node::Element( U"test-namespace", U"test-prefix", U"name" );
+
+    node1.createAttribute( U"name", U"value1" );
+    node2.createAttribute( U"name", U"value2" );
+
+    ASSERT_TRUE( node1.isEqualNode( node2 ) );
+}
+
+TEST( parser_dom_node_Node_Tests, isEqualNode_same_10 ) { //valid/equivalent Document nodes with equivalent children
     auto node1 = node::Document();
     node1.appendChild( std::make_unique<node::CDATASection>( U"data" ) );
     node1.appendChild( std::make_unique<node::Element>( U"namespace", U"prefix", U"name") );
@@ -993,13 +1194,13 @@ TEST( parser_dom_node_Node_Tests, compareDocumentPosition_0 ) { //same node
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_1 ) { //same node, same attribute
-    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto * e1a1 = e1->createAttribute( U"e1a1" );
     ASSERT_EQ( e1a1->compareDocumentPosition( *e1a1 ), 0 );
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_2 ) { //same node, attribute comparison preceding
-    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto * e1a1 = e1->createAttribute( U"e1a1" );
     auto * e1a2 = e1->createAttribute( U"e1a2" );
     auto * e1a3 = e1->createAttribute( U"e1a3" );
@@ -1010,7 +1211,7 @@ TEST( parser_dom_node_Node_Tests, compareDocumentPosition_2 ) { //same node, att
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_3 ) { //same node, attribute comparison following
-    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto * e1a1 = e1->createAttribute( U"e1a1" );
     auto * e1a2 = e1->createAttribute( U"e1a2" );
     auto * e1a3 = e1->createAttribute( U"e1a3" );
@@ -1021,7 +1222,7 @@ TEST( parser_dom_node_Node_Tests, compareDocumentPosition_3 ) { //same node, att
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_4 ) { //compare against a null node
-    auto element   = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto element   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto attribute = std::make_unique<node::Attr>( U"prefix", U"name" ); //orphan (i.e.: parent is null)
 
     ASSERT_EQ( element->compareDocumentPosition( *attribute ),
@@ -1036,8 +1237,8 @@ TEST( parser_dom_node_Node_Tests, compareDocumentPosition_4 ) { //compare agains
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_5 ) { //descendant
-    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
-    auto * e2   = e1->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto   e1   = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
+    auto * e2   = e1->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
 
     //[e1] --> [e2]
 
@@ -1051,9 +1252,9 @@ TEST( parser_dom_node_Node_Tests, compareDocumentPosition_5 ) { //descendant
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_6 ) { //descendant via attributes
-    auto   e1  = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
+    auto   e1  = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
     auto * e1a = e1->createAttribute( U"e1a1" );
-    auto * e2  = e1->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto * e2  = e1->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
     auto * e2a = dynamic_cast<node::Element *>( e2 )->createAttribute( U"e2a1" );
 
     //  [e1] --> [e2]
@@ -1069,10 +1270,10 @@ TEST( parser_dom_node_Node_Tests, compareDocumentPosition_6 ) { //descendant via
 }
 
 TEST( parser_dom_node_Node_Tests, compareDocumentPosition_7 ) { // both children of same parent
-    auto   parent = std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV );
-    auto * c1     = parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
-    auto * c2     = parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
-    auto * c3     = parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_DIV ) );
+    auto   parent = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
+    auto * c1     = parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
+    auto * c2     = parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
+    auto * c3     = parent->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV ) );
 
     ASSERT_EQ( c1->compareDocumentPosition( *c3 ), node::Node::DOCUMENT_POSITION_FOLLOWING );
     ASSERT_EQ( c3->compareDocumentPosition( *c1 ), node::Node::DOCUMENT_POSITION_PRECEDING );
@@ -1107,20 +1308,100 @@ TEST( parser_dom_node_Node_Tests, contains_fail ) {
     ASSERT_FALSE( node.contains( look_for ) );
 }
 
-TEST( parser_dom_node_Node_Tests, lookupPrefix ) {
-    FAIL();
+TEST( parser_dom_node_Node_Tests, lookupPrefix_0 ) { //Element with declaration in Attribute
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto * r   = doc->documentElement(); //<root>
+
+    ASSERT_EQ( r->lookupPrefix( U"http://www.site.com/xml/undergrad" ), U"ug" );
 }
 
-TEST( parser_dom_node_Node_Tests, lookupNamespaceURI ) {
-    FAIL();
+TEST( parser_dom_node_Node_Tests, lookupPrefix_1 ) { //namespaced Element
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   ug  = doc->documentElement()->firstChild(); //<ug:student>
+
+    ASSERT_EQ( ug->lookupPrefix( U"http://www.site.com/xml/undergrad" ), U"ug" );
 }
 
-TEST( parser_dom_node_Node_Tests, isDefaultNamespace_str ) {
-    FAIL();
+TEST( parser_dom_node_Node_Tests, lookupPrefix_2 ) { //nested child Element in namespaced Element
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   tr  = doc->documentElement()->firstChild()->firstChild(); //<tr>
+
+    ASSERT_EQ( tr->lookupPrefix( U"http://www.site.com/xml/undergrad" ), U"ug" );
 }
 
-TEST( parser_dom_node_Node_Tests, isDefaultNamespace_enum ) {
-    FAIL();
+TEST( parser_dom_node_Node_Tests, lookupPrefix_3 ) { //Attribute of nested child Element in namespaced Element
+    std::unique_ptr<node::Node> root;
+    auto   v    = blogator::tests::createTestDOM_3( root );
+    auto * doc  = dynamic_cast<node::Document *>( root.get() );
+    auto * attr = dynamic_cast<node::Element *>( doc->documentElement()->firstChild()->firstChild() )->attributes().list()[0].get(); //{class='table'} (i.e.: <tr> attribute)
+
+    ASSERT_EQ( attr->lookupPrefix( U"http://www.site.com/xml/undergrad" ), U"ug" );
+}
+
+TEST( parser_dom_node_Node_Tests, lookupPrefix_4 ) { //no namespace prefixed Element
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
+
+    ASSERT_EQ( node.lookupPrefix( U"http://www.site.com/xml/undergrad" ), U"" );
+}
+
+TEST( parser_dom_node_Node_Tests, lookupPrefix_5 ) { //Attribute of nested child Element in namespaced Element
+    std::unique_ptr<node::Node> root;
+    auto   v       = blogator::tests::createTestDOM_3( root );
+    auto * doc     = dynamic_cast<node::Document *>( root.get() );
+    auto * doctype = doc->doctype();
+
+    ASSERT_EQ( doctype->lookupPrefix( U"http://www.site.com/xml/undergrad" ), U"" );
+}
+
+TEST( parser_dom_node_Node_Tests, lookupNamespaceURI_0 ) { //get default NS
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   tr  = doc->documentElement()->firstChild()->firstChild(); //<tr>
+
+    ASSERT_EQ( tr->lookupNamespaceURI( U"" ), U"http://www.site.com/xml/default" );
+}
+
+TEST( parser_dom_node_Node_Tests, lookupNamespaceURI_2 ) { //namespace found via parent Element NS
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   tr  = doc->documentElement()->firstChild()->firstChild(); //<tr>
+
+    ASSERT_EQ( tr->lookupNamespaceURI( U"ug" ), U"http://www.site.com/xml/undergrad" );
+}
+
+TEST( parser_dom_node_Node_Tests, lookupNamespaceURI_3 ) { //URI found via parent attribute ns declaration
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   el  = doc->documentElement()->firstChild(); //<ug:student>
+
+    ASSERT_EQ( el->lookupNamespaceURI( U"pg" ), U"http://www.site.com/xml/default" ); //since 'xlmns' > 'xmlnx:pg'
+}
+
+TEST( parser_dom_node_Node_Tests, isDefaultNamespace_0 ) {
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   el  = doc->documentElement()->firstChild(); //<ug:student>
+
+    ASSERT_TRUE( el->isDefaultNamespace( U"http://www.site.com/xml/default" ) );
+}
+
+TEST( parser_dom_node_Node_Tests, isDefaultNamespace_1 ) {
+    std::unique_ptr<node::Node> root;
+    auto   v   = blogator::tests::createTestDOM_3( root );
+    auto * doc = dynamic_cast<node::Document *>( root.get() );
+    auto   el  = doc->documentElement()->firstChild(); //<ug:student>
+
+    ASSERT_FALSE( el->isDefaultNamespace( U"http://www.site.com/xml/postgrad" ) );
 }
 
 TEST( parser_dom_node_Node_Tests, insertBefore_0 ) { //insert at end
@@ -1128,6 +1409,8 @@ TEST( parser_dom_node_Node_Tests, insertBefore_0 ) { //insert at end
     auto * child = node.insertBefore( std::make_unique<node::Node>(), nullptr );
     ASSERT_FALSE( node.childNodes().empty() );
     ASSERT_EQ( node.childNodes()[0].get(), child );
+    ASSERT_EQ( node.childNodes()[0]->parentNode(), &node );
+    ASSERT_EQ( node.childNodes()[0]->nextSibling(), nullptr );
 }
 
 TEST( parser_dom_node_Node_Tests, insertBefore_1 ) { //insert before a child
@@ -1139,12 +1422,17 @@ TEST( parser_dom_node_Node_Tests, insertBefore_1 ) { //insert before a child
     ASSERT_TRUE( node.childNodes()[0] );
     ASSERT_EQ( node.insertBefore( insert, node.childNodes()[0].get() ), insert_ptr );
     ASSERT_EQ( node.childNodes().size(), 2 );
+    ASSERT_EQ( insert_ptr->parentNode(), &node );
+    ASSERT_EQ( insert_ptr->previousSibling(), nullptr );
+    ASSERT_EQ( insert_ptr->nextSibling(), child );
+    ASSERT_EQ( child->previousSibling(), insert_ptr );
+    ASSERT_EQ( child->nextSibling(), nullptr);
 }
 
 TEST( parser_dom_node_Node_Tests, insertBefore_2 ) { //insert between CDATA and Element in a Document node
     auto   node   = node::Document();
     auto * child1 = node.appendChild( std::make_unique<node::CDATASection>( U"CDATASection" ) );
-    auto * child2 = node.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_HEAD ) );
+    auto * child2 = node.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_HEAD ) );
 
     std::unique_ptr<node::Node> insert     = std::make_unique<node::DocumentType>( U"name", U"public-id", U"system-id" );
     node::Node *                insert_ptr = insert.get();
@@ -1154,6 +1442,78 @@ TEST( parser_dom_node_Node_Tests, insertBefore_2 ) { //insert between CDATA and 
     ASSERT_EQ( node.childNodes()[1].get(), child2 );
     ASSERT_EQ( node.insertBefore( insert, node.childNodes()[1].get() ), insert_ptr );
     ASSERT_EQ( node.childNodes().size(), 3 );
+
+    ASSERT_EQ( node.childNodes()[0]->previousSibling(), nullptr );
+    ASSERT_EQ( node.childNodes()[0]->nextSibling(), insert_ptr );
+
+    ASSERT_EQ( node.childNodes()[1]->parentNode(), &node );
+    ASSERT_EQ( node.childNodes()[1]->nextSibling(), child2 );
+    ASSERT_EQ( node.childNodes()[1]->previousSibling(), child1 );
+
+    ASSERT_EQ( node.childNodes()[2]->previousSibling(), insert_ptr );
+    ASSERT_EQ( node.childNodes()[2]->nextSibling(), nullptr );
+}
+
+TEST( parser_dom_node_Node_Tests, insertBefore_3 ) { //DocumentFragment elements append at end
+    NodePtr_t doc_fragment = std::make_unique<node::DocumentFragment>();
+    auto *    frag_child_1 = doc_fragment->appendChild( std::make_unique<node::Element>( U"frag1" ) );
+    auto *    frag_child_2 = doc_fragment->appendChild( std::make_unique<node::Element>( U"frag2" ) );
+
+    auto      node         = node::Element( U"parent" );
+    auto *    first_child  = node.appendChild( std::make_unique<node::Text>( U"first child" ) );
+
+    //sanity check
+    ASSERT_EQ( doc_fragment->childNodes().size(), 2 );
+    ASSERT_EQ( node.childNodes().size(), 1 );
+
+    //test
+    ASSERT_EQ( node.insertBefore( doc_fragment, nullptr ), frag_child_1 );
+    ASSERT_FALSE( doc_fragment );
+    ASSERT_EQ( node.childNodes().size(), 3 );
+
+    ASSERT_EQ( first_child->previousSibling(), nullptr );
+    ASSERT_EQ( first_child->nextSibling(), frag_child_1 );
+
+    ASSERT_EQ( frag_child_1->parentNode(), &node );
+    ASSERT_EQ( frag_child_1->previousSibling(), first_child );
+    ASSERT_EQ( frag_child_1->nextSibling(), frag_child_2 );
+
+    ASSERT_EQ( frag_child_2->parentNode(), &node );
+    ASSERT_EQ( frag_child_2->previousSibling(), frag_child_1 );
+    ASSERT_EQ( frag_child_2->nextSibling(), nullptr );
+}
+
+TEST( parser_dom_node_Node_Tests, insertBefore_4 ) { //DocumentFragment elements between other nodes
+    NodePtr_t doc_fragment = std::make_unique<node::DocumentFragment>();
+    auto *    frag_child_1 = doc_fragment->appendChild( std::make_unique<node::Element>( U"frag1" ) );
+    auto *    frag_child_2 = doc_fragment->appendChild( std::make_unique<node::Element>( U"frag2" ) );
+
+    auto      node         = node::Element( U"parent" );
+    auto *    first_child  = node.appendChild( std::make_unique<node::Text>( U"first child" ) );
+    auto *    last_child   = node.appendChild( std::make_unique<node::Text>( U"last child" ) );
+
+    //sanity check
+    ASSERT_EQ( doc_fragment->childNodes().size(), 2 );
+    ASSERT_EQ( node.childNodes().size(), 2 );
+
+    //test
+    ASSERT_EQ( node.insertBefore( doc_fragment, last_child ), frag_child_1 );
+    ASSERT_FALSE( doc_fragment );
+    ASSERT_EQ( node.childNodes().size(), 4 );
+
+    ASSERT_EQ( first_child->previousSibling(), nullptr );
+    ASSERT_EQ( first_child->nextSibling(), frag_child_1 );
+
+    ASSERT_EQ( frag_child_1->parentNode(), &node );
+    ASSERT_EQ( frag_child_1->previousSibling(), first_child );
+    ASSERT_EQ( frag_child_1->nextSibling(), frag_child_2 );
+
+    ASSERT_EQ( frag_child_2->parentNode(), &node );
+    ASSERT_EQ( frag_child_2->previousSibling(), frag_child_1 );
+    ASSERT_EQ( frag_child_2->nextSibling(), last_child );
+
+    ASSERT_EQ( last_child->previousSibling(), frag_child_2 );
+    ASSERT_EQ( last_child->nextSibling(), nullptr );
 }
 
 TEST( parser_dom_node_Node_Tests, insertBefore_fail_0 ) { //null arg
@@ -1217,7 +1577,7 @@ TEST( parser_dom_node_Node_Tests, insertBefore_fail_4 ) { //insert Attr node int
 }
 
 TEST( parser_dom_node_Node_Tests, insertBefore_fail_5 ) { //insert Attr node into Element
-    auto parent = node::Element( blogator::parser::specs::html5::Element::HTML5_SPAN );
+    auto parent = node::Element( blogator::parser::specs::infra::Element::HTML5_SPAN );
 
     try {
         parent.insertBefore( std::make_unique<node::Attr>( U"name" ), nullptr );
@@ -1369,6 +1729,35 @@ TEST( parser_dom_node_Node_Tests, appendChild_2 ) { //[][][]
     ASSERT_EQ( child3->nextSibling(), nullptr );
 }
 
+TEST( parser_dom_node_Node_Tests, appendChild_3 )  { //append tree
+    auto   doc = node::Document();
+    auto * el  = doc.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_HTML ) );
+
+    auto   root  = std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_DIV );
+    auto * attr1 = root->createAttribute( U"name1" );
+    auto * child = root->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_H1 ) );
+    auto * attr2 = dynamic_cast<node::Element *>( child )->createAttribute( U"name2" );
+
+    //sanity check
+    ASSERT_EQ( el->ownerDocument(), &doc );
+    ASSERT_EQ( el->parentNode(), &doc );
+    ASSERT_EQ( root->ownerDocument(), nullptr );
+    ASSERT_EQ( root->parentNode(), nullptr );
+
+    auto * ptr = el->appendChild( std::move( root ) );
+
+    ASSERT_EQ( ptr->parentNode(), el );
+    ASSERT_EQ( attr1->ownerDocument(), &doc ); //'ptr' attribute
+    ASSERT_EQ( attr2->ownerDocument(), &doc ); //'child' attribute
+
+    size_t counter = 0;
+    for( auto it = doc.cbegin(); it != doc.cend(); ++it, ++counter ) {
+        ASSERT_EQ( it->ownerDocument(), &doc );
+    }
+
+    ASSERT_EQ( counter, 4 ); //make sure all nodes were checked
+}
+
 TEST( parser_dom_node_Node_Tests, appendChild_fail_0 ) { //null unique_ptr
     auto parent       = node::Node();
     std::unique_ptr<node::Node> node;;
@@ -1514,8 +1903,8 @@ TEST( parser_dom_node_Node_Tests, replaceChild_fail_4 ) { //child not in tree
 }
 
 TEST( parser_dom_node_Node_Tests, replaceChild_fail_5 ) { //replace w/ an Attr node
-    auto      parent      = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
-    auto *    child       = parent.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SPAN ) );
+    auto      parent      = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
+    auto *    child       = parent.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
     NodePtr_t replacement = std::make_unique<node::Attr>( U"prefix", U"name" );
 
     ASSERT_EQ( parent.childNodes().size(), 1 ); //sanity check
@@ -1533,8 +1922,8 @@ TEST( parser_dom_node_Node_Tests, replaceChild_fail_5 ) { //replace w/ an Attr n
 }
 
 TEST( parser_dom_node_Node_Tests, replaceChild_fail_6 ) { //replace w/ an Document node
-    auto      parent      = node::Element( blogator::parser::specs::html5::Element::HTML5_DIV );
-    auto *    child       = parent.appendChild( std::make_unique<node::Element>( blogator::parser::specs::html5::Element::HTML5_SPAN ) );
+    auto      parent      = node::Element( blogator::parser::specs::infra::Element::HTML5_DIV );
+    auto *    child       = parent.appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_SPAN ) );
     NodePtr_t replacement = std::make_unique<node::Document>();
 
     ASSERT_EQ( parent.childNodes().size(), 1 ); //sanity check
@@ -1650,4 +2039,84 @@ TEST( parser_dom_node_Node_Tests, removeChild_fail_1 ) { //by index
     } catch( std::exception &other ) {
         FAIL() << "Wrong exception type thrown.";
     }
+}
+
+TEST( parser_dom_node_Node_Tests, swap_0 ) { //parent
+    auto parent1 = node::Node();
+    auto parent2 = node::Node();
+    auto node1   = node::Node( NodeType::UNDEFINED, &parent1, nullptr );
+    auto node2   = node::Node( NodeType::UNDEFINED, &parent2, nullptr );
+
+    blogator::parser::dom::node::swap( node1, node2 );
+
+    ASSERT_EQ( node1.parentNode(), &parent1 );
+    ASSERT_EQ( node2.parentNode(), &parent2 );
+}
+
+TEST( parser_dom_node_Node_Tests, swap_1 ) { //previous sibling
+    auto prev_sibling_1 = node::Node();
+    auto prev_sibling_2 = node::Node();
+    auto node1          = node::Node( NodeType::UNDEFINED, nullptr, &prev_sibling_1 );
+    auto node2          = node::Node( NodeType::UNDEFINED, nullptr, &prev_sibling_2 );
+
+    blogator::parser::dom::node::swap( node1, node2 );
+
+    ASSERT_EQ( node1.previousSibling(), &prev_sibling_1 );
+    ASSERT_EQ( node2.previousSibling(), &prev_sibling_2 );
+}
+
+TEST( parser_dom_node_Node_Tests, swap_2 ) { //next sibling
+    auto next_sibling_1 = node::Node();
+    auto next_sibling_2 = node::Node();
+    auto node1          = node::Node( NodeType::UNDEFINED, nullptr, nullptr, &next_sibling_1 );
+    auto node2          = node::Node( NodeType::UNDEFINED, nullptr, nullptr, &next_sibling_2 );
+
+    blogator::parser::dom::node::swap( node1, node2 );
+
+    ASSERT_EQ( node1.nextSibling(), &next_sibling_1 );
+    ASSERT_EQ( node2.nextSibling(), &next_sibling_2 );
+}
+
+TEST( parser_dom_node_Node_Tests, swap_3 ) { //children + owner doc
+    auto parent1 = node::Document();
+    auto node1   = parent1.appendChild( std::make_unique<node::Node>( NodeType::UNDEFINED ) );
+    auto child1  = node1->appendChild( std::make_unique<node::Node>() );
+
+    auto parent2 = node::Document();
+    auto node2   = parent2.appendChild( std::make_unique<node::Node>( NodeType::UNDEFINED ) );
+    auto child2  = node2->appendChild( std::make_unique<node::Node>() );
+    auto child3  = node2->appendChild( std::make_unique<node::Node>() );
+
+    //sanity check
+    ASSERT_EQ( node1->childNodes().size(), 1 );
+    ASSERT_EQ( node1->childNodes()[0]->ownerDocument(), &parent1 );
+    ASSERT_EQ( node1->childNodes()[0]->parentNode(), node1 );
+
+    ASSERT_EQ( node2->childNodes().size(), 2 );
+    ASSERT_EQ( node2->childNodes()[0]->ownerDocument(), &parent2 );
+    ASSERT_EQ( node2->childNodes()[0]->parentNode(), node2 );
+    ASSERT_EQ( node2->childNodes()[1]->ownerDocument(), &parent2 );
+    ASSERT_EQ( node2->childNodes()[1]->parentNode(), node2 );
+
+    blogator::parser::dom::node::swap( *node1, *node2 );
+
+    //assert result
+    ASSERT_EQ( node1->ownerDocument(), &parent1 );
+    ASSERT_EQ( node1->childNodes().size(), 1 );
+    ASSERT_EQ( node1->childNodes()[0]->ownerDocument(), &parent1 );
+    ASSERT_EQ( node1->childNodes()[0]->parentNode(), node1 );
+
+    ASSERT_EQ( node2->ownerDocument(), &parent2 );
+    ASSERT_EQ( node2->childNodes().size(), 2 );
+    ASSERT_EQ( node2->childNodes()[0]->ownerDocument(), &parent2 );
+    ASSERT_EQ( node2->childNodes()[0]->parentNode(), node2 );
+    ASSERT_EQ( node2->childNodes()[1]->ownerDocument(), &parent2 );
+    ASSERT_EQ( node2->childNodes()[1]->parentNode(), node2 );
+}
+
+TEST( parser_dom_node_Node_Tests, swap_fail_0 ) { //not same types
+    auto node1   = node::Node( NodeType::TEXT_NODE );
+    auto node2   = node::Node( NodeType::COMMENT_NODE );
+
+    ASSERT_THROW( node1.swap( node2 ), blogator::parser::dom::exception::DOMException );
 }

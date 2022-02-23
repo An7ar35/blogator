@@ -4,30 +4,47 @@
 using namespace blogator::parser::dom;
 using           blogator::parser::specs::infra::Namespace;
 
+TEST( parser_dom_NamespaceMap_Tests, constructor ) {
+    auto nsmap = NamespaceMap();
+    ASSERT_NO_THROW( ASSERT_EQ( nsmap.getNamespaceEnum( NamespaceMap::NONE ), Namespace::NONE ) );
+    ASSERT_NO_THROW( ASSERT_EQ( nsmap.getNamespaceURI( NamespaceMap::NONE ), U"" ) );
+    ASSERT_NO_THROW( ASSERT_EQ( nsmap.getNamespacePrefix( NamespaceMap::NONE ), U"" ) );
+    ASSERT_NO_THROW( ASSERT_EQ( nsmap.setNamespace( U"" ), NamespaceMap::NONE ) );
+}
+
 TEST( parser_dom_NamespaceMap_Tests, setNamespace_0 ) {
     auto nsmap = NamespaceMap();
     auto id    = nsmap.setNamespace( U"new_namespace" );
-    ASSERT_EQ( id, 0 );
+    ASSERT_EQ( id, 1 );
 }
 
 TEST( parser_dom_NamespaceMap_Tests, setNamespace_1 ) { //recall
     auto nsmap = NamespaceMap();
-    ASSERT_EQ( nsmap.setNamespace( U"new_namespace" ), 0 );
-    ASSERT_EQ( nsmap.setNamespace( U"new_namespace" ), 0 );
-    ASSERT_EQ( nsmap.size(), 1 );
+    ASSERT_EQ( nsmap.setNamespace( U"new_namespace" ), 1 );
+    ASSERT_EQ( nsmap.setNamespace( U"new_namespace" ), 1 );
+    ASSERT_EQ( nsmap.size(), 2 );
 }
 
 TEST( parser_dom_NamespaceMap_Tests, setNamespace_2 ) {
     auto nsmap = NamespaceMap();
     auto id    = nsmap.setNamespace( Namespace::MATHML );
-    ASSERT_EQ( id, 0 );
+    ASSERT_EQ( id, 1 );
 }
 
 TEST( parser_dom_NamespaceMap_Tests, setNamespace_3 ) { //recall
     auto nsmap = NamespaceMap();
-    ASSERT_EQ( nsmap.setNamespace( Namespace::MATHML ), 0 );
-    ASSERT_EQ( nsmap.setNamespace( Namespace::MATHML ), 0 );
-    ASSERT_EQ( nsmap.size(), 1 );
+    ASSERT_EQ( nsmap.setNamespace( Namespace::MATHML ), 1 );
+    ASSERT_EQ( nsmap.setNamespace( Namespace::MATHML ), 1 );
+    ASSERT_EQ( nsmap.size(), 2 );
+}
+
+TEST( parser_dom_NamespaceMap_Tests, setNamespace_4 ) { //URI range convertible to Namespace enums
+    auto nsmap = NamespaceMap();
+
+    for( auto e = static_cast<int>( Namespace::URI_DEFS_BEGIN ), i = 1; e <= static_cast<int>( Namespace::URI_DEFS_END ); ++e, ++i  ) {
+        ASSERT_EQ( nsmap.setNamespace( blogator::parser::specs::infra::to_namespaceURI( static_cast<Namespace>( e ) ) ), i );
+        ASSERT_EQ( nsmap.getID( static_cast<Namespace>( e ) ), i ); //checking enum map is correct
+    }
 }
 
 TEST( parser_dom_NamespaceMap_Tests, setNamespace_fail_0 ) {
@@ -113,21 +130,18 @@ TEST( parser_dom_NamespaceMap_Tests, getNamespacePrefix_fail_1 ) {
 
 TEST( parser_dom_NamespaceMap_Tests, size ) {
     auto nsmap = NamespaceMap();
-    ASSERT_EQ( nsmap.size(), 0 );
-    nsmap.setNamespace( U"new_namespace" );
     ASSERT_EQ( nsmap.size(), 1 );
+    nsmap.setNamespace( U"new_namespace" );
+    ASSERT_EQ( nsmap.size(), 2 );
 }
 
 TEST( parser_dom_NamespaceMap_Tests, empty ) {
     auto nsmap = NamespaceMap();
-    ASSERT_TRUE( nsmap.empty() );
-    nsmap.setNamespace( U"new_namespace" );
-    ASSERT_FALSE( nsmap.empty() );
+    ASSERT_FALSE( nsmap.empty() ); //since 'NONE' is auto-added
 }
 
 TEST( parser_dom_NamespaceMap_Tests, getID_0 ) {
     auto nsmap  = NamespaceMap();
-    auto id     = nsmap.setNamespace( Namespace::MATHML );
     ASSERT_EQ( nsmap.getID( Namespace::HTML5 ), NamespaceMap::INVALID );
 }
 
@@ -139,7 +153,6 @@ TEST( parser_dom_NamespaceMap_Tests, getID_1 ) {
 
 TEST( parser_dom_NamespaceMap_Tests, getID_2 ) {
     auto nsmap  = NamespaceMap();
-    auto id     = nsmap.setNamespace( U"namespace/uri" );
     ASSERT_EQ( nsmap.getID( U"other/uri" ), NamespaceMap::INVALID );
 }
 

@@ -12,11 +12,12 @@ namespace blogator::parser::dom::node {
     class Text : public node::CharacterData {
       public:
         explicit Text( DOMString_t str );
-        Text( DOMString_t str, node::Node * parent, node::Node * prev_sibling );
-        Text( DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling );
+        Text( Document * document, DOMString_t str );
         Text( NodeType type, DOMString_t str );
-        Text( NodeType type, DOMString_t str, node::Node * parent, node::Node * prev_sibling );
-        Text( NodeType type, DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling );
+        Text( Document * document, NodeType type, DOMString_t str );
+
+        void swap( Node & rhs ) override;
+        void swap( Text & rhs );
 
       public: /* 'Node' interface override */
         [[nodiscard]] DOMString_t nodeName() const override;
@@ -29,6 +30,8 @@ namespace blogator::parser::dom::node {
         virtual node::Text * splitText( size_t offset );
         [[nodiscard]] virtual DOMString_t wholeText() const;
     };
+
+    void swap( Text & lhs, Text & rhs );
 }
 
 #endif //BLOGATOR_PARSER_DOM_NODE_TEXT_H

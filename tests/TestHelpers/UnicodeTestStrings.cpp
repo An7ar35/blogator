@@ -1,10 +1,10 @@
-#include "TestStrings.h"
+#include "UnicodeTestStrings.h"
 
 #include <cassert>
 
-using blogator::tests::TestStrings;
+using blogator::tests::UnicodeTestStrings;
 
-const std::u32string TestStrings::test_str[COUNT] = {
+const std::u32string UnicodeTestStrings::test_str[COUNT] = {
     //STR #0: ASCII
     U"Hello, world!",
 
@@ -20,7 +20,7 @@ const std::u32string TestStrings::test_str[COUNT] = {
 };
 
 
-const std::function<void( std::ostream & )> TestStrings::write_u8[COUNT] = {
+const std::function<void( std::ostream & )> UnicodeTestStrings::write_u8[COUNT] = {
     []( std::ostream & os ) {
         os << (char) 0x48 << (char) 0x65 << (char) 0x6C << (char) 0x6C
            << (char) 0x6F << (char) 0x2C << (char) 0x20 << (char) 0x77
@@ -55,7 +55,7 @@ const std::function<void( std::ostream & )> TestStrings::write_u8[COUNT] = {
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u16le[COUNT] = {
+const std::function<void( std::ostream & )> UnicodeTestStrings::write_u16le[COUNT] = {
     []( std::ostream &os ) {
         os << (char) 0x48 << (char) 0x00 //0x4800
            << (char) 0x65 << (char) 0x00 //0x6500
@@ -101,7 +101,7 @@ const std::function<void( std::ostream & )> TestStrings::write_u16le[COUNT] = {
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u16be[COUNT] = {
+const std::function<void( std::ostream & )> UnicodeTestStrings::write_u16be[COUNT] = {
     []( std::ostream &os ) {
         os << (char) 0x00 << (char) 0x48 //0x0048
            << (char) 0x00 << (char) 0x65 //0x0065
@@ -147,7 +147,7 @@ const std::function<void( std::ostream & )> TestStrings::write_u16be[COUNT] = {
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u32le[COUNT] = {
+const std::function<void( std::ostream & )> UnicodeTestStrings::write_u32le[COUNT] = {
     []( std::ostream &os ) {
         os << (char) 0x48 << (char) 0x00 << (char) 0x00 << (char) 0x00 //0x48000000
            << (char) 0x65 << (char) 0x00 << (char) 0x00 << (char) 0x00 //0x65000000
@@ -193,7 +193,7 @@ const std::function<void( std::ostream & )> TestStrings::write_u32le[COUNT] = {
     }
 };
 
-const std::function<void( std::ostream & )> TestStrings::write_u32be[COUNT] = {
+const std::function<void( std::ostream & )> UnicodeTestStrings::write_u32be[COUNT] = {
     []( std::ostream &os ) {
         os << (char) 0x00 << (char) 0x00 << (char) 0x00 << (char) 0x48 //0x00000048
            << (char) 0x00 << (char) 0x00 << (char) 0x00 << (char) 0x65 //0x00000065
@@ -245,7 +245,7 @@ const std::function<void( std::ostream & )> TestStrings::write_u32be[COUNT] = {
  * @param fmt Output format
  * @param os Output stream
  */
-void TestStrings::write( size_t id, EncodingFmt fmt, std::ostream &os ) {
+void UnicodeTestStrings::write( size_t id, EncodingFmt fmt, std::ostream &os ) {
     assert( id < COUNT );
 
     switch( fmt ) {
@@ -262,7 +262,7 @@ void TestStrings::write( size_t id, EncodingFmt fmt, std::ostream &os ) {
  * @param id String ID
  * @return Test string
  */
-const std::u32string & TestStrings::string( size_t id ) {
+const std::u32string & UnicodeTestStrings::string( size_t id ) {
     assert( id < COUNT );
     return test_str[id];
 }
@@ -271,6 +271,6 @@ const std::u32string & TestStrings::string( size_t id ) {
  * Gets the number of test strings available
  * @return Test string count
  */
-size_t TestStrings::count() {
+size_t UnicodeTestStrings::count() {
     return COUNT;
 }

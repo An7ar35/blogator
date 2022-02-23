@@ -11,8 +11,10 @@ namespace blogator::parser::dom::node {
     class Comment : public CharacterData {
       public:
         explicit Comment( DOMString_t str );
-        Comment( DOMString_t str, node::Node * parent, node::Node * prev_sibling );
-        Comment( DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling );
+        Comment( Document * document, DOMString_t str );
+
+        void swap( Node & rhs ) override;
+        void swap( Comment & rhs );
 
       public: /* 'Node' interface override */
         [[nodiscard]] DOMString_t nodeName() const override;
@@ -21,6 +23,8 @@ namespace blogator::parser::dom::node {
         Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
         NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
     };
+
+    void swap( Comment & lhs, Comment & rhs );
 }
 
 #endif //BLOGATOR_PARSER_DOM_NODE_COMMENT_H

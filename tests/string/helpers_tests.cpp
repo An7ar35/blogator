@@ -55,19 +55,48 @@ TEST( string_Tests, split3 ) {
 TEST( string_Tests, split4 ) {
     using blogator::string::split;
 
-    std::string str = "  three  five";
+    std::string str = " one two three four five six ";
+    char        sep = ' ';
+
+    auto res = split<char>( str, sep, true );
+    ASSERT_EQ( 6,       res.size() );
+    ASSERT_EQ( "one",   res.at( 0 ) );
+    ASSERT_EQ( "two",   res.at( 1 ) );
+    ASSERT_EQ( "three", res.at( 2 ) );
+    ASSERT_EQ( "four",  res.at( 3 ) );
+    ASSERT_EQ( "five",  res.at( 4 ) );
+    ASSERT_EQ( "six",   res.at( 5 ) );
+}
+
+TEST( string_Tests, split5 ) {
+    using blogator::string::split;
+
+    std::string str = "  three  five ";
     char        sep = ' ';
 
     auto res = split<char>( str, sep );
-    ASSERT_EQ( 5,       res.size() );
+    ASSERT_EQ( 6,       res.size() );
     ASSERT_EQ( "",      res.at( 0 ) );
     ASSERT_EQ( "",      res.at( 1 ) );
     ASSERT_EQ( "three", res.at( 2 ) );
     ASSERT_EQ( "",      res.at( 3 ) );
     ASSERT_EQ( "five",  res.at( 4 ) );
+    ASSERT_EQ( "",  res.at( 5 ) );
 }
 
-TEST( string_Tests, split5 ) {
+TEST( string_Tests, split6 ) {
+    using blogator::string::split;
+
+    std::string str = "  three  five ";
+    char        sep = ' ';
+
+    auto res = split<char>( str, sep, true );
+    ASSERT_EQ( 2,       res.size() );
+    ASSERT_EQ( "three", res.at( 0 ) );
+    ASSERT_EQ( "five",  res.at( 1 ) );
+}
+
+TEST( string_Tests, split7 ) {
     using blogator::string::split;
 
     std::string str = "1,2,3,,,6,,";
@@ -83,6 +112,20 @@ TEST( string_Tests, split5 ) {
     ASSERT_EQ( "6", res.at( 5 ) );
     ASSERT_EQ( "",  res.at( 6 ) );
     ASSERT_EQ( "",  res.at( 7 ) );
+}
+
+TEST( string_Tests, split8 ) {
+    using blogator::string::split;
+
+    std::string str = "1,2,3,,,6,,";
+    char        sep = ',';
+
+    auto res = split<char>( str, sep, true );
+    ASSERT_EQ( 4,   res.size() );
+    ASSERT_EQ( "1", res.at( 0 ) );
+    ASSERT_EQ( "2", res.at( 1 ) );
+    ASSERT_EQ( "3", res.at( 2 ) );
+    ASSERT_EQ( "6", res.at( 3 ) );
 }
 
 TEST( string_Tests, skipWhitespace1 ) {

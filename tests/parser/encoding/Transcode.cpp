@@ -7,7 +7,7 @@
 #include <bit>
 
 #include "../../helper.h"
-#include "../../TestStrings.h"
+#include "../../TestHelpers/UnicodeTestStrings.h"
 #include "../../../src/parser/logging/ParserLog.h"
 
 using namespace blogator::parser;
@@ -31,6 +31,8 @@ class ParserLogCatcher {
   private:
     std::vector<blogator::parser::logging::ErrorObject> _errors;
 };
+
+
 
 //===========================================[ TESTS ] =============================================
 
@@ -71,12 +73,12 @@ TEST( parser_encoding_Transcode, sniffBOM_unknown ) {
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32LE ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
-        const auto &      in_str = blogator::tests::TestStrings::string( str_id );
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+        const auto &      in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::stringstream out_stream;
         std::stringstream expected_stream;
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, expected_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, expected_stream );
 
         ASSERT_TRUE( Transcode::U32toByteStream( in_str, out_stream, Endianness::LE ) );
         ASSERT_EQ( out_stream.str(), expected_stream.str() );
@@ -84,12 +86,12 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32LE ) {
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32BE ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
-        const auto &      in_str = blogator::tests::TestStrings::string( str_id );
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+        const auto &      in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::stringstream out_stream;
         std::stringstream expected_stream;
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, expected_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, expected_stream );
 
         ASSERT_TRUE( Transcode::U32toByteStream( in_str, out_stream, Endianness::BE ) );
         ASSERT_EQ( out_stream.str(), expected_stream.str() );
@@ -98,7 +100,7 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32BE ) {
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32string_fail_1 ) { //bad output stream
     const size_t      test_string_id = 0;
-    const auto &      in_str = blogator::tests::TestStrings::string( test_string_id );
+    const auto &      in_str = blogator::tests::UnicodeTestStrings::string( test_string_id );
     std::stringstream out_stream;
 
     out_stream.setstate( std::ios::badbit );
@@ -106,13 +108,13 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32string_fail_1 ) { //bad outp
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32LE ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
-        const auto &          in_str = blogator::tests::TestStrings::string( str_id );
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+        const auto &          in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::vector<uint32_t> in_vec( in_str.begin(), in_str.end() );
         std::stringstream     out_stream;
         std::stringstream     expected_stream;
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, expected_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, expected_stream );
 
         ASSERT_TRUE( Transcode::U32toByteStream( in_vec, out_stream, Endianness::LE ) );
         ASSERT_EQ( out_stream.str(), expected_stream.str() );
@@ -120,13 +122,13 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32LE ) {
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32BE ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
-        const auto &          in_str = blogator::tests::TestStrings::string( str_id );
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+        const auto &          in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::vector<uint32_t> in_vec( in_str.begin(), in_str.end() );
         std::stringstream     out_stream;
         std::stringstream     expected_stream;
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, expected_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, expected_stream );
 
         ASSERT_TRUE( Transcode::U32toByteStream( in_vec, out_stream, Endianness::BE ) );
         ASSERT_EQ( out_stream.str(), expected_stream.str() );
@@ -135,7 +137,7 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32BE ) {
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32collection_fail_1 ) { //bad output stream
     const size_t          test_string_id = 0;
-    const auto &          in_str = blogator::tests::TestStrings::string( test_string_id );
+    const auto &          in_str = blogator::tests::UnicodeTestStrings::string( test_string_id );
     std::vector<uint32_t> in_vec( in_str.begin(), in_str.end() );
     std::stringstream     out_stream;
 
@@ -366,13 +368,13 @@ TEST( parser_encoding_Transcode, addCodePoint_newline_LFCR ) {
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF32_LE );
         std::vector<uint32_t>  out_buffer;
-        const std::u32string & expected_str = blogator::tests::TestStrings::string( str_id );
+        const std::u32string & expected_str = blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
 
         ASSERT_TRUE( Transcode::U32LEtoU32( in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -381,14 +383,14 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_stream ) {
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_0 ) { //with pre-buffered bytes
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t> in_buffer = { 0xD6, 0xFA, 0x01, 0x00 }; //LE 0x0001FAD6 (TEAPOT)
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_LE );
         std::vector<uint32_t> out_buffer;
-        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
 
         ASSERT_TRUE( Transcode::U32LEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -397,15 +399,15 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_0 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_1 ) { //with pre-buffered bytes (1/4 byte)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t> in_buffer = { 0xD6 }; //LE 0x0001FAD6 (TEAPOT) - 1/4 byte
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_LE );
         std::vector<uint32_t> out_buffer;
-        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << (char) 0xFA << (char) 0x01 << (char) 0x00; //3/4 bytes
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
 
         ASSERT_TRUE( Transcode::U32LEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -414,15 +416,15 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_1 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_2 ) { //with pre-buffered bytes (3/4 byte)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t> in_buffer = { 0xD6, 0xFA, 0x01 }; //LE 0x0001FAD6 (TEAPOT) - 3/4 byte
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_LE );
         std::vector<uint32_t> out_buffer;
-        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << (char) 0x00; //1/4 bytes
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32LE, in_stream );
 
         ASSERT_TRUE( Transcode::U32LEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -476,13 +478,13 @@ TEST( parser_encoding_Transcode, U32LEtoU32_file ) {
 }
 
 TEST( parser_encoding_Transcode, U32BEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_BE );
         std::vector<uint32_t> out_buffer;
-        const std::u32string &expected_str = blogator::tests::TestStrings::string( str_id );
+        const std::u32string &expected_str = blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, in_stream );
 
         ASSERT_TRUE( Transcode::U32BEtoU32( in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -491,14 +493,14 @@ TEST( parser_encoding_Transcode, U32BEtoU32_string_stream ) {
 }
 
 TEST( parser_encoding_Transcode, U32BEtoU32_string_prebuffered ) { //with pre-buffered bytes
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>  in_buffer = { 0x00, 0x01, 0xFA, 0xD6 }; //BE 0x0001FAD6 (TEAPOT)
         std::stringstream    in_stream;
         Source               in_source = Source( in_stream, "", Format::UTF32_BE );
         std::vector<uint32_t> out_buffer;
-        std::u32string        expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string        expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF32BE, in_stream );
 
         ASSERT_TRUE( Transcode::U32BEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -531,13 +533,13 @@ TEST( parser_encoding_Transcode, U8toU32_u8_file ) {
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF8 );
         std::vector<uint32_t> out_buffer;
-        const std::u32string &expected_str = blogator::tests::TestStrings::string( str_id );
+        const std::u32string &expected_str = blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
 
         ASSERT_TRUE( Transcode::U8toU32( in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -587,14 +589,14 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_1 ) { //invalid code
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_0 ) { //with pre-buffered bytes
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t> in_buffer = { 0xf0, 0x9f, 0xab, 0x96 }; //U+1FAD6 (TEAPOT)
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF8 );
         std::vector<uint32_t> out_buffer;
-        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
 
         ASSERT_TRUE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -603,15 +605,15 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_0 ) { //with pre-buf
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_1 ) { //incomplete codepoint buffered (1/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t> in_buffer = { 0xf0 }; //U+1FAD6 (TEAPOT) - first byte
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF8 );
         std::vector<uint32_t> out_buffer;
-        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << ( char ) 0x9f << ( char ) 0xab << ( char ) 0x96; //remainder of TEAPOT
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
 
         ASSERT_TRUE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -620,15 +622,15 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_1 ) { //incomplete c
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_2 ) { //incomplete codepoint buffered (3/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>   in_buffer = { 0xf0, 0x9f, 0xab }; //U+1FAD6 (TEAPOT) - first 3 byte
         std::stringstream     in_stream;
         Source                in_source = Source( in_stream, "", Format::UTF8 );
         std::vector<uint32_t> out_buffer;
-        std::u32string        expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        std::u32string        expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << ( char ) 0x96; //remainder of TEAPOT
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
 
         ASSERT_TRUE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -637,7 +639,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_2 ) { //incomplete c
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_3 ) { //pre-buffered with variable width codepoints
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>   in_buffer = { 0xf0, 0x9f, 0xab, 0x96, //U+0001FAD6 (TEAPOT)
                                             0xC3, 0x84,             //U+000000C4 ('Ä')
                                             0xeb, 0x86, 0xa2,       //U+0000B1A2 ('놢')
@@ -645,9 +647,9 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_3 ) { //pre-buffered
         std::stringstream     in_stream;
         Source                in_source = Source( in_stream, "", Format::UTF8 );
         std::vector<uint32_t> out_buffer;
-        std::u32string        expected_str = U"\U0001FAD6\U000000C4\U0000B1A2a" + blogator::tests::TestStrings::string( str_id );
+        std::u32string        expected_str = U"\U0001FAD6\U000000C4\U0000B1A2a" + blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF8, in_stream );
 
         ASSERT_TRUE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -696,13 +698,13 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_1 ) { //invalid
 }
 
 TEST( parser_encoding_Transcode, U16LEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF16_LE );
         std::vector<uint32_t> out_buffer;
-        const std::u32string &expected_str = blogator::tests::TestStrings::string( str_id );
+        const std::u32string &expected_str = blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16LE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16LE, in_stream );
 
         ASSERT_TRUE( Transcode::U16LEtoU32( in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -711,14 +713,14 @@ TEST( parser_encoding_Transcode, U16LEtoU32_string_stream ) {
 }
 
 TEST( parser_encoding_Transcode, U16LEtoU32_string_prebuffered_0 ) { //with pre-buffered bytes (complete)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>    in_buffer = { 0x3E, 0xD8, 0xD6, 0xDE }; //U+1FAD6 (TEAPOT)
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_LE );
         std::vector<uint32_t>  out_buffer;
-        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16LE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16LE, in_stream );
 
         ASSERT_TRUE( Transcode::U16LEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -727,13 +729,13 @@ TEST( parser_encoding_Transcode, U16LEtoU32_string_prebuffered_0 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF16_BE );
         std::vector<uint32_t> out_buffer;
-        const std::u32string &expected_str = blogator::tests::TestStrings::string( str_id );
+        const std::u32string &expected_str = blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
 
         ASSERT_TRUE( Transcode::U16BEtoU32( in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -834,14 +836,14 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_4 ) { //invalid h
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_0 ) { //with pre-buffered bytes (complete)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>    in_buffer = { 0xD8, 0x3E, 0xDE, 0xD6 }; //U+1FAD6 (TEAPOT)
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
         std::vector<uint32_t>  out_buffer;
-        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
 
         ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -850,15 +852,15 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_0 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_1 ) { //incomplete codepoint buffered (1/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>    in_buffer = { 0xD8 }; //U+1FAD6 (TEAPOT) - 1/4 bytes
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
         std::vector<uint32_t>  out_buffer;
-        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << (char) 0x3E << (char) 0xDE << (char) 0xD6;
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
 
         ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -867,15 +869,15 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_1 ) { //incomplet
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_2 ) { //incomplete codepoint buffered (2/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>    in_buffer = { 0xD8, 0x3E }; //U+1FAD6 (TEAPOT) - 2/4 bytes
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
         std::vector<uint32_t>  out_buffer;
-        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::TestStrings::string( str_id );
+        const std::u32string & expected_str = U"\U0001FAD6" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << (char) 0xDE << (char) 0xD6;
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
 
         ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );
@@ -884,16 +886,16 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_2 ) { //incomplet
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_3 ) { //incomplete codepoint buffered (2/2 + 1/2 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::TestStrings::count(); ++str_id ) {
+    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<uint8_t>    in_buffer = { 0x01, 0xA3, //U+01A3 ('ƣ')
                                              0xB1 };     //U+B1A2 ('놢') - 1/2 bytes;
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
         std::vector<uint32_t>  out_buffer;
-        const std::u32string & expected_str = U"\U000001A3\U0000B1A2" + blogator::tests::TestStrings::string( str_id );
+        const std::u32string & expected_str = U"\U000001A3\U0000B1A2" + blogator::tests::UnicodeTestStrings::string( str_id );
 
         in_stream << (char) 0xA2;
-        blogator::tests::TestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
+        blogator::tests::UnicodeTestStrings::write( str_id, blogator::tests::EncodingFmt::UTF16BE, in_stream );
 
         ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) ) << "Failed transcoding with str #" << str_id;
         auto output = std::u32string( out_buffer.begin(), out_buffer.end() );

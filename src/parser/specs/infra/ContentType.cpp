@@ -21,6 +21,21 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
 }
 
 /**
+ * Gets the Namespace closest associated with a content type given
+ * @param content_type ContentType enum
+ * @return Namespace enum (default: NONE)
+ */
+blogator::parser::specs::infra::Namespace blogator::parser::specs::infra::to_namespace( blogator::parser::specs::infra::ContentType content_type ) {
+    switch( content_type ) {
+        case ContentType::IMAGE_SVG_XML:         { return Namespace::SVG;   }
+        case ContentType::APPLICATION_XHTML_XML: { return Namespace::HTML5; }
+        case ContentType::APPLICATION_RSS_XML:   [[fallthrough]];
+        case ContentType::APPLICATION_XML:       { return Namespace::XML;   }
+        default:                                 { return Namespace::NONE;  }
+    }
+}
+
+/**
  * Converts a parser::specs::infra::ContentType enum to a string representation
  * @param content_type ContentType enum
  * @return String representation

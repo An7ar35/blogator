@@ -227,3 +227,23 @@ TEST( parser_dom_node_CharacterData_Tests, insertBefore_fail_0 ) { //parent not 
         FAIL() << "Wrong exception type thrown.";
     }
 }
+
+TEST( parser_dom_node_CharacterData_Tests, swap_0 ) {
+    auto node1 = CharacterData( NodeType::TEXT_NODE, U"node1" );
+    auto node2 = CharacterData( NodeType::TEXT_NODE, U"node2" );
+
+    blogator::parser::dom::node::swap( dynamic_cast<Node &>( node1 ), dynamic_cast<Node &>( node2 ) );
+
+    ASSERT_EQ( node1.data(), U"node2" );
+    ASSERT_EQ( node2.data(), U"node1" );
+}
+
+TEST( parser_dom_node_CharacterData_Tests, swap_1 ) {
+    auto node1 = CharacterData( NodeType::TEXT_NODE, U"node1" );
+    auto node2 = CharacterData( NodeType::TEXT_NODE, U"node2" );
+
+    blogator::parser::dom::node::swap( node1, node2 );
+
+    ASSERT_EQ( node1.data(), U"node2" );
+    ASSERT_EQ( node2.data(), U"node1" );
+}

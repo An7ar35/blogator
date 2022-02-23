@@ -6,30 +6,35 @@ using namespace blogator::parser::dom::node;
  * Constructor
  * @param str Content string
  */
-CDATASection::CDATASection( DOMString_t str )
-    : Text( NodeType::CDATA_SECTION_NODE, std::move( str ) )
+CDATASection::CDATASection( DOMString_t str ) :
+    Text( NodeType::CDATA_SECTION_NODE, std::move( str ) )
 {}
 
 /**
  * Constructor
+ * @param document Pointer to owner document
  * @param str Content string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
  */
-CDATASection::CDATASection( DOMString_t str, node::Node * parent, node::Node * prev_sibling ) :
-    node::Text( NodeType::CDATA_SECTION_NODE, std::move( str ), parent, prev_sibling )
+CDATASection::CDATASection( Document * document, blogator::parser::dom::DOMString_t str ) :
+    Text( document, NodeType::CDATA_SECTION_NODE, std::move( str ) )
 {}
 
 /**
- * Constructor
- * @param str Content string
- * @param parent Pointer to parent
- * @param prev_sibling Pointer to previous sibling
- * @param next_sibling Pointer to next sibling
+ * [OVERRRIDE] Shallow swaps nodes
+ * @param rhs node to swap with
+ * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
  */
-CDATASection::CDATASection( DOMString_t str, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling ) :
-    node::Text( NodeType::CDATA_SECTION_NODE, std::move( str ), parent, prev_sibling, next_sibling )
-{}
+void CDATASection::swap( Node &rhs ) {
+    Text::swap( rhs );
+}
+
+/**
+ * Shallow swaps CDATASection nodes
+ * @param rhs node::CDATASection to swap with
+ */
+void CDATASection::swap( CDATASection &rhs ) {
+    CharacterData::swap( dynamic_cast<CharacterData &>( rhs ) );
+}
 
 /**
  * Gets the node's name
@@ -82,4 +87,13 @@ blogator::parser::dom::NodePtr_t CDATASection::replaceChildNode( NodePtr_t &node
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "CDATASection nodes do not have children." );
+}
+
+/**
+ * Shallow swaps CDATASection nodes
+ * @param lhs CDATASection node
+ * @param rhs CDATASection node
+ */
+void blogator::parser::dom::node::swap( CDATASection &lhs, CDATASection &rhs ) {
+    lhs.swap( rhs );
 }

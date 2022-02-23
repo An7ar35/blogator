@@ -6,7 +6,7 @@
 #include <type_traits>
 
 namespace blogator::string {
-    template<typename CharType> std::vector<std::basic_string<CharType>> split( std::basic_string<CharType> str, CharType separator );
+    template<typename CharType> std::vector<std::basic_string<CharType>> split( std::basic_string<CharType> str, CharType separator, bool discard_empty = false );
     template<typename CharType> typename std::basic_string<CharType>::iterator & skipWhitespace( const std::basic_string<CharType> &str, typename std::basic_string<CharType>::iterator &it );
     template<typename CharType> typename std::basic_string<CharType>::const_iterator & skipWhitespace( const std::basic_string<CharType> &str, typename std::basic_string<CharType>::const_iterator &it );
 }
@@ -18,11 +18,13 @@ namespace blogator::string {
  * @tparam CharType String character type
  * @param str       String to split
  * @param separator Split separator character
+ * @param discard_empty Discard empty sections (default=false)
  * @return List of sub-strings
  */
 template<typename CharType> std::vector<std::basic_string<CharType>> blogator::string::split(
     std::basic_string<CharType> str,
-    CharType                    separator )
+    CharType                    separator,
+    bool                        discard_empty )
 {
     auto v = std::vector<std::basic_string<CharType>>();
 
@@ -33,13 +35,21 @@ template<typename CharType> std::vector<std::basic_string<CharType>> blogator::s
     typename std::basic_string<CharType>::size_type next = str.find( separator );
 
     while( next != std::basic_string<CharType>::npos ) {
-        v.emplace_back( str.substr( prev, next - prev ) );
+        const auto length = next - prev;
+
+        if( length != 0 || !discard_empty ) {
+            v.emplace_back( str.substr( prev, length ) );
+        }
+
         prev = next + 1;
         next = str.find( separator, prev );
     }
 
-    if( prev <= str.size() )
+    const auto length = str.size() - prev;
+
+    if( length != 0 || !discard_empty ) {
         v.emplace_back( str.substr( prev ) );
+    }
 
     return v;
 }
