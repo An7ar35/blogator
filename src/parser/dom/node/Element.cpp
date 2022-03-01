@@ -230,6 +230,15 @@ void Element::swap( Element &rhs ) {
 }
 
 /**
+ * [OVERRIDE] Gets the Namespace enum associated with this node's ID
+ * @return specs::infra::Namespace enum associated with the ID
+ * @throws blogator::exception::failed_expectation when mapping inconsistency is detected
+ */
+blogator::parser::specs::infra::Namespace Element::getNamespaceEnum() const {
+    return Node::getNamespaceEnum( this->_namespace_id );
+}
+
+/**
  * Gets the element's matching HTML type
  * @return Matching specs::infra::Element enum (UNKNOWN if string not in Element list)
  */

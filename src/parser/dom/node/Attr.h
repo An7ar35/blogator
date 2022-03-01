@@ -54,6 +54,8 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] node::Element * ownerElement();
 
       public: /* 'Node' interface */
+        [[nodiscard]] specs::infra::Namespace getNamespaceEnum() const override;
+
         [[nodiscard]] DOMString_t nodeName() const override;
         [[nodiscard]] DOMString_t * nodeValue() override;
         [[nodiscard]] DOMString_t textContent() const override;

@@ -175,7 +175,7 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
         map.emplace( Element::MATHML_MUNDEROVER, "munderover" );
         map.emplace( Element::MATHML_SEMANTICS, "semantics" );
         map.emplace( Element::MATHML_ANNOTATION, "annotation" );
-        map.emplace( Element::MATHML_ANNOTATION_XML, "annotation_xml" );
+        map.emplace( Element::MATHML_ANNOTATION_XML, "annotation-xml" );
         map.emplace( Element::SVG, "svg" );
         map.emplace( Element::SVG_A, "a" );
         map.emplace( Element::SVG_ANIMATE, "animate" );
@@ -183,7 +183,7 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
         map.emplace( Element::SVG_ANIMATETRANSFORM, "animatetransform" );
         map.emplace( Element::SVG_CIRCLE, "circle" );
         map.emplace( Element::SVG_CLIPPATH, "clippath" );
-        map.emplace( Element::SVG_COLOR_PROFILE, "color_profile" );
+        map.emplace( Element::SVG_COLOR_PROFILE, "color-profile" );
         map.emplace( Element::SVG_DEFS, "defs" );
         map.emplace( Element::SVG_DESC, "desc" );
         map.emplace( Element::SVG_DISCARD, "discard" );

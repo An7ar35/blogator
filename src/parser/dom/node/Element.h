@@ -39,6 +39,7 @@ namespace blogator::parser::dom::node {
 
         void swap( Node &rhs ) override;
         void swap( Element &rhs );
+        [[nodiscard]] specs::infra::Namespace getNamespaceEnum() const override;
 
       public: /* Non-standard interface */
         [[nodiscard]] specs::infra::Element elementType() const;

@@ -245,3 +245,13 @@ std::string blogator::to_string( blogator::parser::specs::infra::Attribute attr 
     ss << attr;
     return ss.str();
 }
+
+/**
+ * Converts a parser::specs::infra::Attribute enum to a string representation
+ * @param attr Attribute enum
+ * @return String representation
+ */
+std::u32string blogator::to_u32string( blogator::parser::specs::infra::Attribute attr ) {
+    auto u8str = to_string( attr );
+    return { u8str.cbegin(), u8str.cend() };
+}

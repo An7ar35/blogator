@@ -404,6 +404,15 @@ void Node::swap( Node &rhs ) {
 }
 
 /**
+ * Gets the Namespace enum associated with this node's ID
+ * @return specs::infra::Namespace enum associated with the ID
+ * @throws blogator::exception::failed_expectation when mapping inconsistency is detected
+ */
+blogator::parser::specs::infra::Namespace Node::getNamespaceEnum() const {
+    return blogator::parser::specs::infra::Namespace::NONE;
+}
+
+/**
  * Helper method to get a Namespace enum from an ID
  * @param id Namespace ID
  * @return specs::infra::Namespace enum associated with the ID

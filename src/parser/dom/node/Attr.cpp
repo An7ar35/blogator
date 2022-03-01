@@ -335,6 +335,15 @@ blogator::parser::dom::node::Element * Attr::ownerElement() {
 }
 
 /**
+ * [OVERRIDE] Gets the Namespace enum associated with this node's ID
+ * @return specs::infra::Namespace enum associated with the ID
+ * @throws blogator::exception::failed_expectation when mapping inconsistency is detected
+ */
+blogator::parser::specs::infra::Namespace Attr::getNamespaceEnum() const {
+    return Node::getNamespaceEnum( this->_namespace_id );
+}
+
+/**
  * [OVERRIDE] Gets the node's name
  * @return Attribute's qualified name string
  */

@@ -62,6 +62,7 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] const_iterator crend() const;
 
         virtual void swap( Node &rhs );
+        [[nodiscard]] virtual specs::infra::Namespace getNamespaceEnum() const;
 
         static specs::infra::Namespace getNamespaceEnum( NamespaceMap::id_t id );
         static const DOMString_t & getNamespaceURI( NamespaceMap::id_t id );

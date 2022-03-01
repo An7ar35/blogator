@@ -80,7 +80,8 @@ namespace blogator::parser::specs::infra {
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::specs::infra::Attribute el );
+    std::string to_string( blogator::parser::specs::infra::Attribute attr );
+    std::u32string to_u32string( blogator::parser::specs::infra::Attribute attr );
 }
 
 #endif //BLOGATOR_PARSER_SPECS_HTML5_ATTRIBUTE_H
