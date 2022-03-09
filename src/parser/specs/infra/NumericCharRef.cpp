@@ -1,8 +1,8 @@
 #include "NumericCharRef.h"
 
-using namespace blogator::parser::specs::infra;
+#include <vector>
 
-std::vector<NumericCharRef> NumericCharRef::_char_references;
+using namespace blogator::parser::specs::infra;
 
 /**
  * Constructor (default)
@@ -82,27 +82,7 @@ bool NumericCharRef::operator >=( const NumericCharRef &rhs ) const {
  * @return { found, codepoint }
  */
 std::pair<bool, uint32_t> NumericCharRef::fetch( uint32_t number ) {
-    if( _char_references.empty() ) {
-        loadNCR( _char_references );
-    }
-
-    auto it = std::find_if( _char_references.begin(),
-                            _char_references.end(),
-                            [&number]( const auto & ncr ) { return ncr.number == number; } );
-
-    if( it == _char_references.cend() ) {
-        return { false, 0 };
-    } else {
-        return { true, it->codepoint };
-    }
-}
-
-/**
- * Loads the numeric character references into a vector
- * @param ncr Vector to load into
- */
-void NumericCharRef::loadNCR( std::vector<NumericCharRef> &ncr ) {
-    ncr = {
+    static const auto char_references = std::vector<NumericCharRef>(  {
         { 0x80, 0x20AC }, //EURO SIGN (€)
         { 0x82, 0x201A }, //SINGLE LOW-9 QUOTATION MARK (‚)
         { 0x83, 0x0192 }, //LATIN SMALL LETTER F WITH HOOK (ƒ)
@@ -130,6 +110,16 @@ void NumericCharRef::loadNCR( std::vector<NumericCharRef> &ncr ) {
         { 0x9C, 0x0153 }, //LATIN SMALL LIGATURE OE (œ)
         { 0x9E, 0x017E }, //LATIN SMALL LETTER Z WITH CARON (ž)
         { 0x9F, 0x0178 }  //LATIN CAPITAL LETTER Y WITH DIAERESIS (Ÿ)
-    };
+    } );
+
+    auto it = std::find_if( char_references.begin(),
+                            char_references.end(),
+                            [&number]( const auto & ncr ) { return ncr.number == number; } );
+
+    if( it == char_references.cend() ) {
+        return { false, 0 };
+    } else {
+        return { true, it->codepoint };
+    }
 }
 

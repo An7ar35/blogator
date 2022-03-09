@@ -267,7 +267,7 @@ blogator::parser::dom::DOMString_t Attr::namespaceURI() const {
     } catch( const std::out_of_range &e ) {
         using blogator::unicode::utf8::convert;
 
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Attr::namespaceURI()] "
             "Failed to get URI for node '" + convert( this->nodeName() ) + "'."
         );

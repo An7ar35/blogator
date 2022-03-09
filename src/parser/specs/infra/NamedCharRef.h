@@ -36,11 +36,13 @@ namespace blogator::parser::specs::infra {
       private:
         typedef std::unordered_map<std::u32string, NamedCharRef> NamedCharRefMap_t;
 
-        static void loadNCR( NamedCharRef::NamedCharRefMap_t & map, Trie<uint32_t> &trie, std::unique_ptr<NamedCharRef> &ncr );
+        static NamedCharRef      _not_found;
+        static Trie<uint32_t>    _ncr_trie;
+        static NamedCharRefMap_t _ncr_map;
 
-        static Trie<uint32_t>                _ncr_trie;
-        static std::unique_ptr<NamedCharRef> _not_found;
-        static NamedCharRefMap_t             _ncr_map;
+        static NamedCharRef loadNotFound() noexcept;
+        static NamedCharRefMap_t loadMap() noexcept;
+        static Trie<uint32_t> loadTrie() noexcept;
     };
 }
 

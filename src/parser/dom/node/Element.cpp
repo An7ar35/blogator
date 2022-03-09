@@ -492,7 +492,7 @@ blogator::parser::dom::DOMString_t Element::namespaceURI() const {
     } catch( const std::out_of_range &e ) {
         using blogator::unicode::utf8::convert;
 
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Element::namespaceURI()] "
             "Failed to get URI for node '" + convert( this->nodeName() ) + "'."
         );
@@ -1173,7 +1173,7 @@ blogator::parser::dom::DOMString_t Element::lookupPrefix( const DOMString_t &ns 
     } catch ( std::out_of_range &e ) {
         using blogator::unicode::utf8::convert;
 
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Element::lookupPrefix( \"" + convert( ns ) + "\" )] " + e.what()
         );
     }
@@ -1220,7 +1220,7 @@ blogator::parser::dom::DOMString_t Element::lookupNamespaceURI( const DOMString_
     } catch ( std::out_of_range &e ) {
         using blogator::unicode::utf8::convert;
 
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Element::lookupNamespaceURI( \"" + convert( prefix ) + "\" )] " + e.what()
         );
     }

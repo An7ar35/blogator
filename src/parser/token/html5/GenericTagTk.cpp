@@ -27,7 +27,15 @@ GenericTagTk::GenericTagTk( specs::infra::TokenType type, std::u32string text, b
  * Gets the name of the tag
  * @return Name string
  */
-std::u32string GenericTagTk::name() const {
+std::u32string & GenericTagTk::name() {
+    return this->text();
+}
+
+/**
+ * Gets the name of the tag
+ * @return Name string
+ */
+const std::u32string & GenericTagTk::name() const {
     return this->text();
 }
 
@@ -43,7 +51,15 @@ bool GenericTagTk::selfclosing() const {
  * Gets the list of attributes
  * @return List of attributes
  */
-const Attributes_t &GenericTagTk::attributes() const {
+Attributes_t & GenericTagTk::attributes() {
+    return _attributes;
+}
+
+/**
+ * Gets the list of attributes
+ * @return List of attributes
+ */
+const Attributes_t & GenericTagTk::attributes() const {
     return _attributes;
 }
 

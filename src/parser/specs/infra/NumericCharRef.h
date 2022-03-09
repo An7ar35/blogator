@@ -3,7 +3,6 @@
 
 #include <cctype>
 #include <string>
-#include <vector>
 
 namespace blogator::parser::specs::infra {
     /**
@@ -25,11 +24,6 @@ namespace blogator::parser::specs::infra {
 
         uint32_t       number;
         uint32_t       codepoint;
-
-      private:
-        static void loadNCR( std::vector<NumericCharRef> & ncr );
-
-        static std::vector<NumericCharRef> _char_references;
     };
 }
 

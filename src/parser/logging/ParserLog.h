@@ -2,23 +2,53 @@
 #define BLOGATOR_PARSER_LOGGING_PARSERLOG_H
 
 #include <functional>
+#include <map>
+#include <mutex>
 
 #include "ErrorObject.h"
 
 namespace blogator::parser::logging {
+    /**
+     * The ParserLog is responsible for collecting and dispatching any parsing-specific errors
+     * raised whilst a source file is processed. Once parsing on a file is completed the `flush(..)`
+     * function should be called if buffering is set so that all errors raised in the scope of that
+     * file can be dispatched out of the buffer as a block.
+     */
     class ParserLog {
       public:
-        typedef std::function<void( const ErrorObject & )> OutputCallback_f;
+        typedef std::function<void( const ErrorObject & )>   OutputCallback_f;
+        typedef std::vector<ErrorObject>                     ErrorPool_t;
+        typedef std::map<std::filesystem::path, ErrorPool_t> ErrorPoolMap_t;
 
-        static ParserLog & getInstance();
-        ParserLog();
-        virtual ~ParserLog();
+        ~ParserLog();
 
+        static void setBuffering( bool flag );
         static void attachOutputCallback( OutputCallback_f cb );
+        static void detachOutputCallback();
+        static bool appendOutputCallback( const std::string &name, OutputCallback_f cb );
+        static bool detachOutputCallback( const std::string &name );
+
         static void log( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position );
+        static void flush();
+        static void flush( const std::filesystem::path &path );
+
       private:
-        static OutputCallback_f _out_cb;
-        static ParserLog *      _instance;
+        static ParserLog                        _instance;
+
+        bool                                    _buffering { false };
+        std::mutex                              _mutex;
+        ErrorPoolMap_t                          _pools;
+        OutputCallback_f                        _output_cb;
+        std::map<std::string, OutputCallback_f> _outputs;
+
+        void attachPrimaryOutputCb( OutputCallback_f cb );
+        void detachPrimaryOutputCb();
+        bool appendOutputCb( const std::string &name, OutputCallback_f cb );
+        bool removeOutputCb( const std::string &name );
+        void log( ErrorObject &&err );
+        void flushPool( const std::filesystem::path &path );
+        void flushPools();
+        void dispatch( const ErrorObject &err );
     };
 }
 

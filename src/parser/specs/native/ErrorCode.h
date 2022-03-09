@@ -15,7 +15,8 @@ namespace blogator::parser::specs::native {
             INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
             INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
             INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
-
+            NULL_CHARACTER,
+            TOKEN_OF_UNKNOWN_TYPE,
             ENUM_END
         };
 

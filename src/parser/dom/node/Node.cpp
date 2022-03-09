@@ -423,7 +423,7 @@ blogator::parser::specs::infra::Namespace Node::getNamespaceEnum( NamespaceMap::
         return Node::namespace_map.getNamespaceEnum( id ); //throws
 
     } catch( const std::out_of_range &e ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Node::getNamespaceEnum( " + std::to_string( id ) + " )] " + e.what()
         );
     }
@@ -440,7 +440,7 @@ const blogator::parser::dom::DOMString_t & Node::getNamespaceURI( NamespaceMap::
         return Node::namespace_map.getNamespaceURI( id ); //throws
 
     } catch( const std::out_of_range &e ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Node::getNamespaceURI( " + std::to_string( id ) + " )] " + e.what()
         );
     }
@@ -1073,7 +1073,7 @@ blogator::parser::dom::NodePtr_t Node::removeChild( size_t index ) {
  */
 std::vector<blogator::parser::dom::NodePtr_t>::iterator Node::getParentChildListIterator( const Node * node ) {
     if( _parent == nullptr ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[blogator::parser::dom::node::Node::getParentChildListIterator( const Node * )] "
             "Given child is an orphan."
         );
@@ -1086,7 +1086,7 @@ std::vector<blogator::parser::dom::NodePtr_t>::iterator Node::getParentChildList
     );
 
     if( it == child_list.end() ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[blogator::parser::dom::node::Node::getParentChildListIterator( const Node * )] "
             "Child does not exist the parent's children list."
         );
@@ -1103,14 +1103,14 @@ std::vector<blogator::parser::dom::NodePtr_t>::iterator Node::getParentChildList
  */
 blogator::parser::dom::Nodes_t::iterator Node::getChildListIterator( const Node * child ) {
     if( child->_parent == nullptr ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[blogator::parser::dom::node::Node::getChildListIterator( const Node * )] "
             "Given child is an orphan."
         );
     }
 
     if( child->_parent != this ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[blogator::parser::dom::node::Node::getChildListIterator( const Node * )] "
             "Given child's parent is not this node."
         );
@@ -1121,7 +1121,7 @@ blogator::parser::dom::Nodes_t::iterator Node::getChildListIterator( const Node 
     );
 
     if( it == _children.end() ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[blogator::parser::dom::node::Node::getChildListIterator( const Node * )] "
             "Child does not exist in the children list."
         );

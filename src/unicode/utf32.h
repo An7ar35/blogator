@@ -5,6 +5,13 @@
 #include <string>
 
 /**
+ * Character code constants
+ */
+namespace blogator::unicode {
+    static const uint32_t REPLACEMENT_CHAR { 0xFFFD };
+}
+
+/**
  * UTF-32 specific methods
  */
 namespace blogator::unicode::utf32 {

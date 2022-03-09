@@ -25,11 +25,11 @@ LoggableException::LoggableException( std::string what, bool quiet ) :
  * @param what Description
  * @param quiet (optional) Flag to suppress logger call
  */
-LoggableException::LoggableException( char * src, int line, std::string what, bool quiet ) :
+LoggableException::LoggableException( const char * src, int line, std::string what, bool quiet ) :
     _what( std::move( what ) )
 {
     if( !quiet ) {
-        Logger::print<LogLevel::ERROR>( { line, src }, what );
+        Logger::print<LogLevel::ERROR>( { line, basename( (char*) src ) }, _what );
     }
 }
 

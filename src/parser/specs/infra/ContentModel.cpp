@@ -13,20 +13,18 @@ using namespace blogator::parser::specs::infra;
  * @return Output stream
  */
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::ContentModel model ) {
-    static std::map<ContentModel, std::string> map;
-
-    if( map.empty() ) {
-        map.emplace( ContentModel::NOTHING, "nothing" );
-        map.emplace( ContentModel::METADATA, "metadata" );
-        map.emplace( ContentModel::FLOW, "flow" );
-        map.emplace( ContentModel::SECTIONING, "sectioning" );
-        map.emplace( ContentModel::HEADING, "heading" );
-        map.emplace( ContentModel::PHRASING, "phrasing" );
-        map.emplace( ContentModel::EMBEDDED, "embedded" );
-        map.emplace( ContentModel::INTERACTIVE, "interactive" );
-        map.emplace( ContentModel::PALPABLE, "palpable" );
-        map.emplace( ContentModel::SCRIPT_SUPPORT, "script support" );
-    }
+    static const auto map = std::map<ContentModel, std::string>( {
+        { ContentModel::NOTHING, "nothing" },
+        { ContentModel::METADATA, "metadata" },
+        { ContentModel::FLOW, "flow" },
+        { ContentModel::SECTIONING, "sectioning" },
+        { ContentModel::HEADING, "heading" },
+        { ContentModel::PHRASING, "phrasing" },
+        { ContentModel::EMBEDDED, "embedded" },
+        { ContentModel::INTERACTIVE, "interactive" },
+        { ContentModel::PALPABLE, "palpable" },
+        { ContentModel::SCRIPT_SUPPORT, "script support" },
+    } );
 
     if( map.contains( model ) ) {
         os << map.at( model );

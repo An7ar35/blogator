@@ -31,6 +31,11 @@ namespace blogator::parser::dom {
     typedef std::vector<DOMString_t>                   DOMTokenList_t;
 
     template<typename T> using Sequence_t = std::vector<T>;
+
+    struct InsertionPoint {
+        node::Node * parent;
+        node::Node * child;
+    };
 }
 
 #endif //BLOGATOR_PARSER_DOM_DEFS_H

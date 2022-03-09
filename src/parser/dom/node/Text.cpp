@@ -94,7 +94,7 @@ blogator::parser::dom::node::Text * Text::splitText( size_t offset ) {
             }
 
         } else {
-            throw blogator::exception::failed_expectation(
+            throw FAILED_EXPECTATION_EXCEPTION(
                 "[blogator::parser::dom::node::Text::splitText( " + std::to_string( offset ) + " )] "
                 "Node is an orphan."
             );
@@ -105,7 +105,7 @@ blogator::parser::dom::node::Text * Text::splitText( size_t offset ) {
         //      (ref: https://dom.spec.whatwg.org/#concept-live-range)
 
     } catch( blogator::exception::failed_expectation &e ) {
-        throw blogator::exception::failed_expectation(
+        throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::dom::node::Text::splitText( " + std::to_string( offset ) + " )] "
             "Possible DOM tree corruption detected."
         );

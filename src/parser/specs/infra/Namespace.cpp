@@ -1,10 +1,36 @@
 #include "Namespace.h"
 
+#include "../../../logger/Logger.h"
+
 #include <ostream>
-#include <sstream>
 #include <map>
 
 using namespace blogator::parser::specs::infra;
+
+/**
+ * [LOCAL] URI-to-Namespace map loader
+ * @return Map
+ */
+static std::map<std::u32string, Namespace> loadMap() noexcept {
+    try {
+        auto map = std::map<std::u32string, Namespace>();
+
+        for( auto i = static_cast<int>( Namespace::URI_DEFS_BEGIN ); i <= static_cast<int>( Namespace::URI_DEFS_END ); ++i ) {
+            map.emplace(
+                std::make_pair<std::u32string, Namespace>( to_namespaceURI( static_cast<Namespace>( i ) ),
+                                                           static_cast<Namespace>( i ) )
+            );
+        }
+
+        return std::move( map );
+
+    } catch( const std::exception &e ) {
+        LOG_CRITICAL( "[parser::specs::infra::Namespace::] Failed to load map data (loadMap): ", e.what() );
+        std::terminate();
+    }
+}
+
+static const std::map<std::u32string, Namespace> NAMESPACE_URI_MAP = loadMap();
 
 /**
  * Output stream operator
@@ -76,20 +102,9 @@ std::u32string blogator::parser::specs::infra::to_prefix( Namespace ns ) {
  * @return Matching enum (or 'UNKNOWN' when no match is found)
  */
 Namespace blogator::parser::specs::infra::to_namespace( const std::u32string &uri ) {
-    static std::map<std::u32string, Namespace> map;
+    auto it = NAMESPACE_URI_MAP.find( uri );
 
-    if( map.empty() ) {
-        for( auto i = static_cast<int>( Namespace::URI_DEFS_BEGIN ); i <= static_cast<int>( Namespace::URI_DEFS_END ); ++i ) {
-            map.emplace(
-                std::make_pair<std::u32string, Namespace>( to_namespaceURI( static_cast<Namespace>( i ) ),
-                                                           static_cast<Namespace>( i ) )
-            );
-        }
-    }
-
-    auto it = map.find( uri );
-
-    return ( it == map.end() ? Namespace::UNKNOWN : it->second );
+    return ( it == NAMESPACE_URI_MAP.end() ? Namespace::UNKNOWN : it->second );
 }
 
 /**

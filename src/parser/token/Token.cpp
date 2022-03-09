@@ -44,7 +44,15 @@ specs::Context token::Token::context() const {
  * Gets the text
  * @return UTF32 text string
  */
-std::u32string token::Token::text() const {
+std::u32string & token::Token::text() {
+    return _text;
+}
+
+/**
+ * Gets the text
+ * @return UTF32 text string
+ */
+const std::u32string & token::Token::text() const {
     return _text;
 }
 

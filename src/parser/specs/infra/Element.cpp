@@ -2,11 +2,39 @@
 
 #include <map>
 #include <ostream>
-#include <sstream>
+
+#include "../../../logger/Logger.h"
 
 #include "Namespace.h"
 
 using namespace blogator::parser::specs::infra;
+
+/**
+ * [LOCAL] Creates a u32string->Element enum map
+ * @return Map
+ */
+static std::map<std::u32string , blogator::parser::specs::infra::Element> loadMap() noexcept {
+    try {
+        using blogator::parser::specs::infra::Element;
+
+        auto map = std::map<std::u32string, Element>();
+
+        //i = 1 as 'Element::UNKNOWN' (0) can be skipped
+        for( int i = 1; i <= static_cast<int>( blogator::parser::specs::infra::Element::ENUM_END ); ++i ) {
+            //Since string representation of elements are all in ASCII range
+            //conversion to u32 can just be done with direct casting.
+            map.emplace( blogator::to_u32string( static_cast<Element>( i ) ), static_cast<Element>( i ) );
+        }
+
+        return std::move( map );
+
+    } catch( const std::exception &e ) {
+        LOG_CRITICAL( "[parser::specs::infra::Element::] Failed to load map data (loadMap): ", e.what() );
+        std::terminate();
+    }
+}
+
+static const std::map<std::u32string , blogator::parser::specs::infra::Element> ELEMENT_STR_MAP = loadMap();
 
 /**
  * Output stream operator
@@ -15,241 +43,251 @@ using namespace blogator::parser::specs::infra;
  * @return Output stream
  */
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::Element el ) {
-    static std::map<Element, std::string> map;
-
-    if( map.empty() ) {
-        map.emplace( Element::UNKNOWN, "UNKNOWN" );
-        map.emplace( Element::HTML5_A, "a" );
-        map.emplace( Element::HTML5_ABBR, "abbr" );
-        map.emplace( Element::HTML5_ADDRESS, "address" );
-        map.emplace( Element::HTML5_AREA, "area" );
-        map.emplace( Element::HTML5_ARTICLE, "article" );
-        map.emplace( Element::HTML5_ASIDE, "aside" );
-        map.emplace( Element::HTML5_AUDIO, "audio" );
-        map.emplace( Element::HTML5_B, "b" );
-        map.emplace( Element::HTML5_BASE, "base" );
-        map.emplace( Element::HTML5_BDI, "bdi" );
-        map.emplace( Element::HTML5_BDO, "bdo" );
-        map.emplace( Element::HTML5_BLOCKQUOTE, "blockquote" );
-        map.emplace( Element::HTML5_BODY, "body" );
-        map.emplace( Element::HTML5_BR, "br" );
-        map.emplace( Element::HTML5_BUTTON, "button" );
-        map.emplace( Element::HTML5_CANVAS, "canvas" );
-        map.emplace( Element::HTML5_CAPTION, "caption" );
-        map.emplace( Element::HTML5_CITE, "cite" );
-        map.emplace( Element::HTML5_CODE, "code" );
-        map.emplace( Element::HTML5_COL, "col" );
-        map.emplace( Element::HTML5_COLGROUP, "colgroup" );
-        map.emplace( Element::HTML5_COMMENT, "comment" );
-        map.emplace( Element::HTML5_DATA, "data" );
-        map.emplace( Element::HTML5_DATALIST, "datalist" );
-        map.emplace( Element::HTML5_DD, "dd" );
-        map.emplace( Element::HTML5_DEL, "del" );
-        map.emplace( Element::HTML5_DETAILS, "details" );
-        map.emplace( Element::HTML5_DFN, "dfn" );
-        map.emplace( Element::HTML5_DIALOG, "dialog" );
-        map.emplace( Element::HTML5_DIV, "div" );
-        map.emplace( Element::HTML5_DL, "dl" );
-        map.emplace( Element::HTML5_DOCTYPE, "doctype" );
-        map.emplace( Element::HTML5_DT, "dt" );
-        map.emplace( Element::HTML5_EM, "em" );
-        map.emplace( Element::HTML5_EMBED, "embed" );
-        map.emplace( Element::HTML5_FIELDSET, "fieldset" );
-        map.emplace( Element::HTML5_FIGCAPTION, "figcaption" );
-        map.emplace( Element::HTML5_FIGURE, "figure" );
-        map.emplace( Element::HTML5_FOOTER, "footer" );
-        map.emplace( Element::HTML5_FORM, "form" );
-        map.emplace( Element::HTML5_H1, "h1" );
-        map.emplace( Element::HTML5_H2, "h2" );
-        map.emplace( Element::HTML5_H3, "h3" );
-        map.emplace( Element::HTML5_H4, "h4" );
-        map.emplace( Element::HTML5_H5, "h5" );
-        map.emplace( Element::HTML5_H6, "h6" );
-        map.emplace( Element::HTML5_HEAD, "head" );
-        map.emplace( Element::HTML5_HEADER, "header" );
-        map.emplace( Element::HTML5_HGROUP, "hgroup" );
-        map.emplace( Element::HTML5_HR, "hr" );
-        map.emplace( Element::HTML5_HTML, "html" );
-        map.emplace( Element::HTML5_I, "i" );
-        map.emplace( Element::HTML5_IFRAME, "iframe" );
-        map.emplace( Element::HTML5_IMG, "img" );
-        map.emplace( Element::HTML5_INPUT, "input" );
-        map.emplace( Element::HTML5_INS, "ins" );
-        map.emplace( Element::HTML5_KBD, "kbd" );
-        map.emplace( Element::HTML5_LABEL, "label" );
-        map.emplace( Element::HTML5_LEGEND, "legend" );
-        map.emplace( Element::HTML5_LI, "li" );
-        map.emplace( Element::HTML5_LINK, "link" );
-        map.emplace( Element::HTML5_MAIN, "main" );
-        map.emplace( Element::HTML5_MAP, "map" );
-        map.emplace( Element::HTML5_MARK, "mark" );
-        map.emplace( Element::HTML5_META, "meta" );
-        map.emplace( Element::HTML5_MENU, "menu" );
-        map.emplace( Element::HTML5_METER, "meter" );
-        map.emplace( Element::HTML5_NAV, "nav" );
-        map.emplace( Element::HTML5_NOSCRIPT, "noscript" );
-        map.emplace( Element::HTML5_OBJECT, "object" );
-        map.emplace( Element::HTML5_OL, "ol" );
-        map.emplace( Element::HTML5_OPTGROUP, "optgroup" );
-        map.emplace( Element::HTML5_OPTION, "option" );
-        map.emplace( Element::HTML5_OUTPUT, "output" );
-        map.emplace( Element::HTML5_P, "p" );
-        map.emplace( Element::HTML5_PARAM, "param" );
-        map.emplace( Element::HTML5_PICTURE, "picture" );
-        map.emplace( Element::HTML5_PRE, "pre" );
-        map.emplace( Element::HTML5_PROGRESS, "progress" );
-        map.emplace( Element::HTML5_Q, "q" );
-        map.emplace( Element::HTML5_RP, "rp" );
-        map.emplace( Element::HTML5_RT, "rt" );
-        map.emplace( Element::HTML5_RUBY, "ruby" );
-        map.emplace( Element::HTML5_S, "s" );
-        map.emplace( Element::HTML5_SAMP, "samp" );
-        map.emplace( Element::HTML5_SCRIPT, "script" );
-        map.emplace( Element::HTML5_SECTION, "section" );
-        map.emplace( Element::HTML5_SELECT, "select" );
-        map.emplace( Element::HTML5_SLOT, "slot" );
-        map.emplace( Element::HTML5_SMALL, "small" );
-        map.emplace( Element::HTML5_SOURCE, "source" );
-        map.emplace( Element::HTML5_SPAN, "span" );
-        map.emplace( Element::HTML5_STRONG, "strong" );
-        map.emplace( Element::HTML5_STYLE, "style" );
-        map.emplace( Element::HTML5_SUB, "sub" );
-        map.emplace( Element::HTML5_SUMMARY, "summary" );
-        map.emplace( Element::HTML5_SUP, "sup" );
-        map.emplace( Element::HTML5_TABLE, "table" );
-        map.emplace( Element::HTML5_TBODY, "tbody" );
-        map.emplace( Element::HTML5_TD, "td" );
-        map.emplace( Element::HTML5_TEMPLATE, "template" );
-        map.emplace( Element::HTML5_TEXTAREA, "textarea" );
-        map.emplace( Element::HTML5_TFOOT, "tfoot" );
-        map.emplace( Element::HTML5_TH, "th" );
-        map.emplace( Element::HTML5_THEAD, "thead" );
-        map.emplace( Element::HTML5_TIME, "time" );
-        map.emplace( Element::HTML5_TITLE, "title" );
-        map.emplace( Element::HTML5_TR, "tr" );
-        map.emplace( Element::HTML5_TRACK, "track" );
-        map.emplace( Element::HTML5_U, "u" );
-        map.emplace( Element::HTML5_UL, "ul" );
-        map.emplace( Element::HTML5_VAR, "var" );
-        map.emplace( Element::HTML5_VIDEO, "video" );
-        map.emplace( Element::HTML5_WBR, "wbr" );
-        map.emplace( Element::HTML5_WBR, "wbr" );
-        map.emplace( Element::MATH, "math" );
-        map.emplace( Element::MATHML_MACTION, "maction" );
-        map.emplace( Element::MATHML_MALIGNGROUP, "maligngroup" );
-        map.emplace( Element::MATHML_MALIGNMARK, "malignmark" );
-        map.emplace( Element::MATHML_MENCLOSE, "menclose" );
-        map.emplace( Element::MATHML_MERROR, "merror" );
-        map.emplace( Element::MATHML_MFENCED, "mfenced" );
-        map.emplace( Element::MATHML_MFRAC, "mfrac" );
-        map.emplace( Element::MATHML_MGLYPH, "mglyph" );
-        map.emplace( Element::MATHML_MI, "mi" );
-        map.emplace( Element::MATHML_MLABELEDTR, "mlabeledtr" );
-        map.emplace( Element::MATHML_MLONGDIV, "mlongdiv" );
-        map.emplace( Element::MATHML_MMULTISCRIPT, "mmultiscript" );
-        map.emplace( Element::MATHML_MN, "mn" );
-        map.emplace( Element::MATHML_MO, "mo" );
-        map.emplace( Element::MATHML_MOVER, "mover" );
-        map.emplace( Element::MATHML_MPADDED, "mpadded" );
-        map.emplace( Element::MATHML_MPHANTOM, "mphantom" );
-        map.emplace( Element::MATHML_MROOT, "mroot" );
-        map.emplace( Element::MATHML_MROW, "mrow" );
-        map.emplace( Element::MATHML_MS, "ms" );
-        map.emplace( Element::MATHML_MSCARRIES, "mscarries" );
-        map.emplace( Element::MATHML_MSCARRY, "mscarry" );
-        map.emplace( Element::MATHML_MSGROUP, "msgroup" );
-        map.emplace( Element::MATHML_MSLINE, "msline" );
-        map.emplace( Element::MATHML_MSPACE, "mspace" );
-        map.emplace( Element::MATHML_MSQRT, "msqrt" );
-        map.emplace( Element::MATHML_MSROW, "msrow" );
-        map.emplace( Element::MATHML_MSTACK, "mstack" );
-        map.emplace( Element::MATHML_MSTYLE, "mstyle" );
-        map.emplace( Element::MATHML_MSUB, "msub" );
-        map.emplace( Element::MATHML_MSUP, "msup" );
-        map.emplace( Element::MATHML_MSUBSUP, "msubsup" );
-        map.emplace( Element::MATHML_MTABLE, "mtable" );
-        map.emplace( Element::MATHML_MTD, "mtd" );
-        map.emplace( Element::MATHML_MTEXT, "mtext" );
-        map.emplace( Element::MATHML_MTR, "mtr" );
-        map.emplace( Element::MATHML_MUNDER, "munder" );
-        map.emplace( Element::MATHML_MUNDEROVER, "munderover" );
-        map.emplace( Element::MATHML_SEMANTICS, "semantics" );
-        map.emplace( Element::MATHML_ANNOTATION, "annotation" );
-        map.emplace( Element::MATHML_ANNOTATION_XML, "annotation-xml" );
-        map.emplace( Element::SVG, "svg" );
-        map.emplace( Element::SVG_A, "a" );
-        map.emplace( Element::SVG_ANIMATE, "animate" );
-        map.emplace( Element::SVG_ANIMATEMOTION, "animatemotion" );
-        map.emplace( Element::SVG_ANIMATETRANSFORM, "animatetransform" );
-        map.emplace( Element::SVG_CIRCLE, "circle" );
-        map.emplace( Element::SVG_CLIPPATH, "clippath" );
-        map.emplace( Element::SVG_COLOR_PROFILE, "color-profile" );
-        map.emplace( Element::SVG_DEFS, "defs" );
-        map.emplace( Element::SVG_DESC, "desc" );
-        map.emplace( Element::SVG_DISCARD, "discard" );
-        map.emplace( Element::SVG_ELLIPSE, "ellipse" );
-        map.emplace( Element::SVG_FEBLEND, "feblend" );
-        map.emplace( Element::SVG_FECOLORMATRIX, "fecolormatrix" );
-        map.emplace( Element::SVG_FECOMPONENTTRANSFER, "fecomponenttransfer" );
-        map.emplace( Element::SVG_FECOMPOSITE, "fecomposite" );
-        map.emplace( Element::SVG_FECONVOLVEMATRIX, "feconvolvematrix" );
-        map.emplace( Element::SVG_FEDIFFUSELIGHTING, "fediffuselighting" );
-        map.emplace( Element::SVG_FEDISPLACEMENTMAP, "fedisplacementmap" );
-        map.emplace( Element::SVG_FEDISTANTLIGHT, "fedistantlight" );
-        map.emplace( Element::SVG_FEDROPSHADOW, "fedropshadow" );
-        map.emplace( Element::SVG_FEFLOOD, "feflood" );
-        map.emplace( Element::SVG_FEFUNCA, "fefunca" );
-        map.emplace( Element::SVG_FEFUNCB, "fefuncb" );
-        map.emplace( Element::SVG_FEFUNCG, "fefuncg" );
-        map.emplace( Element::SVG_FEFUNCR, "fefuncr" );
-        map.emplace( Element::SVG_FEGAUSSIANBLUR, "fegaussianblur" );
-        map.emplace( Element::SVG_FEIMAGE, "feimage" );
-        map.emplace( Element::SVG_FEMERGE, "femerge" );
-        map.emplace( Element::SVG_FEMERGENODE, "femergenode" );
-        map.emplace( Element::SVG_FEMORPHOLOGY, "femorphology" );
-        map.emplace( Element::SVG_FEOFFSET, "feoffset" );
-        map.emplace( Element::SVG_FEPOINTLIGHT, "fepointlight" );
-        map.emplace( Element::SVG_FESPECULARLIGHTING, "fespecularlighting" );
-        map.emplace( Element::SVG_FESPOTLIGHT, "fespotlight" );
-        map.emplace( Element::SVG_FETILE, "fetile" );
-        map.emplace( Element::SVG_FETURBULENCE, "feturbulence" );
-        map.emplace( Element::SVG_FILTER, "filter" );
-        map.emplace( Element::SVG_FOREIGNOBJECT, "foreignobject" );
-        map.emplace( Element::SVG_G, "g" );
-        map.emplace( Element::SVG_HATCH, "hatch" );
-        map.emplace( Element::SVG_HATCHPATH, "hatchpath" );
-        map.emplace( Element::SVG_IMAGE, "image" );
-        map.emplace( Element::SVG_LINE, "line" );
-        map.emplace( Element::SVG_LINEARGRADIENT, "lineargradient" );
-        map.emplace( Element::SVG_MARKER, "marker" );
-        map.emplace( Element::SVG_MASK, "mask" );
-        map.emplace( Element::SVG_MESH, "mesh" );
-        map.emplace( Element::SVG_MESHGRADIENT, "meshgradient" );
-        map.emplace( Element::SVG_MESHPATCH, "meshpatch" );
-        map.emplace( Element::SVG_MESHROW, "meshrow" );
-        map.emplace( Element::SVG_METADATA, "metadata" );
-        map.emplace( Element::SVG_MPATH, "mpath" );
-        map.emplace( Element::SVG_PATH, "path" );
-        map.emplace( Element::SVG_PATTERN, "pattern" );
-        map.emplace( Element::SVG_POLYGON, "polygon" );
-        map.emplace( Element::SVG_POLYLINE, "polyline" );
-        map.emplace( Element::SVG_RADIALGRADIENT, "radialgradient" );
-        map.emplace( Element::SVG_RECT, "rect" );
-        map.emplace( Element::SVG_SCRIPT, "script" );
-        map.emplace( Element::SVG_SET, "set" );
-        map.emplace( Element::SVG_SOLIDCOLOR, "solidcolor" );
-        map.emplace( Element::SVG_STOP, "stop" );
-        map.emplace( Element::SVG_STYLE, "style" );
-        map.emplace( Element::SVG_SWITCH, "switch" );
-        map.emplace( Element::SVG_SYMBOL, "symbol" );
-        map.emplace( Element::SVG_TEXT, "text" );
-        map.emplace( Element::SVG_TEXTPATH, "textpath" );
-        map.emplace( Element::SVG_TITLE, "title" );
-        map.emplace( Element::SVG_TSPAN, "tspan" );
-        map.emplace( Element::SVG_UNKNOWN, "unknown" );
-        map.emplace( Element::SVG_USE, "use" );
-        map.emplace( Element::SVG_VIEW, "view" );
-    }
+    static const auto map = std::map<Element, std::string>( {
+        { Element::UNKNOWN, "UNKNOWN" },
+        { Element::DEPR_HTML4_BIG, "big" },
+        { Element::DEPR_HTML4_CENTER, "center" },
+        { Element::DEPR_HTML4_FONT, "font" },
+        { Element::DEPR_HTML4_LISTING, "listing" },
+        { Element::DEPR_HTML4_NOBR, "nobr" },
+        { Element::DEPR_HTML4_STRIKE, "strike" },
+        { Element::DEPR_HTML4_TT, "tt" },
+        { Element::HTML5_A, "a" },
+        { Element::HTML5_ABBR, "abbr" },
+        { Element::HTML5_ADDRESS, "address" },
+        { Element::HTML5_AREA, "area" },
+        { Element::HTML5_ARTICLE, "article" },
+        { Element::HTML5_ASIDE, "aside" },
+        { Element::HTML5_AUDIO, "audio" },
+        { Element::HTML5_B, "b" },
+        { Element::HTML5_BASE, "base" },
+        { Element::HTML5_BDI, "bdi" },
+        { Element::HTML5_BDO, "bdo" },
+        { Element::HTML5_BLOCKQUOTE, "blockquote" },
+        { Element::HTML5_BODY, "body" },
+        { Element::HTML5_BR, "br" },
+        { Element::HTML5_BUTTON, "button" },
+        { Element::HTML5_CANVAS, "canvas" },
+        { Element::HTML5_CAPTION, "caption" },
+        { Element::HTML5_CITE, "cite" },
+        { Element::HTML5_CODE, "code" },
+        { Element::HTML5_COL, "col" },
+        { Element::HTML5_COLGROUP, "colgroup" },
+        { Element::HTML5_COMMENT, "comment" },
+        { Element::HTML5_DATA, "data" },
+        { Element::HTML5_DATALIST, "datalist" },
+        { Element::HTML5_DD, "dd" },
+        { Element::HTML5_DEL, "del" },
+        { Element::HTML5_DETAILS, "details" },
+        { Element::HTML5_DFN, "dfn" },
+        { Element::HTML5_DIALOG, "dialog" },
+        { Element::HTML5_DIV, "div" },
+        { Element::HTML5_DL, "dl" },
+        { Element::HTML5_DOCTYPE, "doctype" },
+        { Element::HTML5_DT, "dt" },
+        { Element::HTML5_EM, "em" },
+        { Element::HTML5_EMBED, "embed" },
+        { Element::HTML5_FIELDSET, "fieldset" },
+        { Element::HTML5_FIGCAPTION, "figcaption" },
+        { Element::HTML5_FIGURE, "figure" },
+        { Element::HTML5_FOOTER, "footer" },
+        { Element::HTML5_FORM, "form" },
+        { Element::HTML5_H1, "h1" },
+        { Element::HTML5_H2, "h2" },
+        { Element::HTML5_H3, "h3" },
+        { Element::HTML5_H4, "h4" },
+        { Element::HTML5_H5, "h5" },
+        { Element::HTML5_H6, "h6" },
+        { Element::HTML5_HEAD, "head" },
+        { Element::HTML5_HEADER, "header" },
+        { Element::HTML5_HGROUP, "hgroup" },
+        { Element::HTML5_HR, "hr" },
+        { Element::HTML5_HTML, "html" },
+        { Element::HTML5_I, "i" },
+        { Element::HTML5_IFRAME, "iframe" },
+        { Element::HTML5_IMG, "img" },
+        { Element::HTML5_INPUT, "input" },
+        { Element::HTML5_INS, "ins" },
+        { Element::HTML5_KBD, "kbd" },
+        { Element::HTML5_LABEL, "label" },
+        { Element::HTML5_LEGEND, "legend" },
+        { Element::HTML5_LI, "li" },
+        { Element::HTML5_LINK, "link" },
+        { Element::HTML5_MAIN, "main" },
+        { Element::HTML5_MAP, "map" },
+        { Element::HTML5_MARK, "mark" },
+        { Element::HTML5_META, "meta" },
+        { Element::HTML5_MENU, "menu" },
+        { Element::HTML5_METER, "meter" },
+        { Element::HTML5_NAV, "nav" },
+        { Element::HTML5_NOSCRIPT, "noscript" },
+        { Element::HTML5_OBJECT, "object" },
+        { Element::HTML5_OL, "ol" },
+        { Element::HTML5_OPTGROUP, "optgroup" },
+        { Element::HTML5_OPTION, "option" },
+        { Element::HTML5_OUTPUT, "output" },
+        { Element::HTML5_P, "p" },
+        { Element::HTML5_PARAM, "param" },
+        { Element::HTML5_PICTURE, "picture" },
+        { Element::HTML5_PRE, "pre" },
+        { Element::HTML5_PROGRESS, "progress" },
+        { Element::HTML5_Q, "q" },
+        { Element::HTML5_RP, "rp" },
+        { Element::HTML5_RT, "rt" },
+        { Element::HTML5_RUBY, "ruby" },
+        { Element::HTML5_S, "s" },
+        { Element::HTML5_SAMP, "samp" },
+        { Element::HTML5_SCRIPT, "script" },
+        { Element::HTML5_SECTION, "section" },
+        { Element::HTML5_SELECT, "select" },
+        { Element::HTML5_SLOT, "slot" },
+        { Element::HTML5_SMALL, "small" },
+        { Element::HTML5_SOURCE, "source" },
+        { Element::HTML5_SPAN, "span" },
+        { Element::HTML5_STRONG, "strong" },
+        { Element::HTML5_STYLE, "style" },
+        { Element::HTML5_SUB, "sub" },
+        { Element::HTML5_SUMMARY, "summary" },
+        { Element::HTML5_SUP, "sup" },
+        { Element::HTML5_TABLE, "table" },
+        { Element::HTML5_TBODY, "tbody" },
+        { Element::HTML5_TD, "td" },
+        { Element::HTML5_TEMPLATE, "template" },
+        { Element::HTML5_TEXTAREA, "textarea" },
+        { Element::HTML5_TFOOT, "tfoot" },
+        { Element::HTML5_TH, "th" },
+        { Element::HTML5_THEAD, "thead" },
+        { Element::HTML5_TIME, "time" },
+        { Element::HTML5_TITLE, "title" },
+        { Element::HTML5_TR, "tr" },
+        { Element::HTML5_TRACK, "track" },
+        { Element::HTML5_U, "u" },
+        { Element::HTML5_UL, "ul" },
+        { Element::HTML5_VAR, "var" },
+        { Element::HTML5_VIDEO, "video" },
+        { Element::HTML5_WBR, "wbr" },
+        { Element::HTML5_WBR, "wbr" },
+        { Element::MATH, "math" },
+        { Element::MATHML_MACTION, "maction" },
+        { Element::MATHML_MALIGNGROUP, "maligngroup" },
+        { Element::MATHML_MALIGNMARK, "malignmark" },
+        { Element::MATHML_MENCLOSE, "menclose" },
+        { Element::MATHML_MERROR, "merror" },
+        { Element::MATHML_MFENCED, "mfenced" },
+        { Element::MATHML_MFRAC, "mfrac" },
+        { Element::MATHML_MGLYPH, "mglyph" },
+        { Element::MATHML_MI, "mi" },
+        { Element::MATHML_MLABELEDTR, "mlabeledtr" },
+        { Element::MATHML_MLONGDIV, "mlongdiv" },
+        { Element::MATHML_MMULTISCRIPT, "mmultiscript" },
+        { Element::MATHML_MN, "mn" },
+        { Element::MATHML_MO, "mo" },
+        { Element::MATHML_MOVER, "mover" },
+        { Element::MATHML_MPADDED, "mpadded" },
+        { Element::MATHML_MPHANTOM, "mphantom" },
+        { Element::MATHML_MROOT, "mroot" },
+        { Element::MATHML_MROW, "mrow" },
+        { Element::MATHML_MS, "ms" },
+        { Element::MATHML_MSCARRIES, "mscarries" },
+        { Element::MATHML_MSCARRY, "mscarry" },
+        { Element::MATHML_MSGROUP, "msgroup" },
+        { Element::MATHML_MSLINE, "msline" },
+        { Element::MATHML_MSPACE, "mspace" },
+        { Element::MATHML_MSQRT, "msqrt" },
+        { Element::MATHML_MSROW, "msrow" },
+        { Element::MATHML_MSTACK, "mstack" },
+        { Element::MATHML_MSTYLE, "mstyle" },
+        { Element::MATHML_MSUB, "msub" },
+        { Element::MATHML_MSUP, "msup" },
+        { Element::MATHML_MSUBSUP, "msubsup" },
+        { Element::MATHML_MTABLE, "mtable" },
+        { Element::MATHML_MTD, "mtd" },
+        { Element::MATHML_MTEXT, "mtext" },
+        { Element::MATHML_MTR, "mtr" },
+        { Element::MATHML_MUNDER, "munder" },
+        { Element::MATHML_MUNDEROVER, "munderover" },
+        { Element::MATHML_SEMANTICS, "semantics" },
+        { Element::MATHML_ANNOTATION, "annotation" },
+        { Element::MATHML_ANNOTATION_XML, "annotation-xml" },
+        { Element::SVG, "svg" },
+        { Element::SVG_A, "a" },
+        { Element::SVG_ALTGLYPH, "altGlyph" },
+        { Element::SVG_ALTGLYPHDEF, "altGlyphDef" },
+        { Element::SVG_ALTGLYPHITEM, "altGlyphItem" },
+        { Element::SVG_ANIMATE, "animate" },
+        { Element::SVG_ANIMATECOLOR, "animateColor" },
+        { Element::SVG_ANIMATEMOTION, "animateMotion" },
+        { Element::SVG_ANIMATETRANSFORM, "animateTransform" },
+        { Element::SVG_CIRCLE, "circle" },
+        { Element::SVG_CLIPPATH, "clipPath" },
+        { Element::SVG_COLOR_PROFILE, "color-profile" },
+        { Element::SVG_DEFS, "defs" },
+        { Element::SVG_DESC, "desc" },
+        { Element::SVG_DISCARD, "discard" },
+        { Element::SVG_ELLIPSE, "ellipse" },
+        { Element::SVG_FEBLEND, "feBlend" },
+        { Element::SVG_FECOLORMATRIX, "feColorMatrix" },
+        { Element::SVG_FECOMPONENTTRANSFER, "feComponentTransfer" },
+        { Element::SVG_FECOMPOSITE, "feComposite" },
+        { Element::SVG_FECONVOLVEMATRIX, "feConvolveMatrix" },
+        { Element::SVG_FEDIFFUSELIGHTING, "feDiffuseLighting" },
+        { Element::SVG_FEDISPLACEMENTMAP, "feDisplacementMap" },
+        { Element::SVG_FEDISTANTLIGHT, "feDistantLight" },
+        { Element::SVG_FEDROPSHADOW, "feDropShadow" },
+        { Element::SVG_FEFLOOD, "feFlood" },
+        { Element::SVG_FEFUNCA, "feFuncA" },
+        { Element::SVG_FEFUNCB, "feFuncB" },
+        { Element::SVG_FEFUNCG, "feFuncG" },
+        { Element::SVG_FEFUNCR, "feFuncR" },
+        { Element::SVG_FEGAUSSIANBLUR, "feGaussianBlur" },
+        { Element::SVG_FEIMAGE, "feImage" },
+        { Element::SVG_FEMERGE, "feMerge" },
+        { Element::SVG_FEMERGENODE, "feMergeNode" },
+        { Element::SVG_FEMORPHOLOGY, "feMorphology" },
+        { Element::SVG_FEOFFSET, "feOffset" },
+        { Element::SVG_FEPOINTLIGHT, "fePointLight" },
+        { Element::SVG_FESPECULARLIGHTING, "feSpecularLighting" },
+        { Element::SVG_FESPOTLIGHT, "feSpotLight" },
+        { Element::SVG_FETILE, "feTile" },
+        { Element::SVG_FETURBULENCE, "feTurbulence" },
+        { Element::SVG_FILTER, "filter" },
+        { Element::SVG_FOREIGNOBJECT, "foreignObject" },
+        { Element::SVG_G, "g" },
+        { Element::SVG_GLYPHREF, "glyphRef" },
+        { Element::SVG_HATCH, "hatch" },
+        { Element::SVG_HATCHPATH, "hatchpath" },
+        { Element::SVG_IMAGE, "image" },
+        { Element::SVG_LINE, "line" },
+        { Element::SVG_LINEARGRADIENT, "linearGradient" },
+        { Element::SVG_MARKER, "marker" },
+        { Element::SVG_MASK, "mask" },
+        { Element::SVG_MESH, "mesh" },
+        { Element::SVG_MESHGRADIENT, "meshgradient" },
+        { Element::SVG_MESHPATCH, "meshpatch" },
+        { Element::SVG_MESHROW, "meshrow" },
+        { Element::SVG_METADATA, "metadata" },
+        { Element::SVG_MPATH, "mpath" },
+        { Element::SVG_PATH, "path" },
+        { Element::SVG_PATTERN, "pattern" },
+        { Element::SVG_POLYGON, "polygon" },
+        { Element::SVG_POLYLINE, "polyline" },
+        { Element::SVG_RADIALGRADIENT, "radialGradient" },
+        { Element::SVG_RECT, "rect" },
+        { Element::SVG_SCRIPT, "script" },
+        { Element::SVG_SET, "set" },
+        { Element::SVG_SOLIDCOLOR, "solidcolor" },
+        { Element::SVG_STOP, "stop" },
+        { Element::SVG_STYLE, "style" },
+        { Element::SVG_SWITCH, "switch" },
+        { Element::SVG_SYMBOL, "symbol" },
+        { Element::SVG_TEXT, "text" },
+        { Element::SVG_TEXTPATH, "textPath" },
+        { Element::SVG_TITLE, "title" },
+        { Element::SVG_TSPAN, "tspan" },
+        { Element::SVG_UNKNOWN, "unknown" },
+        { Element::SVG_USE, "use" },
+        { Element::SVG_VIEW, "view" },
+    } );
 
     if( map.contains( el ) ) {
         os << map.at( el );
@@ -286,25 +324,60 @@ blogator::parser::specs::infra::Namespace blogator::parser::specs::infra::getNam
  * @return Element type (Element::UNKNOWN if not found)
  */
 blogator::parser::specs::infra::Element blogator::parser::specs::infra::getElementType( const std::u32string &el ) {
-    static std::map<std::u32string , specs::infra::Element> map;
+    auto it = ELEMENT_STR_MAP.find( el );
 
-    if( map.empty() ) {
-        //i = 1 as 'Element::UNKNOWN' (0) can be skipped
-        for( int i = 1; i <= static_cast<int>( blogator::parser::specs::infra::Element::ENUM_END ); ++i ) {
-            //Since string representation of elements are all in ASCII range
-            //conversion to u32 can just be done with direct casting.
-            auto u8str = blogator::to_string( static_cast<specs::infra::Element>( i ) );
-            map.emplace( std::u32string( u8str.cbegin(), u8str.cend() ), static_cast<specs::infra::Element>( i ) );
-        }
-    }
+    return ( it == ELEMENT_STR_MAP.cend() ? specs::infra::Element::UNKNOWN : it->second );
+}
 
-    auto it = map.find( el );
+/**
+ * Adjusts a SVG element tag name
+ * @param name Element tag name in the SVG namespace
+ * @return Adjusted tag name name
+ */
+std::u32string adjustSVGElementTagName( const std::u32string &name ) {
+    static const auto map = std::map<std::u32string , Element>( {
+        { U"altglyph", Element::SVG_ALTGLYPH },
+        { U"altglyphdef", Element::SVG_ALTGLYPHDEF },
+        { U"altglyphitem", Element::SVG_ALTGLYPHITEM },
+        { U"animatecolor", Element::SVG_ANIMATECOLOR },
+        { U"animatemotion", Element::SVG_ANIMATEMOTION },
+        { U"animatetransform", Element::SVG_ANIMATETRANSFORM },
+        { U"clippath", Element::SVG_CLIPPATH },
+        { U"feblend", Element::SVG_FEBLEND },
+        { U"fecolormatrix", Element::SVG_FECOLORMATRIX },
+        { U"fecomponenttransfer", Element::SVG_FECOMPONENTTRANSFER },
+        { U"fecomposite", Element::SVG_FECOMPOSITE },
+        { U"feconvolvematrix", Element::SVG_FECONVOLVEMATRIX },
+        { U"fediffuselighting", Element::SVG_FEDIFFUSELIGHTING },
+        { U"fedisplacementmap", Element::SVG_FEDISPLACEMENTMAP },
+        { U"fedistantlight", Element::SVG_FEDISTANTLIGHT },
+        { U"fedropshadow", Element::SVG_FEDROPSHADOW },
+        { U"feflood", Element::SVG_FEFLOOD },
+        { U"fefunca", Element::SVG_FEFUNCA },
+        { U"fefuncb", Element::SVG_FEFUNCB },
+        { U"fefuncg", Element::SVG_FEFUNCG },
+        { U"fefuncr", Element::SVG_FEFUNCR },
+        { U"fegaussianblur", Element::SVG_FEGAUSSIANBLUR },
+        { U"feimage", Element::SVG_FEIMAGE },
+        { U"femerge", Element::SVG_FEMERGE },
+        { U"femergenode", Element::SVG_FEMERGENODE },
+        { U"femorphology", Element::SVG_FEMORPHOLOGY },
+        { U"feoffset", Element::SVG_FEOFFSET },
+        { U"fepointlight", Element::SVG_FEPOINTLIGHT },
+        { U"fespecularlighting", Element::SVG_FESPECULARLIGHTING },
+        { U"fespotlight", Element::SVG_FESPOTLIGHT },
+        { U"fetile", Element::SVG_FETILE },
+        { U"feturbulence", Element::SVG_FETURBULENCE },
+        { U"foreignobject", Element::SVG_FOREIGNOBJECT },
+        { U"glyphref", Element::SVG_GLYPHREF },
+        { U"lineargradient", Element::SVG_LINEARGRADIENT },
+        { U"radialgradient", Element::SVG_RADIALGRADIENT },
+        { U"textpath", Element::SVG_TEXTPATH },
+    } );
 
-    if( it != map.cend() ) {
-        return it->second;
-    } else {
-        return specs::infra::Element::UNKNOWN;
-    }
+    const auto it = map.find( name );
+
+    return ( it == map.end() ? name : blogator::to_u32string( it->second ) );
 }
 
 /**

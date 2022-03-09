@@ -23,7 +23,8 @@ namespace blogator::parser::token {
         virtual void setText( std::u32string text ) final;
 
         [[nodiscard]] virtual specs::Context context() const final;
-        [[nodiscard]] virtual std::u32string text() const final;
+        [[nodiscard]] virtual std::u32string & text() final;
+        [[nodiscard]] virtual const std::u32string & text() const final;
         [[nodiscard]] virtual size_t lineNum() const final;
         [[nodiscard]] virtual size_t colPos() const final;
         [[nodiscard]] virtual TextPos position() const final;

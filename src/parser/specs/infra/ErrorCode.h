@@ -13,6 +13,7 @@ namespace blogator::parser::specs::infra {
         enum {
             NONE    = 0,
             UNKNOWN = 1,
+
             ABRUPT_CLOSING_OF_EMPTY_COMMENT,
             ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER,
             ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER,
@@ -62,6 +63,10 @@ namespace blogator::parser::specs::infra {
             UNEXPECTED_QUESTION_MARK_INSTEAD_OF_TAG_NAME,
             UNEXPECTED_SOLIDUS_IN_TAG,
             UNKNOWN_NAMED_CHARACTER_REFERENCE,
+
+            INVALID_DOCTYPE_TOKEN_IN_FOREIGN_CONTENT,
+            INVALID_STARTTAG_TOKEN_IN_FOREIGN_CONTENT,
+            INVALID_ENDTAG_TOKEN_IN_FOREIGN_CONTENT,
 
             ENUM_END
         };

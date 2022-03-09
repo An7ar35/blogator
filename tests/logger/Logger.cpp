@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../../../src/logger/Logger.h"
+#include "../../../src/logger/LoggableException.h"
 
 #include "../TestHelpers/AsyncNotify.h"
 
@@ -101,7 +102,6 @@ class logger_Logger_Tests : public ::testing::Test {
 std::shared_ptr<std::vector<LogMsg>> logger_Logger_Tests::msgs = std::make_shared<std::vector<LogMsg>>();
 blogator::tests::AsyncNotify<LogMsg> logger_Logger_Tests::async_notify = blogator::tests::AsyncNotify<LogMsg>();
 
-
 TEST_F( logger_Logger_Tests, log_trace ) {
     auto expected_msg = LogMsg( 1, LogLevel::TRACE, "Logger.cpp", 112, "string1 string2 1.2345" );
 
@@ -178,4 +178,38 @@ TEST_F( logger_Logger_Tests, log_error ) {
 
     ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
     ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+}
+
+TEST_F( logger_Logger_Tests, LoggableException_0 ) {
+    auto expected_msg = LogMsg( 1, LogLevel::ERROR, "LoggableException.cpp", 16, "exception" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    try {
+        throw blogator::logger::LoggableException( "exception" );
+        FAIL() << "Exception was not caught.";
+
+    } catch( const blogator::logger::LoggableException &e ) {
+        ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+        ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+    }
+}
+
+TEST_F( logger_Logger_Tests, LoggableException_1 ) {
+    auto expected_msg = LogMsg( 1, LogLevel::ERROR, "Logger.cpp", 208, "exception" );
+
+    auto check_fn = [&expected_msg]( const LogMsg &msg ){ return expected_msg.isEquivalent( msg ); };
+
+    async_notify.setCheckFn( check_fn );
+
+    try {
+        throw blogator::logger::LoggableException( __FILE__, __LINE__, "exception" );
+        FAIL() << "Exception was not caught.";
+
+    } catch( const blogator::logger::LoggableException &e ) {
+        ASSERT_TRUE( Logger::running() ) << "Logger is not running.";
+        ASSERT_TRUE( async_notify.waitForCheckSuccess( ASYNC_TEST_TIMEOUT ) ) << "Timed out getting a match.";
+    }
 }

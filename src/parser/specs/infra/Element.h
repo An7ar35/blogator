@@ -11,6 +11,19 @@ namespace blogator::parser::specs::infra {
         UNKNOWN = 0,
 
         /**
+         * Deprecated tags (backward compatibility)
+         */
+        DEPR_NS_BEGIN,
+        DEPR_HTML4_BIG = DEPR_NS_BEGIN,
+        DEPR_HTML4_CENTER,
+        DEPR_HTML4_FONT,
+        DEPR_HTML4_LISTING,
+        DEPR_HTML4_NOBR,
+        DEPR_HTML4_STRIKE,
+        DEPR_HTML4_TT,
+        DEPR_NS_END = DEPR_HTML4_TT,
+
+        /**
          * HTML5::core elements
          */
         HTML5_NS_BEGIN, //Not HTML - used for iterating enums
@@ -70,7 +83,7 @@ namespace blogator::parser::specs::infra {
          */
         SVG_NS_BEGIN, //Not HTML - used for iterating enums
         SVG = SVG_NS_BEGIN,
-        SVG_A, SVG_ANIMATE, SVG_ANIMATEMOTION, SVG_ANIMATETRANSFORM,
+        SVG_A, SVG_ALTGLYPH, SVG_ALTGLYPHDEF, SVG_ALTGLYPHITEM, SVG_ANIMATE, SVG_ANIMATECOLOR, SVG_ANIMATEMOTION, SVG_ANIMATETRANSFORM,
         SVG_CIRCLE, SVG_CLIPPATH, SVG_COLOR_PROFILE,
         SVG_DEFS, SVG_DESC, SVG_DISCARD,
         SVG_ELLIPSE,
@@ -87,7 +100,7 @@ namespace blogator::parser::specs::infra {
         SVG_FETILE, SVG_FETURBULENCE,
         SVG_FILTER,
         SVG_FOREIGNOBJECT,
-        SVG_G,
+        SVG_G, SVG_GLYPHREF,
         SVG_HATCH, SVG_HATCHPATH,
         SVG_IMAGE,
         SVG_LINE, SVG_LINEARGRADIENT,
@@ -106,6 +119,7 @@ namespace blogator::parser::specs::infra {
     std::ostream & operator <<( std::ostream &os, Element el );
     specs::infra::Namespace getNamespace( specs::infra::Element el );
     specs::infra::Element getElementType( const std::u32string &el );
+    std::u32string adjustSVGElementTagName( const std::u32string &name );
     //TODO create paired, self closing lookup
 }
 

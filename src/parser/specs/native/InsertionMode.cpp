@@ -11,15 +11,13 @@
  * @return Output stream
  */
 std::ostream &blogator::parser::specs::native::operator <<( std::ostream &os, blogator::parser::specs::native::InsertionMode mode ) {
-    static std::map<InsertionMode, std::string> map;
-
-    if( map.empty() ) {
-        map.emplace( InsertionMode::INITIAL, "INITIAL" );
-        map.emplace( InsertionMode::PRE_NAMESPACE, "PRE_NAMESPACE" );
-        map.emplace( InsertionMode::IN_NAMESPACE, "IN_NAMESPACE" );
-        map.emplace( InsertionMode::POST_NAMESPACE, "POST_NAMESPACE" );
+    static const auto map = std::map<InsertionMode, std::string>( {
+        { InsertionMode::INITIAL, "INITIAL" },
+        { InsertionMode::PRE_NAMESPACE, "PRE_NAMESPACE" },
+        { InsertionMode::IN_NAMESPACE, "IN_NAMESPACE" },
+        { InsertionMode::POST_NAMESPACE, "POST_NAMESPACE" },
         //TODO
-    }
+    } );
 
     if( map.contains( mode ) ) {
         os << map.at( mode );
