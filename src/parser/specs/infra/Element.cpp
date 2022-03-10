@@ -2,8 +2,9 @@
 
 #include <map>
 #include <ostream>
+#include <sstream>
 
-#include "../../../logger/Logger.h"
+#include "../../../sys/terminate.h"
 
 #include "Namespace.h"
 
@@ -28,9 +29,8 @@ static std::map<std::u32string , blogator::parser::specs::infra::Element> loadMa
 
         return std::move( map );
 
-    } catch( const std::exception &e ) {
-        LOG_CRITICAL( "[parser::specs::infra::Element::] Failed to load map data (loadMap): ", e.what() );
-        std::terminate();
+    } catch( ... ) {
+        TERMINATE( "[parser::specs::infra::Element::] Failed to load map data (loadMap)." );
     }
 }
 

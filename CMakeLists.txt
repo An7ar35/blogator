@@ -425,7 +425,9 @@ set(SOURCE_FILES
         src/parser/dom/datastructure/NamespaceMap.cpp
         src/parser/dom/datastructure/NamespaceMap.h
         src/parser/dom/validation/XML.cpp
-        src/parser/dom/validation/XML.h)
+        src/parser/dom/validation/XML.h
+        src/sys/terminate.cpp
+        src/sys/terminate.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )

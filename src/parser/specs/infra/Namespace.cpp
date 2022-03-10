@@ -1,8 +1,9 @@
 #include "Namespace.h"
 
-#include "../../../logger/Logger.h"
+#include "../../../sys/terminate.h"
 
 #include <ostream>
+#include <sstream>
 #include <map>
 
 using namespace blogator::parser::specs::infra;
@@ -24,8 +25,8 @@ static std::map<std::u32string, Namespace> loadMap() noexcept {
 
         return std::move( map );
 
-    } catch( const std::exception &e ) {
-        LOG_CRITICAL( "[parser::specs::infra::Namespace::] Failed to load map data (loadMap): ", e.what() );
+    } catch( ... ) {
+        TERMINATE( "[parser::specs::infra::Namespace::] Failed to load map data (loadMap)." );
         std::terminate();
     }
 }

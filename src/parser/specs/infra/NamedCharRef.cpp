@@ -1,6 +1,7 @@
 #include "NamedCharRef.h"
 
 #include "../../../logger/Logger.h"
+#include "../../../sys/terminate.h"
 
 using namespace blogator::parser::specs::infra;
 
@@ -124,9 +125,8 @@ NamedCharRef NamedCharRef::loadNotFound() noexcept {
     try {
         return {};
 
-    } catch( const std::exception &e ) {
-        LOG_CRITICAL( "[parser::specs::infra::NamedCharRef::loadNotFound()] ", e.what() );
-        std::terminate();
+    } catch( ... ) {
+        TERMINATE( "[parser::specs::infra::NamedCharRef::loadNotFound()] Failed to initialise." );
     }
 }
 
@@ -2369,9 +2369,8 @@ std::unordered_map<std::u32string, NamedCharRef> NamedCharRef::loadMap() noexcep
             { U"&zwnj;", NamedCharRef { U"&zwnj;", 8204 } },
         } );
 
-    } catch( const std::exception &e ) {
-        LOG_CRITICAL( "[parser::specs::infra::NamedCharRef::loadMap()] ", e.what() );
-        std::terminate();
+    } catch( ... ) {
+        TERMINATE( "[parser::specs::infra::NamedCharRef::loadMap()] Failed to initialise." );
     }
 }
 
@@ -2389,9 +2388,8 @@ blogator::Trie<uint32_t> NamedCharRef::loadTrie() noexcept {
 
         return std::move( trie );
 
-    } catch( const std::exception &e ) {
-        LOG_CRITICAL( "[parser::specs::infra::NamedCharRef::loadTrie()] ", e.what() );
-        std::terminate();
+    } catch( ... ) {
+        TERMINATE( "[parser::specs::infra::NamedCharRef::loadTrie()] Failed to initialise." );
     }
 }
 

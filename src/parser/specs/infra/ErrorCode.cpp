@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "../../../logger/Logger.h"
+#include "../../../sys/terminate.h"
 
 using namespace blogator::parser::specs::infra;
 
@@ -238,9 +238,8 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
 
         return std::move( arr );
 
-    } catch( const std::exception &e ) {
-        LOG_CRITICAL( "[parser::specs::infra::ErrorCode::] Failed to load error data (loadErrorStrings): ", e.what() );
-        std::terminate();
+    } catch( ... ) {
+        TERMINATE( "[parser::specs::infra::ErrorCode::] Failed to load error data (loadErrorStrings)." );
     }
     //TODO log debug
 }
