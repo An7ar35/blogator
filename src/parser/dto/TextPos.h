@@ -28,6 +28,7 @@ namespace blogator::parser {
 
         TextPos & newline();
         TextPos & increment( bool new_line = false );
+        [[nodiscard]] std::string str() const;
 
         size_t line;
         size_t col;

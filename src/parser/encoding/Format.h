@@ -22,6 +22,7 @@ namespace blogator::parser::encoding {
 
 namespace blogator {
     std::string to_string( blogator::parser::encoding::Format fmt );
+    std::u32string to_u32string( blogator::parser::encoding::Format fmt );
 }
 
 #endif //BLOGATOR_PARSER_ENCODING_FORMAT_H

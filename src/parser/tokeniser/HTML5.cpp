@@ -25,9 +25,11 @@ tokeniser::HTML5::HTML5( dom::TreeBuilder &tree_builder ) :
     _error_count( 0 ),
     _tree_builder( tree_builder ),
     _current_state( State_e::DATA ),
-    _return_state( State_e::DATA )
+    _return_state( State_e::DATA ),
+    _acknowledgement_flag( false )
 {
-    tree_builder.setChangeHTML5TokeniserStateCb( [ this ]( State_e s ) { setState( s ); } );
+    tree_builder.setTokeniserStateChangeCallback( [ this ]( State_e s ) { setState( s ); } );
+    tree_builder.setSelfClosingTagAckCallback( [ this ]() { setAcknowledgementFlag(); } );
 }
 
 /**
@@ -43,8 +45,12 @@ tokeniser::HTML5::HTML5( dom::TreeBuilder & tree_builder, specs::infra::Tokenise
     _tree_builder( tree_builder ),
     _current_state( init_state ),
     _return_state( State_e::DATA ),
-    _last_start_tag( std::move( last_start_tag ) )
-{}
+    _last_start_tag( std::move( last_start_tag ) ),
+    _acknowledgement_flag( false )
+{
+    tree_builder.setTokeniserStateChangeCallback( [ this ]( State_e s ) { setState( s ); } );
+    tree_builder.setSelfClosingTagAckCallback( [ this ]() { setAcknowledgementFlag(); } );
+}
 
 /**
  * Parse HTML5 content into tokens
@@ -929,14 +935,17 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setState( State_e::DOCTYPE );
                 } else if( next7 == U"[CDATA[" ) {
                     text.advanceCol( 6 );
-                    if( _tree_builder.hasAdjustedCurrentNode() && _tree_builder.adjustedCurrentNode().second != specs::infra::Namespace::HTML5 ) {
+                    auto [ adj_node_exists, adj_node_ns ] = _tree_builder.adjustedCurrentNodeNS();
+
+                    if( adj_node_exists && adj_node_ns != specs::infra::Namespace::HTML ) {
                         setState( State_e::CDATA_SECTION );
                     } else {
                         logError( text.position(), ErrorCode::CDATA_IN_HTML_CONTENT );
+                        createCommentToken( text.position() );
+                        appendToPendingTokenText( U"[CDATA[" );
+                        setState( State_e::BOGUS_COMMENT );
                     }
-                    createCommentToken( text.position() );
-                    appendToPendingTokenText( U"[CDATA[" );
-                    setState( State_e::BOGUS_COMMENT );
+
                 } else {
                     logError( text.position(), ErrorCode::INCORRECTLY_OPENED_COMMENT );
                     createCommentToken( text.position() );
@@ -1706,7 +1715,6 @@ size_t tokeniser::HTML5::errors() const {
 
 /**
  * Sends a parse error to the parser log
- * @param src Source filepath
  * @param position Position in source text
  * @param err_code HTML5 error code
  */
@@ -1802,6 +1810,8 @@ inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
         return; //EARLY RETURN
     }
 
+    bool acknowledgment_expected { false };
+
     if( _pending.token->type() == Type_e::START_TAG ) {
         auto * tk = dynamic_cast<token::html5::StartTagTk *>( _pending.token.get() );
 
@@ -1813,6 +1823,8 @@ inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
         addPendingTokenAttribute();
 
         _last_start_tag = tk->name();
+
+        acknowledgment_expected = tk->selfclosing();
 
     } else if( _pending.token->type() == Type_e::END_TAG ) {
         auto * tk = dynamic_cast<token::html5::EndTagTk *>( _pending.token.get() );
@@ -1855,7 +1867,16 @@ inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
         );
     }
 
-    _tree_builder.addToken( std::move( _pending.token ) );
+    _tree_builder.dispatch( std::move( _pending.token ) );
+
+    if( acknowledgment_expected ) {
+        if( !_acknowledgement_flag ) {
+            logError( position, ErrorCode::NON_VOID_HTML_ELEMENT_START_TAG_WITH_TRAILING_SOLIDUS );
+        }
+
+        resetAcknowledgementFlag();
+    }
+
     clearPendingToken();
 }
 
@@ -1881,7 +1902,7 @@ inline void tokeniser::HTML5::appendToPendingTokenText( const std::u32string &tx
  * @param c Character
  */
 inline void tokeniser::HTML5::emitCharacterToken( TextPos position, uint32_t c ) {
-    _tree_builder.addToken( std::make_unique<token::html5::CharacterTk>( std::u32string( 1, c ), position ) );
+    _tree_builder.dispatch( std::make_unique<token::html5::CharacterTk>( std::u32string( 1, c ), position ) );
 }
 
 /**
@@ -1890,7 +1911,7 @@ inline void tokeniser::HTML5::emitCharacterToken( TextPos position, uint32_t c )
  * @param str String
  */
 inline void tokeniser::HTML5::emitCharacterToken( TextPos position, const std::u32string & str ) {
-    _tree_builder.addToken( std::make_unique<token::html5::CharacterTk>( str, position ) );
+    _tree_builder.dispatch( std::make_unique<token::html5::CharacterTk>( str, position ) );
 }
 
 /**
@@ -1898,7 +1919,7 @@ inline void tokeniser::HTML5::emitCharacterToken( TextPos position, const std::u
  * @param position Position of EOF in source text
  */
 inline void tokeniser::HTML5::emitEndOfFileToken( TextPos position ) {
-    _tree_builder.addToken( std::make_unique<token::html5::EndOfFileTk>( position ) );
+    _tree_builder.dispatch( std::make_unique<token::html5::EndOfFileTk>( position ) );
     _eof = true;
 }
 
@@ -1952,8 +1973,10 @@ inline void tokeniser::HTML5::createEndTagToken( TextPos position ) {
     _pending.token = std::make_unique<token::html5::EndTagTk>( position );
 }
 
-
-
+/**
+ * Checks if end tag token is appropriate
+ * @return Valid state
+ */
 inline bool tokeniser::HTML5::appropriateEndTagToken() {
     if( _pending.token->type() == Type_e::END_TAG ) {
         auto name = std::u32string( _pending.token_name_buffer.cbegin(), _pending.token_name_buffer.cend() );
@@ -2147,6 +2170,20 @@ inline uint32_t tokeniser::HTML5::charRefCode() const {
  */
 inline bool tokeniser::HTML5::validCharRefCode() const {
     return !_pending.bad_ref_code;
+}
+
+/**
+ * Raises the acknowledgement flag
+ */
+void tokeniser::HTML5::setAcknowledgementFlag() {
+    _acknowledgement_flag = true;
+}
+
+/**
+ * Reset the acknowledgement flag
+ */
+inline void tokeniser::HTML5::resetAcknowledgementFlag() {
+    _acknowledgement_flag = false;
 }
 
 /**

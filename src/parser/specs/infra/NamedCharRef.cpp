@@ -1,6 +1,5 @@
 #include "NamedCharRef.h"
 
-#include "../../../logger/Logger.h"
 #include "../../../sys/terminate.h"
 
 using namespace blogator::parser::specs::infra;

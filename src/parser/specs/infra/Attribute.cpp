@@ -1,7 +1,7 @@
 #include "Attribute.h"
 
 #include <sstream>
-#include <map>
+#include <unordered_map>
 
 /**
  * Output stream operator
@@ -10,7 +10,7 @@
  * @return Output stream
  */
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::Attribute attr ) {
-    static const auto map = std::map<Attribute, std::string>( {
+    static const auto map = std::unordered_map<Attribute, std::string>( {
         { Attribute::UNKNOWN, "UNKNOWN" },
         { Attribute::ACCEPT, "accept" },
         { Attribute::ACCEPT_CHARSET, "accept-charset" },
@@ -222,6 +222,7 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
         { Attribute::ARIA_VALUEMIN, "valuemin" },
         { Attribute::ARIA_VALUENOW, "valuenow" },
         { Attribute::ARIA_VALUETEXT, "valuetext" },
+        { Attribute::MATHML_DEFINITIONURL, "definitionURL" },
         { Attribute::SVG_ATTRIBUTENAME, "attributeName" },
         { Attribute::SVG_ATTRIBUTETYPE, "attributeType" },
         { Attribute::SVG_BASEFREQUENCY, "baseFrequency" },
@@ -298,7 +299,7 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
  */
 std::u32string blogator::parser::specs::infra::adjustMathMLAttribute( const std::u32string &name ) {
     //ref: https://html.spec.whatwg.org/multipage/parsing.html#adjust-mathml-attributes
-    static const auto map = std::map<std::u32string , Attribute>( {
+    static const auto map = std::unordered_map<std::u32string , Attribute>( {
         { U"definitionurl", Attribute::MATHML_DEFINITIONURL }
     } );
 
@@ -314,7 +315,7 @@ std::u32string blogator::parser::specs::infra::adjustMathMLAttribute( const std:
  */
 std::u32string blogator::parser::specs::infra::adjustSVGAttribute( const std::u32string &name ) {
     //ref: https://html.spec.whatwg.org/multipage/parsing.html#adjust-svg-attributes
-    static const auto map = std::map<std::u32string , Attribute>( {
+    static const auto map = std::unordered_map<std::u32string , Attribute>( {
         { U"attributename", Attribute::SVG_ATTRIBUTENAME },
         { U"attributetype", Attribute::SVG_ATTRIBUTETYPE },
         { U"basefrequency", Attribute::SVG_BASEFREQUENCY },

@@ -64,6 +64,14 @@ const Attributes_t & GenericTagTk::attributes() const {
 }
 
 /**
+ * Checks token has attributes
+ * @return Has attribute
+ */
+bool GenericTagTk::hasAttributes() const {
+    return !_attributes.empty();
+}
+
+/**
  * Adds an attribute to the list
  * @param name Attribute name
  * @param value Attribute value

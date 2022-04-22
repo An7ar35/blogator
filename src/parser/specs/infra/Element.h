@@ -8,26 +8,46 @@ namespace blogator::parser::specs::infra {
     enum class Namespace;
 
     enum class Element {
-        UNKNOWN = 0,
+        UNKNOWN = 0, //not resolved
+        OTHER   = 1, //not typed
 
         /**
          * Deprecated tags (backward compatibility)
          */
-        DEPR_NS_BEGIN,
-        DEPR_HTML4_BIG = DEPR_NS_BEGIN,
-        DEPR_HTML4_CENTER,
-        DEPR_HTML4_FONT,
-        DEPR_HTML4_LISTING,
-        DEPR_HTML4_NOBR,
-        DEPR_HTML4_STRIKE,
-        DEPR_HTML4_TT,
-        DEPR_NS_END = DEPR_HTML4_TT,
+        DEPR_HTML_APPLET,
+        HTML_NS_BEGIN = DEPR_HTML_APPLET, //Not HTML - used for iterating enums
+        DEPR_NS_BEGIN = HTML_NS_BEGIN,    //Not HTML - used for iterating enums
+        DEPR_HTML_BASEFONT,
+        DEPR_HTML_BGSOUND,
+        DEPR_HTML_BIG,
+        DEPR_HTML_CENTER,
+        DEPR_HTML_DIR,
+        DEPR_HTML_FONT,
+        DEPR_HTML_FRAME,
+        DEPR_HTML_FRAMESET,
+        DEPR_HTML_IMAGE,
+        DEPR_HTML_KEYGEN,
+        DEPR_HTML_LISTING,
+        DEPR_HTML_MARQUEE,
+        DEPR_HTML_MENUITEM,
+        DEPR_HTML_NOBR,
+        DEPR_HTML_NOEMEBED,
+        DEPR_HTML_NOFRAMES,
+        DEPR_HTML_PLAINTEXT,
+        DEPR_HTML_RB,
+        DEPR_HTML_RTC,
+        DEPR_HTML_STRIKE,
+        DEPR_HTML_TT,
+        DEPR_HTML_XMP,
+        DEPR_NS_END = DEPR_HTML_XMP, //Not HTML - used for iterating enums
 
         /**
          * HTML5::core elements
          */
-        HTML5_NS_BEGIN, //Not HTML - used for iterating enums
-        HTML5_A = HTML5_NS_BEGIN, HTML5_ABBR, HTML5_ADDRESS, HTML5_AREA, HTML5_ARTICLE, HTML5_ASIDE, HTML5_AUDIO,
+
+        HTML5_A,
+        HTML5_NS_BEGIN = HTML5_A, //Not HTML - used for iterating enums
+        HTML5_ABBR, HTML5_ADDRESS, HTML5_AREA, HTML5_ARTICLE, HTML5_ASIDE, HTML5_AUDIO,
         HTML5_B, HTML5_BASE, HTML5_BDI, HTML5_BDO, HTML5_BLOCKQUOTE, HTML5_BODY, HTML5_BR, HTML5_BUTTON,
         HTML5_CANVAS, HTML5_CAPTION, HTML5_CITE, HTML5_CODE, HTML5_COL, HTML5_COLGROUP, HTML5_COMMENT,
         HTML5_DATA, HTML5_DATALIST, HTML5_DD, HTML5_DEL, HTML5_DETAILS, HTML5_DFN, HTML5_DIALOG,
@@ -51,14 +71,15 @@ namespace blogator::parser::specs::infra {
         HTML5_U, HTML5_UL,
         HTML5_VAR, HTML5_VIDEO,
         HTML5_WBR,
-        HTML5_NS_END = HTML5_WBR, //Not HTML - used for iterating enums
+        HTML5_NS_END = HTML5_WBR,   //Not HTML - used for iterating enums
+        HTML_NS_END = HTML5_NS_END, //Not HTML - used for iterating enums
 
         /**
          * HTML5::MathML3.0 elements
          * (https://developer.mozilla.org/en-US/docs/Web/MathML/Element)
          */
-        MATHML_NS_BEGIN, //Not HTML - used for iterating enums
-        MATH = MATHML_NS_BEGIN,
+        MATH,
+        MATHML_NS_BEGIN = MATH, //Not HTML - used for iterating enums
         MATHML_MACTION, MATHML_MALIGNGROUP, MATHML_MALIGNMARK,
         MATHML_MENCLOSE, MATHML_MERROR,
         MATHML_MFENCED, MATHML_MFRAC,
@@ -81,8 +102,8 @@ namespace blogator::parser::specs::infra {
          * HTML::SVG elements
          * https://developer.mozilla.org/en-US/docs/Web/SVG/Element
          */
-        SVG_NS_BEGIN, //Not HTML - used for iterating enums
-        SVG = SVG_NS_BEGIN,
+        SVG,
+        SVG_NS_BEGIN = SVG, //Not HTML - used for iterating enums
         SVG_A, SVG_ALTGLYPH, SVG_ALTGLYPHDEF, SVG_ALTGLYPHITEM, SVG_ANIMATE, SVG_ANIMATECOLOR, SVG_ANIMATEMOTION, SVG_ANIMATETRANSFORM,
         SVG_CIRCLE, SVG_CLIPPATH, SVG_COLOR_PROFILE,
         SVG_DEFS, SVG_DESC, SVG_DISCARD,
@@ -118,8 +139,11 @@ namespace blogator::parser::specs::infra {
 
     std::ostream & operator <<( std::ostream &os, Element el );
     specs::infra::Namespace getNamespace( specs::infra::Element el );
-    specs::infra::Element getElementType( const std::u32string &el );
-    std::u32string adjustSVGElementTagName( const std::u32string &name );
+    specs::infra::Namespace resolveNamespace( specs::infra::Element el );
+    specs::infra::Element resolveElementType( Namespace ns_hint, std::u32string & el );
+    bool isAmbiguousElement( const std::u32string & el );
+    bool isAmbiguousElement( specs::infra::Element el );
+    std::u32string & adjustSVGElementTagName( std::u32string & name );
     //TODO create paired, self closing lookup
 }
 

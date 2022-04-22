@@ -3,6 +3,7 @@
 
 #include "ContentModel.h"
 #include "ContentType.h"
+#include "DocType.h"
 #include "Element.h"
 #include "ErrorCode.h"
 #include "InsertionMode.h"

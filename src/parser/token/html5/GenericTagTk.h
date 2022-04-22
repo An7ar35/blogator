@@ -29,6 +29,7 @@ namespace blogator::parser::token::html5 {
         [[nodiscard]] bool selfclosing() const;
         [[nodiscard]] Attributes_t & attributes();
         [[nodiscard]] const Attributes_t & attributes() const;
+        [[nodiscard]] bool hasAttributes() const;
 
         void addAttribute( std::u32string name, std::u32string value );
         void setSelfClosing( bool flag = true );

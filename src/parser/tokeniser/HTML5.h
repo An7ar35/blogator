@@ -54,14 +54,15 @@ namespace blogator::parser::tokeniser {
         static const uint32_t UNDEFINED_CHAR_10FFFF  = 0x10FFFF;
         static const auto     THIS_CONTEXT           = specs::Context::HTML5;
 
-        bool                       _eof;
-        std::filesystem::path      _src_path;
-        size_t                     _error_count;
-        dom::TreeBuilder         & _tree_builder;
-        State_e                    _current_state;
-        State_e                    _return_state;
-        std::u32string             _last_start_tag;
-        std::vector<uint32_t>      _temp_buffer;
+        bool                  _eof;
+        std::filesystem::path _src_path;
+        size_t                _error_count;
+        dom::TreeBuilder &    _tree_builder;
+        State_e               _current_state;
+        State_e               _return_state;
+        std::u32string        _last_start_tag;
+        std::vector<uint32_t> _temp_buffer;
+        bool                  _acknowledgement_flag;
 
         struct Cache {
             Type_e                                 type          { Type_e::UNKNOWN };
@@ -121,6 +122,9 @@ namespace blogator::parser::tokeniser {
         void addToCharRefCode( uint32_t base, uint32_t num );
         [[nodiscard]] uint32_t charRefCode() const;
         [[nodiscard]] bool validCharRefCode() const;
+
+        void setAcknowledgementFlag();
+        void resetAcknowledgementFlag();
 
         void flushCodePoints( TextPos position );
     };

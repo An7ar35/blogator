@@ -36,7 +36,7 @@ blogator::parser::specs::infra::TokenType html5::HTML5Tk::type() const {
  * @param os Output stream
  */
 void html5::HTML5Tk::toStr( std::ostream &os ) const {
-    os << "html5::GenericTk={ type: " << static_cast<int>( _type ) << ", text: \"";
+    os << "html5::HTML5Tk={ type: " << type() << ", text: \"";
     unicode::utf8::convert( os, text() );
     os << "\", position: " << lineNum() << ":" << colPos() << " }";
 }

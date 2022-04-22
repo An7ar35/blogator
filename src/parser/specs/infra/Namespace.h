@@ -10,7 +10,9 @@ namespace blogator::parser::specs::infra {
     enum class Namespace {
         UNKNOWN = 0,
         NONE,
-        HTML5,
+        DEPR,  //HTML4 and depreciated HTML5 tags
+        HTML5, //Current HTML5 tags
+        HTML,  //catch-all for HTML (depreciated or not)
         MATHML,
         SVG,
         XLINK,
@@ -21,8 +23,8 @@ namespace blogator::parser::specs::infra {
         //used for iterating the enums
         ENUM_BEGIN     = UNKNOWN, //start of full range of enums
         ENUM_END       = OTHER,   //end of full range of enums
-        URI_DEFS_BEGIN = HTML5,   //start of URI defined enums
-        URI_DEFS_END   = XMLNS,   //end of URI defined enums
+        URI_DEFS_BEGIN = HTML,    //start of unique URI defined enums
+        URI_DEFS_END   = XMLNS,   //end of unique URI defined enums
     };
 
     std::ostream & operator <<( std::ostream &os, Namespace ns );

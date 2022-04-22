@@ -67,6 +67,24 @@ namespace blogator::parser::specs::infra {
             INVALID_DOCTYPE_TOKEN_IN_FOREIGN_CONTENT,
             INVALID_STARTTAG_TOKEN_IN_FOREIGN_CONTENT,
             INVALID_ENDTAG_TOKEN_IN_FOREIGN_CONTENT,
+            MISMATCHING_ENDTAG_IN_FOREIGN_CONTENT,
+
+            MISSING_DOCTYPE,
+            MALFORMED_DOCTYPE,
+            UNEXPECTED_CHARACTER,
+            UNEXPECTED_DOCTYPE,
+            UNEXPECTED_STARTTAG,
+            UNEXPECTED_ENDTAG,
+            UNEXPECTED_CONTENT,
+            ORPHANED_STARTTAG,
+            ORPHANED_ENDTAG,
+            BAD_NESTING, //TODO replace with incorect_nesting...?
+            UNCLOSED_TAG,
+            INVALID_NESTING_OF_ELEMENT,
+            INVALID_NESTING_OF_FORMATTING_ELEMENT,
+            INCORRECT_IMAGE_TAG_NAMING,
+
+            FOSTER_PARENTING_TEXT,
 
             ENUM_END
         };

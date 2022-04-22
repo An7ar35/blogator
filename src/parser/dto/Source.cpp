@@ -33,7 +33,7 @@ Source::Source( std::istream &in, std::filesystem::path path, encoding::Format f
  * Gets the stream (will calls peek() to update the stream state)
  * @return Stream
  */
-std::istream &Source::stream() {
+std::istream & Source::stream() {
     _stream.peek();
     return _stream;
 }
@@ -42,7 +42,7 @@ std::istream &Source::stream() {
  * Gets the position tracker
  * @return Position
  */
-TextPos &Source::position() {
+TextPos & Source::position() {
     return _position;
 }
 

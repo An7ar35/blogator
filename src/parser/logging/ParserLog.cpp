@@ -75,6 +75,18 @@ void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code
 }
 
 /**
+ * [THREAD-SAFE] Logs a message
+ * @param src Source filepath
+ * @param ctx Error Context enum
+ * @param err_code Error code within the context
+ * @param txt Optional text to append to the error message
+ * @param position Text position
+ */
+void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code, std::string txt, TextPos position ) {
+    ParserLog::_instance.log( ErrorObject( std::move( src ), ctx, err_code, position, std::move( txt ) ) );
+}
+
+/**
  * [THREAD-SAFE] Flushes every error message pools
  */
 void ParserLog::flush() {
@@ -198,7 +210,8 @@ void ParserLog::dispatch( const ErrorObject &err ) {
     //TODO output file -> passed via global config?
 
     std::cout << "{\n"
-              << "\tpath: " << err.filepath() << "\n"
+              << "\tsource: " << err.filepath() << "\n"
+              << "\tposition: " << err.position() << "\n"
               << "\tcontext: " << err.context() << "\n"
               << "\terror: " << err.error() << "\n"
               << "\tdetailed: " << err.detailed() << "\n"

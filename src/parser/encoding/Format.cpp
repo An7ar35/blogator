@@ -32,3 +32,13 @@ std::string blogator::to_string( blogator::parser::encoding::Format fmt ) {
     ss << fmt;
     return ss.str();
 }
+
+/**
+ * Converts a blogator::parser::encoding::Format enum to a string representation
+ * @param content_type Format enum
+ * @return String representation
+ */
+std::u32string blogator::to_u32string( blogator::parser::encoding::Format fmt ) {
+    auto u8str = to_string( fmt );
+    return { u8str.cbegin(), u8str.cend() };
+}

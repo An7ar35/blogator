@@ -1,6 +1,6 @@
 #include "InsertionMode.h"
 
-#include <map>
+#include <unordered_map>
 #include <ostream>
 #include <sstream>
 
@@ -13,7 +13,7 @@ using namespace blogator::parser::specs::infra;
  * @return Output stream
  */
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::InsertionMode mode ) {
-    static const auto map = std::map<InsertionMode, std::string>( {
+    static const auto map = std::unordered_map<InsertionMode, std::string>( {
         { InsertionMode::INITIAL, "initial" },
         { InsertionMode::BEFORE_HTML, "before html" },
         { InsertionMode::BEFORE_HEAD, "before head" },

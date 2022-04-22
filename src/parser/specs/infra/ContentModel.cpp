@@ -1,6 +1,6 @@
 #include "ContentModel.h"
 
-#include <map>
+#include <unordered_map>
 #include <ostream>
 #include <sstream>
 
@@ -13,7 +13,7 @@ using namespace blogator::parser::specs::infra;
  * @return Output stream
  */
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, blogator::parser::specs::infra::ContentModel model ) {
-    static const auto map = std::map<ContentModel, std::string>( {
+    static const auto map = std::unordered_map<ContentModel, std::string>( {
         { ContentModel::NOTHING, "nothing" },
         { ContentModel::METADATA, "metadata" },
         { ContentModel::FLOW, "flow" },

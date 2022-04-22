@@ -4,7 +4,7 @@
 
 #include <ostream>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 
 using namespace blogator::parser::specs::infra;
 
@@ -12,9 +12,9 @@ using namespace blogator::parser::specs::infra;
  * [LOCAL] URI-to-Namespace map loader
  * @return Map
  */
-static std::map<std::u32string, Namespace> loadMap() noexcept {
+static std::unordered_map<std::u32string, Namespace> loadMap() noexcept {
     try {
-        auto map = std::map<std::u32string, Namespace>();
+        auto map = std::unordered_map<std::u32string, Namespace>();
 
         for( auto i = static_cast<int>( Namespace::URI_DEFS_BEGIN ); i <= static_cast<int>( Namespace::URI_DEFS_END ); ++i ) {
             map.emplace(
@@ -31,7 +31,7 @@ static std::map<std::u32string, Namespace> loadMap() noexcept {
     }
 }
 
-static const std::map<std::u32string, Namespace> NAMESPACE_URI_MAP = loadMap();
+static const std::unordered_map<std::u32string, Namespace> NAMESPACE_URI_MAP = loadMap();
 
 /**
  * Output stream operator
@@ -41,15 +41,17 @@ static const std::map<std::u32string, Namespace> NAMESPACE_URI_MAP = loadMap();
  */
 std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, specs::infra::Namespace ns ) {
     switch( ns ) {
-        case Namespace::UNKNOWN: { os << "UNKNOWN"; } break;
-        case Namespace::NONE:    { os << "NONE";    } break;
-        case Namespace::HTML5:   { os << "HTML5";   } break;
-        case Namespace::MATHML:  { os << "MathML";  } break;
-        case Namespace::SVG:     { os << "SVG";     } break;
-        case Namespace::XLINK:   { os << "XLINK";   } break;
-        case Namespace::XML:     { os << "XML";     } break;
-        case Namespace::XMLNS:   { os << "XMLNS";   } break;
-        case Namespace::OTHER:   { os << "OTHER";   } break;
+        case Namespace::UNKNOWN: { os << "UNKNOWN";               } break;
+        case Namespace::NONE:    { os << "NONE";                  } break;
+        case Namespace::DEPR:    { os << "DEPRECIATED HTML";      } break;
+        case Namespace::HTML5:   { os << "HTML5";                 } break;
+        case Namespace::HTML:    { os << "HTML";                  } break;
+        case Namespace::MATHML:  { os << "MathML";                } break;
+        case Namespace::SVG:     { os << "SVG";                   } break;
+        case Namespace::XLINK:   { os << "XLINK";                 } break;
+        case Namespace::XML:     { os << "XML";                   } break;
+        case Namespace::XMLNS:   { os << "XMLNS";                 } break;
+        case Namespace::OTHER:   { os << "OTHER";                 } break;
         default:                 { os << "enum string not found"; }
     }
 
@@ -66,7 +68,9 @@ std::u32string blogator::parser::specs::infra::to_namespaceURI( Namespace ns ) {
     switch( ns ) {
         case Namespace::UNKNOWN: { return U"UNKNOWN"; }
         case Namespace::NONE:    { return U""; }
-        case Namespace::HTML5:   { return U"http://www.w3.org/1999/xhtml"; }
+        case Namespace::DEPR:    [[fallthrough]];
+        case Namespace::HTML5:   [[fallthrough]];
+        case Namespace::HTML:    { return U"http://www.w3.org/1999/xhtml"; }
         case Namespace::MATHML:  { return U"http://www.w3.org/1998/Math/MathML"; }
         case Namespace::SVG:     { return U"http://www.w3.org/2000/svg"; }
         case Namespace::XLINK:   { return U"http://www.w3.org/1999/xlink"; }
@@ -86,7 +90,9 @@ std::u32string blogator::parser::specs::infra::to_prefix( Namespace ns ) {
     switch( ns ) {
         case Namespace::UNKNOWN: { return U""; }
         case Namespace::NONE:    { return U""; }
+        case Namespace::DEPR:    { return U""; }
         case Namespace::HTML5:   { return U""; }
+        case Namespace::HTML:    { return U""; }
         case Namespace::MATHML:  { return U"math"; }
         case Namespace::SVG:     { return U"svg"; }
         case Namespace::XLINK:   { return U"xlink"; }

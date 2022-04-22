@@ -29,6 +29,37 @@ ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err
 {}
 
 /**
+ * Constructor
+ * @param src Source filepath
+ * @param ctx Context
+ * @param err_code Error code
+ * @param txt Optional text to append to the error message
+ * @param position Position in source file
+ */
+ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position, std::string txt ) :
+    _src_file( std::move( src ) ),
+    _context( ctx ),
+    _code( err_code ),
+    _position( position ),
+    _text( std::move( txt ) )
+{}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param err ErrorObject
+ * @return Output stream
+ */
+std::ostream & blogator::parser::logging::operator <<( std::ostream &os, const ErrorObject &err ) {
+    os << "{ path: " << err.filepath()
+       << ", position: " << err.position()
+       << ", context: " << err.context()
+       << ", description: \"" << err.error() << "\""
+       << " }";
+    return os;
+}
+
+/**
  * Checks if error is the same as another
  * @param rhs Error object to compare to
  * @return Equivalence state (filepath is ignored)
@@ -71,9 +102,13 @@ std::string ErrorObject::context() const {
 std::string ErrorObject::error() const {
     switch( _context ) {
         case specs::Context::NATIVE:
-            return specs::native::ErrorCode::str( _code );
+            return ( _text.empty()
+                     ? specs::native::ErrorCode::str( _code )
+                     : specs::native::ErrorCode::str( _code ) + ": " + _text );
         case specs::Context::HTML5:
-            return specs::infra::ErrorCode::str( _code );
+            return ( _text.empty()
+                     ? specs::infra::ErrorCode::str( _code )
+                     : specs::infra::ErrorCode::str( _code ) + ": " + _text );
         case specs::Context::MARKDOWN:
             return "MARKDOWN"; //TODO
         default:

@@ -224,7 +224,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             R"(This error occurs if the parser encounters an ambiguous ampersand. In this case the parser doesn't resolve the character reference.)"
         };
         arr[ErrorCode::INVALID_DOCTYPE_TOKEN_IN_FOREIGN_CONTENT] = {
-            "doctype token in foreign content",
+            "DOCTYPE token in foreign content",
             R"(This error occurs when a 'Doctype' token is passed as foreign content. The token will be ignored.)"
         };
         arr[ErrorCode::INVALID_STARTTAG_TOKEN_IN_FOREIGN_CONTENT] =  {
@@ -234,6 +234,70 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         arr[ErrorCode::INVALID_ENDTAG_TOKEN_IN_FOREIGN_CONTENT] = {
             "invalid end tag token in foreign content",
             R"(This error occurs when an 'end tag' token with an invalid name is passed as foreign content. The token will reprocessed as HTML content.)"
+        };
+        arr[ErrorCode::MISMATCHING_ENDTAG_IN_FOREIGN_CONTENT] = {
+            "end tag mismatch in foreign content",
+            R"(This error occurs when an 'end tag' token does not match the currently opened element's tag name.)"
+        };
+        arr[ErrorCode::MISSING_DOCTYPE] = {
+            "missing doctype",
+            R"(This error occurs when DOCTYPE is missing.)"
+        };
+        arr[ErrorCode::MALFORMED_DOCTYPE] = {
+            "malformed DOCTYPE",
+            R"(This error occurs when the DOCTYPE token's name is not "html", or the token's public identifier is not missing, or the token's system identifier is neither missing nor "about:legacy-compat".)"
+        };
+        arr[ErrorCode::UNEXPECTED_CHARACTER] = {
+            "unexpected character",
+            R"(This error occurs when a character(s) don't conform to the rules within an insertion mode.)"
+        };
+        arr[ErrorCode::UNEXPECTED_DOCTYPE] = {
+            "unexpected DOCTYPE",
+            R"(This error occurs when a DOCTYPE token is encountered outside the 'initial' insertion mode. I.e.: it is in the wrong place.)"
+        };
+        arr[ErrorCode::UNEXPECTED_STARTTAG] = {
+            "unexpected start tag",
+            R"(This error occurs when an start tag is encountered in the wrong place.)"
+        };
+        arr[ErrorCode::UNEXPECTED_ENDTAG] = {
+            "unexpected end tag",
+            R"(This error occurs when an unexpected end tag is encountered.)"
+        };
+        arr[ErrorCode::UNEXPECTED_CONTENT] = {
+            "unexpected content",
+            R"(This error occurs when unexpected token(s) are passed in violation of the current insertion mode's rules.)"
+        };
+        arr[ErrorCode::ORPHANED_STARTTAG] = {
+            "orphaned start tag(s)",
+            R"(This error occurs when 1 or more elements are on the stack of opened elements before the target element to close. A possible reason is the presence of unmatched start/end tags in source.)"
+        };
+        arr[ErrorCode::ORPHANED_ENDTAG] = {
+            "orphaned end tag",
+            R"(This error occurs when a end tag is encountered without having its equivalent start tag inside the stack of open elements.)"
+        };
+        arr[ErrorCode::BAD_NESTING] = {
+            "invalid nesting",
+            R"(This error occurs when a start tag is incorrectly nested. For example: \"<h1><h2>...\". )"
+        };
+        arr[ErrorCode::UNCLOSED_TAG] = {
+            "unclosed opened tag",
+            R"(This error occurs when opened tag(s) remains opened despite requiring an equivalent closing tag (e.g.: <div><a>..</div>).)"
+        };
+        arr[ErrorCode::FOSTER_PARENTING_TEXT] = {
+            "foster parenting of text",
+            R"(This error occurs when a character is not nested in either a <table>, <tbody>, <tfoot>, <thead> or <tr> element in the context of a table.)"
+        };
+        arr[ErrorCode::INVALID_NESTING_OF_ELEMENT] = {
+            "incorrect element nesting",
+            R"(This error occurs when an incompatible element is opened inside a currently opened element.)"
+        };
+        arr[ErrorCode::INVALID_NESTING_OF_FORMATTING_ELEMENT] = {
+            "incorrect formatting element nesting",
+            R"(This error occurs when an incompatible formatting element is opened inside a currently opened formatting element.)"
+        };
+        arr[ErrorCode::INCORRECT_IMAGE_TAG_NAMING] = {
+            "incorrect image tag name",
+            R"(This error occurs when a tag name is 'image' when it should actually be 'img'.)"
         };
 
         return std::move( arr );

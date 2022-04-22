@@ -11,8 +11,8 @@
 std::ostream & blogator::parser::specs::operator <<( std::ostream &os, blogator::parser::specs::Context ctx ) {
     switch( ctx ) {
         case Context::UNKNOWN:  { os << "Unknown";  } break;
-        case Context::NATIVE: { os << "Blogator"; } break;
-        case Context::HTML5:    { os << "HTML5";    } break;
+        case Context::NATIVE:   { os << "Blogator"; } break;
+        case Context::HTML5:    { os << "HTML";    } break;
         case Context::MARKDOWN: { os << "Markdown"; } break;
         default:
             LOG_ERROR( "[blogator::parser::specs::ctxToStr( ", static_cast<int>( ctx ), " )] "

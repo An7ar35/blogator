@@ -1,5 +1,7 @@
 #include "TextPos.h"
 
+#include <sstream>
+
 using namespace blogator::parser;
 
 /**
@@ -154,4 +156,14 @@ TextPos & TextPos::increment( bool new_line ) {
 
     ++col;
     return *this;
+}
+
+/**
+ * Stringify the TextPos
+ * @return String representation
+ */
+std::string TextPos::str() const {
+    std::stringstream ss;
+    ss << line << ":" << col;
+    return ss.str();
 }
