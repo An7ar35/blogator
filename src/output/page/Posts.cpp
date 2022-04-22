@@ -49,7 +49,7 @@ bool blogator::output::page::Posts::init() const {
     auto &insert_points = _templates->_post->block_write_pos;
 
     if( insert_points.empty() )
-        throw exception::failed_expectation( "No insertion points found in post template." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "No insertion points found in post template." );
 
     try {
         const auto css_insert_line = _templates->_post->html->findLineOfTag( "</head>" );
@@ -425,6 +425,7 @@ void blogator::output::page::Posts::writeIndexDateTree( dto::Page &page,
 {
     if( !_html_date_tree )
         throw exception::failed_expectation(
+            __FILE__, __LINE__,
             "[output::page::Posts::writeIndexDateTree(..)] "
             "No Tree was created and yet the post tree writer method was called."
         );
@@ -462,6 +463,7 @@ void blogator::output::page::Posts::writeIndexTagTree( dto::Page &page,
 {
     if( !_html_tag_tree )
         throw exception::failed_expectation(
+            __FILE__, __LINE__,
             "[output::page::Posts::writeIndexTagTree(..)] "
             "No Tree was created and yet the post tree writer method was called."
         );

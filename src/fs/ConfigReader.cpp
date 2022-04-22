@@ -778,6 +778,7 @@ void blogator::fs::ConfigReader::processRssOptions( std::unordered_map<std::stri
     if( site_url_it != map.end() ) {
         if( options._rss.generate && site_url_it->second.value.empty() )
             throw exception::failed_expectation(
+                __FILE__, __LINE__,
                 "The target site's url '" + site_url + "' is required to create an RSS feed."
             );
 

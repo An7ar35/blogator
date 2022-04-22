@@ -256,6 +256,18 @@ blogator::parser::dom::NamespaceMap::id_t Attr::namespaceID() const {
 }
 
 /**
+ * Gets the 'qualified name' of the attribute (i.e. "prefix + ':' + name" for easy indexing)
+ * @return Qualified name
+ */
+blogator::parser::dom::DOMString_t Attr::qualifiedName() const {
+    if( _prefix.empty() ) {
+        return _name;
+    } else {
+        return _prefix + U":" + _name;
+    }
+}
+
+/**
  * Gets the namespace URI
  * @return Namespace URI
  * @throws blogator::exception::failed_expectation when namespace ID doesn't exist in global NamespaceMap

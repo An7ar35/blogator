@@ -27,3 +27,17 @@ canonify-urls  = false; //TODO true: modify all relative URLs found in the posts
 
 · Index page for local files (e.g.: *.pdf)
 · Updated page hook for the front page as an option (i.e. when a post is updated the article can appear in an "recently updated section" for the frontpage)
+
+
+
+
+==> In tokeniser
+· if '{{...}}' then do a substitution or a var declaration in the local or global map
+·
+
+blogator global var should be copied to all thread instances to avoid clashes
+
+Parser cfg A: [tokeniser::Config]->???
+Parser cfg 0: [tokeniser::Native]->[builder::ParserCfgBuilder]->some global/local mapper
+Parser cfg 1: [tokeniser::HTML5]->[dom::TreeBuilder]->'node::Document'
+Parser cfg 2: [tokeniser::Markdown]->[builder::MarkdownBuilder]->'node::Document'

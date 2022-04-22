@@ -173,10 +173,10 @@ TEST( parser_dom_node_Node_Tests, getNamespaceURI_fail_1 ) {
 
 TEST( parser_dom_node_Node_Tests, namespaceMap ) {
     using blogator::parser::specs::infra::Element::HTML5_HTML;
-    using blogator::parser::specs::infra::getNamespace;
+    using blogator::parser::specs::infra::resolveNamespace;
 
     auto node = node::Element( HTML5_HTML );
-    ASSERT_NE( node.namespaceMap().getID( getNamespace( HTML5_HTML ) ), NamespaceMap::INVALID );
+    ASSERT_NE( node.namespaceMap().getID( resolveNamespace( HTML5_HTML ) ), NamespaceMap::INVALID );
 }
 
 TEST( parser_dom_node_Node_Tests, nodeType_0 ) { //default
@@ -2127,10 +2127,10 @@ TEST( parser_dom_node_Node_Tests, getNamespaceEnum_local_0 ) { //generic
 }
 
 TEST( parser_dom_node_Node_Tests, getNamespaceEnum_local_1 ) { //Attr (HTML5 namespace)
-    auto ns_id = node::Node::namespaceMap().getID( blogator::parser::specs::infra::Namespace::HTML5 );
+    auto ns_id = node::Node::namespaceMap().getID( blogator::parser::specs::infra::Namespace::HTML );
     auto node  = node::Attr( ns_id, U"name", U"value" );
 
-    ASSERT_EQ( node.getNamespaceEnum(), blogator::parser::specs::infra::Namespace::HTML5 );
+    ASSERT_EQ( node.getNamespaceEnum(), blogator::parser::specs::infra::Namespace::HTML );
 }
 
 TEST( parser_dom_node_Node_Tests, getNamespaceEnum_local_2 ) { //Attr (other namespace)
@@ -2143,7 +2143,7 @@ TEST( parser_dom_node_Node_Tests, getNamespaceEnum_local_2 ) { //Attr (other nam
 TEST( parser_dom_node_Node_Tests, getNamespaceEnum_local_3 ) { //Element (HTML5 namespace)
     auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_HTML );
 
-    ASSERT_EQ( node.getNamespaceEnum(), blogator::parser::specs::infra::Namespace::HTML5 );
+    ASSERT_EQ( node.getNamespaceEnum(), blogator::parser::specs::infra::Namespace::HTML );
 }
 
 TEST( parser_dom_node_Node_Tests, getNamespaceEnum_local_4 ) { //Element (other namespace)

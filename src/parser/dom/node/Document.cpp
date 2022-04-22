@@ -350,7 +350,7 @@ Element * Document::createDocumentElement( blogator::parser::dom::DOMString_t lo
 
         return dynamic_cast<Element *>(
             this->appendChild( std::make_unique<Element>(
-                specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 ),
+                specs::infra::to_namespaceURI( specs::infra::Namespace::HTML ),
                 std::move( local_name )
             ) )
         );
@@ -359,7 +359,7 @@ Element * Document::createDocumentElement( blogator::parser::dom::DOMString_t lo
         return dynamic_cast<Element *>(
             this->appendChild( std::make_unique<Element>(
                 ( _content_type == specs::infra::ContentType::APPLICATION_XHTML_XML
-                  ? specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 )
+                  ? specs::infra::to_namespaceURI( specs::infra::Namespace::HTML )
                   : U"" ),
                 std::move( local_name )
             ) )
@@ -388,7 +388,7 @@ Element *Document::createDocumentElement( blogator::parser::specs::infra::Elemen
     }
 
     auto ns_str = ( _type == Type::HTML || _content_type == ContentType::APPLICATION_XHTML_XML
-                    ? to_namespaceURI( specs::infra::Namespace::HTML5 )
+                    ? to_namespaceURI( specs::infra::Namespace::HTML )
                     : DOMString_t() );
 
     return dynamic_cast<Element *>(
@@ -498,7 +498,6 @@ const Element * Document::getElementById( const DOMString_t &id ) const {
  */
 blogator::parser::dom::HTMLCollection_t Document::getElementsByTagName( const DOMString_t & qualified_name ) {
     //ref: https://dom.spec.whatwg.org/#concept-getelementsbytagname
-
     auto list = HTMLCollection_t();
 
     if( qualified_name == U"*" /* U+002A */ ) {
@@ -515,7 +514,7 @@ blogator::parser::dom::HTMLCollection_t Document::getElementsByTagName( const DO
         const auto filter_fn = [&qualified_name, &lowercase_qname]( const node::Node &node ) {
             const auto * element = dynamic_cast<const Element *>( &node );
 
-            if( Node::namespace_map.getNamespaceEnum( element->namespaceID() ) == specs::infra::Namespace::HTML5 ) {
+            if( element->getNamespaceEnum() == specs::infra::Namespace::HTML ) {
                 return ( element->qualifiedName() == lowercase_qname ? NodeFilter::Result::FILTER_ACCEPT : NodeFilter::Result::FILTER_SKIP );
             }
 
@@ -665,14 +664,15 @@ blogator::parser::dom::HTMLCollection_t Document::getElementsByClassName( std::s
 /**
  * Creates a an Element node
  * @param local_name Element name
+ * @param validation Validation state (default: 'ON')
  * @return Pointer to created Element node
  * @throws DOMException when name string is not valid
  */
-std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( DOMString_t local_name ) const {
+std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( DOMString_t local_name, ValidationState validation ) const {
     using blogator::parser::dom::exception::DOMException;
     using blogator::parser::dom::exception::DOMExceptionType;
 
-    if( !dom::validation::XML::checkNCName( local_name ) ) {
+    if( validation == ValidationState::ON && !dom::validation::XML::checkNCName( local_name ) ) {
         using blogator::unicode::utf8::convert;
 
         throw DOMException(
@@ -686,7 +686,7 @@ std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( D
 
         return std::make_unique<Element>(
             const_cast<Document *>( this ),
-            specs::infra::to_namespaceURI( specs::infra::Namespace::HTML5 ),
+            specs::infra::to_namespaceURI( specs::infra::Namespace::HTML ),
             std::move( local_name )
         );
 
@@ -715,7 +715,7 @@ std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( s
     if( _type == Type::HTML || _content_type == ContentType::APPLICATION_XHTML_XML ) {
         return std::make_unique<node::Element>(
             const_cast<Document *>( this ),
-            to_namespaceURI( specs::infra::Namespace::HTML5 ),
+            to_namespaceURI( specs::infra::Namespace::HTML ),
             DOMString_t( u8name.cbegin(), u8name.cend() )
         );
 
@@ -731,18 +731,30 @@ std::unique_ptr<blogator::parser::dom::node::Element> Document::createElement( s
 /**
  * Creates an Element node
  * @param ns Namespace
- * @param local_name Local name
+ * @param qualified_name Qualified name
+ * @param validation Validation state (default: 'ON')
  * @return Pointer to created Element node
  * @throws blogator::parser::dom::exception::DOMException when validation failed
  */
-std::unique_ptr<blogator::parser::dom::node::Element> Document::createElementNS( const DOMString_t & ns, const DOMString_t & qualified_name ) const {
+std::unique_ptr<blogator::parser::dom::node::Element> Document::createElementNS( const DOMString_t & ns, const DOMString_t & qualified_name, ValidationState validation ) const {
     try {
-        auto v = validation::XML::validateNS( ns, qualified_name );
+        if( validation == ValidationState::ON ) {
+            auto v = validation::XML::validateNS( ns, qualified_name ); //throws
 
-        if( v.size() == 1 ) {
-            return std::make_unique<Element>( const_cast<Document *>( this ), ns, DOMString_t(), v[0] ); //EARLY RETURN
+            if( v.size() == 1 ) {
+                return std::make_unique<Element>( const_cast<Document *>( this ), ns, DOMString_t(), v[0] ); //EARLY RETURN
+            } else {
+                return std::make_unique<node::Element>( const_cast<Document *>( this ), ns, v[0], v[1] ); //EARLY RETURN
+            }
+
         } else {
-            return std::make_unique<node::Element>( const_cast<Document *>( this ), ns, v[0], v[1] ); //EARLY RETURN
+            auto v = blogator::string::split<char32_t>( qualified_name, ':', false );
+
+            if( v.size() == 1 ) {
+                return std::make_unique<Element>( const_cast<Document *>( this ), ns, DOMString_t(), v[0] ); //EARLY RETURN
+            } else {
+                return std::make_unique<node::Element>( const_cast<Document *>( this ), ns, v[0], v[1] ); //EARLY RETURN
+            }
         }
 
     } catch( const exception::DOMException &e ) {
@@ -797,7 +809,7 @@ std::unique_ptr<blogator::parser::dom::node::Comment> Document::createComment( D
  * @return Attribute (AttrPtr_t)
  */
 blogator::parser::dom::AttrPtr_t Document::createAttribute( DOMString_t local_name ) {
-    if( !dom::validation::XML::checkNCName( local_name ) ) {
+    if( !dom::validation::XML::checkAttrName( local_name ) ) {
         using blogator::unicode::utf8::convert;
 
         throw dom::exception::DOMException(
@@ -1168,4 +1180,19 @@ blogator::parser::dom::NodePtr_t Document::removeChildNode( Nodes_t::iterator it
  */
 void blogator::parser::dom::node::swap( Document &lhs, Document &rhs ) {
     lhs.swap( rhs );
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param el Document::Type enum
+ * @return Output stream
+ */
+std::ostream & blogator::parser::dom::node::operator <<( std::ostream &os, Document::Type &type ) {
+    switch( type ) {
+        case Document::Type::XML:  { os << "XML";  } break;
+        case Document::Type::HTML: { os << "HTML"; } break;
+    }
+
+    return os;
 }

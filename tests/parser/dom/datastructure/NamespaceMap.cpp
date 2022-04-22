@@ -42,8 +42,11 @@ TEST( parser_dom_NamespaceMap_Tests, setNamespace_4 ) { //URI range convertible 
     auto nsmap = NamespaceMap();
 
     for( auto e = static_cast<int>( Namespace::URI_DEFS_BEGIN ), i = 1; e <= static_cast<int>( Namespace::URI_DEFS_END ); ++e, ++i  ) {
-        ASSERT_EQ( nsmap.setNamespace( blogator::parser::specs::infra::to_namespaceURI( static_cast<Namespace>( e ) ) ), i );
-        ASSERT_EQ( nsmap.getID( static_cast<Namespace>( e ) ), i ); //checking enum map is correct
+        ASSERT_EQ( nsmap.setNamespace( blogator::parser::specs::infra::to_namespaceURI( static_cast<Namespace>( e ) ) ), i )
+            << "Failed on '" << static_cast<Namespace>( e ) << "'.";
+
+        ASSERT_EQ( nsmap.getID( static_cast<Namespace>( e ) ), i )
+            << "Failed on '" << static_cast<Namespace>( e ) << "'."; //checking enum map is correct
     }
 }
 

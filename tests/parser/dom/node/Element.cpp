@@ -43,10 +43,10 @@ TEST( parser_dom_node_Element_Tests, constructor_3 ) { //Element( DOMString_t ns
 }
 
 TEST( parser_dom_node_Element_Tests, constructor_4 ) { //Element::Element( NamespaceMap::id_t ns_id, DOMString_t name )
-    auto node = Element( 666, U"constructor_4" );
+    auto node = Element( 0, U"constructor_4" ); //ns_id: 0 for NONE otherwise `nodeName()` would detect NamespaceMap inconsistency and throw
     ASSERT_EQ( node.nodeName(), U"constructor_4" );
     ASSERT_EQ( node.prefix(), U"" );
-    ASSERT_EQ( node.namespaceID(), 666 );
+    ASSERT_EQ( node.namespaceID(), 0 );
 }
 
 TEST( parser_dom_node_Element_Tests, constructor_5 ) { //Element::Element( Document * document, NamespaceMap::id_t ns_id, DOMString_t name )
@@ -332,7 +332,7 @@ TEST( parser_dom_node_Element_Tests, elementType_0 ) {
 
 TEST( parser_dom_node_Element_Tests, elementType_1 ) {
     auto node = Element( U"ns", U"name" );
-    ASSERT_EQ( node.elementType(), blogator::parser::specs::infra::Element::UNKNOWN );
+    ASSERT_EQ( node.elementType(), blogator::parser::specs::infra::Element::OTHER );
 }
 
 TEST( parser_dom_node_Element_Tests, qualifiedName_0 ) {
@@ -451,7 +451,7 @@ TEST( parser_dom_node_Element_Tests, createAttribute_fail_0 ) { //name only + in
     auto node = Element( blogator::parser::specs::infra::Element::HTML5_DIV );
 
     try {
-        node.createAttribute( U"n@me" );
+        node.createAttribute( U"n a m e" );
         FAIL() << "Nothing thrown.";
     } catch( DOMException &e ) {
         ASSERT_EQ( e.type(), DOMExceptionType::InvalidCharacterError ) << "DOMException thrown with wrong DOMExceptionType: " << e.type();
@@ -464,7 +464,7 @@ TEST( parser_dom_node_Element_Tests, createAttribute_fail_1 ) { //name & value +
     auto node = Element( blogator::parser::specs::infra::Element::HTML5_DIV );
 
     try {
-        node.createAttribute( U"n@me", U"value" );
+        node.createAttribute( U"n a m e", U"value" );
         FAIL() << "Nothing thrown.";
     } catch( DOMException &e ) {
         ASSERT_EQ( e.type(), DOMExceptionType::InvalidCharacterError ) << "DOMException thrown with wrong DOMExceptionType: " << e.type();
@@ -558,7 +558,7 @@ TEST( parser_dom_node_Element_Tests, createElement_2 ) { //html + doc
     ASSERT_EQ( node->childNodes()[0].get(), child );
     ASSERT_EQ( node->childNodes()[0]->nodeType(), NodeType::ELEMENT_NODE );
     ASSERT_EQ( node->childNodes()[0]->parentNode(), node );
-    ASSERT_EQ( node->childNodes()[0]->nodeName(), U"myelement" );
+    ASSERT_EQ( node->childNodes()[0]->nodeName(), U"MYELEMENT" );
 }
 
 TEST( parser_dom_node_Element_Tests, createElement_fail_0 ) {
@@ -760,14 +760,14 @@ TEST( parser_dom_node_Element_Tests, hasAttributes ) {
     auto node = Element( U"ns", U"element" );
 
     ASSERT_FALSE( node.hasAttributes() );
-    node.createAttribute( U"", U"test" );
+    node.createAttribute( U"test" );
     ASSERT_TRUE( node.hasAttributes() );
 }
 
 TEST( parser_dom_node_Element_Tests, attributes ) {
     auto   node       = Element( U"ns", U"element" );
     auto & attributes = node.attributes();
-    node.createAttribute( U"", U"test" );
+    node.createAttribute( U"test" );
 
     ASSERT_EQ( attributes.list().size(), 1 );
 }

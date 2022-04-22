@@ -41,6 +41,7 @@ namespace blogator::parser::dom::node {
 
         [[nodiscard]] bool equivalent( const Attr &rhs ) const;
         [[nodiscard]] NamespaceMap::id_t namespaceID() const;
+        [[nodiscard]] DOMString_t qualifiedName() const;
 
       public: /* 'Attr' interface */
         [[nodiscard]] DOMString_t namespaceURI() const;

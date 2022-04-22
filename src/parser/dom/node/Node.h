@@ -61,7 +61,9 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] const_iterator crbegin( std::shared_ptr<NodeFilter> filter ) const;
         [[nodiscard]] const_iterator crend() const;
 
+        virtual size_t depth() const;
         virtual void swap( Node &rhs );
+        virtual NodePtr_t detach();
         [[nodiscard]] virtual specs::infra::Namespace getNamespaceEnum() const;
 
         static specs::infra::Namespace getNamespaceEnum( NamespaceMap::id_t id );

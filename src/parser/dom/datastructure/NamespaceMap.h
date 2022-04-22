@@ -1,7 +1,7 @@
 #ifndef BLOGATOR_PARSER_DOM_DATASTRUCTURE_NAMESPACEMAP_H
 #define BLOGATOR_PARSER_DOM_DATASTRUCTURE_NAMESPACEMAP_H
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <thread>
 
@@ -43,10 +43,10 @@ namespace blogator::parser::dom {
             specs::infra::Namespace ns_enum;
         };
 
-        mutable std::mutex                      _mutex;
-        std::vector<NS>                         _namespaces;
-        std::map<DOMString_t,             id_t> _str_mapping;
-        std::map<specs::infra::Namespace, id_t> _enum_mapping;
+        mutable std::mutex                                _mutex;
+        std::vector<NS>                                   _namespaces;
+        std::unordered_map<DOMString_t,             id_t> _str_mapping;
+        std::unordered_map<specs::infra::Namespace, id_t> _enum_mapping;
     };
 }
 

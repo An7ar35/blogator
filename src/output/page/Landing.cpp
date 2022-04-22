@@ -37,6 +37,7 @@ bool blogator::output::page::Landing::init() const {
 
     if( _templates->_landing->block_write_pos.empty() ||  _templates->_index_entry->block_write_pos.empty() ) {
         throw exception::failed_expectation(
+            __FILE__, __LINE__,
             "Missing insertion points in one or more of the required landing page templates "
             "(Found: page=" + std::to_string( _templates->_landing->block_write_pos.size() ) +
             ", entry=" + std::to_string( _templates->_index_entry->block_write_pos.size() ) + ")."

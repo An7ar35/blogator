@@ -49,6 +49,7 @@ bool blogator::output::page::Indices::init() const {
     try {
         if( _templates->_index->block_write_pos.empty() || _templates->_index_entry->block_write_pos.empty() ) {
             throw exception::failed_expectation(
+                __FILE__, __LINE__,
                 "Missing insertion points in one or more index templates "
                 "(Found: index page=" + std::to_string( _templates->_index->block_write_pos.size() ) +
                 ", index entry=" + std::to_string( _templates->_index_entry->block_write_pos.size() ) + ")."
@@ -58,6 +59,7 @@ bool blogator::output::page::Indices::init() const {
         { //Chronological index ("by_date")
             if( _index->_indices.chronological.file_names.empty() )
                 throw exception::failed_expectation(
+                    __FILE__, __LINE__,
                     "No prepared filenames were found in the chronological index "
                     "(" + std::to_string( _index->_indices.chronological.page_count ) + "pages "
                     "for " + std::to_string( _index->_articles.size() ) + " articles)."
@@ -75,7 +77,7 @@ bool blogator::output::page::Indices::init() const {
 
         if( _options->_index.index_by_year ) { //Year list index ("by_year")
             if( _templates->_year_list->block_write_pos.empty() )
-                throw exception::failed_expectation( "Missing insertion points in the tag list template." );
+                throw exception::failed_expectation( __FILE__, __LINE__, "Missing insertion points in the tag list template." );
 
             _display.progress( _options->_folders.index.by_year.filename() / _options->_filenames.year_list );
 
@@ -94,7 +96,7 @@ bool blogator::output::page::Indices::init() const {
 
         if( _options->_index.index_by_tag ) { //Tag list index ("by_tag")
             if( _templates->_tag_list->block_write_pos.empty() )
-                throw exception::failed_expectation( "Missing insertion points in the tag list template." );
+                throw exception::failed_expectation( __FILE__, __LINE__, "Missing insertion points in the tag list template." );
 
             _display.progress( _options->_folders.index.by_tag.filename() / _options->_filenames.tag_list );
 
@@ -113,7 +115,7 @@ bool blogator::output::page::Indices::init() const {
 
         if( _options->_index.index_by_author ) { //Author list index ("by_author")
             if(  _templates->_author_list->block_write_pos.empty() )
-                throw exception::failed_expectation( "Missing insertion points in the author list template." );
+                throw exception::failed_expectation( __FILE__, __LINE__, "Missing insertion points in the author list template." );
 
             _display.progress( _options->_folders.index.by_author.filename() / _options->_filenames.author_list );
 

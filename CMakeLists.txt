@@ -177,13 +177,10 @@ set(SOURCE_FILES
         src/dom/dto/TagSpecs.h
         src/dom/dto/Text.cpp
         src/dom/dto/Text.h
-        src/dom/html5/Html5Relationships.cpp
-        src/dom/html5/Html5Relationships.h
         src/dom/html5/special_char.h
         src/dom/html5/enums/AttrBoundaryChar.h
         src/dom/html5/enums/Attribute.h
         src/dom/html5/enums/ContentModel.h
-        src/dom/html5/enums/InsertMode.h
         src/dom/html5/enums/NameSpace.h
         src/dom/html5/enums/Tag.h
         src/dom/html5/enums/TagStructure.h
@@ -199,10 +196,6 @@ set(SOURCE_FILES
         src/dom/html5/properties/content_model.h
         src/dom/html5/properties/relationships.cpp
         src/dom/html5/properties/relationships.h
-        src/dom/html5/rules/context.h
-        src/dom/html5/rules/insert_mode.h
-        src/dom/html5/rules/OptionalTags.cpp
-        src/dom/html5/rules/OptionalTags.h
         src/dom/html5/validator/validator.cpp
         src/dom/html5/validator/validator.h
         src/dom/parser/Parser.cpp
@@ -242,6 +235,7 @@ set(SOURCE_FILES
         src/parser/specs/native/InsertionMode.h
         src/parser/specs/native/specifications.h
         src/parser/specs/infra/tokeniser/TokeniserState.h
+        src/parser/specs/infra/tokeniser/TokenType.cpp
         src/parser/specs/infra/tokeniser/TokenType.h
         src/parser/specs/infra/Attribute.cpp
         src/parser/specs/infra/Attribute.h
@@ -249,6 +243,8 @@ set(SOURCE_FILES
         src/parser/specs/infra/ContentModel.h
         src/parser/specs/infra/ContentType.cpp
         src/parser/specs/infra/ContentType.h
+        src/parser/specs/infra/DocType.cpp
+        src/parser/specs/infra/DocType.h
         src/parser/specs/infra/Element.cpp
         src/parser/specs/infra/Element.h
         src/parser/specs/infra/Namespace.cpp
@@ -294,10 +290,6 @@ set(SOURCE_FILES
         src/parser/token/markdown/MarkdownTk.h
         src/parser/token/markdown/tokens.h
 
-        src/parser/dom/DOM.cpp
-        src/parser/dom/DOM.h
-        src/parser/dom/TreeBuilder.cpp
-        src/parser/dom/TreeBuilder.h
         src/parser/dom/node/Node.cpp
         src/parser/dom/node/Node.h
 
@@ -420,14 +412,14 @@ set(SOURCE_FILES
         src/parser/dom/iterator/ConstNodeIterator.h
         src/parser/dom/iterator/TreeWalker.cpp
         src/parser/dom/iterator/TreeWalker.h
-        src/parser/dom/builders/HtmlBuilder.cpp
-        src/parser/dom/builders/HtmlBuilder.h
+        src/parser/dom/TreeBuilder.cpp
+        src/parser/dom/TreeBuilder.h
         src/parser/dom/datastructure/NamespaceMap.cpp
         src/parser/dom/datastructure/NamespaceMap.h
         src/parser/dom/validation/XML.cpp
         src/parser/dom/validation/XML.h
         src/sys/terminate.cpp
-        src/sys/terminate.h)
+        src/sys/terminate.h src/parser/dom/enum/ValidationState.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -479,10 +471,7 @@ set(TEST_FILES
         tests/dom/html5/validator/validator_validateOpeningTag_tests.cpp
         tests/dom/html5/validator/validator_validateClosingTag_tests.cpp
         tests/dom/html5/validator/validator_validateAttributes_tests.cpp
-        tests/dom/html5/Html5Relationships_tests.cpp
         tests/dom/dto/Attribute.cpp
-        tests/dom/html5/kb/KnowledgeBase_Tests.cpp
-        tests/parser/tokeniser/HTML5.cpp
         tests/parser/tokeniser/Blogator.cpp
         tests/parser/dto/U32Text.cpp
         tests/parser/dto/TextPos.cpp
@@ -522,9 +511,18 @@ set(TEST_FILES
         tests/parser/dom/iterator/ConstNodeIterator.cpp
         tests/parser/dom/iterator/TreeWalker.cpp
         tests/parser/dom/datastructure/NamedNodeMap.cpp
-        tests/parser/dom/datastructure/NamespaceMap.cpp tests/parser/specs/infra/ContentType.cpp tests/parser/dom/validation/XML.cpp)
+        tests/parser/dom/datastructure/NamespaceMap.cpp
+        tests/parser/specs/infra/ContentType.cpp
+        tests/parser/dom/validation/XML.cpp
+        tests/parser/specs/infra/DocType.cpp
+
+        test-harness/html5lib-tests/helpers.cpp
+        test-harness/html5lib-tests/helpers.h
+        test-harness/html5lib-tests/tokenizer-tests.cpp
+        test-harness/html5lib-tests/tree-construction-tests.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
+configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)
 
 enable_testing()
 

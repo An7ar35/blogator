@@ -19,13 +19,13 @@ void blogator::output::generate( const std::shared_ptr<const dto::Index>     &in
     auto json_index    = output::json::JSON( index, options );
 
     if( !post_maker.init() )
-        throw exception::failed_expectation( "Failed creating the post targets." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "Failed creating the post targets." );
     if( !index_maker.init() )
-        throw exception::failed_expectation( "Failed creating the indices targets." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "Failed creating the indices targets." );
     if( !landing_maker.init() )
-        throw exception::failed_expectation( "Failed creating the landing page target." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "Failed creating the landing page target." );
     if( !rss.init() )
-        throw exception::failed_expectation( "Failed creating the RSS feed target." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "Failed creating the RSS feed target." );
     if( !json_index.init() )
-        throw exception::failed_expectation( "Failed creating the JSON index target." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "Failed creating the JSON index target." );
 }

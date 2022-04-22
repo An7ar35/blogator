@@ -12,13 +12,7 @@ namespace blogator::parser::dom::validation {
         static bool checkQName( const DOMString_t & name );
         static bool checkQName( const DOMString_t & prefix, const DOMString_t & name );
         static bool checkNCName( const DOMString_t & name );
-
-      private:
-        static bool isNameStartChar( char32_t c );
-        static bool isNameChar( char32_t c );
-        static bool isNCNameStartChar( char32_t c );
-        static bool isNCNameChar( char32_t c );
-        static bool isChar( char32_t c );
+        static bool checkAttrName( const DOMString_t & name );
     };
 }
 

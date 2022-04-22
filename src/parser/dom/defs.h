@@ -5,6 +5,11 @@
 #include <list>
 #include <string>
 #include <memory>
+#include <functional>
+
+namespace blogator::parser::specs::infra {
+    enum class TokeniserState;
+}
 
 namespace blogator::parser::dom {
     namespace node {

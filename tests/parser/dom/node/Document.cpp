@@ -794,7 +794,7 @@ TEST( parser_dom_node_Document_Tests, createAttribute_fail_0 ) { //invalid local
     auto doc  = node::Document();
 
     try {
-        std::ignore = doc.createAttribute( U"te:t" );
+        std::ignore = doc.createAttribute( U"t e s t" );
         FAIL() << "Nothing thrown.";
     } catch( exception::DOMException &e ) {
         ASSERT_EQ( e.type(), exception::DOMExceptionType::InvalidCharacterError ) << "DOMException thrown with wrong DOMExceptionType: " << e.type();

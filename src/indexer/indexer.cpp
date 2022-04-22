@@ -187,7 +187,7 @@ void blogator::indexer::indexTemplates( const dto::Options &global_options, dto:
     }
 
     if( errors > 0 )
-        throw exception::failed_expectation( "Missing template(s)." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "Missing template(s)." );
 }
 
 /**
@@ -267,7 +267,7 @@ void blogator::indexer::indexPosts( const dto::Options &global_options, dto::Ind
     }
 
     if( index._articles.empty() )
-        throw exception::failed_expectation( "No articles (posts) to index found." );
+        throw exception::failed_expectation( __FILE__, __LINE__, "No articles (posts) to index found." );
 
     //Add any * css files to their respective articles css path if found and
     //add any *_index html files to their respective articles index entry path if found

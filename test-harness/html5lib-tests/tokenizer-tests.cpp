@@ -16,12 +16,14 @@
 #include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/Parser.h"
 
-#include "../../helper.h"
+#include "helpers.h"
 
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;
 using blogator::parser::specs::infra::TokeniserState;
 using blogator::parser::logging::ParserLog;
+
+using namespace test_harness::html5lib_tests;
 
 TokeniserState getStateEnum( const std::string &str ) {
     static const std::map<std::string, TokeniserState> map = {
@@ -128,7 +130,7 @@ class ParserLogCatcher {
                    _errors.end(),
                    []( const auto & a, const auto & b ) -> bool { return a.textpos() < b.textpos(); }
         );
-        blogator::tests::jsonifyErrorObjects( ss, _errors );
+        helpers::jsonifyErrorObjects( ss, _errors );
         auto s = ss.str();
         return nlohmann::json::parse( ss.str() );
     }
@@ -140,13 +142,13 @@ class ParserLogCatcher {
 /**
  * MOCK TreeBuilder class
  */
-class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
+  class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
   public:
-    explicit MockTreeBuilder( std::unique_ptr<blogator::parser::dom::DOM> dom ) :
+    explicit MockTreeBuilder() :
         blogator::parser::dom::TreeBuilder()
     {};
 
-    void addToken( std::unique_ptr<HTML5Tk> tk ) override {
+    void dispatch( std::unique_ptr<HTML5Tk> tk ) override {
         if( tk->type() != blogator::parser::specs::infra::TokenType::END_OF_FILE ) {
             if( tk->type() == blogator::parser::specs::infra::TokenType::CHARACTER
                 && !_tokens.empty()
@@ -161,7 +163,7 @@ class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
 
     [[nodiscard]] std::string toStr() const {
         std::stringstream  ss;
-        blogator::tests::jsonifyHtml5Tokens( ss, _tokens );
+        helpers::jsonifyHtml5Tokens( ss, _tokens );
         return ss.str();
     }
 
@@ -178,7 +180,7 @@ class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
 };
 
 /**
- * [HELPER] Passed each code points in a U32 string through the Transcoder global error checks
+ * [HELPER] Passes each code points in a U32 string through the Transcoder global error checks
  * @param raw  Original raw UTF-32 text
  * @param path Source path
  * @return Processed/checked UTF-32 text
@@ -208,7 +210,7 @@ std::u32string preprocess( std::u32string &raw, const std::filesystem::path &pat
 testing::AssertionResult runTest( const nlohmann::json &test, const std::filesystem::path &path ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
 
-    MockTreeBuilder  mock_tree_builder( std::make_unique<blogator::parser::dom::DOM>() );
+    MockTreeBuilder  mock_tree_builder;
     ParserLogCatcher error_catcher;
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
@@ -216,7 +218,7 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
     std::u32string raw_txt = converter_U8toU32.from_bytes( test.at( "input" ) );
 
     if( test.contains( "doubleEscaped" ) ) {
-        raw_txt = blogator::tests::unescape( raw_txt );
+        raw_txt = helpers::unescape( raw_txt );
     }
 
     auto text        = blogator::parser::U32Text( path, preprocess( raw_txt, path ) );
@@ -244,9 +246,9 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
         std::string    actual_output   = mock_tree_builder.toStr();
 
         if( test.contains( "doubleEscaped" ) ) {
-            auto expected_str = blogator::tests::unescape( to_string( test.at( "output" ) ) );
+            auto expected_str = helpers::unescape( to_string( test.at( "output" ) ) );
             expected_output = nlohmann::json::parse( expected_str );
-            actual_output   = blogator::tests::unescape( actual_output );
+            actual_output   = helpers::unescape( actual_output );
         }
 
         if( nlohmann::json::parse( actual_output ) != expected_output ) {
@@ -279,5 +281,5 @@ TEST_P( parser_tokeniser_HTML5_Tests, html5lib_tests) {
 INSTANTIATE_TEST_CASE_P(
     HTML5TokeniserTestInstance,
     parser_tokeniser_HTML5_Tests,
-    ::testing::ValuesIn( blogator::tests::loadJSONTests( blogator::tests::HTML5LIB_TOKENIZER_TEST_PATH ) )
+    ::testing::ValuesIn( helpers::loadJSONTests( test_harness::HTML5LIB_TOKENIZER_TEST_PATH ) )
 );

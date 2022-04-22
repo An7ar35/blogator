@@ -378,6 +378,22 @@ Node::const_iterator Node::crend() const {
 }
 
 /**
+ * Gets the tree depth of the node
+ * @return Level in tree
+ */
+size_t Node::depth() const { //TODO unit test
+    auto * curr = this;
+    size_t lvl  = 0;
+
+    while( curr->parentNode() ) {
+        curr = curr->parentNode();
+        ++lvl;
+    }
+
+    return lvl;
+}
+
+/**
  * Shallow swaps Nodes in-place
  * @param rhs Node to swap content with
  * @throws parser::dom::exception::DOMException when nodes being swapped are not the same type
@@ -400,6 +416,30 @@ void Node::swap( Node &rhs ) {
                 "(" + blogator::to_string( this->nodeType() ) + " <-> " + blogator::to_string( rhs.nodeType() ) + ")"
             );
         }
+    }
+}
+
+/**
+ * Detaches node tree from parent
+ * @return Detached node
+ * @throws parser::dom::exception::DOMException when there is no parent to detach from
+ */
+blogator::parser::dom::NodePtr_t Node::detach() { //TODO test
+    try {
+        if( _parent == nullptr ) {
+            throw FAILED_EXPECTATION_EXCEPTION( "[parser::dom::node::Node::detach()] Parent is NULL." );
+        }
+
+        return _parent->removeChildNode( getParentChildListIterator( this ) );
+
+    } catch( const blogator::exception::failed_expectation &e ) {
+        using blogator::parser::dom::exception::DOMException;
+        using blogator::parser::dom::exception::DOMExceptionType;
+
+        throw DOMException(
+            DOMExceptionType::HierarchyRequestError,
+            "Trying to detach an orphaned node (no parent)."
+        );
     }
 }
 
@@ -1141,11 +1181,20 @@ Node * Node::insertNodeBefore( NodePtr_t node, Node * child ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 
+    /**
+     * [LAMBDA] Checks if this node is a 'template' element (edge case)
+     */
+    const auto isTemplateElement = [this]() {
+        return this->nodeType()                               == NodeType::ELEMENT_NODE
+            && dynamic_cast<Element *>( this )->elementType() == specs::infra::Element::HTML5_TEMPLATE;
+    };
+
+
     if( child ) {
         try {
             auto child_it = getChildListIterator( child ); //throws
 
-            if( node->nodeType() == NodeType::DOCUMENT_FRAGMENT_NODE ) {
+            if( node->nodeType() == NodeType::DOCUMENT_FRAGMENT_NODE && !isTemplateElement() ) {
                 return insertNodesBefore( node->childNodes(), child_it );
             } else {
                 return insertNodeBefore( node, child_it );
@@ -1159,7 +1208,7 @@ Node * Node::insertNodeBefore( NodePtr_t node, Node * child ) {
         }
 
     } else {
-        if( node->nodeType() == NodeType::DOCUMENT_FRAGMENT_NODE ) {
+        if( node->nodeType() == NodeType::DOCUMENT_FRAGMENT_NODE && !isTemplateElement() ) { //edge case
             return appendNodes( node->childNodes() );
         } else {
             return appendNode( node );
@@ -1178,7 +1227,7 @@ blogator::parser::dom::NodePtr_t Node::replaceChildNode( NodePtr_t &node, NodePt
     using exception::DOMException;
     using exception::DOMExceptionType;
 
-    if( this->contains( *node ) ) {
+    if( this->contains( *node ) ) { //TODO re-implement as this is now wrong!
         //Note: the check for host-including inclusive ancestor of a parent is skipped
         //      as DocumentFragments will never have hosts in this implementation
         throw DOMException( DOMExceptionType::HierarchyRequestError, "Replacement node already in DOM tree." );
@@ -1314,10 +1363,15 @@ Node * Node::appendNode( NodePtr_t &node ) {
 /**
  * [PRIVATE] Appends a list of nodes to the end of the children list
  * @param nodes List of nodes to append
- * @return Pointer to first appended node
+ * @return Pointer to first appended node (or nullptr when the list is empty)
  */
 Node * Node::appendNodes( Nodes_t &nodes ) {
-    auto   it             = nodes.begin();
+    auto it = nodes.begin();
+
+    if( it == nodes.end() ) {
+        return nullptr; //EARLY RETURN
+    }
+
     Node * first_inserted = appendNode( *(it++) );
 
     while( it != nodes.end() ) {

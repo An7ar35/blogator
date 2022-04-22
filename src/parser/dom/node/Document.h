@@ -5,6 +5,7 @@
 #include <set>
 
 #include "Node.h"
+#include "../enum/ValidationState.h"
 #include "../filter/NodeFilter.h"
 #include "../iterator/TreeWalker.h"
 #include "../enum/QuirksMode.h"
@@ -67,9 +68,10 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] HTMLCollection_t getElementsByTagNameNS( const DOMString_t &ns, const DOMString_t &local_name );
         [[nodiscard]] HTMLCollection_t getElementsByClassName( std::set<DOMString_t> class_names );
 
-        [[nodiscard]] std::unique_ptr<Element> createElement( DOMString_t local_name ) const;
+        [[nodiscard]] std::unique_ptr<Element> createElement( DOMString_t local_name, ValidationState validation = ValidationState::ON ) const;
         [[nodiscard]] std::unique_ptr<Element> createElement( specs::infra::Element element_type ) const;
-        [[nodiscard]] std::unique_ptr<Element> createElementNS( const DOMString_t & ns, const DOMString_t & qualified_name ) const;
+        [[nodiscard]] std::unique_ptr<Element> createElementNS( const DOMString_t & ns, const DOMString_t & qualified_name, ValidationState validation = ValidationState::ON ) const;
+
         [[nodiscard]] std::unique_ptr<Text> createTextNode( DOMString_t data ) const;
         [[nodiscard]] std::unique_ptr<CDATASection> createCDATASection( DOMString_t data ) const;
         [[nodiscard]] std::unique_ptr<Comment> createComment( DOMString_t data ) const;
@@ -106,6 +108,7 @@ namespace blogator::parser::dom::node {
         Element *                 _element; //shortcut to 'Element' child
     };
 
+    std::ostream & operator <<( std::ostream &os, Document::Type &type );
     void swap( Document &lhs, Document &rhs );
 }
 
