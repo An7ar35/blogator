@@ -5,5 +5,5 @@
 	path = submodules/html5lib-tests
 	url = https://github.com/An7ar35/html5lib-tests.git
 [submodule "submodules/commonmark-spec"]
-    path = submodules/commonmark-spec
-    url = https://github.com/commonmark/commonmark-spec.git
+	path = submodules/commonmark-spec
+	url = https://github.com/commonmark/commonmark-spec.git
