@@ -14,6 +14,7 @@ namespace blogator::parser::specs::infra {
             NONE    = 0,
             UNKNOWN = 1,
 
+            /* from the standard (used mostly in tokenizer) */
             ABRUPT_CLOSING_OF_EMPTY_COMMENT,
             ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER,
             ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER,
@@ -64,26 +65,36 @@ namespace blogator::parser::specs::infra {
             UNEXPECTED_SOLIDUS_IN_TAG,
             UNKNOWN_NAMED_CHARACTER_REFERENCE,
 
+            /* extras (used exclusively in the tree constructor )*/
             INVALID_DOCTYPE_TOKEN_IN_FOREIGN_CONTENT,
             INVALID_STARTTAG_TOKEN_IN_FOREIGN_CONTENT,
             INVALID_ENDTAG_TOKEN_IN_FOREIGN_CONTENT,
             MISMATCHING_ENDTAG_IN_FOREIGN_CONTENT,
-
             MISSING_DOCTYPE,
             MALFORMED_DOCTYPE,
+            MALFORMED_TAG_IMAGE,
+            MALFORMED_TAG_BR,
+            UNEXPECTED_TOKEN_DISCARDED,
+            UNEXPECTED_TOKEN_FORWARDED,
             UNEXPECTED_CHARACTER,
             UNEXPECTED_DOCTYPE,
             UNEXPECTED_STARTTAG,
             UNEXPECTED_ENDTAG,
-            UNEXPECTED_CONTENT,
+            UNEXPECTED_ENDTAG_SPECIAL_ELEMENT,
+            UNEXPECTED_EOF,
+            UNEXPECTED_EOF_IN_TEMPLATE,
             ORPHANED_STARTTAG,
             ORPHANED_ENDTAG,
-            BAD_NESTING, //TODO replace with incorect_nesting...?
+            ORPHANED_ENDTAG_IN_SCOPE,
             UNCLOSED_TAG,
             INVALID_NESTING_OF_ELEMENT,
             INVALID_NESTING_OF_FORMATTING_ELEMENT,
-            INCORRECT_IMAGE_TAG_NAMING,
-
+            INVALID_END_TAG_IN_CURRENT_INSERTION_MODE,
+            INVALID_ELEMENT_IN_FRAGMENT_CASE,
+            ADOPTION_AGENCY_ALGO_4_4,
+            ADOPTION_AGENCY_ALGO_4_5,
+            ADOPTION_AGENCY_ALGO_4_6,
+            FOSTER_PARENTING_TOKEN,
             FOSTER_PARENTING_TEXT,
 
             ENUM_END

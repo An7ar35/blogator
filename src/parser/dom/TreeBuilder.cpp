@@ -1109,7 +1109,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
         } break;
 
         default: {
-            this->logError( specs::infra::ErrorCode::UNEXPECTED_CONTENT, token );
+            this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
             goto anything_else;
         }
     }
@@ -1426,7 +1426,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         curr_node_type == Element_e::HTML5_H5 ||
                         curr_node_type == Element_e::HTML5_H6 )
                     {
-                        this->logError( specs::infra::ErrorCode::BAD_NESTING, token );
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> in <" << curr_node_type << "> scope";
+                        this->logError( specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, token );
+
                         this->popOpenElements();
                     }
 
@@ -1449,7 +1452,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                     if( _form_element != nullptr && !has_open_template ) {
                         std::stringstream ss;
-                        ss << "<" << resolved << "> in <" << Element_e::HTML5_FORM << "> scope";
+                        ss << "<" << resolved << "> inside <" << Element_e::HTML5_FORM << "> scope";
                         this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
 
                     } else {
@@ -1538,7 +1541,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_BUTTON: {
                     if( this->hasParticularElementInButtonScope( Element_e::HTML5_BUTTON ) ) {
                         std::stringstream ss;
-                        ss << "<" << resolved << "> in <" << Element_e::HTML5_BUTTON << "> scope";
+                        ss << "<" << resolved << "> inside <" << Element_e::HTML5_BUTTON << "> scope";
                         this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
 
                         this->generateImpliedEndTags();
@@ -1551,7 +1554,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 case Element_e::HTML5_A: {
-                    bool any_other_tag_flag = false;
+                    bool any_other_end_tag_flag = false;
 
                     auto fmt_it = findActiveFormattingElementAfterLastMarker( Element_e::HTML5_A );
 
@@ -1559,14 +1562,20 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         const auto * fmt_ptr = (*fmt_it);
 
                         std::stringstream ss;
-                        ss << "<" << resolved << "> in <" << Element_e::HTML5_A << "> scope";
+                        ss << "<" << resolved << "> inside <" << Element_e::HTML5_A << "> scope";
                         this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_FORMATTING_ELEMENT, ss.str() );
 
-                        any_other_tag_flag = this->runAdoptionAgencyAlgorithm( tk, resolved ); //TODO on fail goto anything else?
+                        any_other_end_tag_flag = this->runAdoptionAgencyAlgorithm( tk, resolved );
 
-                        if( !any_other_tag_flag ) {
+                        if( !any_other_end_tag_flag ) {
                             this->removeOpenElement( this->findOpenElement( fmt_ptr ) );
                             this->removeActiveFormattingElement( this->findActiveFormattingElement( fmt_ptr ) );
+
+                        } else {
+                            LOG_WARNING(
+                                "[parser::dom::TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::IN_BODY>( std::unique_ptr<token::html5::HTML5Tk>, <", resolved, "> )] "
+                                "Adoption agency algorithm returned the 'TREAT_AS_ANY_OTHER_END_TAG' flag which is unexpected for a StartTagTk."
+                            );
                         }
                     }
 
@@ -1574,7 +1583,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                     auto * new_element = this->insertHtmlElement( tk, resolved );
 
-                    if( !any_other_tag_flag && new_element != nullptr ) {
+                    if( !any_other_end_tag_flag && new_element != nullptr ) {
                         this->pushActiveFormattingElement( new_element );
                     }
                 } break;
@@ -1600,7 +1609,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                     if( this->hasParticularElementInScope( resolved ) ) {
                         std::stringstream ss;
-                        ss << "<" << resolved << "> in <" << resolved << "> scope";
+                        ss << "<" << resolved << "> inside <" << Element_e::DEPR_HTML_NOBR << "> scope";
                         this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
 
                         if( this->runAdoptionAgencyAlgorithm( tk, resolved ) == TREAT_AS_ANY_OTHER_END_TAG ) {
@@ -1698,7 +1707,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 case Element_e::DEPR_HTML_IMAGE: {
-                    this->logError( specs::infra::ErrorCode::INCORRECT_IMAGE_TAG_NAMING, token );
+                    this->logError( specs::infra::ErrorCode::MALFORMED_TAG_IMAGE, token );
 
                     tk->name() = blogator::to_u32string( Element_e::HTML5_IMG );
                     resolved   = Element_e::HTML5_IMG;
@@ -1779,7 +1788,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->generateImpliedEndTags();
 
                         if( this->currentNodeType() != Element_e::HTML5_RUBY ) {
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            std::stringstream ss;
+                            ss << "<" << this->currentNodeType() << "> inside <" << Element_e::HTML5_RUBY << "> scope";
+                            this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
                         }
                     }
 
@@ -1794,7 +1805,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         const auto curr_element_type = this->currentNodeType();
 
                         if( curr_element_type != Element_e::DEPR_HTML_RTC || curr_element_type != Element_e::HTML5_RUBY ) {
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            std::stringstream ss;
+                            ss << "<" << this->currentNodeType() << "> "
+                               << "inside <" << Element_e::DEPR_HTML_RTC << "> or <" << Element_e::HTML5_RUBY << "> scope";
+                            this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
                         }
                     }
 
@@ -1844,7 +1858,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_TH:        [[fallthrough]];
                 case Element_e::HTML5_THEAD:     [[fallthrough]];
                 case Element_e::HTML5_TR: { //ignore token
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token );
+                    this->logError( specs::infra::ErrorCode::UNEXPECTED_STARTTAG, token );
                 } break;
 
                 default: { //any other start tags
@@ -1867,15 +1881,15 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         for( auto * el : _open_elements ) {
                             if( !ELEMENT_CHECK_LIST.contains( el->elementType() ) ) {
                                 std::stringstream ss;
-                                ss << "<" << blogator::unicode::utf8::convert( el->qualifiedName() ) << ">";
-                                this->logError( tk->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() ); //TODO check error is correct
+                                ss << "<" << blogator::unicode::utf8::convert( el->qualifiedName() ) << "> inside <" << Element_e::HTML5_BODY << "> scope";
+                                this->logError( tk->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                             }
                         }
 
                         this->setCurrentInsertMode( InsertionMode_e::AFTER_BODY );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -1884,8 +1898,8 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         for( auto * el : _open_elements ) {
                             if( !ELEMENT_CHECK_LIST.contains( el->elementType() ) ) {
                                 std::stringstream ss;
-                                ss << "<" << blogator::unicode::utf8::convert( el->qualifiedName() ) << ">";
-                                this->logError( tk->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() ); //TODO check error is correct
+                                ss << "<" << blogator::unicode::utf8::convert( el->qualifiedName() ) << "> inside <" << Element_e::HTML5_HTML << "> scope";
+                                this->logError( tk->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                             }
                         }
 
@@ -1893,7 +1907,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::AFTER_BODY>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -1928,15 +1942,14 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                         if( this->currentNodeType() != resolved ) {
                             std::stringstream ss;
-                            ss << "expected <" << resolved << ">, " << "got <" << this->currentNodeType() << ">";
-
+                            ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
                             this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
                         this->popOpenElementsUntil( resolved, true );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -1947,15 +1960,14 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                             if( this->currentNodeType() != resolved ) {
                                 std::stringstream ss;
-                                ss << "expected <" << resolved << ">, " << "got <" << this->currentNodeType() << ">";
-
+                                ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
                                 this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                             }
 
                             this->popOpenElementsUntil( Element_e::HTML5_FORM, true );
 
                         } else { //ignore token
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                         }
 
                     } else {
@@ -1966,20 +1978,22 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                             this->generateImpliedEndTags();
 
                             if( this->currentNode() != node ) {
-                                this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                                std::stringstream ss;
+                                ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
+                                this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                             }
 
                             this->removeOpenElement( this->findOpenElement( node ) );
 
                         } else { //ignore token
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                         }
                     }
                 } break;
 
                 case Element_e::HTML5_P: {
                     if( !this->hasParticularElementInButtonScope( Element_e::HTML5_P ) ) {
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
 
                         auto p_tk = token::html5::StartTagTk( blogator::to_u32string( Element_e::HTML5_P ), tk->position() );
                         this->insertHtmlElement( &p_tk, Element_e::HTML5_P );
@@ -1993,7 +2007,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->closeElement( resolved, tk->position() );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -2003,7 +2017,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->closeElement( resolved, tk->position() );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -2026,13 +2040,15 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->generateImpliedEndTags();
 
                         if( this->currentNodeType() != resolved ) {
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            std::stringstream ss;
+                            ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
+                            this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
                         this->popOpenElementsUntil( HEADING_ELEMENTS, true );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -2063,8 +2079,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                         if( this->currentNodeType() != resolved ) {
                             std::stringstream ss;
-                            ss << "expected <" << resolved << ">, " << "got <" << this->currentNodeType() << ">";
-
+                            ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
                             this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
@@ -2072,12 +2087,12 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->clearActiveFormattingElementsUpToLastMarker();
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
                 case Element_e::HTML5_BR: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::MALFORMED_TAG_BR, token );
 
                     this->processAsHTMLContent<InsertionMode_e::IN_BODY>(
                         std::make_unique<token::html5::StartTagTk>(
@@ -2111,7 +2126,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                             }
 
                             if( TreeBuilder::isSpecialElement( (*node_it)->elementType(), {} ) ) {
-                                this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                                std::stringstream ss;
+                                ss << "</" << resolved << "> | special element <" << (*node_it)->elementType() << ">";
+                                this->logError( token->position(), specs::infra::ErrorCode::UNEXPECTED_ENDTAG_SPECIAL_ELEMENT, ss.str() );
                                 return; //EARLY RETURN (ignore token)
                             }
 
@@ -2179,7 +2196,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
     return; //DEFAULT
 
     //-----------
-    anything_else: {
+    anything_else: { //can only be an end tag
         bool done    = false;
         auto node_it = this->currentNodeIterator();
 
@@ -2188,14 +2205,19 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 this->generateImpliedEndTags( { resolved } );
 
                 if( (*node_it) != this->currentNode() ) {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    std::stringstream ss;
+                    ss << "expected <" << blogator::unicode::utf8::convert( this->currentNode()->qualifiedName() ) << ">, "
+                       << "got <" << blogator::unicode::utf8::convert( (*node_it)->qualifiedName() ) << ">";
+                    this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                 }
 
                 this->popOpenElementsUntil( (*node_it)->elementType(), true );
                 done = true;
 
             } else if( TreeBuilder::isSpecialElement( (*node_it)->elementType(), {} ) ) {
-                this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                std::stringstream ss;
+                ss << "</" << resolved << "> | special element <" << (*node_it)->elementType() << ">";
+                this->logError( specs::infra::ErrorCode::UNEXPECTED_ENDTAG_SPECIAL_ELEMENT, token );
                 done = true;
 
             } else {
@@ -2249,7 +2271,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
         } break;
 
         case specs::infra::TokenType::END_OF_FILE: {
-            this->logError( specs::infra::ErrorCode::UNKNOWN, token );
+            this->logError( specs::infra::ErrorCode::UNEXPECTED_EOF, token );
             //"If the current node is a script element, mark the script element as "already started"." - not implemented for blogator
             this->popOpenElements();
             this->setCurrentInsertMode( _original_insert_mode );
@@ -2330,7 +2352,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 case Element_e::HTML5_TABLE: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    std::stringstream ss;
+                    ss << "<" << resolved << "> inside <" << Element_e::HTML5_TABLE << "> scope";
+                    this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
 
                     if( this->hasParticularElementInScope( resolved ) ) {
                         this->popOpenElementsUntil( resolved, true );
@@ -2356,7 +2380,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         goto anything_else;
 
                     } else {
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, token );
 
                         this->insertHtmlElement( tk, resolved );
                         this->popOpenElements();
@@ -2369,7 +2393,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 case Element_e::HTML5_FORM: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    std::stringstream ss;
+                    ss << "<" << resolved << "> inside table";
+                    this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
 
                     if( !( this->hasOpenElement( Element_e::HTML5_TEMPLATE ) || _form_element != nullptr ) ) {
                         this->setFormElementPtr( this->insertHtmlElement( tk, resolved ) );
@@ -2394,7 +2420,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->resetInsertionModeAppropriately();
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::ORPHANED_ENDTAG, token );
                     }
                 } break;
 
@@ -2409,7 +2435,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_TH:       [[fallthrough]];
                 case Element_e::HTML5_THEAD:    [[fallthrough]];
                 case Element_e::HTML5_TR: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
                 } break;
 
                 case Element_e::HTML5_TEMPLATE: {
@@ -2417,7 +2443,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 default: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
                     goto anything_else;
                 }
             }
@@ -2452,7 +2478,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
         } break;
 
         default: {
-            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+            this->logError( specs::infra::ErrorCode::FOSTER_PARENTING_TOKEN, token );
             goto anything_else;
         }
     }
@@ -2478,7 +2504,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
         case specs::infra::TokenType::CHARACTER: {
             for( auto c : token->text() ) {
                 if( c == unicode::NUL ) {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::UNEXPECTED_NULL_CHARACTER, token );
                 } else {
                     _pending_table_char_tokens.emplace_back( c );
                 }
@@ -2491,7 +2517,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                                           []( auto c ) { return !unicode::ascii::iswspace( c ); } );
 
             if( it != _pending_table_char_tokens.end() ) {
-                this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_FORWARDED, token );
 
                 { //Reprocess as 'anything else', 'in table' insertion mode
                     _foster_parenting = true;
@@ -2540,7 +2566,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->generateImpliedEndTags();
 
                         if( this->currentNodeType() != Element_e::HTML5_CAPTION ) {
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            std::stringstream ss;
+                            ss << "expected <" << Element_e::HTML5_CAPTION << ">, got <" << this->currentNodeType() << ">";
+                            this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
                         this->popOpenElementsUntil( Element_e::HTML5_CAPTION, true );
@@ -2549,7 +2577,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << blogator::unicode::utf8::convert( tk->name() ) << "> inside caption";
+                        this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
                     }
                 } break;
 
@@ -2569,7 +2599,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->generateImpliedEndTags();
 
                         if( this->currentNodeType() != resolved ) {
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            std::stringstream ss;
+                            ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
+                            this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
                         this->popOpenElementsUntil( resolved, true );
@@ -2577,7 +2609,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->setCurrentInsertMode( InsertionMode_e::IN_TABLE );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2586,7 +2620,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->generateImpliedEndTags();
 
                         if( this->currentNodeType() != Element_e::HTML5_CAPTION ) {
-                            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                            std::stringstream ss;
+                            ss << "expected <" << Element_e::HTML5_CAPTION << ">, got <" << this->currentNodeType() << ">";
+                            this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
                         this->popOpenElementsUntil( Element_e::HTML5_CAPTION, true );
@@ -2595,7 +2631,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> | <" << Element_e::HTML5_CAPTION << "> not found in table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2608,7 +2646,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_TH:       [[fallthrough]];
                 case Element_e::HTML5_THEAD:    [[fallthrough]];
                 case Element_e::HTML5_TR: { //ignore token
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
                 } break;
 
                 default: {
@@ -2680,7 +2718,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->setCurrentInsertMode( InsertionMode_e::IN_TABLE );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
                     }
                 } break;
 
@@ -2735,7 +2773,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
             this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );
 
         } else { //ignore token
-            this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+            this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
         }
     };
 }
@@ -2760,7 +2798,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                 case Element_e::HTML5_TH: [[fallthrough]];
                 case Element_e::HTML5_TD: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    std::stringstream ss;
+                    ss << "<" << resolved << "> inside table body";
+                    this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
+
                     this->clearStackBackToTableBodyContext();
 
                     auto tr_token = token::html5::StartTagTk( blogator::to_u32string( Element_e::HTML5_TR ), tk->position() );
@@ -2786,7 +2827,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in either "
+                           << "<" << Element_e::HTML5_TBODY << ">, <" << Element_e::HTML5_THEAD << "> or <" << Element_e::HTML5_TFOOT << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2809,7 +2853,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->setCurrentInsertMode( InsertionMode_e::IN_TABLE );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2824,7 +2870,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in either "
+                           << "<" << Element_e::HTML5_TBODY << ">, <" << Element_e::HTML5_THEAD << "> or <" << Element_e::HTML5_TFOOT << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2836,7 +2885,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_TD:       [[fallthrough]];
                 case Element_e::HTML5_TH:       [[fallthrough]];
                 case Element_e::HTML5_TR: { //ignore token
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
                 } break;
 
                 default: {
@@ -2896,7 +2945,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::IN_TABLE_BODY>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << blogator::unicode::utf8::convert( tk->name() ) << "> inside row";
+                        this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
                     }
                 } break;
 
@@ -2917,7 +2968,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->setCurrentInsertMode( InsertionMode_e::IN_TABLE_BODY );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in <" << resolved << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2929,7 +2982,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent<InsertionMode_e::IN_TABLE_BODY>( std::move( token ), resolved );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in <" << Element_e::HTML5_TR << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2945,7 +3000,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         } //else: ignore token
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in <" << resolved << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -2956,7 +3013,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_HTML:     [[fallthrough]];
                 case Element_e::HTML5_TD:       [[fallthrough]];
                 case Element_e::HTML5_TH: { //ignore token
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
                 } break;
 
                 default: {
@@ -3009,8 +3066,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->closeCell( token->position() );
                         this->processAsHTMLContent( std::move( token ), resolved );
 
-                    } else {
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    } else { //ignore token
+                        std::stringstream ss;
+                        ss << "<" << blogator::unicode::utf8::convert( tk->name() ) << "> inside cell";
+                        this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
                     }
                 } break;
 
@@ -3032,8 +3091,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                         if( this->currentNodeType() != resolved ) {
                             std::stringstream ss;
-                            ss << "expected <" << resolved << ">, " << "got <" << this->currentNodeType() << ">";
-
+                            ss << "expected <" << resolved << ">, got <" << this->currentNodeType() << ">";
                             this->logError( token->position(), specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
                         }
 
@@ -3042,7 +3100,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->setCurrentInsertMode( InsertionMode_e::IN_ROW );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in <" << resolved << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -3051,7 +3111,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_COL:      [[fallthrough]];
                 case Element_e::HTML5_COLGROUP: [[fallthrough]];
                 case Element_e::HTML5_HTML: { //ignore token
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
                 } break;
 
                 case Element_e::HTML5_TABLE: [[fallthrough]];
@@ -3064,7 +3124,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->processAsHTMLContent( std::move( token ) );
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in <" << resolved << "> table scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -3128,7 +3190,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 case Element_e::HTML5_SELECT: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, token );
 
                     if( this->hasParticularElementInSelectScope( resolved ) ) {
                         this->popOpenElementsUntil( resolved, true );
@@ -3139,7 +3201,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_INPUT:      [[fallthrough]];
                 case Element_e::DEPR_HTML_KEYGEN: [[fallthrough]];
                 case Element_e::HTML5_TEXTAREA: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, token );
 
                     if( this->hasParticularElementInSelectScope( Element_e::HTML5_SELECT ) ) {
                         this->popOpenElementsUntil( Element_e::HTML5_SELECT, true );
@@ -3176,7 +3238,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->popOpenElements();
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
                     }
                 } break;
 
@@ -3185,7 +3247,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->popOpenElements();
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
                     }
                 } break;
 
@@ -3195,7 +3257,9 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                         this->resetInsertionModeAppropriately();
 
                     } else { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        std::stringstream ss;
+                        ss << "<" << resolved << "> not found in <" << resolved << "> select scope";
+                        this->logError( token->position(), specs::infra::ErrorCode::ORPHANED_ENDTAG_IN_SCOPE, ss.str() );
                     }
                 } break;
 
@@ -3258,7 +3322,10 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_TR:      [[fallthrough]];
                 case Element_e::HTML5_TD:      [[fallthrough]];
                 case Element_e::HTML5_TH: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    std::stringstream ss;
+                    ss << "<" << resolved << "> inside a select table scope";
+                    this->logError( token->position(), specs::infra::ErrorCode::INVALID_NESTING_OF_ELEMENT, ss.str() );
+
                     this->popOpenElementsUntil( Element_e::HTML5_SELECT, true );
                     this->resetInsertionModeAppropriately();
                     this->processAsHTMLContent( std::move( token ) );
@@ -3282,7 +3349,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_TR:      [[fallthrough]];
                 case Element_e::HTML5_TD:      [[fallthrough]];
                 case Element_e::HTML5_TH: {
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
 
                     if( this->hasParticularElementInTableScope( resolved ) ) {
                         this->popOpenElementsUntil( Element_e::HTML5_SELECT, true );
@@ -3392,14 +3459,14 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 } break;
 
                 default: { //ignore token
-                    this->logError( specs::infra::ErrorCode::UNKNOWN, token );
+                    this->logError( specs::infra::ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE, token );
                 } break;
             }
         } break;
 
         case specs::infra::TokenType::END_OF_FILE: {
             if( this->hasOpenElement( Element_e::HTML5_TEMPLATE ) ) {
-                this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                this->logError( specs::infra::ErrorCode::UNEXPECTED_EOF_IN_TEMPLATE, token );
                 this->popOpenElementsUntil( Element_e::HTML5_TEMPLATE, true );
                 this->clearActiveFormattingElementsUpToLastMarker();
                 this->popTemplateInsertionModes();
@@ -3447,7 +3514,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
             switch( ( resolved = this->resolveElement( resolved, Namespace_e::UNKNOWN, tk->name() ) ) ) {
                 case Element_e::HTML5_HTML: {
                     if( _fragment_case ) { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::INVALID_ELEMENT_IN_FRAGMENT_CASE, token );
 
                     } else {
                         this->setCurrentInsertMode( InsertionMode_e::AFTER_AFTER_BODY );
@@ -3499,7 +3566,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
     //-----------
     anything_else: {
-        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_FORWARDED, token );
         this->setCurrentInsertMode( InsertionMode_e::IN_BODY );
         this->processAsHTMLContent<InsertionMode_e::IN_BODY>( std::move( token ), resolved );
     };
@@ -3554,7 +3621,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
             switch( ( resolved = this->resolveElement( resolved, Namespace_e::UNKNOWN, tk->name() ) ) ) {
                 case Element_e::DEPR_HTML_FRAMESET: {
                     if( _open_elements.size() == 1 && this->currentNodeType() == Element_e::HTML5_HTML ) { //ignore token
-                        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                        this->logError( specs::infra::ErrorCode::UNEXPECTED_ENDTAG, token );
 
                     } else {
                         this->popOpenElements();
@@ -3595,7 +3662,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
         case specs::infra::TokenType::END_OF_FILE: {
             if( this->currentNodeType() != Element_e::HTML5_HTML ) {
-                this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+                this->logError( specs::infra::ErrorCode::UNEXPECTED_EOF, token );
             }
 
             this->stopParsing();
@@ -3610,7 +3677,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
     //-----------
     anything_else: { //ignore token
-        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
     };
 }
 
@@ -3693,7 +3760,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
     //-----------
     anything_else: { //ignore token
-        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
     };
 }
 
@@ -3762,7 +3829,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
     //-----------
     anything_else: {
-        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_FORWARDED, token );
         this->setCurrentInsertMode( InsertionMode_e::IN_BODY );
         this->processAsHTMLContent<InsertionMode_e::IN_BODY>( std::move( token ), resolved );
     };
@@ -3837,7 +3904,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
     //-----------
     anything_else: { //ignore token
-        this->logError( specs::infra::ErrorCode::UNKNOWN, token ); //TODO
+        this->logError( specs::infra::ErrorCode::UNEXPECTED_TOKEN_DISCARDED, token );
     };
 }
 
@@ -4880,7 +4947,9 @@ bool TreeBuilder::runAdoptionAgencyAlgorithm( const token::html5::GenericTagTk *
         // [4.4] If formatting element is not in the stack of open elements,
         //       then this is a parse error; remove the element from the list, and return.
         if( fmt_in_open_elements_it == _open_elements.end() ) {
-            this->logError( token->position(), specs::infra::ErrorCode::UNKNOWN, "adoption agency algorithm (4.4)" ); //TODO
+            std::stringstream ss;
+            ss << "<" << (*fmt_in_fmt_elements_it)->elementType() << ">";
+            this->logError( token->position(), specs::infra::ErrorCode::ADOPTION_AGENCY_ALGO_4_4, ss.str() );
             _formatting_elements.erase( fmt_in_fmt_elements_it );
             return DEFAULT; //EARLY RETURN
         }
@@ -4888,13 +4957,17 @@ bool TreeBuilder::runAdoptionAgencyAlgorithm( const token::html5::GenericTagTk *
         // [4.5] If formatting element is in the stack of open elements, but the element is not in scope,
         //       then this is a parse error; return.
         if( !this->hasParticularElementInScope( subject ) ) {
-            this->logError( token->position(), specs::infra::ErrorCode::UNKNOWN, "adoption agency algorithm (4.5)" ); //TODO
+            std::stringstream ss;
+            ss << "<" << blogator::unicode::utf8::convert( token->name() ) << ">";
+            this->logError( token->position(), specs::infra::ErrorCode::ADOPTION_AGENCY_ALGO_4_5, ss.str() );
             return DEFAULT; //EARLY RETURN
         }
 
         // [4.6] If formatting element is not the current node, this is a parse error. (But do not return.)
         if( *fmt_in_fmt_elements_it != this->currentNode() ) {
-            this->logError( token->position(), specs::infra::ErrorCode::UNKNOWN, "adoption agency algorithm (4.6)" ); //TODO
+            std::stringstream ss;
+            ss << "formatting element <" << (*fmt_in_fmt_elements_it)->elementType() << "> not current node <" << this->currentNodeType() << ">";
+            this->logError( token->position(), specs::infra::ErrorCode::ADOPTION_AGENCY_ALGO_4_6, ss.str() );
         }
 
         // [4.7] Let furthest block be the topmost node in the stack of open elements
@@ -5037,7 +5110,6 @@ void TreeBuilder::closeElement( TreeBuilder::Element_e el, const TextPos & pos )
     if( this->currentNodeType() != el ) {
         std::stringstream ss;
         ss << "expected <" << el << ">, got <" << this->currentNodeType() << ">";
-
         this->logError( pos, specs::infra::ErrorCode::UNCLOSED_TAG, ss.str() );
     }
 

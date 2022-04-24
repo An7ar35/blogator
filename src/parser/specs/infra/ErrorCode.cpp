@@ -33,15 +33,15 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER] = {
             "abrupt doctype public identifier",
-            R"(This error occurs if the parser encounters a U+003E (>) code point in the DOCTYPE public identifier (e.g., <!DOCTYPE html PUBLIC "foo>). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters a U+003E (>) code point in the DOCTYPE public identifier (e.g.: <!DOCTYPE html PUBLIC "foo>). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
         };
         arr[ErrorCode::ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER] = {
             "abrupt doctype system identifier",
-            R"(This error occurs if the parser encounters a U+003E (>) code point in the DOCTYPE system identifier (e.g., <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "foo>). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters a U+003E (>) code point in the DOCTYPE system identifier (e.g.: <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "foo>). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
         };
         arr[ErrorCode::ABSENCE_OF_DIGITS_IN_NUMERIC_CHARACTER_REFERENCE] = {
             "absence of digits in numeric character reference",
-            R"(This error occurs if the parser encounters a numeric character reference that doesn't contain any digits (e.g., &#qux;). In this case the parser doesn't resolve the character reference.)"
+            R"(This error occurs if the parser encounters a numeric character reference that doesn't contain any digits (e.g.: &#qux;). In this case the parser doesn't resolve the character reference.)"
         };
         arr[ErrorCode::CDATA_IN_HTML_CONTENT] = {
             "CDATA in html content",
@@ -69,11 +69,11 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::END_TAG_WITH_TRAILING_SOLIDUS] = {
             "end tag with trailing solidus",
-            R"(This error occurs if the parser encounters an end tag that has a U+002F (/) code point right before the closing U+003E (>) code point (e.g., </div/>). Such a tag is treated as a regular end tag.)"
+            R"(This error occurs if the parser encounters an end tag that has a U+002F (/) code point right before the closing U+003E (>) code point (e.g.: </div/>). Such a tag is treated as a regular end tag.)"
         };
         arr[ErrorCode::EOF_BEFORE_TAG_NAME] = {
             "EOF before tag name",
-            R"(This error occurs if the parser encounters the end of the input stream where a tag name is expected. In this case the parser treats the beginning of a start tag (i.e., <) or an end tag (i.e., </) as text content.)"
+            R"(This error occurs if the parser encounters the end of the input stream where a tag name is expected. In this case the parser treats the beginning of a start tag (i.e.: "<") or an end tag (i.e.: "</") as text content.)"
         };
         arr[ErrorCode::EOF_IN_CDATA] = {
             "EOF in CDATA",
@@ -89,11 +89,11 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT] = {
             "EOF in script html comment like text",
-            R"(This error occurs if the parser encounters the end of the input stream in text that resembles an HTML comment inside script element content (e.g., <script><!-- foo).)"
+            R"(This error occurs if the parser encounters the end of the input stream in text that resembles an HTML comment inside script element content (e.g.: "<script><!-- foo").)"
         };
         arr[ErrorCode::EOF_IN_TAG] = {
             "EOF in tag",
-            R"(This error occurs if the parser encounters the end of the input stream in a start tag or an end tag (e.g., <div id=). Such a tag is completely ignored.)"
+            R"(This error occurs if the parser encounters the end of the input stream in a start tag or an end tag (e.g.: "<div id="). Such a tag is completely ignored.)"
         };
         arr[ErrorCode::INCORRECTLY_CLOSED_COMMENT] = {
             "incorrectly closed comment",
@@ -113,31 +113,31 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::MISSING_ATTRIBUTE_VALUE] = {
             "missing attribute value",
-            R"(This error occurs if the parser encounters a U+003E (>) code point where an attribute value is expected (e.g., <div id=>). The parser treats the attribute as having an empty value.)"
+            R"(This error occurs if the parser encounters a U+003E (>) code point where an attribute value is expected (e.g.: "<div id=>"). The parser treats the attribute as having an empty value.)"
         };
         arr[ErrorCode::MISSING_DOCTYPE_NAME] = {
             "missing doctype name",
-            R"(This error occurs if the parser encounters a DOCTYPE that is missing a name (e.g., <!DOCTYPE>). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters a DOCTYPE that is missing a name (e.g.: "<!DOCTYPE>"). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
         };
         arr[ErrorCode::MISSING_DOCTYPE_PUBLIC_IDENTIFIER] = {
             "missing doctype public identifier",
-            R"(This error occurs if the parser encounters a U+003E (>) code point where start of the DOCTYPE public identifier is expected (e.g., <!DOCTYPE html PUBLIC >). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters a U+003E (>) code point where start of the DOCTYPE public identifier is expected (e.g.: <!DOCTYPE html PUBLIC >). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
         };
         arr[ErrorCode::MISSING_DOCTYPE_SYSTEM_IDENTIFIER] = {
             "missing doctype system identifier",
-            R"(This error occurs if the parser encounters a U+003E (>) code point where start of the DOCTYPE system identifier is expected (e.g., <!DOCTYPE html SYSTEM >). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters a U+003E (>) code point where start of the DOCTYPE system identifier is expected (e.g.: <!DOCTYPE html SYSTEM >). In such a case, if the DOCTYPE is correctly placed as a document preamble, the parser sets the Document to quirks mode.)"
         };
         arr[ErrorCode::MISSING_END_TAG_NAME] = {
             "missing end tag name",
-            R"(This error occurs if the parser encounters a U+003E (>) code point where an end tag name is expected, i.e., </>. The parser completely ignores whole "</>" code point sequence.)"
+            R"(This error occurs if the parser encounters a U+003E (>) code point where an end tag name is expected, in other words, "</>". The parser completely ignores whole "</>" code point sequence.)"
         };
         arr[ErrorCode::MISSING_QUOTE_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER] = {
             "missing quote before doctype public identifier",
-            R"(This error occurs if the parser encounters the DOCTYPE public identifier that is not preceded by a quote (e.g., <!DOCTYPE html PUBLIC -//W3C//DTD HTML 4.01//EN">). In such a case, the parser ignores the public identifier, and if the DOCTYPE is correctly placed as a document preamble, sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters the DOCTYPE public identifier that is not preceded by a quote (e.g.: <!DOCTYPE html PUBLIC -//W3C//DTD HTML 4.01//EN">). In such a case, the parser ignores the public identifier, and if the DOCTYPE is correctly placed as a document preamble, sets the Document to quirks mode.)"
         };
         arr[ErrorCode::MISSING_QUOTE_BEFORE_DOCTYPE_SYSTEM_IDENTIFIER] = {
             "missing quote before doctype system identifier",
-            R"(This error occurs if the parser encounters the DOCTYPE system identifier that is not preceded by a quote (e.g., <!DOCTYPE html SYSTEM http:R"(www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">). In such a case, the parser ignores the system identifier, and if the DOCTYPE is correctly placed as a document preamble, sets the Document to quirks mode.)"
+            R"(This error occurs if the parser encounters the DOCTYPE system identifier that is not preceded by a quote (e.g.: <!DOCTYPE html SYSTEM http:R"(www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">). In such a case, the parser ignores the system identifier, and if the DOCTYPE is correctly placed as a document preamble, sets the Document to quirks mode.)"
         };
         arr[ErrorCode::MISSING_SEMICOLON_AFTER_CHARACTER_REFERENCE] = {
             "missing semicolon after character reference",
@@ -157,7 +157,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::MISSING_WHITESPACE_BETWEEN_ATTRIBUTES] = {
             "missing whitespace between attributes",
-            R"(This error occurs if the parser encounters attributes that are not separated by ASCII whitespace (e.g., <div id="foo"class="bar">). In this case the parser behaves as if ASCII whitespace is present.)"
+            R"(This error occurs if the parser encounters attributes that are not separated by ASCII whitespace (e.g.: <div id="foo"class="bar">). In this case the parser behaves as if ASCII whitespace is present.)"
         };
         arr[ErrorCode::MISSING_WHITESPACE_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS] = {
             "missing whitespace between doctype public and system identifiers",
@@ -165,7 +165,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::NESTED_COMMENT] = {
             "nested comment",
-            R"(This error occurs if the parser encounters a nested comment (e.g., <!-- <!-- nested --> -->). Such a comment will be closed by the first occurring "-->" code point sequence and everything that follows will be treated as markup.)"
+            R"(This error occurs if the parser encounters a nested comment (e.g.: <!-- <!-- nested --> -->). Such a comment will be closed by the first occurring "-->" code point sequence and everything that follows will be treated as markup.)"
         };
         arr[ErrorCode::NONCHARACTER_CHARACTER_REFERENCE] = {
             "noncharacter character reference",
@@ -177,7 +177,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::NON_VOID_HTML_ELEMENT_START_TAG_WITH_TRAILING_SOLIDUS] = {
             "non void html element start tag with trailing solidus",
-            R"(This error occurs if the parser encounters a start tag for an element that is not in the list of void elements or is not a part of foreign content (i.e., not an SVG or MathML element) that has a U+002F (/) code point right before the closing U+003E (>) code point. The parser behaves as if the U+002F (/) is not present.)"
+            R"(This error occurs if the parser encounters a start tag for an element that is not in the list of void elements or is not a part of foreign content (i.e.: not an SVG or MathML element) that has a U+002F (/) code point right before the closing U+003E (>) code point. The parser behaves as if the U+002F (/) is not present.)"
         };
         arr[ErrorCode::NULL_CHARACTER_REFERENCE] = {
             "NULL character reference",
@@ -217,7 +217,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::UNEXPECTED_SOLIDUS_IN_TAG] = {
             "unexpected solidus in tag",
-            R"(This error occurs if the parser encounters a U+002F (/) code point that is not a part of a quoted attribute value and not immediately followed by a U+003E (>) code point in a tag (e.g., <div / id="foo">). In this case the parser behaves as if it encountered ASCII whitespace.)"
+            R"(This error occurs if the parser encounters a U+002F (/) code point that is not a part of a quoted attribute value and not immediately followed by a U+003E (>) code point in a tag (e.g.: <div / id="foo">). In this case the parser behaves as if it encountered ASCII whitespace.)"
         };
         arr[ErrorCode::UNKNOWN_NAMED_CHARACTER_REFERENCE] = {
             "unknown named character reference",
@@ -241,11 +241,27 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::MISSING_DOCTYPE] = {
             "missing doctype",
-            R"(This error occurs when DOCTYPE is missing.)"
+            R"(This error occurs when the DOCTYPE declaration is missing.)"
         };
         arr[ErrorCode::MALFORMED_DOCTYPE] = {
             "malformed DOCTYPE",
             R"(This error occurs when the DOCTYPE token's name is not "html", or the token's public identifier is not missing, or the token's system identifier is neither missing nor "about:legacy-compat".)"
+        };
+        arr[ErrorCode::MALFORMED_TAG_IMAGE] = {
+            "incorrect image tag name",
+            R"(This error occurs when a tag name is 'image' when it should actually be 'img'.)"
+        };
+        arr[ErrorCode::MALFORMED_TAG_BR] = {
+            "line break as closing tag",
+            R"(This error occurs when a line break tag <br> is written as a (self-)closing tag. The tag is substituted with the correct one and any attributes discarded.)"
+        };
+        arr[ErrorCode::UNEXPECTED_TOKEN_DISCARDED] = {
+            "unexpected content (ignored)",
+            R"(This generic error occurs when unexpected token(s) are passed in violation of the current insertion mode's rules. Reasons include misplacement of the item represented by the token. The token is dropped.)"
+        };
+        arr[ErrorCode::UNEXPECTED_TOKEN_FORWARDED] = {
+            "unexpected content (reprocessed)",
+            R"(This generic error occurs when unexpected token(s) are passed in violation of the current insertion mode's rules. Reasons include misplacement of the item represented by the token. The token is reprocessed in an other insertion mode.)"
         };
         arr[ErrorCode::UNEXPECTED_CHARACTER] = {
             "unexpected character",
@@ -261,11 +277,19 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::UNEXPECTED_ENDTAG] = {
             "unexpected end tag",
-            R"(This error occurs when an unexpected end tag is encountered.)"
+            R"(This error occurs when an unexpected/invalid end tag is encountered.)"
         };
-        arr[ErrorCode::UNEXPECTED_CONTENT] = {
-            "unexpected content",
-            R"(This error occurs when unexpected token(s) are passed in violation of the current insertion mode's rules.)"
+        arr[ErrorCode::UNEXPECTED_ENDTAG_SPECIAL_ELEMENT] = {
+            "unexpected special element found during closing",
+            R"(This error occurs when an unexpected element in the 'special' category (i.e.: subject to different parsing rules) is found in the stack of open elements during the process of closing the element the given end-tag token represents. The 'special' element expects its closing tag to be placed before the token's matching start tag. Probable cause: mis-nesting or missing closing tag(s) in the source.)"
+        };
+        arr[ErrorCode::UNEXPECTED_EOF] = {
+            "unexpected EOF",
+            R"(This error occurs when EOF happens when there are still opened elements.)"
+        };
+        arr[ErrorCode::UNEXPECTED_EOF_IN_TEMPLATE] = {
+            "unexpected EOF in template",
+            R"(This error occurs when EOF happens whilst a <template> is currently opened.)"
         };
         arr[ErrorCode::ORPHANED_STARTTAG] = {
             "orphaned start tag(s)",
@@ -273,19 +297,15 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ErrorCode::ORPHANED_ENDTAG] = {
             "orphaned end tag",
-            R"(This error occurs when a end tag is encountered without having its equivalent start tag inside the stack of open elements.)"
+            R"(This error occurs when an end tag is encountered without having its equivalent start tag within the currently opened elements.)"
         };
-        arr[ErrorCode::BAD_NESTING] = {
-            "invalid nesting",
-            R"(This error occurs when a start tag is incorrectly nested. For example: \"<h1><h2>...\". )"
+        arr[ErrorCode::ORPHANED_ENDTAG_IN_SCOPE] = {
+            "orphaned end tag in scope",
+            R"(This error occurs when an end tag is encountered without having its equivalent start tag inside an expected scope within the currently opened elements.)"
         };
         arr[ErrorCode::UNCLOSED_TAG] = {
             "unclosed opened tag",
-            R"(This error occurs when opened tag(s) remains opened despite requiring an equivalent closing tag (e.g.: <div><a>..</div>).)"
-        };
-        arr[ErrorCode::FOSTER_PARENTING_TEXT] = {
-            "foster parenting of text",
-            R"(This error occurs when a character is not nested in either a <table>, <tbody>, <tfoot>, <thead> or <tr> element in the context of a table.)"
+            R"(This error occurs when opened tag(s) remains opened despite requiring an equivalent closing tag (e.g.: "<div><a>..</div>").)"
         };
         arr[ErrorCode::INVALID_NESTING_OF_ELEMENT] = {
             "incorrect element nesting",
@@ -295,17 +315,41 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "incorrect formatting element nesting",
             R"(This error occurs when an incompatible formatting element is opened inside a currently opened formatting element.)"
         };
-        arr[ErrorCode::INCORRECT_IMAGE_TAG_NAMING] = {
-            "incorrect image tag name",
-            R"(This error occurs when a tag name is 'image' when it should actually be 'img'.)"
+        arr[ErrorCode::INVALID_END_TAG_IN_CURRENT_INSERTION_MODE] = {
+            "invalid closing tag in current insertion mode",
+            R"(This error occurs when an invalid closing tag is encountered within a the context of the current insertion mode.)"
         };
+        arr[ErrorCode::INVALID_ELEMENT_IN_FRAGMENT_CASE] = {
+            "invalid element in html fragment case",
+            R"(This error occurs when an invalid tag is used when the parser was initialised for the purpose of using the HTML fragment parsing algorithm (i.e.: a 'fragment' case). )"
+        };
+        arr[ErrorCode::ADOPTION_AGENCY_ALGO_4_4] = { //TODO better description needed
+            "adoption agency algorithm 4.4",
+            R"(This error occurs when the formatting element is not in the stack of open elements.)"
+        };
+        arr[ErrorCode::ADOPTION_AGENCY_ALGO_4_5] = { //TODO better description needed
+            "adoption agency algorithm 4.5",
+            R"(This error occurs when the formatting element is not in scope within the stack of open elements.)"
+        };
+        arr[ErrorCode::ADOPTION_AGENCY_ALGO_4_6] = { //TODO better description needed
+            "adoption agency algorithm 4.6",
+            R"(This error occurs when the formatting element is not the bottom-most element in the stack of open elements (i.e.: the current node).)"
+        };
+        arr[ErrorCode::FOSTER_PARENTING_TOKEN] = {
+            "foster parenting of token",
+            R"(This error occurs when content is mis-nested in tables. The token will be inserted using the 'in body' insertion mode and 'fostered' as required.)"
+        };
+        arr[ErrorCode::FOSTER_PARENTING_TEXT] = {
+            "foster parenting of text",
+            R"(This error occurs when a character is not nested in either a <table>, <tbody>, <tfoot>, <thead> or <tr> element in the context of a table.)"
+        };
+
 
         return std::move( arr );
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::ErrorCode::] Failed to load error data (loadErrorStrings)." );
     }
-    //TODO log debug
 }
 
 static std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErrorStrings();

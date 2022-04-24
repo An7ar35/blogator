@@ -42,6 +42,21 @@ blogator::parser::specs::infra::Namespace resolveNamespace( const std::u32string
 }
 
 /**
+ * Checks the presence of 'Error::UNKNOWN' or 'Error::NONE' in list of errors
+ * @param errors List of errors
+ * @return Presence of 'UNKNOWN' or 'NONE' type of errors
+ */
+bool hasUnknownErrors( const std::vector<blogator::parser::logging::ErrorObject> & errors ) {
+    return ( std::find_if( errors.cbegin(),
+                           errors.cend(),
+                           []( const auto & err ) {
+                                return err.errcode() == static_cast<int>( blogator::parser::specs::infra::ErrorCode::NONE )
+                                    || err.errcode() == static_cast<int>( blogator::parser::specs::infra::ErrorCode::UNKNOWN );
+                           } ) != errors.cend()
+    );
+}
+
+/**
  * Parsing log catcher
  */
 class ParserLogCatcher {
@@ -61,6 +76,10 @@ class ParserLogCatcher {
 
         return os;
     }
+
+    [[nodiscard]] const std::vector<blogator::parser::logging::ErrorObject> & errors() const {
+        return _errors;
+    };
 
     [[nodiscard]] size_t count() const {
         return _errors.size();
@@ -131,10 +150,11 @@ testing::AssertionResult runTest( const helpers::TreeConstructionTest &test, con
     auto document       = builder.reset();
     auto returned_u8    = test_harness::html5lib_tests::helpers::to_string( *document, test.is_fragment );
 
-    const bool output_match      = ( returned_u8 == test.expected_output );
-    const bool error_count_match = ( error_catcher.count() == test.errors.size() );
+    const bool output_match       = ( returned_u8 == test.expected_output );
+    const bool error_count_match  = ( error_catcher.count() == test.errors.size() );
+    const bool has_unknown_errors = hasUnknownErrors( error_catcher.errors() );
 
-    if( !output_match /* || !error_count_match || test.errors.size() > 0 */ ) {
+    if( !output_match || has_unknown_errors /* || !error_count_match /* || test.errors.size() > 0 */ ) {
         const auto context = ( !test.ctx_prefix.empty() ? ( test.ctx_prefix + ":" + test.ctx_local_name ) : test.ctx_local_name ) + "\n";
 
         std::stringstream ss;
