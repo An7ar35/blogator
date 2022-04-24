@@ -1397,6 +1397,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_NAV:        [[fallthrough]];
                 case Element_e::HTML5_OL:         [[fallthrough]];
                 case Element_e::HTML5_P:          [[fallthrough]];
+                case Element_e::HTML5_SEARCH:     [[fallthrough]];
                 case Element_e::HTML5_SECTION:    [[fallthrough]];
                 case Element_e::HTML5_SUMMARY:    [[fallthrough]];
                 case Element_e::HTML5_UL: {
@@ -1934,6 +1935,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
                 case Element_e::HTML5_NAV:         [[fallthrough]];
                 case Element_e::HTML5_OL:          [[fallthrough]];
                 case Element_e::HTML5_PRE:         [[fallthrough]];
+                case Element_e::HTML5_SEARCH:      [[fallthrough]];
                 case Element_e::HTML5_SECTION:     [[fallthrough]];
                 case Element_e::HTML5_SUMMARY:     [[fallthrough]];
                 case Element_e::HTML5_UL: {

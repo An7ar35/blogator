@@ -216,6 +216,7 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
         { Element::HTML5_S,                 "s" },
         { Element::HTML5_SAMP,              "samp" },
         { Element::HTML5_SCRIPT,            "script" },
+        { Element::HTML5_SEARCH,            "search" },
         { Element::HTML5_SECTION,           "section" },
         { Element::HTML5_SELECT,            "select" },
         { Element::HTML5_SLOT,              "slot" },
