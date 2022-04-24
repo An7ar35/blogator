@@ -18,13 +18,11 @@
 #include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dom/node/Element.h"
 
-#include "helpers.h"
+#include "../helpers/helpers.h"
 
 using blogator::parser::dom::TreeBuilder;
 using blogator::parser::token::html5::HTML5Tk;
 using blogator::parser::logging::ParserLog;
-
-using namespace test_harness::html5lib_tests;
 
 /**
  * Resolves the test prefix into a Namespace
@@ -117,7 +115,7 @@ blogator::parser::U32Text transcodeInput( const std::string & raw, const std::fi
  * @param path Source file path of the test
  * @return Assert result
  */
-testing::AssertionResult runTest( const helpers::TreeConstructionTest &test, const std::filesystem::path &path ) { //TODO
+testing::AssertionResult runTest( const test_harness::html5lib_tests::TreeConstructionTest &test, const std::filesystem::path &path ) { //TODO
     using namespace blogator::parser::dom;
 
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
@@ -148,7 +146,7 @@ testing::AssertionResult runTest( const helpers::TreeConstructionTest &test, con
 
     auto builder_errors = builder.errors();
     auto document       = builder.reset();
-    auto returned_u8    = test_harness::html5lib_tests::helpers::to_string( *document, test.is_fragment );
+    auto returned_u8    = test_harness::html5lib_tests::to_string( *document, test.is_fragment );
 
     const bool output_match       = ( returned_u8 == test.expected_output );
     const bool error_count_match  = ( error_catcher.count() == test.errors.size() );
@@ -179,7 +177,7 @@ testing::AssertionResult runTest( const helpers::TreeConstructionTest &test, con
 
         if( builder_errors > 0 || !test.errors.empty() ) {
             ss << "Errors (rcv/exp) .: " << builder_errors << "/" << test.errors.size() << "\n"
-               << "Expected errors ..: " << "\n" << helpers::to_string( test.errors ) << "\n"
+               << "Expected errors ..: " << "\n" << test_harness::html5lib_tests::to_string( test.errors ) << "\n"
                << "Received errors ..: " << "\n" << error_catcher;
         } else {
             ss << "Errors (rcv/exp) .: " << builder_errors << "/" << test.errors.size();
@@ -191,7 +189,7 @@ testing::AssertionResult runTest( const helpers::TreeConstructionTest &test, con
     return testing::AssertionSuccess();
 }
 
-class parser_dom_TreeBuilder_Tests : public testing::TestWithParam<std::pair<helpers::TreeConstructionTest, std::filesystem::path>> {};
+class parser_dom_TreeBuilder_Tests : public testing::TestWithParam<std::pair<test_harness::html5lib_tests::TreeConstructionTest, std::filesystem::path>> {};
 
 TEST_P( parser_dom_TreeBuilder_Tests, html5lib_tests ) {
     auto test = GetParam();
@@ -201,5 +199,5 @@ TEST_P( parser_dom_TreeBuilder_Tests, html5lib_tests ) {
 INSTANTIATE_TEST_CASE_P(
     TreeBuilderTestInstance,
     parser_dom_TreeBuilder_Tests,
-    ::testing::ValuesIn( helpers::loadTreeConstructionTests( test_harness::HTML5LIB_TREECONSTRUCTION_TEST_PATH ) )
+    ::testing::ValuesIn( test_harness::html5lib_tests::loadTreeConstructionTests( test_harness::HTML5LIB_TREECONSTRUCTION_TEST_PATH ) )
 );

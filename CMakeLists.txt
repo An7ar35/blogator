@@ -515,10 +515,13 @@ set(TEST_FILES
         tests/parser/dom/validation/XML.cpp
         tests/parser/specs/infra/DocType.cpp
 
-        test-harness/html5lib-tests/helpers.cpp
-        test-harness/html5lib-tests/helpers.h
+        test-harness/helpers/MarkdownTest.h
+        test-harness/helpers/TreeConstructionTest.h
+        test-harness/helpers/helpers.cpp
+        test-harness/helpers/helpers.h
         test-harness/html5lib-tests/tokenizer-tests.cpp
-        test-harness/html5lib-tests/tree-construction-tests.cpp)
+        test-harness/html5lib-tests/tree-construction-tests.cpp
+        test-harness/commonmark-spec/commonmark-spec-tests.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)
@@ -536,6 +539,17 @@ if( NOT GTEST_FOUND )
     target_link_libraries(blogator_tests gtest)
 else()
     target_link_libraries(blogator_tests pthread gtest gmock nlohmann_json::nlohmann_json)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+    if(Python3_Interpreter_FOUND)
+        execute_process(
+                COMMAND ${Python_EXECUTABLE} test/spec_tests.py --dump-tests
+                WORKING_DIRECTORY ${SUBMODULE_PATH}/commonmark-spec
+                OUTPUT_FILE tests.json
+        )
+    else()
+        message(FATAL_ERROR "Required package 'Python3::interpreter' not found on system.")
+    endif()
 endif()
 
 add_test(blogator_tests ${TEST_FILES})

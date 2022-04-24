@@ -14,16 +14,15 @@
 #include "gtest/gtest.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/logging/ParserLog.h"
-#include "../../../src/parser/Parser.h"
+#include "../../../src/parser/dto/Source.h"
+#include "../../../src/parser/encoding/Transcode.h"
 
-#include "helpers.h"
+#include "../helpers/helpers.h"
 
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;
 using blogator::parser::specs::infra::TokeniserState;
 using blogator::parser::logging::ParserLog;
-
-using namespace test_harness::html5lib_tests;
 
 TokeniserState getStateEnum( const std::string &str ) {
     static const std::map<std::string, TokeniserState> map = {
@@ -130,7 +129,7 @@ class ParserLogCatcher {
                    _errors.end(),
                    []( const auto & a, const auto & b ) -> bool { return a.textpos() < b.textpos(); }
         );
-        helpers::jsonifyErrorObjects( ss, _errors );
+        test_harness::html5lib_tests::jsonifyErrorObjects( ss, _errors );
         auto s = ss.str();
         return nlohmann::json::parse( ss.str() );
     }
@@ -163,7 +162,7 @@ class ParserLogCatcher {
 
     [[nodiscard]] std::string toStr() const {
         std::stringstream  ss;
-        helpers::jsonifyHtml5Tokens( ss, _tokens );
+        test_harness::html5lib_tests::jsonifyHtml5Tokens( ss, _tokens );
         return ss.str();
     }
 
@@ -207,7 +206,7 @@ std::u32string preprocess( std::u32string &raw, const std::filesystem::path &pat
  * @param path Source file path of the test
  * @return Assert result
  */
-testing::AssertionResult runTest( const nlohmann::json &test, const std::filesystem::path &path ) {
+testing::AssertionResult runHTML5TokeniserTest( const nlohmann::json &test, const std::filesystem::path &path ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
 
     MockTreeBuilder  mock_tree_builder;
@@ -218,7 +217,7 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
     std::u32string raw_txt = converter_U8toU32.from_bytes( test.at( "input" ) );
 
     if( test.contains( "doubleEscaped" ) ) {
-        raw_txt = helpers::unescape( raw_txt );
+        raw_txt = test_harness::html5lib_tests::unescape( raw_txt );
     }
 
     auto text        = blogator::parser::U32Text( path, preprocess( raw_txt, path ) );
@@ -246,9 +245,9 @@ testing::AssertionResult runTest( const nlohmann::json &test, const std::filesys
         std::string    actual_output   = mock_tree_builder.toStr();
 
         if( test.contains( "doubleEscaped" ) ) {
-            auto expected_str = helpers::unescape( to_string( test.at( "output" ) ) );
+            auto expected_str = test_harness::html5lib_tests::unescape( to_string( test.at( "output" ) ) );
             expected_output = nlohmann::json::parse( expected_str );
-            actual_output   = helpers::unescape( actual_output );
+            actual_output   = test_harness::html5lib_tests::unescape( actual_output );
         }
 
         if( nlohmann::json::parse( actual_output ) != expected_output ) {
@@ -275,11 +274,11 @@ class parser_tokeniser_HTML5_Tests : public testing::TestWithParam<std::pair<nlo
 
 TEST_P( parser_tokeniser_HTML5_Tests, html5lib_tests) {
     auto test = GetParam();
-    EXPECT_TRUE( runTest( test.first, test.second ) ) << "File name: " << test.second;
+    EXPECT_TRUE( runHTML5TokeniserTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
 INSTANTIATE_TEST_CASE_P(
     HTML5TokeniserTestInstance,
     parser_tokeniser_HTML5_Tests,
-    ::testing::ValuesIn( helpers::loadJSONTests( test_harness::HTML5LIB_TOKENIZER_TEST_PATH ) )
+    ::testing::ValuesIn( test_harness::html5lib_tests::loadJSONTests( test_harness::HTML5LIB_TOKENIZER_TEST_PATH ) )
 );

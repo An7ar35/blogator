@@ -1,5 +1,6 @@
 #include "helpers.h"
 
+#include <iostream>
 #include <fstream>
 #include <set>
 
@@ -14,21 +15,128 @@
 #include "../../../src/parser/dom/node/Element.h"
 #include "../../../src/parser/dom/node/Text.h"
 
-typedef std::vector<std::pair<test_harness::html5lib_tests::helpers::TreeConstructionTest, std::filesystem::path>> TreeConstructionTests_t;
-typedef std::vector<test_harness::html5lib_tests::helpers::TreeConstructionTest>                                   TreeConstructionTestCollection_t;
+typedef std::vector<std::pair<test_harness::html5lib_tests::TreeConstructionTest, std::filesystem::path>> TreeConstructionTests_t;
+typedef std::vector<test_harness::html5lib_tests::TreeConstructionTest>                                   TreeConstructionTestCollection_t;
 
 //local methods pre-declaration
-static std::set<std::filesystem::path> getTestFiles( const std::filesystem::path &test_dir, const std::string & file_ext );
-static nlohmann::json loadJSON( const std::filesystem::path &path );
 static TreeConstructionTestCollection_t loadTreeConstructionDat( const std::filesystem::path &path );
+
+
+/**
+ * Loads a json file into a JSON object
+ * @param path Source filepath
+ * @return JSON
+ */
+nlohmann::json test_harness::loadJSONFromFile( const std::filesystem::path &path ) {
+    std::cout << "Loading test file: " << path << std::endl;
+    std::fstream file;
+    file.open( path, std::ios::in );
+    auto json = nlohmann::json();
+    file >> json;
+    file.close();
+    return json;
+}
+
+/**
+ * Gets all '.*' files found in a directory path
+ * @param test_dir Directory path
+ * @param file_ext File extension of the test files to look for
+ * @return Collection of test file paths
+ */
+std::set<std::filesystem::path> test_harness::getTestFiles( const std::filesystem::path &test_dir, const std::string & file_ext ) {
+    auto test_files = std::set<std::filesystem::path>();
+
+    for( const std::filesystem::path & file : std::filesystem::directory_iterator( test_dir ) ) {
+        if( file.extension() == file_ext && file.stem() != "package" ) { //avoids `package.json` file that sometimes lives in the root of some git repos
+            test_files.emplace( file );
+        }
+    }
+
+    return test_files;
+}
 
 /**
  * Output stream operator
  * @param os Output stream
- * @param test TreeConstructionObject
+ * @param test MarkdownTest object
  * @return Output stream
  */
-std::ostream & test_harness::html5lib_tests::helpers::operator <<( std::ostream &os, const test_harness::html5lib_tests::helpers::TreeConstructionTest &test ) {
+std::ostream & test_harness::commonmark_spec_tests::operator <<( std::ostream &os, const test_harness::commonmark_spec_tests::MarkdownTest &test ) {
+    os << test.src.filename().string() << ":" << test.start_line << ", #"
+       << test.example_no << ", ";
+    return os;
+}
+
+/**
+ * Loads a 'commonmark-spec' json test file into a collection of tests
+ * @param test_dir Source filepath
+ * @return MarkdownTests_t collection
+ */
+std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::filesystem::path>> test_harness::commonmark_spec_tests::loadMarkdownTests( const std::filesystem::path &test_dir ) {
+    static const auto fields = std::vector<std::string>( {
+        "example",
+        "start_line",
+        "end_line",
+        "markdown",
+        "html",
+        "section"
+    } );
+
+    std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::filesystem::path>> test_collection;
+
+    auto test_files = getTestFiles( test_dir, ".json" );
+
+    for( const auto & file : test_files ) {
+        auto   source = test_harness::loadJSONFromFile( file );
+        size_t tests  = 0;
+
+        if( !source.is_array() ) {
+            std::cerr << "Unexpected JSON format (need root array) in: " << file.string() << std::endl;
+
+        } else {
+            for( const auto &test: source ) {
+                auto err = false;
+                auto obj = MarkdownTest();
+
+                for( const auto & field : fields ) {
+                    if( !test.contains( field ) ) {
+                        std::cerr << "ERROR: field \"" << field << "\" not found for test " << tests << " in " << file.string() << std::endl;
+                        err = true;
+                        break;
+                    }
+                }
+
+                if( !err ) {
+                    obj.src = file;
+                    obj.example_no = test.at( "example" ).get<unsigned>();
+                    obj.start_line = test.at( "start_line" ).get<unsigned>();
+                    obj.end_line = test.at( "end_line" ).get<unsigned>();
+                    obj.markdown = to_string( test.at( "markdown" ) );
+                    obj.html_output = to_string( test.at( "html" ) );
+                    obj.section_desc = to_string( test.at( "section" ) );
+
+                    test_collection.emplace_back( std::make_pair( std::move( obj ), file ) );
+                }
+
+                ++tests;
+            }
+
+            std::cout << "> Found " << tests << " tests." << std::endl;
+        }
+    }
+
+    std::cout << "> TOTAL TESTS FOUND: " << test_collection.size() << " (" << test_dir << ")" << std::endl;
+
+    return test_collection;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param test TreeConstructionTest object
+ * @return Output stream
+ */
+std::ostream & test_harness::html5lib_tests::operator <<( std::ostream &os, const test_harness::html5lib_tests::TreeConstructionTest &test ) {
     os << test.src.filename().string() << ":" << test.line << ", #"
        << test.id << ", ";
 
@@ -54,7 +162,7 @@ std::ostream & test_harness::html5lib_tests::helpers::operator <<( std::ostream 
  * @param errors List of errors
  * @return String
  */
-std::string test_harness::html5lib_tests::helpers::to_string( const test_harness::html5lib_tests::helpers::TreeConstructionTest::Errors_t &errors ) {
+std::string test_harness::html5lib_tests::to_string( const test_harness::html5lib_tests::TreeConstructionTest::Errors_t &errors ) {
     std::stringstream ss;
 
     for( size_t i = 0, n = 1; i < errors.size(); ++i, ++n ) {
@@ -74,7 +182,7 @@ std::string test_harness::html5lib_tests::helpers::to_string( const test_harness
  * @param fragment Flag to print as a fragment (i.e.: children of <html> node)
  * @return Output string (utf-8)
  */
-std::string test_harness::html5lib_tests::helpers::to_string( blogator::parser::dom::node::Document & document, bool fragment ) {
+std::string test_harness::html5lib_tests::to_string( blogator::parser::dom::node::Document & document, bool fragment ) {
     using           blogator::unicode::utf8::convert;
     using namespace blogator::parser::dom::node;
 
@@ -219,7 +327,7 @@ std::string test_harness::html5lib_tests::helpers::to_string( blogator::parser::
  * @param tokens Tokens
  * @return Output stream
  */
-std::ostream & test_harness::html5lib_tests::helpers::jsonifyHtml5Tokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::html5::HTML5Tk>> &tokens ) {
+std::ostream & test_harness::html5lib_tests::jsonifyHtml5Tokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::html5::HTML5Tk>> &tokens ) {
     os << "[";
 
     for( auto it = tokens.cbegin(); it != tokens.cend(); ++ it ) {
@@ -239,7 +347,7 @@ std::ostream & test_harness::html5lib_tests::helpers::jsonifyHtml5Tokens( std::o
  * @param err Error objects
  * @return Output stream
  */
-std::ostream & test_harness::html5lib_tests::helpers::jsonifyErrorObjects( std::ostream & os, const std::vector<blogator::parser::logging::ErrorObject> &err ) {
+std::ostream & test_harness::html5lib_tests::jsonifyErrorObjects( std::ostream & os, const std::vector<blogator::parser::logging::ErrorObject> &err ) {
     os << "[";
 
     for( auto it = err.cbegin(); it != err.cend(); ++ it ) {
@@ -262,11 +370,11 @@ std::ostream & test_harness::html5lib_tests::helpers::jsonifyErrorObjects( std::
  * @param err ErrorObject
  * @return Formatted string
  */
-std::string test_harness::html5lib_tests::helpers::formatErrorObject( const blogator::parser::logging::ErrorObject &err ) { //TODO
+std::string test_harness::html5lib_tests::formatErrorObject( const blogator::parser::logging::ErrorObject &err ) { //TODO
     return std::string();
 }
 
-std::u32string test_harness::html5lib_tests::helpers::unescape( const std::u32string &str ) {
+std::u32string test_harness::html5lib_tests::unescape( const std::u32string &str ) {
     std::vector<char32_t> buffer;
 
     auto addToCharRefCode = []( uint32_t & crf, uint32_t c ) -> bool {
@@ -315,7 +423,7 @@ std::u32string test_harness::html5lib_tests::helpers::unescape( const std::u32st
 }
 
 
-std::string test_harness::html5lib_tests::helpers::unescape( const std::string &u8str ) {
+std::string test_harness::html5lib_tests::unescape( const std::string &u8str ) {
     enum class State {
         CHARACTER,
         SINGLE_ESCAPE,
@@ -419,13 +527,13 @@ std::string test_harness::html5lib_tests::helpers::unescape( const std::string &
  * @param test_dir Directory path
  * @return Collection of { test, source path }
  */
-std::vector<std::pair<nlohmann::json, std::filesystem::path>> test_harness::html5lib_tests::helpers::loadJSONTests( const std::filesystem::path &test_dir ) {
+std::vector<std::pair<nlohmann::json, std::filesystem::path>> test_harness::html5lib_tests::loadJSONTests( const std::filesystem::path &test_dir ) {
     std::vector<std::pair<nlohmann::json, std::filesystem::path>> test_collection;
 
     auto test_files = getTestFiles( test_dir, ".test" );
 
     for( const auto & file : test_files ) {
-        auto source = loadJSON( file );
+        auto source = test_harness::loadJSONFromFile( file );
 
         if( !source.contains( "tests" ) ) {
             std::cerr << "Can't find root key 'tests' in source json file: " << file << std::endl;
@@ -451,7 +559,7 @@ std::vector<std::pair<nlohmann::json, std::filesystem::path>> test_harness::html
  * @param test_dir Directory path
  * @return Collection of { test, source path }
  */
-TreeConstructionTests_t test_harness::html5lib_tests::helpers::loadTreeConstructionTests( const std::filesystem::path &test_dir ) { //TODO
+TreeConstructionTests_t test_harness::html5lib_tests::loadTreeConstructionTests( const std::filesystem::path &test_dir ) { //TODO
     TreeConstructionTests_t test_collection;
 
     auto test_files = getTestFiles( test_dir, ".dat" );
@@ -476,45 +584,12 @@ TreeConstructionTests_t test_harness::html5lib_tests::helpers::loadTreeConstruct
 }
 
 /**
- * Gets all '.test' files found in a directory path
- * @param test_dir Directory path
- * @param file_ext File extension of the test files to look for
- * @return Collection of test file paths
- */
-std::set<std::filesystem::path> getTestFiles( const std::filesystem::path &test_dir, const std::string & file_ext ) {
-    auto test_files = std::set<std::filesystem::path>();
-
-    for( const std::filesystem::path & file : std::filesystem::directory_iterator( test_dir ) ) {
-        if( file.extension() == file_ext ) {
-            test_files.emplace( file );
-        }
-    }
-
-    return test_files;
-}
-
-/**
- * Loads a json file into a JSON object
- * @param path Source filepath
- * @return JSON
- */
-nlohmann::json loadJSON( const std::filesystem::path &path ) {
-    std::cout << "Loading test file: " << path << std::endl;
-    std::fstream file;
-    file.open( path, std::ios::in );
-    auto json = nlohmann::json();
-    file >> json;
-    file.close();
-    return json;
-}
-
-/**
  * Loads a tree construction 'dat' file into a collection of tests
  * @param path Source filepath
  * @return TreeConstructionTests_t collection
  */
 TreeConstructionTestCollection_t loadTreeConstructionDat( const std::filesystem::path &path ) { //TODO
-    using test_harness::html5lib_tests::helpers::TreeConstructionTest;
+    using test_harness::html5lib_tests::TreeConstructionTest;
 
     static constexpr uint8_t SCRIPTING_FLAG_NONE       = { 0b00 };
     static constexpr uint8_t SCRIPTING_FLAG_ON         = { 0b10 };
@@ -610,7 +685,7 @@ TreeConstructionTestCollection_t loadTreeConstructionDat( const std::filesystem:
                     default: break;
                 };
             } else {
-                std::cerr << "[test_harness::html5lib_tests::helpers::loadTreeConstructionDat( " << path << " )] "
+                std::cerr << "[test_harness::html5lib_tests::loadTreeConstructionDat( " << path << " )] "
                           << "Key (#) not recognised: " << line << std::endl;
 
                 state = READY;
@@ -643,7 +718,7 @@ TreeConstructionTestCollection_t loadTreeConstructionDat( const std::filesystem:
                         test->ctx_local_name = words[1];
 
                     } else {
-                        std::cerr << "[test_harness::html5lib_tests::helpers::loadTreeConstructionDat( " << path << " )] "
+                        std::cerr << "[test_harness::html5lib_tests::loadTreeConstructionDat( " << path << " )] "
                                   << "'#document-fragment' section not parsed: \"" << line << std::endl;
                     }
                 } break;

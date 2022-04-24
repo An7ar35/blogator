@@ -1,34 +1,30 @@
-#ifndef TEST_HARNESS_HTML5LIB_TESTS_HELPERS_H
-#define TEST_HARNESS_HTML5LIB_TESTS_HELPERS_H
+#ifndef TEST_HARNESS_HELPERS_HELPERS_H
+#define TEST_HARNESS_HELPERS_HELPERS_H
 
 #include <ostream>
 #include <vector>
 
+#include "test-harness-sources.h"
 #include "nlohmann/json.hpp"
 
-#include "test-harness-sources.h"
+#include "../helpers/MarkdownTest.h"
+#include "../helpers/TreeConstructionTest.h"
+
 #include "../../src/parser/token/html5/tokens.h"
 #include "../../src/parser/logging/ErrorObject.h"
 #include "../../src/parser/dom/node/Document.h"
 
-namespace test_harness::html5lib_tests::helpers {
-    struct TreeConstructionTest {
-        typedef std::string              Data_t;
-        typedef std::vector<std::string> Errors_t;
-        typedef std::string              Output_t;
+namespace test_harness {
+    nlohmann::json loadJSONFromFile( const std::filesystem::path &path );
+    std::set<std::filesystem::path> getTestFiles( const std::filesystem::path &test_dir, const std::string & file_ext );
+}
 
-        size_t                id              {};
-        size_t                line            {};
-        std::filesystem::path src             {};
-        Data_t                data            {};
-        bool                  is_fragment     { false };
-        Data_t                ctx_prefix      {};
-        Data_t                ctx_local_name  {};
-        Errors_t              errors          {};
-        bool                  scripting       { false };
-        Output_t              expected_output {};
-    };
+namespace test_harness::commonmark_spec_tests {
+    std::ostream & operator <<( std::ostream &os, const MarkdownTest &test );
+    std::vector<std::pair<MarkdownTest, std::filesystem::path>> loadMarkdownTests( const std::filesystem::path &test_dir );
+}
 
+namespace test_harness::html5lib_tests {
     std::ostream & operator <<( std::ostream &os, const TreeConstructionTest &test );
     std::string to_string( const TreeConstructionTest::Errors_t &errors );
     std::string to_string( blogator::parser::dom::node::Document & document, bool fragment );
@@ -47,4 +43,4 @@ namespace test_harness::html5lib_tests::helpers {
     std::vector<std::pair<TreeConstructionTest, std::filesystem::path>> loadTreeConstructionTests( const std::filesystem::path &test_dir );
 }
 
-#endif //TEST_HARNESS_HTML5LIB_TESTS_HELPERS_H
+#endif //TEST_HARNESS_HELPERS_HELPERS_H
