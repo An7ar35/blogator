@@ -26,23 +26,9 @@ CharacterTk::CharacterTk( std::u32string text, TextPos position ) :
  * @param os Output stream
  */
 void CharacterTk::toStr( std::ostream &os ) const {
-    const auto & txt = text();
-
     os << R"(["Character",")";
-    unicode::normalize( os, text() );
+    unicode::normalize( os, this->text() );
     os << "\"]";
-}
-
-#else
-
-/**
- * Prints out a string representation of the token
- * @param os Output stream
- */
-void CharacterTk::toStr( std::ostream &os ) const {
-    os << "html5::CharacterTk={ text: \"";
-    unicode::utf8::convert( os, text() );
-    os << "\", position: " << lineNum() << ":" << colPos() << " }";
 }
 
 #endif

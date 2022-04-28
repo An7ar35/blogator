@@ -418,7 +418,22 @@ set(SOURCE_FILES
         src/parser/dom/validation/XML.cpp
         src/parser/dom/validation/XML.h
         src/sys/terminate.cpp
-        src/sys/terminate.h src/parser/dom/enum/ValidationState.h)
+        src/sys/terminate.h src/parser/dom/enum/ValidationState.h
+
+        src/parser/specs/markdown/tokeniser/TokenType.cpp
+        src/parser/specs/markdown/tokeniser/TokenType.h
+        src/parser/specs/markdown/tokeniser/TokeniserState.h
+
+        src/parser/token/markdown/CharacterTk.cpp
+        src/parser/token/markdown/CharacterTk.h
+        src/parser/token/markdown/HeadingTk.cpp
+        src/parser/token/markdown/HeadingTk.h
+        src/parser/token/markdown/FormatBeginTk.cpp
+        src/parser/token/markdown/FormatBeginTk.h
+        src/parser/token/markdown/FormattingTk.cpp
+        src/parser/token/markdown/FormattingTk.h
+        src/parser/token/markdown/FormatEndTk.cpp
+        src/parser/token/markdown/FormatEndTk.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )

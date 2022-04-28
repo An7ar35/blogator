@@ -29,7 +29,7 @@ StartTagTk::StartTagTk( std::u32string text, blogator::parser::TextPos position 
  */
 void StartTagTk::toStr( std::ostream &os ) const {
     os << R"(["StartTag", ")";
-    unicode::normalize( os, text() );
+    unicode::normalize( os, this->text() );
     os << "\", { ";
     for( auto it = attributes().cbegin(); it != attributes().cend(); ++it ) {
         os << "\"";
@@ -47,17 +47,6 @@ void StartTagTk::toStr( std::ostream &os ) const {
         os << ",true";
     }
     os << "]";
-}
-
-#else
-
-/**
- * Prints out a string representation of the token
- * @param os Output stream
- */
-void StartTagTk::toStr( std::ostream &os ) const {
-    os << "html5::StartTagTk=";
-    GenericTagTk::toStr( os );
 }
 
 #endif

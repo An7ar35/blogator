@@ -113,30 +113,30 @@ void DoctypeTk::setForceQuirks( bool flag ) {
  */
 void DoctypeTk::toStr( std::ostream &os ) const {
     os << R"(["DOCTYPE", )";
-    if( hasName() ) {
+    if( this->hasName() ) {
         os << "\"";
-        unicode::normalize( os, name() );
-        os << "\"";
-    } else {
-        os << "null";
-    }
-    os << ", ";
-    if( hasPID() ) {
-        os << "\"";
-        unicode::normalize( os, publicIdentifier() );
+        unicode::normalize( os, this->name() );
         os << "\"";
     } else {
         os << "null";
     }
     os << ", ";
-    if( hasSID() ) {
+    if( this->hasPID() ) {
         os << "\"";
-        unicode::normalize( os, systemIdentifier() );
+        unicode::normalize( os, this->publicIdentifier() );
         os << "\"";
     } else {
         os << "null";
     }
-    os << ", " << ( forceQuirks() ?  "false" : "true" ) //bool values are swapped as html5lib_tests's flag checks 'correct' (i.e. !force-quirks)
+    os << ", ";
+    if( this->hasSID() ) {
+        os << "\"";
+        unicode::normalize( os, this->systemIdentifier() );
+        os << "\"";
+    } else {
+        os << "null";
+    }
+    os << ", " << ( this->forceQuirks() ?  "false" : "true" ) //bool values are swapped as html5lib_tests's flag checks 'correct' (i.e. !force-quirks)
        << " ]";
 }
 
@@ -147,31 +147,31 @@ void DoctypeTk::toStr( std::ostream &os ) const {
  * @param os Output stream
  */
 void DoctypeTk::toStr( std::ostream &os ) const {
-    os << "html5::DoctypeTk={ name: ";
-    if( hasName() ) {
+    os << "HTML5Tk={ type: " << this->type() << ", name: ";
+    if( this->hasName() ) {
         os << "\"";
-        unicode::utf8::convert( os, name() );
+        unicode::utf8::convert( os, this->name() );
         os << "\"";
     } else {
         os << "missing";
     }
     os << ", pid: ";
-    if( hasPID() ) {
+    if( this->hasPID() ) {
         os << "\"";
-        unicode::utf8::convert( os, publicIdentifier() );
+        unicode::utf8::convert( os, this->publicIdentifier() );
         os << "\"";
     } else {
         os << "missing";
     }
     os << ", sid: ";
-    if( hasSID() ) {
+    if( this->hasSID() ) {
         os << "\"";
-        unicode::utf8::convert( os, systemIdentifier() );
+        unicode::utf8::convert( os, this->systemIdentifier() );
         os << "\"";
     } else {
         os << "missing";
     }
-    os << ", force-quirks: " << forceQuirks() << ", position: " << lineNum() << ":" << colPos() << " }";
+    os << ", force-quirks: " << this->forceQuirks() << ", position: " << this->position() << " }";
 }
 
 #endif

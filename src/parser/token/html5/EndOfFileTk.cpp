@@ -20,14 +20,4 @@ void EndOfFileTk::toStr( std::ostream &os ) const {
     os << "[\"EOF\"]";
 }
 
-#else
-
-/**
- * Prints out a string representation of the token
- * @param os Output stream
- */
-void EndOfFileTk::toStr( std::ostream &os ) const {
-    os << "html5::EndOfFileTk={ position: " << lineNum() << ":" << colPos() << " }";
-}
-
 #endif

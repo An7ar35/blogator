@@ -13,13 +13,13 @@ testing::AssertionResult runMarkdownTest( const test_harness::commonmark_spec_te
 
   class parser_tokeniser_Markdown_Tests : public testing::TestWithParam<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::filesystem::path>> {};
 
-TEST_P( parser_tokeniser_Markdown_Tests, html5lib_tests) {
+TEST_P( parser_tokeniser_Markdown_Tests, commonmark_spec_tests) {
     auto test = GetParam();
     EXPECT_TRUE( runMarkdownTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
 INSTANTIATE_TEST_CASE_P(
-    HTML5TokeniserTestInstance,
+    MarkdownTokeniserTestInstance,
     parser_tokeniser_Markdown_Tests,
     ::testing::ValuesIn( test_harness::commonmark_spec_tests::loadMarkdownTests( test_harness::COMMONMARK_SPEC_TEST_PATH ) )
 );

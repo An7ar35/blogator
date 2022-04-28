@@ -93,14 +93,14 @@ void GenericTagTk::setSelfClosing( bool flag ) {
  * @param os Output stream
  */
 void GenericTagTk::toStr( std::ostream &os ) const {
-    os << "{ text: \"";
-    unicode::utf8::convert( os, text() );
-    os << "\", self-closing: " << selfclosing() << ", attributes: [ ";
-    for( const auto & attr : attributes() ) {
+    os << "HTML5Tk={ text: \"";
+    unicode::utf8::convert( os, this->text() );
+    os << "\", self-closing: " << this->selfclosing() << ", attributes: [ ";
+    for( const auto & attr : this->attributes() ) {
         unicode::utf8::convert( os, attr.name );
         os << "=\"";
         unicode::utf8::convert( os, attr.value );
         os << "\" ";
     }
-    os << "], position: " << lineNum() << ":" << colPos() << " }";
+    os << "], position: " << this->position() << " }";
 }

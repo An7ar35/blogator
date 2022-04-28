@@ -85,7 +85,7 @@ TextPos token::Token::position() const {
  * @param os Output stream
  */
 void token::Token::toStr( std::ostream &os ) const {
-    os << "token::Token={ text: \"";
-    unicode::utf8::convert( os, text() );
-    os << "\", position: " << lineNum() << ":" << colPos() << " }";
+    os << "{ text: \"";
+    unicode::utf8::convert( os, this->text() );
+    os << "\", position: " << this->position() << " }";
 }
