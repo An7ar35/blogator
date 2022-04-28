@@ -27,3 +27,16 @@ TEST( parser_dom_node_CDATASection_Tests, swap_1 ) {
     ASSERT_EQ( cdata1.data(), U"cdata2" );
     ASSERT_EQ( cdata2.data(), U"cdata1" );
 }
+
+TEST( parser_dom_node_CDATASection_Tests, output_stream ) {
+    const auto str  = DOMString_t( U"lorem ipsum..." );
+    const auto node = node::CDATASection( str );
+
+    std::stringstream expected_ss;
+    expected_ss << "<!CDATA[lorem ipsum...]]>";
+
+    std::stringstream received_ss;
+    received_ss << node;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

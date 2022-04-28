@@ -20,6 +20,8 @@ namespace blogator::parser::dom::node {
       public: /* 'Node' interface override */
         [[nodiscard]] DOMString_t lookupPrefix( const DOMString_t &ns ) const override;
         [[nodiscard]] DOMString_t lookupNamespaceURI( const DOMString_t &prefix ) const override;
+      protected:
+        void toUTF8Stream( std::ostream &os ) const override;
 
       public: /* Non-standard 'DocumentFragment' interface */
         node::Node * host();

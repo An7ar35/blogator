@@ -1174,6 +1174,20 @@ blogator::parser::dom::NodePtr_t Document::removeChildNode( Nodes_t::iterator it
 }
 
 /**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void Document::toUTF8Stream( std::ostream &os ) const {
+    if( _doctype == nullptr && _type == Type::HTML ) {
+        os << "<!DOCTYPE html>";
+    }
+
+    for( const auto & child : this->childNodes() ) {
+        os << *child;
+    }
+}
+
+/**
  * Shallow swaps Document nodes
  * @param lhs Document
  * @param rhs Document

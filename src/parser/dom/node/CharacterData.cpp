@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "../../../unicode/utf8.h"
 #include "../exception/RangeError.h"
 
 #include <sstream>
@@ -204,6 +205,14 @@ blogator::parser::dom::NodePtr_t CharacterData::replaceChildNode( NodePtr_t &nod
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "CharacterData nodes do not have children." );
+}
+
+/**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void CharacterData::toUTF8Stream( std::ostream &os ) const {
+    blogator::unicode::utf8::convert( os, this->data() );
 }
 
 /**

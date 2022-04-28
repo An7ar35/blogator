@@ -1034,3 +1034,43 @@ TEST( parser_dom_node_Document_Tests, nodeName ) {
     auto doc = node::Document();
     ASSERT_EQ( doc.nodeName(), U"#document" );
 }
+
+TEST( parser_dom_node_Document_Tests, output_stream ) {
+    std::unique_ptr<node::Node> doc;
+    auto v = blogator::tests::createTestDOM_2( doc );
+
+    std::stringstream expected_ss;
+    expected_ss << "<!DOCTYPE html>"
+                   "<!CDATA[cdata]]>"
+                   "<html>"
+                     "<head class=\"header\">"
+                       "<div>"
+                         "<h1>Heading 1</h1>"
+                       "</div>"
+                     "</head>"
+                     "<!-- comment -->"
+                     "<body>"
+                       "<div id=\"id-a\">"
+                         "<h2 class=\"title\">Heading 2</h2>"
+                         "<h3 class=\"title paragraph-heading\">Sub-Title 1</h3>"
+                         "<p class=\"p-section\">"
+                           "Paragraph 1"
+                         "</p>"
+                       "</div>"
+                       "<div id=\"id-b\">"
+                         "<h3 class=\"title paragraph-heading\">Sub-Title 2</h3>"
+                         "<p class=\"p-section\">"
+                           "Paragraph 2"
+                         "</p>"
+                         "<p class=\"p-section\" id=\"p3\">"
+                           "Paragraph 3"
+                         "</p>"
+                       "</div>"
+                     "</body>"
+                   "</html>";
+
+    std::stringstream received_ss;
+    received_ss << *doc;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

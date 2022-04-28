@@ -61,7 +61,7 @@ namespace blogator::parser::dom::node {
         [[nodiscard]] const_iterator crbegin( std::shared_ptr<NodeFilter> filter ) const;
         [[nodiscard]] const_iterator crend() const;
 
-        virtual size_t depth() const;
+        [[nodiscard]] virtual size_t depth() const;
         virtual void swap( Node &rhs );
         virtual NodePtr_t detach();
         [[nodiscard]] virtual specs::infra::Namespace getNamespaceEnum() const;
@@ -139,6 +139,7 @@ namespace blogator::parser::dom::node {
         void setParent( Node * node );
         void setPrevSibling( Node * node );
         void setNextSibling( Node * node );
+        virtual void toUTF8Stream( std::ostream &os ) const;
 
         static dom::NamespaceMap namespace_map;
 

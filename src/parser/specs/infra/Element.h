@@ -21,6 +21,7 @@ namespace blogator::parser::specs::infra {
         DEPR_HTML_BGSOUND,
         DEPR_HTML_BIG,
         DEPR_HTML_CENTER,
+        DEPR_HTML_COMMAND,
         DEPR_HTML_DIR,
         DEPR_HTML_FONT,
         DEPR_HTML_FRAME,
@@ -144,7 +145,7 @@ namespace blogator::parser::specs::infra {
     bool isAmbiguousElement( const std::u32string & el );
     bool isAmbiguousElement( specs::infra::Element el );
     std::u32string & adjustSVGElementTagName( std::u32string & name );
-    //TODO create paired, self closing lookup
+    bool isVoidElement( specs::infra::Element el );
 }
 
 namespace blogator {

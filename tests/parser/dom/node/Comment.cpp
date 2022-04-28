@@ -27,3 +27,16 @@ TEST( parser_dom_node_Comment_Tests, swap_1 ) {
     ASSERT_EQ( comment1.data(), U"comment2" );
     ASSERT_EQ( comment2.data(), U"comment1" );
 }
+
+TEST( parser_dom_node_Comment_Tests, output_stream ) {
+    const auto comment_str = DOMString_t( U"this is a comment string\non multiple lines\n..." );
+    const auto node        = node::Comment( comment_str );
+
+    std::stringstream expected_ss;
+    expected_ss << "<!-- this is a comment string\non multiple lines\n... -->";
+
+    std::stringstream received_ss;
+    received_ss << node;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

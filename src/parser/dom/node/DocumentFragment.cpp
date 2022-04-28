@@ -36,3 +36,13 @@ blogator::parser::dom::DOMString_t DocumentFragment::lookupPrefix( const blogato
 blogator::parser::dom::DOMString_t DocumentFragment::lookupNamespaceURI( const DOMString_t &prefix ) const {
     return {};
 }
+
+/**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void DocumentFragment::toUTF8Stream( std::ostream &os ) const {
+    for( const auto & child : this->childNodes() ) {
+        os << *child;
+    }
+}

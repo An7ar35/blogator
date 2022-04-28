@@ -112,6 +112,7 @@ std::ostream & blogator::parser::specs::infra::operator <<( std::ostream &os, bl
         { Element::DEPR_HTML_BGSOUND,       "bgsound" },
         { Element::DEPR_HTML_BIG,           "big" },
         { Element::DEPR_HTML_CENTER,        "center" },
+        { Element::DEPR_HTML_COMMAND,       "command" },
         { Element::DEPR_HTML_DIR,           "dir" },
         { Element::DEPR_HTML_FONT,          "font" },
         { Element::DEPR_HTML_FRAME,         "frame" },
@@ -563,6 +564,34 @@ std::u32string & blogator::parser::specs::infra::adjustSVGElementTagName( std::u
     }
 
     return name;
+}
+
+/**
+ * Checks if an element is void (singleton)
+ * @param el Element enum
+ * @return Does not require a closing tag
+ */
+bool blogator::parser::specs::infra::isVoidElement( Element el ) {
+    static const auto ELEMENTS = std::set<Element>( {
+        Element::HTML5_AREA,
+        Element::HTML5_BASE,
+        Element::HTML5_BR,
+        Element::HTML5_COL,
+        Element::DEPR_HTML_COMMAND,
+        Element::HTML5_EMBED,
+        Element::HTML5_HR,
+        Element::HTML5_IMG,
+        Element::HTML5_INPUT,
+        Element::DEPR_HTML_KEYGEN,
+        Element::HTML5_LINK,
+        Element::HTML5_META,
+        Element::HTML5_PARAM,
+        Element::HTML5_SOURCE,
+        Element::HTML5_TRACK,
+        Element::HTML5_WBR,
+    } );
+
+    return ELEMENTS.contains( el );
 }
 
 /**

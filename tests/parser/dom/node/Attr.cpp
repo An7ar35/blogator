@@ -104,3 +104,15 @@ TEST_F( parser_dom_node_Attr_Tests, swap_0 ) {
     ASSERT_NE( attr2.value(), nullptr );
     ASSERT_EQ( *attr2.value(), value1 );
 }
+
+TEST_F( parser_dom_node_Attr_Tests, output_stream ) {
+    const auto & attr = parser_dom_node_Attr_Tests::test_attr;
+
+    std::stringstream expected_ss;
+    expected_ss << "test-prefix:test-name=\"test-value\"";
+
+    std::stringstream received_ss;
+    received_ss << attr;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

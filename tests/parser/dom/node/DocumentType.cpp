@@ -23,3 +23,18 @@ TEST( parser_dom_node_DocumentType_Tests, systemId ) {
     const auto node = node::DocumentType( U"", U"", str, nullptr, nullptr );
     ASSERT_EQ( node.systemId(), str );
 }
+
+TEST( parser_dom_node_DocumentType_Tests, output_stream ) {
+    const auto name = DOMString_t( U"testing-name" );
+    const auto pid  = DOMString_t( U"testing-public-id" );
+    const auto sid  = DOMString_t( U"testing-system-id" );
+    const auto node = node::DocumentType( name, pid, sid );
+
+    std::stringstream expected_ss;
+    expected_ss << R"(<!DOCTYPE testing-name PUBLIC "testing-public-id" SYSTEM "testing-system-id">)";
+
+    std::stringstream received_ss;
+    received_ss << node;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

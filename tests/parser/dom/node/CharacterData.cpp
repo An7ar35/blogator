@@ -247,3 +247,16 @@ TEST( parser_dom_node_CharacterData_Tests, swap_1 ) {
     ASSERT_EQ( node1.data(), U"node2" );
     ASSERT_EQ( node2.data(), U"node1" );
 }
+
+TEST( parser_dom_node_CharacterData_Tests, output_stream ) {
+    const auto comment_str = DOMString_t( U"this is a string\non multiple lines\n..." );
+    const auto node        = CharacterData( NodeType::TEXT_NODE, comment_str );
+
+    std::stringstream expected_ss;
+    expected_ss << "this is a string\non multiple lines\n...";
+
+    std::stringstream received_ss;
+    received_ss << node;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

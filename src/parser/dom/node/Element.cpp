@@ -1328,6 +1328,32 @@ void Element::setOwnerDocument( Document * document ) {
 }
 
 /**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void Element::toUTF8Stream( std::ostream &os ) const {
+    const auto qname = blogator::unicode::utf8::convert( this->qualifiedName() );
+
+    os << "<" << qname;
+
+    if( this->hasAttributes() ) {
+        for( const auto & attr_ptr : this->attributes().list() ) {
+            os << " " << *attr_ptr;
+        }
+    }
+
+    os << ">";
+
+    for( const auto & child : this->childNodes() ) {
+        os << *child;
+    }
+
+    if( !specs::infra::isVoidElement( const_cast<Element *>( this )->elementType() ) ) {
+        os << "</" << qname << ">";
+    }
+}
+
+/**
  * Shallow swaps Element nodes
  * @param lhs Element
  * @param rhs Element

@@ -33,6 +33,7 @@ namespace blogator::parser::dom::node {
       protected:
         Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
         NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
+        void toUTF8Stream( std::ostream &os ) const override;
 
       private:
         DOMString_t _name;

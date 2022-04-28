@@ -120,7 +120,7 @@ std::vector<blogator::parser::dom::node::Node *> blogator::tests::createTestDOM_
     auto * p3       = div3->appendChild( std::make_unique<node::Element>( blogator::parser::specs::infra::Element::HTML5_P ) );
     dynamic_cast<node::Element *>( p3 )->createAttribute( U"class", U"p-section", ValidationState::OFF );
     dynamic_cast<node::Element *>( p3 )->createAttribute( U"id", U"p3", ValidationState::OFF );
-    auto * p3_txt2  = p2->appendChild( std::make_unique<node::Text>( U"Paragraph 3" ) );
+    auto * p3_txt2  = p3->appendChild( std::make_unique<node::Text>( U"Paragraph 3" ) );
 
 
     pre_order.insert(

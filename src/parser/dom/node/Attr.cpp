@@ -492,6 +492,20 @@ blogator::parser::dom::NodePtr_t Attr::replaceChildNode( NodePtr_t &node, NodePt
 }
 
 /**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void Attr::toUTF8Stream( std::ostream &os ) const {
+    blogator::unicode::utf8::convert( os, this->qualifiedName() );
+
+    if( this->hasValue() ) {
+        os << "=\"";
+        blogator::unicode::utf8::convert( os, *this->value() );
+        os << "\"";
+    }
+}
+
+/**
  * Shallow swaps Attribute nodes
  * @param lhs Attr
  * @param rhs Attr

@@ -1,5 +1,7 @@
 #include "DocumentType.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::dom::node;
 
 /**
@@ -255,6 +257,28 @@ blogator::parser::dom::NodePtr_t DocumentType::replaceChildNode( NodePtr_t &node
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "DocumentType nodes do not have children." );
+}
+
+/**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void DocumentType::toUTF8Stream( std::ostream &os ) const {
+    os << "<!DOCTYPE ";
+    blogator::unicode::utf8::convert( os, _name );
+
+    if( !_public_id.empty() ) {
+        os << " PUBLIC \"";
+        blogator::unicode::utf8::convert( os, _public_id );
+        os << "\"";
+    }
+    if( !_system_id.empty() ) {
+        os << " SYSTEM \"";
+        blogator::unicode::utf8::convert( os, _system_id );
+        os << "\"";
+    }
+
+    os << ">";
 }
 
 /**

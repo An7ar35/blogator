@@ -1478,3 +1478,37 @@ TEST( parser_dom_node_Element_Tests, getElementsByClassName_2 ) { //'quirks' doc
     ASSERT_EQ( list3.size(), 1 );
     ASSERT_EQ( list3[0], child3 );
 }
+
+TEST( parser_dom_node_Element_Tests, output_stream_0 ) {
+    auto node = Element( U"option" );
+    node.createAttribute( U"value", U"test" );
+    node.createAttribute( U"selected" );
+
+    std::stringstream expected_ss;
+    expected_ss << "<option value=\"test\" selected></option>";
+
+    std::stringstream received_ss;
+    received_ss << node;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}
+
+TEST( parser_dom_node_Element_Tests, output_stream_1 ) {
+    auto node = Element( blogator::parser::specs::infra::Element::HTML5_DIV );
+    node.createAttribute( U"class", U"main" );
+    auto * h1     = node.appendChild( std::make_unique<Element>( blogator::parser::specs::infra::Element::HTML5_H1 ) );
+    auto * h1_txt = h1->appendChild( std::make_unique<Text>( U"Heading 1" ) );
+    auto * img    = node.appendChild( std::make_unique<Element>( blogator::parser::specs::infra::Element::HTML5_IMG ) );
+    dynamic_cast<Element *>( img )->createAttribute( U"src", U"image.jpg" );
+    dynamic_cast<Element *>( img )->createAttribute( U"alt", U"kitteh" );
+    auto * p      = node.appendChild( std::make_unique<Element>( blogator::parser::specs::infra::Element::HTML5_P ) );
+    auto * p_txt  = p->appendChild( std::make_unique<Text>( U"paragraph text" ) );
+
+    std::stringstream expected_ss;
+    expected_ss << R"(<div class="main"><h1>Heading 1</h1><img src="image.jpg" alt="kitteh"><p>paragraph text</p></div>)";
+
+    std::stringstream received_ss;
+    received_ss << node;
+
+    ASSERT_EQ( received_ss.str(), expected_ss.str() );
+}

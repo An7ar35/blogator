@@ -8,6 +8,7 @@
 #include "Comment.h"
 #include "Document.h"
 #include "DocumentType.h"
+#include "DocumentFragment.h"
 #include "Element.h"
 #include "Text.h"
 #include "../../../unicode/unicode.h"
@@ -216,9 +217,8 @@ Node & Node::operator =( Node &&node ) noexcept {
  * @param node DOM Node
  * @return Output stream
  */
-std::ostream & blogator::parser::dom::node::operator <<( std::ostream &os, const Node &node ) {
-    //TODO
-
+std::ostream & blogator::parser::dom::node::operator <<( std::ostream & os, const Node & node ) {
+    node.toUTF8Stream( os );
     return os;
 }
 
@@ -1338,6 +1338,12 @@ void Node::setPrevSibling( Node * node ) {
 void Node::setNextSibling( Node * node ) {
     _next_sibling = node;
 }
+
+/**
+ * Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void Node::toUTF8Stream( std::ostream &os ) const { /* do nothing / use overrides */ }
 
 /**
  * [PRIVATE] Appends a single node to the end of the children list

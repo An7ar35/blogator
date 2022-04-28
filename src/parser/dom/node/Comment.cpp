@@ -1,5 +1,7 @@
 #include "Comment.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::dom::node;
 
 /**
@@ -87,6 +89,16 @@ blogator::parser::dom::NodePtr_t Comment::replaceChildNode( NodePtr_t &node, Nod
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "Comment nodes do not have children." );
+}
+
+/**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void Comment::toUTF8Stream( std::ostream &os ) const {
+    os << "<!-- ";
+    blogator::unicode::utf8::convert( os, this->data() );
+    os << " -->";
 }
 
 /**
