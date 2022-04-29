@@ -17,7 +17,7 @@ bool blogator::unicode::ascii::isspace( uint32_t c ) noexcept {
  * @return Is ASCII whitespace (TAB, LF, FF, CR, SPACE)
  */
 bool blogator::unicode::ascii::iswspace( uint32_t c ) noexcept {
-    return ( c == unicode::TAB || isfeed( c ) || c == unicode::CR || c == unicode::SPACE );
+    return ( c == unicode::TAB || unicode::ascii::isfeed( c ) || c == unicode::CR || c == unicode::SPACE );
 }
 
 /**

@@ -31,28 +31,9 @@ namespace blogator::parser::tokeniser {
         typedef specs::infra::TokeniserState State_e;
         typedef specs::infra::TokenType      Type_e;
 
-        static const uint32_t NULL_CHAR              = unicode::NUL;
-        static const uint32_t CARRIAGE_RETURN        = unicode::CR;
-        static const uint32_t EXCLAMATION_MARK       = 0x0021; //'!'
-        static const uint32_t QUOTATION_MARK         = 0x0022; //'"'
-        static const uint32_t NUMBER_SIGN            = 0x0023; //'#'
-        static const uint32_t AMPERSAND              = 0x0026; //'&'
-        static const uint32_t APOSTROPHE             = 0x0027; //'''
-        static const uint32_t HYPHEN_MINUS           = 0x002D; //'-'
-        static const uint32_t SOLIDUS                = 0x002F; //'/'
-        static const uint32_t DIGIT_ZERO             = 0x0030; //'0'
-        static const uint32_t SEMICOLON              = 0x003B; //';'
-        static const uint32_t LESS_THAN_SIGN         = 0x003C; //'<'
-        static const uint32_t EQUALS_SIGN            = 0x003D; //'='
-        static const uint32_t GREATER_THAN_SIGN      = 0x003E; //'>'
-        static const uint32_t QUESTION_MARK          = 0x003F; //'?'
-        static const uint32_t LATIN_CAPITAL_LETTER_X = 0x0058; //'X'
-        static const uint32_t RIGHT_SQUARE_BRACKET   = 0x005D; //']'
-        static const uint32_t GRAVE_ACCENT           = 0x0060; //'`'
-        static const uint32_t LATIN_SMALL_LETTER_X   = 0x0078; //'x'
-        static const uint32_t REPLACEMENT_CHAR       = 0xFFFD;
-        static const uint32_t UNDEFINED_CHAR_10FFFF  = 0x10FFFF;
-        static const auto     THIS_CONTEXT           = specs::Context::HTML5;
+        static const uint32_t REPLACEMENT_CHAR      = 0xFFFD;
+        static const uint32_t UNDEFINED_CHAR_10FFFF = 0x10FFFF;
+        static const auto     THIS_CONTEXT          = specs::Context::HTML5;
 
         bool                  _eof;
         std::filesystem::path _src_path;
@@ -66,7 +47,7 @@ namespace blogator::parser::tokeniser {
 
         struct Cache {
             Type_e                                 type          { Type_e::UNKNOWN };
-            TextPos                                attr_position { 0, 0 }; //used for Tag.attribute duplication errors
+            TextPos                                attr_position { 0, 0 };  //used for Tag.attribute duplication errors
             std::vector<uint32_t>                  token_name_buffer;
             std::vector<uint32_t>                  field_buffer_a;          //used for Tag.attribute.name or Doctype.pid
             std::vector<uint32_t>                  field_buffer_b;          //used for Tag.attribute.name or Doctype.sid
@@ -89,11 +70,10 @@ namespace blogator::parser::tokeniser {
         void appendToTempBuffer( uint32_t c );
         template<typename InputIt> void appendToTempBuffer( InputIt begin, InputIt end );
         [[nodiscard]] bool isEqualToTempBuffer( const std::u32string & str ) const;
-        const std::vector<uint32_t> & tempBuffer();
+        [[nodiscard]] const std::vector<uint32_t> & tempBuffer() const;
 
         void clearPendingToken();
         void emitCharacterToken( TextPos position, uint32_t c );
-        void emitCharacterToken( TextPos position, const std::u32string& str );
         void emitEndOfFileToken( TextPos position );
 
         void createCommentToken( TextPos position );

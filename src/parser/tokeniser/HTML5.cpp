@@ -111,12 +111,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::DATA: {
                 if( text.reachedEnd() ) {
                     emitEndOfFileToken( text.position() );
-                } else if( character == AMPERSAND ) {
+                } else if( character == unicode::AMPERSAND ) {
                     setReturnState( State_e::DATA );
                     setState( State_e::CHARACTER_REFERENCE );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::TAG_OPEN );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), character );
                 } else {
@@ -127,12 +127,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::RCDATA: {
                 if( text.reachedEnd() ) {
                     emitEndOfFileToken( text.position() );
-                } else if( character == AMPERSAND ) {
+                } else if( character == unicode::AMPERSAND ) {
                     setReturnState( State_e::RCDATA );
                     setState( State_e::CHARACTER_REFERENCE );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::RCDATA_LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
                 } else {
@@ -143,9 +143,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::RAWTEXT: {
                 if( text.reachedEnd() ) {
                     emitEndOfFileToken( text.position() );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::RAWTEXT_LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
                 } else {
@@ -156,9 +156,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::SCRIPT_DATA: {
                 if( text.reachedEnd() ) {
                     emitEndOfFileToken( text.position() );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
                 } else {
@@ -169,7 +169,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::PLAIN_TEXT: {
                 if( text.reachedEnd() ) {
                     emitEndOfFileToken( text.position() );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
                 } else {
@@ -180,22 +180,22 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::TAG_OPEN: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_BEFORE_TAG_NAME );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     emitEndOfFileToken( text.position() );
-                } else if( character == EXCLAMATION_MARK ) {
+                } else if( character == unicode::EXCLAMATION_MARK ) {
                     setState( State_e::MARKUP_DECLARATION_OPEN );
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
                     setState( State_e::END_TAG_OPEN );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     createStartTagToken( text.position() );
                     reconsume( State_e::TAG_NAME );
-                } else if( character == QUESTION_MARK ) {
+                } else if( character == unicode::QUESTION_MARK ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_QUESTION_MARK_INSTEAD_OF_TAG_NAME );
                     createCommentToken( text.position() );
                     reconsume( State_e::BOGUS_COMMENT );
                 } else {
                     logError( text.position(), ErrorCode::INVALID_FIRST_CHARACTER_OF_TAG_NAME );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     reconsume( State_e::DATA );
                 }
             } break;
@@ -203,10 +203,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::END_TAG_OPEN: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_BEFORE_TAG_NAME );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
                     emitEndOfFileToken( text.position() );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_END_TAG_NAME );
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
@@ -226,14 +226,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_ATTRIBUTE_NAME );
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
                     setState( State_e::SELF_CLOSING_START_TAG );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else if( unicode::ascii::isupper( character ) ) {
                     appendToPendingTokenText( unicode::ascii::tolower( character ) );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenText( REPLACEMENT_CHAR );
                 } else {
@@ -242,11 +242,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::RCDATA_LESS_THAN_SIGN: {
-                if( character == SOLIDUS ) {
+                if( character == unicode::SOLIDUS ) {
                     clearTempBuffer();
                     setState( State_e::RCDATA_END_TAG_OPEN );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     reconsume( State_e::RCDATA );
                 }
             } break;
@@ -256,8 +256,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     createEndTagToken( text.position() );
                     reconsume( State_e::RCDATA_END_TAG_NAME );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
                     reconsume( State_e::RCDATA );
                 }
             } break;
@@ -267,8 +267,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     if( appropriateEndTagToken() ) {
                         setState( State_e::BEFORE_ATTRIBUTE_NAME );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -277,13 +277,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                         reconsume( State_e::RCDATA );
                     }
 
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
 
                     if( appropriateEndTagToken() ) {
                         setState( State_e::SELF_CLOSING_START_TAG );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -291,13 +291,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
                         reconsume( State_e::RCDATA );
                     }
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::DATA );
                         emitPendingToken( text.position() );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -312,8 +312,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     appendToPendingTokenText( character );
                     appendToTempBuffer( character );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                     for( const auto & c : tempBuffer() ) {
                         emitCharacterToken( text.position(), c );
@@ -324,11 +324,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::RAWTEXT_LESS_THAN_SIGN: {
-                if( character == SOLIDUS ) {
+                if( character == unicode::SOLIDUS ) {
                     clearTempBuffer();
                     setState( State_e::RAWTEXT_END_TAG_OPEN );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     reconsume( State_e::RAWTEXT );
                 }
             } break;
@@ -338,8 +338,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     createEndTagToken( text.position() );
                     reconsume( State_e::RAWTEXT_END_TAG_NAME );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
                     reconsume( State_e::RAWTEXT );
                 }
             } break;
@@ -349,8 +349,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     if( appropriateEndTagToken() ) {
                         setState( State_e::BEFORE_ATTRIBUTE_NAME );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -358,12 +358,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
                         reconsume( State_e::RAWTEXT );
                     }
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::SELF_CLOSING_START_TAG );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -371,13 +371,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
                         reconsume( State_e::RAWTEXT );
                     }
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::DATA );
                         emitPendingToken( text.position() );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -392,8 +392,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     appendToPendingTokenText( character );
                     appendToTempBuffer( character );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                     for( const auto & c : tempBuffer() ) {
                         emitCharacterToken( text.position(), c );
@@ -404,15 +404,15 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::SCRIPT_DATA_LESS_THAN_SIGN: {
-                if( character == SOLIDUS ) {
+                if( character == unicode::SOLIDUS ) {
                     clearTempBuffer();
                     setState( State_e::SCRIPT_DATA_END_TAG_OPEN );
-                } else if( character == EXCLAMATION_MARK ) {
+                } else if( character == unicode::EXCLAMATION_MARK ) {
                     setState( State_e::SCRIPT_DATA_ESCAPE_START );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), EXCLAMATION_MARK );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::EXCLAMATION_MARK );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     reconsume( State_e::SCRIPT_DATA );
                 }
             } break;
@@ -422,8 +422,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     createEndTagToken( text.position() );
                     reconsume( State_e::SCRIPT_DATA_END_TAG_NAME );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
                     reconsume( State_e::SCRIPT_DATA );
                 }
             } break;
@@ -433,8 +433,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     if( appropriateEndTagToken() ) {
                         setState( State_e::BEFORE_ATTRIBUTE_NAME );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -442,12 +442,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
                         reconsume( State_e::DATA );
                     }
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::SELF_CLOSING_START_TAG );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -455,13 +455,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
                         reconsume( State_e::DATA );
                     }
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     if( appropriateEndTagToken() ) {
                         setState( State_e::DATA );
                         emitPendingToken( text.position() );
                     } else {
-                        emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                        emitCharacterToken( text.position(), SOLIDUS );
+                        emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                        emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                         for( const auto & c : tempBuffer() ) {
                             emitCharacterToken( text.position(), c );
@@ -476,8 +476,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     appendToPendingTokenText( character );
                     appendToTempBuffer( character );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                     for( const auto & c : tempBuffer() ) {
                         emitCharacterToken( text.position(), c );
@@ -488,18 +488,18 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::SCRIPT_DATA_ESCAPE_START: {
-                if( character == HYPHEN_MINUS ) {
+                if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::SCRIPT_DATA_ESCAPE_START_DASH );
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
                 } else {
                     reconsume( State_e::SCRIPT_DATA );
                 }
             } break;
 
             case State_e::SCRIPT_DATA_ESCAPE_START_DASH: {
-                if( character == HYPHEN_MINUS ) {
+                if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_DASH_DASH );
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
                 } else {
                     reconsume( State_e::SCRIPT_DATA );
                 }
@@ -509,12 +509,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_DASH );
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
-                } else if( character == LESS_THAN_SIGN ) {
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
                 } else {
@@ -526,12 +526,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_DASH_DASH );
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
-                } else if( character == LESS_THAN_SIGN ) {
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     setState( State_e::SCRIPT_DATA_ESCAPED );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
@@ -545,14 +545,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA );
-                    emitCharacterToken( text.position(), GREATER_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                    emitCharacterToken( text.position(), unicode::GREATER_THAN_SIGN );
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     setState( State_e::SCRIPT_DATA_ESCAPED );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
@@ -563,15 +563,15 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN: {
-                if( character == SOLIDUS ) {
+                if( character == unicode::SOLIDUS ) {
                     clearTempBuffer();
                     setState( State_e::SCRIPT_DATA_ESCAPED_END_TAG_OPEN );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     clearTempBuffer();
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     reconsume( State_e::SCRIPT_DATA_DOUBLE_ESCAPE_START );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
                     reconsume( State_e::SCRIPT_DATA_ESCAPED );
                 }
             } break;
@@ -581,8 +581,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     createEndTagToken( text.position() );
                     reconsume( State_e::SCRIPT_DATA_ESCAPED_END_TAG_NAME );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
                     reconsume( State_e::SCRIPT_DATA_ESCAPED );
                 }
             } break;
@@ -592,9 +592,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
                 if( ( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) && appropriate ) {
                     setState( State_e::BEFORE_ATTRIBUTE_NAME );
-                } else if( character == SOLIDUS && appropriate ) {
+                } else if( character == unicode::SOLIDUS && appropriate ) {
                     setState( State_e::SELF_CLOSING_START_TAG );
-                } else if( character == GREATER_THAN_SIGN && appropriate ) {
+                } else if( character == unicode::GREATER_THAN_SIGN && appropriate ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else if( unicode::ascii::isupper( character ) ) {
@@ -604,8 +604,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     appendToPendingTokenText( character );
                     appendToTempBuffer( character );
                 } else {
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
 
                     for( const auto & c : tempBuffer() ) {
                         emitCharacterToken( text.position(), c );
@@ -619,8 +619,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( unicode::ascii::istab( character )   ||
                     unicode::ascii::isfeed( character )  ||
                     unicode::ascii::isspace( character ) ||
-                    character == SOLIDUS                 ||
-                    character == GREATER_THAN_SIGN )
+                    character == unicode::SOLIDUS                 ||
+                    character == unicode::GREATER_THAN_SIGN )
                 {
                     if( isEqualToTempBuffer( U"script" ) ) {
                         setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED );
@@ -643,13 +643,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED_DASH );
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
-                } else if( character == LESS_THAN_SIGN ) {
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
                 } else {
@@ -661,13 +661,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH );
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
-                } else if( character == LESS_THAN_SIGN ) {
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
@@ -681,15 +681,15 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
-                    emitCharacterToken( text.position(), HYPHEN_MINUS );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
+                    emitCharacterToken( text.position(), unicode::HYPHEN_MINUS );
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN );
-                    emitCharacterToken( text.position(), LESS_THAN_SIGN );
-                } else if( character == GREATER_THAN_SIGN ) {
+                    emitCharacterToken( text.position(), unicode::LESS_THAN_SIGN );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::SCRIPT_DATA );
-                    emitCharacterToken( text.position(), GREATER_THAN_SIGN );
-                } else if( character == NULL_CHAR ) {
+                    emitCharacterToken( text.position(), unicode::GREATER_THAN_SIGN );
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPED );
                     emitCharacterToken( text.position(), REPLACEMENT_CHAR );
@@ -700,10 +700,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN: {
-                if( character == SOLIDUS ) {
+                if( character == unicode::SOLIDUS ) {
                     clearTempBuffer();
                     setState( State_e::SCRIPT_DATA_DOUBLE_ESCAPE_END );
-                    emitCharacterToken( text.position(), SOLIDUS );
+                    emitCharacterToken( text.position(), unicode::SOLIDUS );
                 } else {
                     reconsume( State_e::SCRIPT_DATA_DOUBLE_ESCAPED );
                 }
@@ -713,8 +713,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( unicode::ascii::istab( character )   ||
                     unicode::ascii::isfeed( character )  ||
                     unicode::ascii::isspace( character ) ||
-                    character == SOLIDUS                 ||
-                    character == GREATER_THAN_SIGN )
+                    character == unicode::SOLIDUS                 ||
+                    character == unicode::GREATER_THAN_SIGN )
                 {
                     if( isEqualToTempBuffer( U"script" ) ) {
                         setState( State_e::SCRIPT_DATA_ESCAPED );
@@ -734,11 +734,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::BEFORE_ATTRIBUTE_NAME: {
-                if( text.reachedEnd() || character == SOLIDUS || character == GREATER_THAN_SIGN ) {
+                if( text.reachedEnd() || character == unicode::SOLIDUS || character == unicode::GREATER_THAN_SIGN ) {
                     reconsume( State_e::AFTER_ATTRIBUTE_NAME );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == EQUALS_SIGN ) {
+                } else if( character == unicode::EQUALS_SIGN ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_EQUALS_SIGN_BEFORE_ATTRIBUTE_NAME );
                     clearPendingTokenAttribute();
                     appendToPendingTokenAttrNameBuffer( character );
@@ -756,18 +756,18 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     unicode::ascii::istab( character )   ||
                     unicode::ascii::isfeed( character )  ||
                     unicode::ascii::isspace( character ) ||
-                    character == SOLIDUS                 ||
-                    character == GREATER_THAN_SIGN )
+                    character == unicode::SOLIDUS                 ||
+                    character == unicode::GREATER_THAN_SIGN )
                 {
                     reconsume( State_e::AFTER_ATTRIBUTE_NAME );
-                } else if( character == EQUALS_SIGN ) {
+                } else if( character == unicode::EQUALS_SIGN ) {
                     setState( State_e::BEFORE_ATTRIBUTE_VALUE );
                 } else if( unicode::ascii::isupper( character ) ) {
                     appendToPendingTokenAttrNameBuffer( unicode::ascii::tolower( character ) );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenAttrNameBuffer( REPLACEMENT_CHAR );
-                } else if( character == QUOTATION_MARK || character == APOSTROPHE || character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::QUOTATION_MARK || character == unicode::APOSTROPHE || character == unicode::LESS_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_CHARACTER_IN_ATTRIBUTE_NAME );
                     appendToPendingTokenAttrNameBuffer( character );
                 } else {
@@ -781,11 +781,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
                     setState( State_e::SELF_CLOSING_START_TAG );
-                } else if( character == EQUALS_SIGN ) {
+                } else if( character == unicode::EQUALS_SIGN ) {
                     setState( State_e::BEFORE_ATTRIBUTE_VALUE );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     addPendingTokenAttribute();
                     emitPendingToken( text.position() );
@@ -799,11 +799,11 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::BEFORE_ATTRIBUTE_VALUE: {
                 if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setState( State_e::ATTRIBUTE_VALUE_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setState( State_e::ATTRIBUTE_VALUE_SINGLE_QUOTED );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_ATTRIBUTE_VALUE );
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
@@ -816,13 +816,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_TAG );
                     emitEndOfFileToken( text.position() );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setState( State_e::AFTER_ATTRIBUTE_VALUE_QUOTED );
                     addPendingTokenAttribute();
-                } else if( character == AMPERSAND ) {
+                } else if( character == unicode::AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_DOUBLE_QUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenAttrValueBuffer( REPLACEMENT_CHAR );
                 } else {
@@ -834,13 +834,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_TAG );
                     emitEndOfFileToken( text.position() );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setState( State_e::AFTER_ATTRIBUTE_VALUE_QUOTED );
                     addPendingTokenAttribute();
-                } else if( character == AMPERSAND ) {
+                } else if( character == unicode::AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_SINGLE_QUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenAttrValueBuffer( REPLACEMENT_CHAR );
                 } else {
@@ -854,20 +854,20 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_ATTRIBUTE_NAME );
-                } else if( character == AMPERSAND ) {
+                } else if( character == unicode::AMPERSAND ) {
                     setReturnState( State_e::ATTRIBUTE_VALUE_UNQUOTED );
                     setState( State_e::CHARACTER_REFERENCE );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenAttrValueBuffer( REPLACEMENT_CHAR );
-                } else if( character == QUOTATION_MARK ||
-                           character == APOSTROPHE     ||
-                           character == LESS_THAN_SIGN ||
-                           character == EQUALS_SIGN    ||
-                           character == GRAVE_ACCENT )
+                } else if( character == unicode::QUOTATION_MARK ||
+                           character == unicode::APOSTROPHE     ||
+                           character == unicode::LESS_THAN_SIGN ||
+                           character == unicode::EQUALS_SIGN    ||
+                           character == unicode::GRAVE_ACCENT )
                 {
                     logError( text.position(), ErrorCode::UNEXPECTED_CHARACTER_IN_UNQUOTED_ATTRIBUTE_VALUE );
                     appendToPendingTokenAttrValueBuffer( character );
@@ -882,9 +882,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_ATTRIBUTE_NAME );
-                } else if( character == SOLIDUS ) {
+                } else if( character == unicode::SOLIDUS ) {
                     setState( State_e::SELF_CLOSING_START_TAG );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else {
@@ -897,7 +897,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_TAG );
                     emitEndOfFileToken( text.position() );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setPendingTokenSelfCloseFlag();
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
@@ -911,10 +911,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenText( REPLACEMENT_CHAR );
                 } else {
@@ -926,7 +926,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 const auto [ next_char, end_reached ] = text.character( 1 );
                 const auto next7                      = text.characters( 7 );
 
-                if( character == HYPHEN_MINUS && !end_reached && next_char == HYPHEN_MINUS ) {
+                if( character == unicode::HYPHEN_MINUS && !end_reached && next_char == unicode::HYPHEN_MINUS ) {
                     text.advanceCol( 1 );
                     createCommentToken( text.position() );
                     setState( State_e::COMMENT_START );
@@ -954,9 +954,9 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::COMMENT_START: {
-                if( character == HYPHEN_MINUS ) {
+                if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_START_DASH );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_CLOSING_OF_EMPTY_COMMENT );
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
@@ -970,14 +970,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_END );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_CLOSING_OF_EMPTY_COMMENT );
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else {
-                    appendToPendingTokenText( HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
                     reconsume( State_e::COMMENT );
                 }
             } break;
@@ -987,12 +987,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     appendToPendingTokenText( character );
                     setState( State_e::COMMENT_LESS_THAN_SIGN );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_END_DASH );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenText( REPLACEMENT_CHAR );
                 } else {
@@ -1001,10 +1001,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::COMMENT_LESS_THAN_SIGN: {
-                if( character == EXCLAMATION_MARK ) {
+                if( character == unicode::EXCLAMATION_MARK ) {
                     appendToPendingTokenText( character );
                     setState( State_e::COMMENT_LESS_THAN_SIGN_BANG );
-                } else if( character == LESS_THAN_SIGN ) {
+                } else if( character == unicode::LESS_THAN_SIGN ) {
                     appendToPendingTokenText( character );
                 } else {
                     reconsume( State_e::COMMENT );
@@ -1012,7 +1012,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::COMMENT_LESS_THAN_SIGN_BANG: {
-                if( character == HYPHEN_MINUS ) {
+                if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_LESS_THAN_SIGN_BANG_DASH );
                 } else {
                     reconsume( State_e::COMMENT );
@@ -1020,7 +1020,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::COMMENT_LESS_THAN_SIGN_BANG_DASH: {
-                if( character == HYPHEN_MINUS ) {
+                if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH );
                 } else {
                     reconsume( State_e::COMMENT_END_DASH );
@@ -1028,7 +1028,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::COMMENT_LESS_THAN_SIGN_BANG_DASH_DASH: {
-                if( text.reachedEnd() || character == GREATER_THAN_SIGN ) {
+                if( text.reachedEnd() || character == unicode::GREATER_THAN_SIGN ) {
                     reconsume( State_e::COMMENT_END );
                 } else {
                     logError( text.position(), ErrorCode::NESTED_COMMENT );
@@ -1041,10 +1041,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
+                } else if( character == unicode::HYPHEN_MINUS ) {
                     setState( State_e::COMMENT_END );
                 } else {
-                    appendToPendingTokenText( HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
                     reconsume( State_e::COMMENT );
                 }
             } break;
@@ -1054,16 +1054,16 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
-                } else if( character == EXCLAMATION_MARK ) {
+                } else if( character == unicode::EXCLAMATION_MARK ) {
                     setState( State_e::COMMENT_END_BANG );
-                } else if( character == HYPHEN_MINUS ) {
-                    appendToPendingTokenText( HYPHEN_MINUS );
+                } else if( character == unicode::HYPHEN_MINUS ) {
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
                 } else {
-                    appendToPendingTokenText( HYPHEN_MINUS );
-                    appendToPendingTokenText( HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
                     reconsume( State_e::COMMENT );
                 }
             } break;
@@ -1073,19 +1073,19 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     logError( text.position(), ErrorCode::EOF_IN_COMMENT );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == HYPHEN_MINUS ) {
-                    appendToPendingTokenText( HYPHEN_MINUS );
-                    appendToPendingTokenText( HYPHEN_MINUS );
-                    appendToPendingTokenText( EXCLAMATION_MARK );
+                } else if( character == unicode::HYPHEN_MINUS ) {
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::EXCLAMATION_MARK );
                     setState( State_e::COMMENT_END_DASH );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::INCORRECTLY_CLOSED_COMMENT );
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else {
-                    appendToPendingTokenText( HYPHEN_MINUS );
-                    appendToPendingTokenText( HYPHEN_MINUS );
-                    appendToPendingTokenText( EXCLAMATION_MARK );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::HYPHEN_MINUS );
+                    appendToPendingTokenText( unicode::EXCLAMATION_MARK );
                     reconsume( State_e::COMMENT );
                 }
             } break;
@@ -1098,7 +1098,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_DOCTYPE_NAME );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     reconsume( State_e::BEFORE_DOCTYPE_NAME );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_BEFORE_DOCTYPE_NAME );
@@ -1118,12 +1118,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     createDoctypeToken( text.position() );
                     appendToPendingTokenText( unicode::ascii::tolower( character ) );
                     setState( State_e::DOCTYPE_NAME );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     createDoctypeToken( text.position() );
                     appendToPendingTokenText( REPLACEMENT_CHAR );
                     setState( State_e::DOCTYPE_NAME );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_NAME );
                     createDoctypeToken( text.position(), true );
                     setState( State_e::DATA );
@@ -1143,12 +1143,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::AFTER_DOCTYPE_NAME );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else if( unicode::ascii::isupper( character ) ) {
                     appendToPendingTokenText( unicode::ascii::tolower( character ) );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenText( REPLACEMENT_CHAR );
                 } else {
@@ -1164,7 +1164,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else {
@@ -1191,15 +1191,15 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_DOCTYPE_PUBLIC_IDENTIFIER );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_AFTER_DOCTYPE_PUBLIC_KEYWORD );
                     setPendingDoctypeTokenPIDFlag( true );
                     setState( State_e::DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_AFTER_DOCTYPE_PUBLIC_KEYWORD );
                     setPendingDoctypeTokenPIDFlag( true );
                     setState( State_e::DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1219,13 +1219,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setPendingDoctypeTokenPIDFlag( true );
                     setState( State_e::DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setPendingDoctypeTokenPIDFlag( true );
                     setState( State_e::DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1243,12 +1243,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setPendingDoctypeTokenQuirksFlag( true );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setState( State_e::AFTER_DOCTYPE_PUBLIC_IDENTIFIER );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenPIDBuffer( REPLACEMENT_CHAR );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1264,12 +1264,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setPendingDoctypeTokenQuirksFlag( true );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setState( State_e::AFTER_DOCTYPE_PUBLIC_IDENTIFIER );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenPIDBuffer( REPLACEMENT_CHAR );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_PUBLIC_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1287,14 +1287,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIER );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS );
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS );
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED );
@@ -1313,13 +1313,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED );
                 } else {
@@ -1337,15 +1337,15 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     setState( State_e::BEFORE_DOCTYPE_SYSTEM_IDENTIFIER );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_AFTER_DOCTYPE_SYSTEM_KEYWORD );
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     logError( text.position(), ErrorCode::MISSING_WHITESPACE_AFTER_DOCTYPE_SYSTEM_KEYWORD );
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1365,13 +1365,13 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setPendingDoctypeTokenSIDFlag( true );
                     setState( State_e::DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::MISSING_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1389,12 +1389,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setPendingDoctypeTokenQuirksFlag( true );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == QUOTATION_MARK ) {
+                } else if( character == unicode::QUOTATION_MARK ) {
                     setState( State_e::AFTER_DOCTYPE_SYSTEM_IDENTIFIER );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenSIDBuffer( REPLACEMENT_CHAR );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1410,12 +1410,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     setPendingDoctypeTokenQuirksFlag( true );
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == APOSTROPHE ) {
+                } else if( character == unicode::APOSTROPHE ) {
                     setState( State_e::AFTER_DOCTYPE_SYSTEM_IDENTIFIER );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     appendToPendingTokenSIDBuffer( REPLACEMENT_CHAR );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     logError( text.position(), ErrorCode::ABRUPT_DOCTYPE_SYSTEM_IDENTIFIER );
                     setPendingDoctypeTokenQuirksFlag( true );
                     setState( State_e::DATA );
@@ -1433,7 +1433,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     emitEndOfFileToken( text.position() );
                 } else if( unicode::ascii::istab( character ) || unicode::ascii::isfeed( character ) || unicode::ascii::isspace( character ) ) {
                     //ignore character
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else {
@@ -1446,10 +1446,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     emitPendingToken( text.position() );
                     emitEndOfFileToken( text.position() );
-                } else if( character == GREATER_THAN_SIGN ) {
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
-                } else if( character == NULL_CHAR ) {
+                } else if( character == unicode::NUL ) {
                     logError( text.position(), ErrorCode::UNEXPECTED_NULL_CHARACTER );
                     //ignore character
                 }
@@ -1459,7 +1459,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_CDATA );
                     emitEndOfFileToken( text.position() );
-                } else if( character == RIGHT_SQUARE_BRACKET ) {
+                } else if( character == unicode::RIGHT_SQUARE_BRACKET ) {
                     setState( State_e::CDATA_SECTION_BRACKET );
                 } else {
                     emitCharacterToken( text.position(), character );
@@ -1467,33 +1467,33 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::CDATA_SECTION_BRACKET: {
-                if( character == RIGHT_SQUARE_BRACKET ) {
+                if( character == unicode::RIGHT_SQUARE_BRACKET ) {
                     setState( State_e::CDATA_SECTION_END );
                 } else {
-                    emitCharacterToken( text.position(), RIGHT_SQUARE_BRACKET );
+                    emitCharacterToken( text.position(), unicode::RIGHT_SQUARE_BRACKET );
                     reconsume( State_e::CDATA_SECTION );
                 }
             } break;
 
             case State_e::CDATA_SECTION_END: {
-                if( character == RIGHT_SQUARE_BRACKET ) {
-                    emitCharacterToken( text.position(), RIGHT_SQUARE_BRACKET );
-                } else if( character == GREATER_THAN_SIGN ) {
+                if( character == unicode::RIGHT_SQUARE_BRACKET ) {
+                    emitCharacterToken( text.position(), unicode::RIGHT_SQUARE_BRACKET );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
                     setState( State_e::DATA );
                 } else {
-                    emitCharacterToken( text.position(), RIGHT_SQUARE_BRACKET );
-                    emitCharacterToken( text.position(), RIGHT_SQUARE_BRACKET );
+                    emitCharacterToken( text.position(), unicode::RIGHT_SQUARE_BRACKET );
+                    emitCharacterToken( text.position(), unicode::RIGHT_SQUARE_BRACKET );
                     reconsume( State_e::CDATA_SECTION );
                 }
             } break;
 
             case State_e::CHARACTER_REFERENCE: {
                 clearTempBuffer();
-                appendToTempBuffer( AMPERSAND );
+                appendToTempBuffer( unicode::AMPERSAND );
 
                 if( unicode::ascii::isalnum( character ) ) {
                     reconsume( State_e::NAMED_CHARACTER_REFERENCE );
-                } else if( character == NUMBER_SIGN ) {
+                } else if( character == unicode::NUMBER_SIGN ) {
                     appendToTempBuffer( character );
                     setState( State_e::NUMERIC_CHARACTER_REFERENCE );
                 } else {
@@ -1507,7 +1507,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 auto match_tracker  = TrieTracker<uint32_t>();
                 auto start_position = text.position();
 
-                specs::infra::NamedCharRef::match( match_tracker, AMPERSAND );
+                specs::infra::NamedCharRef::match( match_tracker, unicode::AMPERSAND );
 
                 while( specs::infra::NamedCharRef::match( match_tracker, character ) ) {
                     appendToTempBuffer( character );
@@ -1522,8 +1522,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     if( ( returnState() == State_e::ATTRIBUTE_VALUE_DOUBLE_QUOTED ||
                           returnState() == State_e::ATTRIBUTE_VALUE_SINGLE_QUOTED ||
                           returnState() == State_e::ATTRIBUTE_VALUE_UNQUOTED )
-                        && ( match_tracker.lastMatchedElement() != SEMICOLON )
-                        && ( next_input_char == EQUALS_SIGN || unicode::ascii::isalnum( next_input_char ) ) )
+                        && ( match_tracker.lastMatchedElement() != unicode::SEMICOLON )
+                        && ( next_input_char == unicode::EQUALS_SIGN || unicode::ascii::isalnum( next_input_char ) ) )
                     {
                         flushCodePoints( start_position );
                         reconsume( returnState() ); //since next character is already current because of the NamedCharRef::match(..) while loop
@@ -1535,7 +1535,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                         const auto remainders     = match_tracker.remainder();
                         const auto [ found, ncr ] = NamedCharRef::fetch( std::u32string( match_buffer.begin(), match_buffer.end() ) );
 
-                        if( match_tracker.lastMatchedElement() != SEMICOLON ) {
+                        if( match_tracker.lastMatchedElement() != unicode::SEMICOLON ) {
                             const auto err_pos = ( start_position + TextPos { 0, match_tracker.lastCompleteMatchSize() - 1 } );
                             logError(err_pos, ErrorCode::MISSING_SEMICOLON_AFTER_CHARACTER_REFERENCE );
                         }
@@ -1587,7 +1587,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     } else {
                         emitCharacterToken( text.position(), character );
                     }
-                } else if( character == SEMICOLON ) {
+                } else if( character == unicode::SEMICOLON ) {
                     logError( text.position(), ErrorCode::UNKNOWN_NAMED_CHARACTER_REFERENCE );
                     reconsume( returnState() );
                 } else {
@@ -1598,7 +1598,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::NUMERIC_CHARACTER_REFERENCE: {
                 resetCharRefCode();
 
-                if( character == LATIN_SMALL_LETTER_X || character == LATIN_CAPITAL_LETTER_X ) {
+                if( character == unicode::LATIN_SMALL_LETTER_X || character == unicode::LATIN_CAPITAL_LETTER_X ) {
                     appendToTempBuffer( character );
                     setState( State_e::HEXADECIMAL_CHARACTER_REFERENCE_START );
                 } else {
@@ -1628,12 +1628,12 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
             case State_e::HEXADECIMAL_CHARACTER_REFERENCE: {
                 if( unicode::ascii::isdigit( character ) ) {
-                    addToCharRefCode( 16, ( character - DIGIT_ZERO ) );
+                    addToCharRefCode( 16, ( character - unicode::DIGIT_ZERO ) );
                 } else if( unicode::ascii::isuxdigit( character ) ) {
                     addToCharRefCode( 16, ( character - 0x0037 ) );
                 } else if( unicode::ascii::islxdigit( character ) ) {
                     addToCharRefCode( 16, ( character - 0x0057 ) );
-                } else if( character == SEMICOLON ) {
+                } else if( character == unicode::SEMICOLON ) {
                     setState( State_e::NUMERIC_CHARACTER_REFERENCE_END );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_SEMICOLON_AFTER_CHARACTER_REFERENCE );
@@ -1643,8 +1643,8 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
 
             case State_e::DECIMAL_CHARACTER_REFERENCE: {
                 if( unicode::ascii::isdigit( character ) ) {
-                    addToCharRefCode( 10, ( character - DIGIT_ZERO ) );
-                } else if( character == SEMICOLON ) {
+                    addToCharRefCode( 10, ( character - unicode::DIGIT_ZERO ) );
+                } else if( character == unicode::SEMICOLON ) {
                     setState( State_e::NUMERIC_CHARACTER_REFERENCE_END );
                 } else {
                     logError( text.position(), ErrorCode::MISSING_SEMICOLON_AFTER_CHARACTER_REFERENCE );
@@ -1655,7 +1655,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             case State_e::NUMERIC_CHARACTER_REFERENCE_END: {
                 auto crc = charRefCode();
 
-                if( crc == NULL_CHAR ) {
+                if( crc == unicode::NUL ) {
                     logError( text.position(), ErrorCode::NULL_CHARACTER_REFERENCE );
                     resetCharRefCode( REPLACEMENT_CHAR );
                 } else if( !validCharRefCode() || crc > UNDEFINED_CHAR_10FFFF ) {
@@ -1667,7 +1667,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else if( unicode::utf32::isnonchar( crc ) ) {
                     logError( text.position(), ErrorCode::NONCHARACTER_CHARACTER_REFERENCE );
                 } else {
-                    if( crc == CARRIAGE_RETURN || ( unicode::utf32::iscntrl( crc ) && !unicode::ascii::iswspace( crc ) ) ) {
+                    if( crc == unicode::CR || ( unicode::utf32::iscntrl( crc ) && !unicode::ascii::iswspace( crc ) ) ) {
                         logError( text.position(), ErrorCode::CONTROL_CHARACTER_REFERENCE );
                     }
 
@@ -1755,6 +1755,9 @@ inline tokeniser::HTML5::State_e tokeniser::HTML5::returnState() const noexcept 
     return _return_state;
 }
 
+/**
+ * Clear temporary character buffer
+ */
 inline void tokeniser::HTML5::clearTempBuffer() {
     _temp_buffer.clear();
 }
@@ -1797,7 +1800,7 @@ template<typename InputIt> void tokeniser::HTML5::appendToTempBuffer( InputIt be
  * Gets the temporary buffer
  * @return Reference to the temporary buffer
  */
-inline const std::vector<uint32_t> &tokeniser::HTML5::tempBuffer() {
+inline const std::vector<uint32_t> & tokeniser::HTML5::tempBuffer() const {
     return _temp_buffer;
 }
 
@@ -1903,15 +1906,6 @@ inline void tokeniser::HTML5::appendToPendingTokenText( const std::u32string &tx
  */
 inline void tokeniser::HTML5::emitCharacterToken( TextPos position, uint32_t c ) {
     _tree_builder.dispatch( std::make_unique<token::html5::CharacterTk>( std::u32string( 1, c ), position ) );
-}
-
-/**
- * Emits a token of CHARACTER type
- * @param position Start position of character(s) in source text
- * @param str String
- */
-inline void tokeniser::HTML5::emitCharacterToken( TextPos position, const std::u32string & str ) {
-    _tree_builder.dispatch( std::make_unique<token::html5::CharacterTk>( str, position ) );
 }
 
 /**

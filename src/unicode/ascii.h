@@ -8,13 +8,36 @@
  * Character code constants in the ASCII range
  */
 namespace blogator::unicode {
-    static const uint32_t NUL   { 0x00 };
-    static const uint32_t TAB   { 0x09 };
-    static const uint32_t LF    { 0x0A };
-    static const uint32_t FF    { 0x0C };
-    static const uint32_t CR    { 0x0D };
-    static const uint32_t SPACE { 0x20 };
-    static const uint32_t DEL   { 0x7F };
+    static constexpr uint32_t NUL                    { 0x00 }; //'\0'
+    static constexpr uint32_t TAB                    { 0x09 }; //'\t'
+    static constexpr uint32_t LF                     { 0x0A }; //'\n'
+    static constexpr uint32_t FF                     { 0x0C }; //'\f'
+    static constexpr uint32_t CR                     { 0x0D }; //'\r'
+    static constexpr uint32_t SPACE                  { 0x20 }; //' '
+    static constexpr uint32_t EXCLAMATION_MARK       { 0x21 }; //'!'
+    static constexpr uint32_t QUOTATION_MARK         { 0x22 }; //'"'
+    static constexpr uint32_t NUMBER_SIGN            { 0x23 }; //'#'
+    static constexpr uint32_t AMPERSAND              { 0x26 }; //'&'
+    static constexpr uint32_t APOSTROPHE             { 0x27 }; //'''
+    static constexpr uint32_t ASTERISK               { 0x2A }; //'*'
+    static constexpr uint32_t PLUS_SIGN              { 0x2B }; //'+'
+    static constexpr uint32_t HYPHEN_MINUS           { 0x2D }; //'-'
+    static constexpr uint32_t SOLIDUS                { 0x2F }; //'/'
+    static constexpr uint32_t DIGIT_ZERO             { 0x30 }; //'0'
+    static constexpr uint32_t SEMICOLON              { 0x3B }; //';'
+    static constexpr uint32_t LESS_THAN_SIGN         { 0x3C }; //'<'
+    static constexpr uint32_t EQUALS_SIGN            { 0x3D }; //'='
+    static constexpr uint32_t GREATER_THAN_SIGN      { 0x3E }; //'>'
+    static constexpr uint32_t QUESTION_MARK          { 0x3F }; //'?'
+    static constexpr uint32_t LATIN_CAPITAL_LETTER_X { 0x58 }; //'X'
+    static constexpr uint32_t LEFT_SQUARE_BRACKET    { 0x5B }; //'['
+    static constexpr uint32_t RIGHT_SQUARE_BRACKET   { 0x5D }; //']'
+    static constexpr uint32_t GRAVE_ACCENT           { 0x60 }; //'`'
+    static constexpr uint32_t LATIN_SMALL_LETTER_X   { 0x78 }; //'x'
+    static constexpr uint32_t LEFT_CURLY_BRACKET     { 0x7B }; //'{'
+    static constexpr uint32_t RIGHT_CURLY_BRACKET    { 0x7D }; //'}'
+    static constexpr uint32_t TILDE                  { 0x7E }; //'~'
+    static constexpr uint32_t DEL                    { 0x7F };
 }
 
 /**
