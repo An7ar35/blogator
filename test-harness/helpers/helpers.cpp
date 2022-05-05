@@ -58,10 +58,10 @@ std::set<std::filesystem::path> test_harness::getTestFiles( const std::filesyste
 /**
  * Output stream operator
  * @param os Output stream
- * @param test MarkdownTest object
+ * @param test CommonMarkTest object
  * @return Output stream
  */
-std::ostream & test_harness::commonmark_spec_tests::operator <<( std::ostream &os, const test_harness::commonmark_spec_tests::MarkdownTest &test ) {
+std::ostream & test_harness::commonmark_spec_tests::operator <<( std::ostream &os, const test_harness::commonmark_spec_tests::CommonMarkTest &test ) {
     os << test.src.filename().string() << ":" << test.start_line << ", #"
        << test.example_no << ", ";
     return os;
@@ -70,10 +70,10 @@ std::ostream & test_harness::commonmark_spec_tests::operator <<( std::ostream &o
 /**
  * Loads a 'commonmark-spec' json test file into a collection of tests
  * @param test_dir Source filepath
- * @return MarkdownTests_t collection
+ * @return CommonMarkTest collection
  */
-std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::filesystem::path>> test_harness::commonmark_spec_tests::loadMarkdownTests( const std::filesystem::path &test_dir ) {
-    static const auto fields = std::vector<std::string>( {
+std::vector<std::pair<test_harness::commonmark_spec_tests::CommonMarkTest, std::filesystem::path>> test_harness::commonmark_spec_tests::loadMarkdownTests( const std::filesystem::path &test_dir ) {
+    static const auto FIELDS = std::vector<std::string>( {
         "example",
         "start_line",
         "end_line",
@@ -82,13 +82,14 @@ std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::fi
         "section"
     } );
 
-    std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::filesystem::path>> test_collection;
+    std::vector<std::pair<test_harness::commonmark_spec_tests::CommonMarkTest, std::filesystem::path>> test_collection;
 
-    auto test_files = getTestFiles( test_dir, ".json" );
+    auto   test_files      = getTestFiles( test_dir, ".json" );
+    size_t malformed_tests = 0;
 
     for( const auto & file : test_files ) {
-        auto   source = test_harness::loadJSONFromFile( file );
-        size_t tests  = 0;
+        auto   source    = test_harness::loadJSONFromFile( file );
+        size_t tests     = 0;
 
         if( !source.is_array() ) {
             std::cerr << "Unexpected JSON format (need root array) in: " << file.string() << std::endl;
@@ -96,12 +97,13 @@ std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::fi
         } else {
             for( const auto &test: source ) {
                 auto err = false;
-                auto obj = MarkdownTest();
+                auto obj = CommonMarkTest();
 
-                for( const auto & field : fields ) {
+                for( const auto & field : FIELDS ) {
                     if( !test.contains( field ) ) {
                         std::cerr << "ERROR: field \"" << field << "\" not found for test " << tests << " in " << file.string() << std::endl;
                         err = true;
+                        ++malformed_tests;
                         break;
                     }
                 }
@@ -116,9 +118,9 @@ std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::fi
                     obj.section_desc = to_string( test.at( "section" ) );
 
                     test_collection.emplace_back( std::make_pair( std::move( obj ), file ) );
-                }
 
-                ++tests;
+                    ++tests;
+                }
             }
 
             std::cout << "> Found " << tests << " tests." << std::endl;
@@ -126,6 +128,169 @@ std::vector<std::pair<test_harness::commonmark_spec_tests::MarkdownTest, std::fi
     }
 
     std::cout << "> TOTAL TESTS FOUND: " << test_collection.size() << " (" << test_dir << ")" << std::endl;
+
+    if( malformed_tests > 0 ) {
+        std::cerr << "> MALFORMED TESTS FOUND: " << malformed_tests << " (" << test_dir << ")" << std::endl;
+    }
+
+    return test_collection;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param test MarkdownTest object
+ * @return Output stream
+ */
+std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test_harness::markdown::MarkdownTkTest & test ) {
+    os << test.description;
+    return os;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param test TokenDescription object
+ * @return Output stream
+ */
+std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test_harness::markdown::TokenDescription & tk ) {
+    os << "{ type: " << tk.type << ", text: \"" << tk.text << "\" }";
+    return os;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param test ErrorDescription object
+ * @return Output stream
+ */
+std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test_harness::markdown::ErrorDescription & err ) {
+    os << "{ description: \"" << err.description << "\", line: " << err.line << ", col: " << err.col << " }";
+    return os;
+}
+
+/**
+ * Pretty print a MarkdownTk to match the format of the "TokenDescription" struct
+ * @param token MarkdownTk instance
+ * @return String
+ */
+std::string test_harness::markdown::to_string( const blogator::parser::token::markdown::MarkdownTk & token ) {
+    std::stringstream ss;
+    ss << "{ type: " << token.type() << ", text: \"" << blogator::unicode::utf8::convert( token.text() ) << "\" }";
+    return ss.str();
+}
+
+/**
+ * Pretty print a ErrorObject to match the format of the "ErrorDescription" struct
+ * @param token ErrorObject instance
+ * @return String
+ */
+std::string test_harness::markdown::to_string( const blogator::parser::logging::ErrorObject & error ) {
+    std::stringstream ss;
+    ss << "{ description: \"" << error.error() << "\", line: " << error.textpos().line << ", col: " << error.textpos().col << " }";
+    return ss.str();
+}
+
+/**
+ * Loads a 'markdown' json test file into a collection of tests
+ * @param test_dir Source filepath
+ * @return CommonMarkTest collection
+ */
+std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::path>> test_harness::markdown::loadMarkdownTests( const std::filesystem::path &test_dir ) {
+    static const auto FIELDS = std::vector<std::string>( {
+        "description",
+        "input",
+        "tokens",
+        "errors",
+    } );
+
+    static const auto TOKEN_FIELDS = std::vector<std::string>( {
+        "type",
+        "text",
+    } );
+
+    static const auto ERROR_FIELDS = std::vector<std::string>( {
+        "description",
+        "line",
+        "col",
+    } );
+
+    std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::path>> test_collection;
+
+    auto   test_files     = getTestFiles( test_dir, ".json" );
+    size_t missing_fields = 0;
+
+    for( const auto & file : test_files ) {
+        auto   source = test_harness::loadJSONFromFile( file );
+        size_t tests  = 0;
+
+        if( !source.contains( "tests" ) ) {
+            std::cerr << "Unexpected JSON format (need root 'tests' array) in: " << file.string() << std::endl;
+
+        } else {
+            for( const auto & test: source.at( "tests" ) ) {
+                auto err = false;
+                auto obj = MarkdownTkTest();
+
+                for( const auto & field : FIELDS ) {
+                    if( !test.contains( field ) ) {
+                        std::cerr << "ERROR: field \"" << field << "\" not found for test " << tests << " in " << file.string() << std::endl;
+                        err = true;
+                        ++missing_fields;
+                        break;
+                    }
+                }
+
+                for( const auto & token : test.at( "tokens" ) ) {
+                    for( const auto &tk_fields: TOKEN_FIELDS ) {
+                        if( !token.contains( tk_fields ) ) {
+                            std::cerr << "ERROR: token field \"" << tk_fields << "\" not found for test " << tests << " in " << file.string() << std::endl;
+                            err = true;
+                            ++missing_fields;
+                            break;
+                        }
+                    }
+                }
+
+                for( const auto & token : test.at( "errors" ) ) {
+                    for( const auto &tk_fields: ERROR_FIELDS ) {
+                        if( !token.contains( tk_fields ) ) {
+                            std::cerr << "ERROR: error field \"" << tk_fields << "\" not found for test " << tests << " in " << file.string() << std::endl;
+                            err = true;
+                            ++missing_fields;
+                            break;
+                        }
+                    }
+                }
+
+                if( !err ) {
+                    obj.src         = file;
+                    obj.description = test.at( "description" );
+                    obj.input       = test.at( "input" );
+
+                    for( const auto & token : test.at( "tokens" ) ) {
+                        obj.tokens.emplace_back( TokenDescription { token.at( "type" ), token.at( "text" ) } );
+                    }
+
+                    for( const auto & error : test.at( "errors" ) ) {
+                        obj.errors.emplace_back( ErrorDescription { error.at( "description" ), error.at( "line" ), error.at( "col" ) } );
+                    }
+
+                    test_collection.emplace_back( std::make_pair( std::move( obj ), file ) );
+
+                    ++tests;
+                }
+            }
+
+            std::cout << "> Found " << tests << " tests." << std::endl;
+        }
+    }
+
+    std::cout << "> TOTAL TESTS FOUND: " << test_collection.size() << " (" << test_dir << ")" << std::endl;
+
+    if( missing_fields > 0 ) {
+        std::cerr << "> MISSING FIELDS IN TESTS (SKIPPED) FOUND: " << missing_fields << " (" << test_dir << ")" << std::endl;
+    }
 
     return test_collection;
 }
@@ -328,6 +493,26 @@ std::string test_harness::html5lib_tests::to_string( blogator::parser::dom::node
  * @return Output stream
  */
 std::ostream & test_harness::html5lib_tests::jsonifyHtml5Tokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::html5::HTML5Tk>> &tokens ) {
+    os << "[";
+
+    for( auto it = tokens.cbegin(); it != tokens.cend(); ++ it ) {
+        os << *( *it );
+        if( std::next( it ) != tokens.cend() ) {
+            os << ", ";
+        }
+    }
+
+    os << "]";
+    return os;
+}
+
+/**
+ * JSON-ify a collection of Markdown tokens into a stream
+ * @param os Output stream
+ * @param tokens Tokens
+ * @return Output stream
+ */
+std::ostream &test_harness::html5lib_tests::jsonifyMarkdownTokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::markdown::MarkdownTk>> &tokens ) {
     os << "[";
 
     for( auto it = tokens.cbegin(); it != tokens.cend(); ++ it ) {

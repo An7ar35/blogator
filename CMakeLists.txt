@@ -25,10 +25,11 @@ include(ExternalProject)
 include(GNUInstallDirs)
 
 #Build directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/bin")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "${CMAKE_CURRENT_SOURCE_DIR}/build/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_CURRENT_SOURCE_DIR}/build/lib")
 set(CMAKE_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/external")
+set(CMAKE_TEST_HARNESS_DIRECTORY    "${CMAKE_CURRENT_SOURCE_DIR}/test-harness")
 
 #External imports/dependencies directories
 set(CMAKE_RESOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
@@ -401,8 +402,6 @@ set(SOURCE_FILES
         src/parser/dom/Variables.h
         src/parser/dom/datastructure/NamedNodeMap.cpp
         src/parser/dom/datastructure/NamedNodeMap.h
-        src/parser/dom-lite/DOMlite.cpp
-        src/parser/dom-lite/DOMlite.h
         src/parser/dom/filter/NodeFilter.cpp
         src/parser/dom/filter/NodeFilter.h
         src/parser/dom/iterator/NodeIterator.cpp
@@ -424,6 +423,8 @@ set(SOURCE_FILES
         src/parser/specs/markdown/tokeniser/TokenType.h
         src/parser/specs/markdown/tokeniser/TokeniserState.h
 
+        src/parser/builder/MarkdownToHtml.cpp
+        src/parser/builder/MarkdownToHtml.h
         src/parser/token/markdown/CharacterTk.cpp
         src/parser/token/markdown/CharacterTk.h
         src/parser/token/markdown/HeadingTk.cpp
@@ -433,7 +434,13 @@ set(SOURCE_FILES
         src/parser/token/markdown/FormattingTk.cpp
         src/parser/token/markdown/FormattingTk.h
         src/parser/token/markdown/FormatEndTk.cpp
-        src/parser/token/markdown/FormatEndTk.h)
+        src/parser/token/markdown/FormatEndTk.h
+        src/parser/token/markdown/BlockIDTk.cpp
+        src/parser/token/markdown/BlockIDTk.h
+        src/parser/token/markdown/LineBreakTk.cpp
+        src/parser/token/markdown/LineBreakTk.h
+        src/parser/token/markdown/EndOfFileTk.cpp
+        src/parser/token/markdown/EndOfFileTk.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -451,6 +458,7 @@ if( NOT GTEST_FOUND )
     ExternalProject_Add(googletest
             PREFIX ${GTEST_DOWNLOAD_PATH}
             GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG main
             CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${GTEST_DOWNLOAD_PATH})
 
     include_directories(${GTEST_DOWNLOAD_PATH}/include)
@@ -530,13 +538,15 @@ set(TEST_FILES
         tests/parser/dom/validation/XML.cpp
         tests/parser/specs/infra/DocType.cpp
 
-        test-harness/helpers/MarkdownTest.h
+        test-harness/helpers/MarkdownTkTest.h
         test-harness/helpers/TreeConstructionTest.h
         test-harness/helpers/helpers.cpp
         test-harness/helpers/helpers.h
         test-harness/html5lib-tests/tokenizer-tests.cpp
         test-harness/html5lib-tests/tree-construction-tests.cpp
-        test-harness/commonmark-spec/commonmark-spec-tests.cpp)
+        test-harness/commonmark-spec/commonmark-spec-tests.cpp
+        test-harness/markdown/tokenizer-tests.cpp
+        test-harness/helpers/CommonMarkTest.h)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)

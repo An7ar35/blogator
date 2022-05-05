@@ -1,0 +1,21 @@
+{"tests": [
+
+{   "description":"Plain text",
+    "input":"Hello, world!",
+    "tokens":[ 
+        {"type": "CHARACTER", "text": "Hello, world!"} 
+    ],
+    "errors":[] 
+},
+
+{   "description":"non-closing formatting character",
+    "input":"Hello, *world!",
+    "tokens":[ 
+        {"type": "CHARACTER", "text": "Hello, world!"} 
+    ],
+    "errors":[
+        {"description": "", "line": 1, "col": 8 }
+    ] 
+}
+
+]}
