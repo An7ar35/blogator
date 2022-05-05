@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  run:
+    build:
+      context: .
+      dockerfile: ./docker/run/Dockerfile
+    volumes:
+      - .:/blogator
+  test:
+    build:
+      context: .
+      dockerfile: ./docker/test/Dockerfile
+    volumes:
+      - .:/blogator
