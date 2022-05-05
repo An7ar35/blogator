@@ -172,11 +172,10 @@ TEST( parser_dom_node_Node_Tests, getNamespaceURI_fail_1 ) {
 }
 
 TEST( parser_dom_node_Node_Tests, namespaceMap ) {
-    using blogator::parser::specs::infra::Element::HTML5_HTML;
     using blogator::parser::specs::infra::resolveNamespace;
 
-    auto node = node::Element( HTML5_HTML );
-    ASSERT_NE( node.namespaceMap().getID( resolveNamespace( HTML5_HTML ) ), NamespaceMap::INVALID );
+    auto node = node::Element( blogator::parser::specs::infra::Element::HTML5_HTML );
+    ASSERT_NE( node.namespaceMap().getID( resolveNamespace( blogator::parser::specs::infra::Element::HTML5_HTML ) ), NamespaceMap::INVALID );
 }
 
 TEST( parser_dom_node_Node_Tests, nodeType_0 ) { //default

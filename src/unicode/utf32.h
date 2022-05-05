@@ -8,7 +8,7 @@
  * Character code constants
  */
 namespace blogator::unicode {
-    static const uint32_t REPLACEMENT_CHAR { 0xFFFD };
+    static constexpr uint32_t REPLACEMENT_CHAR { 0xFFFD };
 }
 
 /**
@@ -20,8 +20,6 @@ namespace blogator::unicode::utf32 {
     bool issurrogate( uint32_t c ) noexcept;
     bool isscalar( uint32_t c ) noexcept;
     bool isnonchar( uint32_t c ) noexcept;
-    bool isascii( uint32_t c ) noexcept;
-    bool isascii( const std::u32string &str );
     bool iscntrl( uint32_t c ) noexcept;
 
     uint32_t toscalar( uint32_t c ) noexcept;

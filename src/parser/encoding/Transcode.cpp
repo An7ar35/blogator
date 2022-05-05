@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include "../../unicode/unicode.h"
 #include "../../logger/Logger.h"
 #include "../logging/ParserLog.h"
 

@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <thread>
+#include <mutex>
 
 #include "../defs.h"
 #include "../../specs/infra/Namespace.h"

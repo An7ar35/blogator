@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-#include "../../unicode/unicode.h"
+#include "../../unicode/utf8.h"
 #include "../specs/Context.h"
 #include "../dto/U32Text.h"
 

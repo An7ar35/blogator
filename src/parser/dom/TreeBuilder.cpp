@@ -6,6 +6,7 @@
 #include "../../logger/Logger.h"
 #include "../specs/infra/Attribute.h"
 #include "../logging/ParserLog.h"
+#include "../../unicode/unicode.h"
 #include "../encoding/Format.h"
 #include "node/Attr.h"
 #include "node/CDATASection.h"

@@ -21,6 +21,8 @@ CommentTk::CommentTk( std::u32string text, blogator::parser::TextPos position ) 
 
 #ifdef TESTING
 
+#include "../../../unicode/unicode.h"
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream

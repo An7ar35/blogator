@@ -21,6 +21,8 @@ CharacterTk::CharacterTk( std::u32string text, TextPos position ) :
 
 #ifdef TESTING
 
+#include "../../../unicode/unicode.h"
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream

@@ -5,7 +5,6 @@
 #include <deque>
 #include <istream>
 
-#include "../../unicode/unicode.h"
 #include "../dto/Source.h"
 
 namespace blogator::parser::encoding {

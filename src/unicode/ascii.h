@@ -32,6 +32,7 @@ namespace blogator::unicode {
     static constexpr uint32_t LATIN_CAPITAL_LETTER_X { 0x58 }; //'X'
     static constexpr uint32_t LEFT_SQUARE_BRACKET    { 0x5B }; //'['
     static constexpr uint32_t RIGHT_SQUARE_BRACKET   { 0x5D }; //']'
+    static constexpr uint32_t CIRCUMFLEX_ACCENT      { 0x5E }; //'^'
     static constexpr uint32_t GRAVE_ACCENT           { 0x60 }; //'`'
     static constexpr uint32_t LATIN_SMALL_LETTER_X   { 0x78 }; //'x'
     static constexpr uint32_t LEFT_CURLY_BRACKET     { 0x7B }; //'{'

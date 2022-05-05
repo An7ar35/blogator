@@ -64,24 +64,6 @@ bool utf32::isnonchar( uint32_t c ) noexcept {
 }
 
 /**
- * Checks code point is within the ASCII range
- * @param c Unicode code point
- * @return Is ASCII
- */
-bool utf32::isascii( uint32_t c ) noexcept {
-    return c <= 0x007F;
-}
-
-/**
- * Checks string is ASCII
- * @param str String
- * @return Is ASCII
- */
-bool utf32::isascii( const std::u32string &str ) {
-    return std::all_of( str.begin(), str.end(), []( auto c ) { return !isascii( c ); } );
-}
-
-/**
  * Check if character is a control character
  * @param c Unicode code point
  * @return Is control character (0x00->0x1F || 0x7F->0x9F)

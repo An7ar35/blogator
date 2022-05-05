@@ -9,6 +9,7 @@
 #include "../../helper.h"
 #include "../../TestHelpers/UnicodeTestStrings.h"
 #include "../../../src/parser/logging/ParserLog.h"
+#include "../../../src/unicode/unicode.h"
 
 using namespace blogator::parser;
 using namespace blogator::parser::encoding;

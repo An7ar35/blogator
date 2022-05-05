@@ -7,6 +7,7 @@
 #include "../../logger/Logger.h"
 #include "../../exception/parsing_failure.h"
 #include "../logging/ParserLog.h"
+#include "../../unicode/unicode.h"
 
 using namespace blogator::parser;
 using           blogator::parser::logging::ParserLog;

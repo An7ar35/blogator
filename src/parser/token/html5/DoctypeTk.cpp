@@ -1,5 +1,7 @@
 #include "DoctypeTk.h"
 
+#include "../../../unicode/unicode.h"
+
 using namespace blogator::parser::token::html5;
 
 /**
