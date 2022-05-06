@@ -8,5 +8,6 @@ RUN mkdir cmake-build-docker \
  && cd cmake-build-docker \
  && cmake ../ \
  && cd .. \
+ && git submodule update --init --recursive \
  && cmake --build cmake-build-docker --target blogator_tests -- -j 6
-CMD [ "./build/bin/blogator_tests" ]
+ENTRYPOINT [ "./build/bin/blogator_tests" ]

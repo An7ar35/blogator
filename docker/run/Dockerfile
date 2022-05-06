@@ -9,4 +9,5 @@ RUN mkdir cmake-build-docker \
  && cmake ../ \
  && cd .. \
  && cmake --build cmake-build-docker --target blogator -- -j 6
-CMD [ "./build/bin/blogator" ]
+ENTRYPOINT [ "./build/bin/blogator" ]
+CMD[ "-d ." ]
