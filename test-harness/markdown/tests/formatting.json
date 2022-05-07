@@ -1,0 +1,153 @@
+{"tests": [
+
+  {
+    "description":"italic \"*\"",
+    "input":"*italic*",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "CHARACTER", "text": "italic"},
+      {"type": "FORMAT_END", "text": "*"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"bold \"**\"",
+    "input":"**bold**",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "CHARACTER", "text": "bold"},
+      {"type": "FORMAT_END", "text": "**"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"italic \"_\"",
+    "input":"_italic_",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "_"},
+      {"type": "CHARACTER", "text": "italic"},
+      {"type": "FORMAT_END", "text": "_"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"bold \"__\"",
+    "input":"__bold__",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "__"},
+      {"type": "CHARACTER", "text": "bold"},
+      {"type": "FORMAT_END", "text": "__"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"strikethrough \"~~\"",
+    "input":"~~strikethrough~~",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "~~"},
+      {"type": "CHARACTER", "text": "strikethrough"},
+      {"type": "FORMAT_END", "text": "~~"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"highlight \"==\"",
+    "input":"==highlight==",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "=="},
+      {"type": "CHARACTER", "text": "highlight"},
+      {"type": "FORMAT_END", "text": "=="}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"subscript \"~\"",
+    "input":"~subscript~",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "~"},
+      {"type": "CHARACTER", "text": "subscript"},
+      {"type": "FORMAT_END", "text": "~"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"superscript \"^\"",
+    "input":"^superscript^",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "^"},
+      {"type": "CHARACTER", "text": "superscript"},
+      {"type": "FORMAT_END", "text": "^"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inline code \"`\"",
+    "input":"`inline code`",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "`"},
+      {"type": "CHARACTER", "text": "inline code"},
+      {"type": "FORMAT_END", "text": "`"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"italic and bold \"***\"",
+    "input":"***italic and bold***",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "CHARACTER", "text": "italic and bold"},
+      {"type": "FORMAT_END", "text": "**"},
+      {"type": "FORMAT_END", "text": "*"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"double bold \"****\"",
+    "input":"****normal text****",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "FORMAT_END", "text": "**"},
+      {"type": "CHARACTER", "text": "normal text"},
+      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "FORMAT_END", "text": "**"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"nested italic in bold \"**..*\"",
+    "input":"**nested *italic* in bold**",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "CHARACTER", "text": "nested "},
+      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "CHARACTER", "text": "italic"},
+      {"type": "FORMAT_END", "text": "*"},
+      {"type": "CHARACTER", "text": " in bold"},
+      {"type": "FORMAT_END", "text": "**"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"non-closing formatting character *",
+    "input":"Hello, *world!",
+    "tokens":[
+      {"type": "CHARACTER", "text": "Hello, "},
+      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "CHARACTER", "text": "world!"}
+    ],
+    "errors":[]
+  }
+]}
