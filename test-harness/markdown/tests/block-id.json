@@ -1,0 +1,101 @@
+{"tests": [
+
+  {
+    "description":"valid block-id",
+    "input":"{#block-id}",
+    "tokens":[
+      {"type": "BLOCK_ID", "text": "block-id"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid valid block-id 1",
+    "input":"{ #block-id}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{ #block-id}"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid block-id 2",
+    "input":"{ # block-id}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{ # block-id}"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid block-id 3",
+    "input":"{ # block-id }",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{ # block-id }"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid block-id 4",
+    "input":"{text}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{text}"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid block-id 5",
+    "input":"{ text}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{ text}"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid block-id name character",
+    "input":"{#@name}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{#@name}"}
+    ],
+    "errors":[
+      {"description": "invalid character in block id name", "line": 1, "col": 3 }
+    ]
+  },
+
+  {
+    "description":"invalid block-id name format",
+    "input":"{#-1invalid}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{#-1invalid}"}
+    ],
+    "errors":[
+      {"description": "invalid block id name: \"-1invalid\"", "line": 1, "col": 12 }
+    ]
+  },
+
+  {
+    "description":"invalid block-id with newline",
+    "input":"{#text\n}",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{#text}"}
+    ],
+    "errors":[
+      {"description": "unexpected end to block id declaration", "line": 1, "col": 7 }
+    ]
+  },
+
+  {
+    "description":"invalid block-id with newline",
+    "input":"{#text",
+    "tokens":[
+      {"type": "CHARACTER", "text": "{#text"}
+    ],
+    "errors":[
+      {"description": "unexpected end to block id declaration", "line": 1, "col": 7 }
+    ]
+  }
+
+]}
