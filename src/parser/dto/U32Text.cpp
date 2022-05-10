@@ -124,7 +124,7 @@ std::pair<uint32_t, bool> U32Text::character( std::u32string::iterator::differen
 }
 
 /**
- * Gets a range of character code points starting at the current position
+ * Gets a range of character code points starting at, and including, the current position
  * @param n Number of code points
  * @return String of size range or less if end was reached
  */

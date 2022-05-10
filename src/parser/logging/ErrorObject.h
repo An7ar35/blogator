@@ -6,7 +6,7 @@
 #include "../specs/Context.h"
 #include "../specs/native/ErrorCode.h"
 #include "../specs/infra/ErrorCode.h"
-//#include "../specs/markdown/ErrorCode.h"
+#include "../specs/markdown/ErrorCode.h"
 #include "../dto/TextPos.h"
 
 namespace blogator::parser::logging {

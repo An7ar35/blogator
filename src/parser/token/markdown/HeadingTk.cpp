@@ -18,7 +18,7 @@ HeadingTk::HeadingTk( TextPos position ) :
  */
 HeadingTk::HeadingTk( std::u32string text, TextPos position ) :
     MarkdownTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
-    _indent( 0 )
+    _indent( ( text.size() > 6 ? 6 : text.size() ) )
 {}
 
 /**
@@ -30,27 +30,11 @@ uint8_t HeadingTk::indent() const {
 }
 
 /**
- * Gets the set custom ID string for the heading
- * @return ID string
- */
-const std::u32string & HeadingTk::customID() const {
-    return _custom_id;
-}
-
-/**
  * Sets the indent value
  * @param val Indent depth
  */
 void HeadingTk::setIndent( uint8_t val ) {
     _indent = val;
-}
-
-/**
- * Sets the custom ID string for the heading
- * @param id ID string
- */
-void HeadingTk::setCustomID( const std::u32string &id ) {
-    _custom_id = id;
 }
 
 /**
@@ -60,7 +44,5 @@ void HeadingTk::setCustomID( const std::u32string &id ) {
 void HeadingTk::toStr( std::ostream &os ) const {
     os << "MarkdownTk={ type: " << this->type() << ", indent: " << _indent << ", text: \"";
     blogator::unicode::utf8::convert( os, this->text() );
-    os << "\", custom id: \"";
-    blogator::unicode::utf8::convert( os, _custom_id );
     os << "\", position: " << this->position() << " }";
 }

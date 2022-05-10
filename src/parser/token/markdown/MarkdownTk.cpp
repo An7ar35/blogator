@@ -1,5 +1,7 @@
 #include "MarkdownTk.h"
 
+#include "../../../unicode/unicode.h"
+
 using namespace blogator::parser::token;
 
 /**
@@ -31,6 +33,20 @@ blogator::parser::specs::markdown::TokenType markdown::MarkdownTk::type() const 
     return _type;
 }
 
+#ifdef TESTING
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void  markdown::MarkdownTk::toStr( std::ostream &os ) const {
+    os << "[" << this->type() << ", \"";
+    unicode::normalize( os, this->text() );
+    os << "\"]";
+}
+
+#else
+
 /**
  * Prints out a string representation of the token
  * @param os Output stream
@@ -40,3 +56,5 @@ void markdown::MarkdownTk::toStr( std::ostream & os ) const {
     unicode::utf8::convert( os, this->text() );
     os << "\", position: " << this->lineNum() << ":" << this->colPos() << " }";
 }
+
+#endif

@@ -8,12 +8,13 @@ namespace blogator::parser::token::markdown {
       public:
         enum class Type {
             NONE = 0,
-            BOLD,           //"**text**" or "__text__"
-            ITALIC,         //"*text*" or "_text_"
-            STRIKETHROUGH,  //"~~text~~"
-            HIGHLIGHT,      //"==text=="
-            SUBSCRIPT,      //"~text~"
-            SUPERSCRIPT,    //"^text^"
+            BOLD,           //"**...**" or "__...__"
+            ITALIC,         //"*...*" or "_..._"
+            STRIKETHROUGH,  //"~~...~~"
+            HIGHLIGHT,      //"==...=="
+            SUBSCRIPT,      //"~...~"
+            SUPERSCRIPT,    //"^...^"
+            INLINE_CODE,    //"`...`"
         };
 
         FormattingTk( specs::markdown::TokenType type, TextPos position );
@@ -24,6 +25,8 @@ namespace blogator::parser::token::markdown {
         [[nodiscard]] Type formatType() const;
 
         void setFormatType( Type type );
+
+        static Type resolveFormateType( const std::u32string & text );
 
       protected:
         void toStr( std::ostream &os ) const override;

@@ -1,5 +1,7 @@
 #include "FormattingTk.h"
 
+#include <unordered_map>
+
 using namespace blogator::parser::token::markdown;
 
 /**
@@ -40,6 +42,31 @@ void FormattingTk::setFormatType( FormattingTk::Type type ) {
 }
 
 /**
+ * Resolves a formatting type based on a string
+ * @param text Markdown formatting character(s)
+ * @return Format type enum
+ */
+FormattingTk::Type FormattingTk::resolveFormateType( const std::u32string &text ) {
+    static const auto MAP = std::unordered_map<std::u32string, Type>( {
+        { U"",   Type::NONE },
+        { U"**", Type::BOLD },
+        { U"__", Type::BOLD },
+        { U"*",  Type::ITALIC },
+        { U"_",  Type::ITALIC },
+        { U"~~", Type::STRIKETHROUGH },
+        { U"==", Type::HIGHLIGHT },
+        { U"~",  Type::SUBSCRIPT },
+        { U"^",  Type::SUPERSCRIPT },
+        { U"`",  Type::INLINE_CODE },
+    } );
+
+    const auto it = MAP.find( text );
+
+    return ( it == MAP.end() ? Type::NONE : it->second );
+}
+
+
+/**
  * Prints out a string representation of the token
  * @param os Output stream
  */
@@ -63,6 +90,7 @@ std::ostream & blogator::parser::token::markdown::operator <<( std::ostream &os,
         case FormattingTk::Type::HIGHLIGHT:     { os << "HIGHLIGHT";     } break;
         case FormattingTk::Type::SUBSCRIPT:     { os << "SUBSCRIPT";     } break;
         case FormattingTk::Type::SUPERSCRIPT:   { os << "SUPERSCRIPT";   } break;
+        case FormattingTk::Type::INLINE_CODE:   { os << "INLINE_CODE";   } break;
         default:                                { os << "NONE";          } break;;
     }
 

@@ -17,4 +17,6 @@ FormatBeginTk::FormatBeginTk( blogator::parser::TextPos position ) :
  */
 FormatBeginTk::FormatBeginTk( std::u32string text, blogator::parser::TextPos position ) :
     FormattingTk( specs::markdown::TokenType::FORMAT_BEGIN, std::move( text ), position )
-{}
+{
+    this->setFormatType( FormattingTk::resolveFormateType( this->text() ) );
+}

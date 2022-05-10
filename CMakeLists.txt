@@ -258,8 +258,12 @@ set(SOURCE_FILES
         src/parser/specs/infra/ErrorCode.cpp
         src/parser/specs/infra/InsertionMode.cpp
         src/parser/specs/infra/InsertionMode.h
-
         src/parser/specs/markdown/specifications.h
+        src/parser/specs/markdown/tokeniser/TokenType.cpp
+        src/parser/specs/markdown/tokeniser/TokenType.h
+        src/parser/specs/markdown/tokeniser/TokeniserState.h
+        src/parser/specs/markdown/ErrorCode.cpp
+        src/parser/specs/markdown/ErrorCode.h
 
         src/parser/token/Token.cpp
         src/parser/token/Token.h
@@ -419,10 +423,6 @@ set(SOURCE_FILES
         src/sys/terminate.cpp
         src/sys/terminate.h src/parser/dom/enum/ValidationState.h
 
-        src/parser/specs/markdown/tokeniser/TokenType.cpp
-        src/parser/specs/markdown/tokeniser/TokenType.h
-        src/parser/specs/markdown/tokeniser/TokeniserState.h
-
         src/parser/builder/MarkdownToHtml.cpp
         src/parser/builder/MarkdownToHtml.h
         src/parser/token/markdown/CharacterTk.cpp
@@ -440,7 +440,11 @@ set(SOURCE_FILES
         src/parser/token/markdown/LineBreakTk.cpp
         src/parser/token/markdown/LineBreakTk.h
         src/parser/token/markdown/EndOfFileTk.cpp
-        src/parser/token/markdown/EndOfFileTk.h)
+        src/parser/token/markdown/EndOfFileTk.h
+        src/parser/token/markdown/BlockEndTk.cpp
+        src/parser/token/markdown/BlockEndTk.h
+        src/parser/token/markdown/CodeBlockTk.cpp
+        src/parser/token/markdown/CodeBlockTk.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )

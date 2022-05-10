@@ -110,7 +110,9 @@ std::string ErrorObject::error() const {
                      ? specs::infra::ErrorCode::str( _code )
                      : specs::infra::ErrorCode::str( _code ) + ": " + _text );
         case specs::Context::MARKDOWN:
-            return "MARKDOWN"; //TODO
+            return ( _text.empty()
+                     ? specs::markdown::ErrorCode::str( _code )
+                     : specs::markdown::ErrorCode::str( _code ) + ": " + _text );
         default:
             return "Unknown Context";
     }
@@ -127,7 +129,7 @@ std::string ErrorObject::detailed() const {
         case specs::Context::HTML5:
             return specs::infra::ErrorCode::detailed( _code );
         case specs::Context::MARKDOWN:
-            return "MARKDOWN"; //TODO
+            return specs::markdown::ErrorCode::detailed( _code );
         default:
             return "Unknown Context";
     }
@@ -179,7 +181,7 @@ std::ostream & ErrorObject::context( std::ostream &os ) const {
 std::ostream & ErrorObject::error( std::ostream &os ) const {
     switch( _context ) {
         case specs::Context::NATIVE:
-            os << "BLOGATOR"; //TODO
+            os << specs::native::ErrorCode::str( _code );
             break;
 
         case specs::Context::HTML5:
@@ -187,7 +189,7 @@ std::ostream & ErrorObject::error( std::ostream &os ) const {
             break;
 
         case specs::Context::MARKDOWN:
-            os << "MARKDOWN"; //TODO
+            os << specs::markdown::ErrorCode::str( _code );
             break;
 
         default:
@@ -214,7 +216,7 @@ std::ostream & ErrorObject::detailed( std::ostream &os ) const {
             break;
 
         case specs::Context::MARKDOWN:
-            os << "MARKDOWN"; //TODO
+            os << specs::markdown::ErrorCode::detailed( _code );
             break;
 
         default:

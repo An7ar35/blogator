@@ -1,0 +1,190 @@
+{"tests": [
+
+  {
+    "description":"empty code-block",
+    "input":"```\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inlined empty code-block",
+    "input":"``````",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "inlined code-block", "line": 1, "col": 4 }
+    ]
+  },
+
+  {
+    "description":"inlined white-spaced code-block",
+    "input":"```  ```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text": "  "},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 6 }
+    ]
+  },
+
+  {
+    "description":"inlined grave accent code-block",
+    "input":"``` `` ```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text": " `` "},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 8 }
+    ]
+  },
+
+  {
+    "description":"inlined double code-blocks",
+    "input":"````````````",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "BLOCK_END", "text": ""},
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "inlined code-block", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 10 }
+    ]
+  },
+
+  {
+    "description":"un-closed code-block",
+    "input":"```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 4 }
+    ]
+  },
+
+  {
+    "description":"empty code-block with tag",
+    "input":"```cpp\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"open/close code-block on same line with invalid tag",
+    "input":"```t@g```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text": "t@g"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 7 }
+    ]
+  },
+
+  {
+    "description":"valid multi-lined code-block",
+    "input":"```cpp\nint main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp"},
+      {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"valid multi-lined code-block with trailing whitespace",
+    "input":"```\nint main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n   ```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n   "},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"code-block with escaped triple grave-accent inline",
+    "input":"```\\`\\`\\````",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text":  "```"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 10 }
+    ]
+  },
+
+  {
+    "description":"code-block with escaped triple grave-accent",
+    "input":"```\n\\`\\`\\`\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text":  "```"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inline code-block with special html characters",
+    "input":"```<&>```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text": "&lt;&amp;&gt;"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 7 }
+    ]
+  },
+
+  {
+    "description":"code-block with special html characters",
+    "input":"```\n<tag> & text```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": ""},
+      {"type": "CHARACTER", "text": "&lt;tag&gt; &amp; text"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inline code-block whitespace after language tag",
+    "input":"```lang invalid\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "lang"},
+      {"type": "CHARACTER", "text": " invalid"},
+      {"type": "BLOCK_END", "text": ""}
+    ],
+    "errors":[
+      { "description": "invalid format in code block declaration", "line": 1, "col": 8 }
+    ]
+  }
+
+
+]}
