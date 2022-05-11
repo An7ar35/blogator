@@ -9,6 +9,7 @@
 #include "FormatBeginTk.h"
 #include "FormatEndTk.h"
 #include "HeadingTk.h"
+#include "ImageTk.h"
 #include "LineBreakTk.h"
 
 #endif //BLOGATOR_PARSER_TOKEN_MARKDOWN_TOKENS_H

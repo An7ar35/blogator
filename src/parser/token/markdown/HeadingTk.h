@@ -8,16 +8,17 @@ namespace blogator::parser::token::markdown {
       public:
         explicit HeadingTk( TextPos position );
         HeadingTk( std::u32string text, TextPos position );
+        HeadingTk( uint8_t level, std::u32string text, TextPos position );
 
-        [[nodiscard]] uint8_t indent() const;
+        [[nodiscard]] uint8_t level() const;
 
-        void setIndent( uint8_t val );
+        void setLevel( uint8_t val );
 
       protected:
         void toStr( std::ostream &os ) const override;
 
       private:
-        uint8_t _indent;
+        uint8_t _level;
     };
 }
 

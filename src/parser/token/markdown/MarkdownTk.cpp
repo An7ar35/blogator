@@ -40,9 +40,9 @@ blogator::parser::specs::markdown::TokenType markdown::MarkdownTk::type() const 
  * @param os Output stream
  */
 void  markdown::MarkdownTk::toStr( std::ostream &os ) const {
-    os << "[" << this->type() << ", \"";
+    os << R"({ "type": ")" << this->type() << R"(", "text": ")";
     unicode::normalize( os, this->text() );
-    os << "\"]";
+    os << R"(" })";
 }
 
 #else

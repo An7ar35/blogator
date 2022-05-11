@@ -1,0 +1,21 @@
+{"tests": [
+
+  {
+    "description":"word",
+    "input":"word",
+    "tokens":[
+      {"type": "CHARACTER", "text": "word"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"sentence",
+    "input":"The quick brown fox jumps over the lazy dog.",
+    "tokens":[
+      {"type": "CHARACTER", "text": "The quick brown fox jumps over the lazy dog."}
+    ],
+    "errors":[]
+  }
+
+]}

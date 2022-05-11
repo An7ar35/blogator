@@ -444,7 +444,9 @@ set(SOURCE_FILES
         src/parser/token/markdown/BlockEndTk.cpp
         src/parser/token/markdown/BlockEndTk.h
         src/parser/token/markdown/CodeBlockTk.cpp
-        src/parser/token/markdown/CodeBlockTk.h)
+        src/parser/token/markdown/CodeBlockTk.h
+        src/parser/token/markdown/ImageTk.cpp
+        src/parser/token/markdown/ImageTk.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )

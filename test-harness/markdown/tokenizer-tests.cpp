@@ -84,7 +84,7 @@ testing::AssertionResult runMarkdownTokeniserTest( const test_harness::markdown:
 
     ParserLogCatcher      error_catcher;
     std::vector<uint32_t> output;
-    auto                  mock_markdown_to_html = MockMarkdownToHtml( output );
+    MockMarkdownToHtml    mock_markdown_to_html( output );
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
@@ -105,10 +105,12 @@ testing::AssertionResult runMarkdownTokeniserTest( const test_harness::markdown:
         auto received_tk_it = tokens_received.cbegin();
 
         while( expected_tk_it != test.tokens.cend() && received_tk_it != tokens_received.cend() ) {
+            std::stringstream ss;
+            ss << *(*received_tk_it);
 
-            if( blogator::to_string( (*received_tk_it)->type() )              != expected_tk_it->type ||
-                blogator::unicode::utf8::convert( (*received_tk_it)->text() ) != expected_tk_it->text )
-            {
+            const auto received_json = nlohmann::json::parse( ss.str() );
+
+            if( received_json != *expected_tk_it ) {
                 failed_tk = true;
                 break;
             }
@@ -155,7 +157,9 @@ testing::AssertionResult runMarkdownTokeniserTest( const test_harness::markdown:
                    << "\treceived:\n";
 
         for( const auto & tk : tokens_received ) {
-            tk_message << "\t\t" << test_harness::markdown::to_string( *tk ) << "\n";
+            std::stringstream ss;
+            ss << (*tk);
+            tk_message << "\t\t" << nlohmann::json::parse( ss.str() ) << "\n";
         }
 
         tk_message << "\texpected:\n";

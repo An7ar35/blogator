@@ -150,17 +150,6 @@ std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test
 /**
  * Output stream operator
  * @param os Output stream
- * @param test TokenDescription object
- * @return Output stream
- */
-std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test_harness::markdown::TokenDescription & tk ) {
-    os << "{ type: " << tk.type << ", text: \"" << tk.text << "\" }";
-    return os;
-}
-
-/**
- * Output stream operator
- * @param os Output stream
  * @param test ErrorDescription object
  * @return Output stream
  */
@@ -176,7 +165,7 @@ std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test
  */
 std::string test_harness::markdown::to_string( const blogator::parser::token::markdown::MarkdownTk & token ) {
     std::stringstream ss;
-    ss << "{ type: " << token.type() << ", text: \"" << blogator::unicode::utf8::convert( token.text() ) << "\" }";
+    ss << token;
     return ss.str();
 }
 
@@ -206,7 +195,6 @@ std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::p
 
     static const auto TOKEN_FIELDS = std::vector<std::string>( {
         "type",
-        "text",
     } );
 
     static const auto ERROR_FIELDS = std::vector<std::string>( {
@@ -269,7 +257,7 @@ std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::p
                     obj.input       = test.at( "input" );
 
                     for( const auto & token : test.at( "tokens" ) ) {
-                        obj.tokens.emplace_back( TokenDescription { token.at( "type" ), token.at( "text" ) } );
+                        auto & desc = obj.tokens.emplace_back( token );
                     }
 
                     for( const auto & error : test.at( "errors" ) ) {

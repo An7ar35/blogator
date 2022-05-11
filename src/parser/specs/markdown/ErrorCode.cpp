@@ -27,7 +27,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "unknown error code",
             "Error code has no description available - pls. check error code falls in the blogator::parser::specs::markdown::ErrorCode enum range."
         };
-        arr[ ErrorCode::BLOCK_LINE_FEED_SEPARATOR_MISSING ] = {
+        arr[ ErrorCode::BLOCK_NEW_LINE_SEPARATOR_MISSING ] = {
             "block line-feed separator missing",
             R"(This error occurs when 2 sequential blocks are not separated properly with 2 x LF ("\n\n").)"
         };
@@ -62,6 +62,18 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         arr[ ErrorCode::INLINED_CODE_BLOCK ] = {
             "inlined code-block",
             R"(This error occurs when a code block is opened and closed on the same line. The opening and closing declaration (```) should be at the start of separate lines with the code content between them.)"
+        };
+        arr[ ErrorCode::UNDEFINED_IMAGE_ALT_TEXT ] = {
+            "undefined image alt-text",
+            R"(This error occurs when an image declaration is missing its alt-text. Expected format: ![alt-text](image.jpg))"
+        };
+        arr[ ErrorCode::UNDEFINED_IMAGE_SOURCE ] = {
+            "undefined image source",
+            R"(This error occurs when an image declaration is missing its source. Expected format: ![alt-text](image.jpg))"
+        };
+        arr[ ErrorCode::INVALID_IMAGE_DECLARATION_FORMAT ] = {
+            "invalid image declaration format",
+            R"(This error occurs when an image declaration ("![..") is made but its format is not correct. The declaration is parsed as normal text in this event. Expected format: ![alt-text](image.jpg))"
         };
 
 

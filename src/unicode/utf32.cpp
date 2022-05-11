@@ -1,7 +1,8 @@
 #include "utf32.h"
 
-#include <locale>
 #include <vector>
+#include <algorithm>
+#include <ostream>
 
 using namespace blogator::unicode;
 

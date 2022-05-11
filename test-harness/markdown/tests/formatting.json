@@ -4,9 +4,9 @@
     "description":"italic \"*\"",
     "input":"*italic*",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*"},
       {"type": "CHARACTER", "text": "italic"},
-      {"type": "FORMAT_END", "text": "*"}
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*"}
     ],
     "errors":[]
   },
@@ -15,9 +15,9 @@
     "description":"bold \"**\"",
     "input":"**bold**",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**"},
       {"type": "CHARACTER", "text": "bold"},
-      {"type": "FORMAT_END", "text": "**"}
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**"}
     ],
     "errors":[]
   },
@@ -26,9 +26,9 @@
     "description":"italic \"_\"",
     "input":"_italic_",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "_"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "_"},
       {"type": "CHARACTER", "text": "italic"},
-      {"type": "FORMAT_END", "text": "_"}
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "_"}
     ],
     "errors":[]
   },
@@ -37,9 +37,9 @@
     "description":"bold \"__\"",
     "input":"__bold__",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "__"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__"},
       {"type": "CHARACTER", "text": "bold"},
-      {"type": "FORMAT_END", "text": "__"}
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "__"}
     ],
     "errors":[]
   },
@@ -48,9 +48,9 @@
     "description":"strikethrough \"~~\"",
     "input":"~~strikethrough~~",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "~~"},
+      {"type": "FORMAT_BEGIN", "formatting": "STRIKETHROUGH", "text": "~~"},
       {"type": "CHARACTER", "text": "strikethrough"},
-      {"type": "FORMAT_END", "text": "~~"}
+      {"type": "FORMAT_END", "formatting": "STRIKETHROUGH", "text": "~~"}
     ],
     "errors":[]
   },
@@ -59,9 +59,9 @@
     "description":"highlight \"==\"",
     "input":"==highlight==",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "=="},
+      {"type": "FORMAT_BEGIN", "formatting": "HIGHLIGHT", "text": "=="},
       {"type": "CHARACTER", "text": "highlight"},
-      {"type": "FORMAT_END", "text": "=="}
+      {"type": "FORMAT_END", "formatting": "HIGHLIGHT", "text": "=="}
     ],
     "errors":[]
   },
@@ -70,9 +70,9 @@
     "description":"subscript \"~\"",
     "input":"~subscript~",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "~"},
+      {"type": "FORMAT_BEGIN", "formatting": "SUBSCRIPT", "text": "~"},
       {"type": "CHARACTER", "text": "subscript"},
-      {"type": "FORMAT_END", "text": "~"}
+      {"type": "FORMAT_END", "formatting": "SUBSCRIPT", "text": "~"}
     ],
     "errors":[]
   },
@@ -81,9 +81,9 @@
     "description":"superscript \"^\"",
     "input":"^superscript^",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "^"},
+      {"type": "FORMAT_BEGIN", "formatting": "SUPERSCRIPT", "text": "^"},
       {"type": "CHARACTER", "text": "superscript"},
-      {"type": "FORMAT_END", "text": "^"}
+      {"type": "FORMAT_END", "formatting": "SUPERSCRIPT", "text": "^"}
     ],
     "errors":[]
   },
@@ -92,9 +92,42 @@
     "description":"inline code \"`\"",
     "input":"`inline code`",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "`"},
+      {"type": "FORMAT_BEGIN", "formatting": "INLINE_CODE", "text": "`"},
       {"type": "CHARACTER", "text": "inline code"},
-      {"type": "FORMAT_END", "text": "`"}
+      {"type": "FORMAT_END", "formatting": "INLINE_CODE", "text": "`"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inline code \"``\"",
+    "input":"``inline code``",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "formatting": "INLINE_CODE", "text": "``"},
+      {"type": "CHARACTER", "text": "inline code"},
+      {"type": "FORMAT_END", "formatting": "INLINE_CODE", "text": "``"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inline code \"``\" with unescaped \"`\"",
+    "input":"``inline `code``",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "formatting": "INLINE_CODE", "text": "``"},
+      {"type": "CHARACTER", "text": "inline `code"},
+      {"type": "FORMAT_END", "formatting": "INLINE_CODE", "text": "``"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"inline code \"``\" with markdown formatting characters",
+    "input":"`**bold** _italic_ ==highlight==`",
+    "tokens":[
+      {"type": "FORMAT_BEGIN", "formatting": "INLINE_CODE", "text": "`"},
+      {"type": "CHARACTER", "text": "**bold** _italic_ ==highlight=="},
+      {"type": "FORMAT_END", "formatting": "INLINE_CODE", "text": "`"}
     ],
     "errors":[]
   },
@@ -103,11 +136,11 @@
     "description":"italic and bold \"***\"",
     "input":"***italic and bold***",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "**"},
-      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*"},
       {"type": "CHARACTER", "text": "italic and bold"},
-      {"type": "FORMAT_END", "text": "**"},
-      {"type": "FORMAT_END", "text": "*"}
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*"}
     ],
     "errors":[]
   },
@@ -116,11 +149,11 @@
     "description":"double bold \"****\"",
     "input":"****normal text****",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "**"},
-      {"type": "FORMAT_END", "text": "**"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**"},
       {"type": "CHARACTER", "text": "normal text"},
-      {"type": "FORMAT_BEGIN", "text": "**"},
-      {"type": "FORMAT_END", "text": "**"}
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**"}
     ],
     "errors":[]
   },
@@ -129,13 +162,13 @@
     "description":"nested italic in bold \"**..*\"",
     "input":"**nested *italic* in bold**",
     "tokens":[
-      {"type": "FORMAT_BEGIN", "text": "**"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**"},
       {"type": "CHARACTER", "text": "nested "},
-      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*"},
       {"type": "CHARACTER", "text": "italic"},
-      {"type": "FORMAT_END", "text": "*"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*"},
       {"type": "CHARACTER", "text": " in bold"},
-      {"type": "FORMAT_END", "text": "**"}
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**"}
     ],
     "errors":[]
   },
@@ -145,9 +178,38 @@
     "input":"Hello, *world!",
     "tokens":[
       {"type": "CHARACTER", "text": "Hello, "},
-      {"type": "FORMAT_BEGIN", "text": "*"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*"},
       {"type": "CHARACTER", "text": "world!"}
     ],
     "errors":[]
+  },
+
+  {
+    "description":"multi-lined formatting \"*..\n..*\"",
+    "input":"normal text **bold \ntext** back to normal",
+    "tokens":[
+      {"type": "CHARACTER", "text": "normal text "},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**"},
+      {"type": "CHARACTER", "text": "bold text"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**"},
+      {"type": "CHARACTER", "text": " back to normal"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"multi-lined formatting with line break \"*..  \n..*\"",
+    "input":"normal text *italic  \ntext* back to normal",
+    "tokens":[
+      {"type": "CHARACTER", "text": "normal text "},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*"},
+      {"type": "CHARACTER", "text": "italic"},
+      {"type": "LINE_BREAK", "text": ""},
+      {"type": "CHARACTER", "text": "text"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*"},
+      {"type": "CHARACTER", "text": " back to normal"}
+    ],
+    "errors":[]
   }
+
 ]}

@@ -12,9 +12,15 @@
 std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os, blogator::parser::specs::markdown::TokenType type ) {
     static const auto map = std::unordered_map<TokenType, std::string>( {
         { TokenType::UNKNOWN,      "UNKNOWN" },
+        { TokenType::BLOCK_END,    "BLOCK_END" },
         { TokenType::CHARACTER,    "CHARACTER" },
-        { TokenType::FORMAT_BEGIN, "UNKNOWN" },
-        { TokenType::FORMAT_END,   "UNKNOWN" },
+        { TokenType::HEADING,      "HEADING" },
+        { TokenType::LINE_BREAK,   "LINE_BREAK" },
+        { TokenType::FORMAT_BEGIN, "FORMAT_BEGIN" },
+        { TokenType::FORMAT_END,   "FORMAT_END" },
+        { TokenType::BLOCK_ID,     "BLOCK_ID" },
+        { TokenType::IMAGE,        "IMAGE" },
+        { TokenType::CODE_BLOCK,   "CODE_BLOCK" },
         { TokenType::END_OF_FILE,  "EOF" },
     } );
 

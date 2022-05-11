@@ -8,7 +8,7 @@ using namespace blogator::parser::token::markdown;
  */
 HeadingTk::HeadingTk( TextPos position ) :
     MarkdownTk( specs::markdown::TokenType::HEADING, position ),
-    _indent( 0 )
+    _level( 0 )
 {}
 
 /**
@@ -18,23 +18,34 @@ HeadingTk::HeadingTk( TextPos position ) :
  */
 HeadingTk::HeadingTk( std::u32string text, TextPos position ) :
     MarkdownTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
-    _indent( ( text.size() > 6 ? 6 : text.size() ) )
+    _level( ( this->text().size() > 6 ? 6 : this->text().size() ) )
 {}
 
 /**
- * Gets the indent value
- * @return Indent depth
+ * Constructor
+ * @param level Heading level (1-6)
+ * @param text UTF32 text
+ * @param position Line:Col position of token in source text
  */
-uint8_t HeadingTk::indent() const {
-    return _indent;
+HeadingTk::HeadingTk( uint8_t level, std::u32string text, blogator::parser::TextPos position )  :
+    MarkdownTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
+    _level( level )
+{}
+
+/**
+ * Gets the heading level value
+ * @return Heading level
+ */
+uint8_t HeadingTk::level() const {
+    return _level;
 }
 
 /**
- * Sets the indent value
- * @param val Indent depth
+ * Sets the heading level value
+ * @param val Heading level
  */
-void HeadingTk::setIndent( uint8_t val ) {
-    _indent = val;
+void HeadingTk::setLevel( uint8_t val ) {
+    _level = val;
 }
 
 /**
@@ -42,7 +53,8 @@ void HeadingTk::setIndent( uint8_t val ) {
  * @param os Output stream
  */
 void HeadingTk::toStr( std::ostream &os ) const {
-    os << "MarkdownTk={ type: " << this->type() << ", indent: " << _indent << ", text: \"";
+    os << R"({ "type": ")" << this->type() << R"(", "level": )" << (unsigned) this->level() << R"(, "text": ")";
     blogator::unicode::utf8::convert( os, this->text() );
-    os << "\", position: " << this->position() << " }";
+    os << R"(" })";
+//    os << R"(", "position": ")" << this->position() << R"(" })";
 }

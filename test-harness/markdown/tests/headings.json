@@ -4,9 +4,9 @@
     "description":"H1 with space",
     "input":"# heading",
     "tokens":[
-      {"type": "HEADING", "text": "#"},
+      {"type": "HEADING", "level": 1, "text": "#"},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -15,9 +15,9 @@
     "description":"H1 without space",
     "input":"#heading",
     "tokens":[
-      {"type": "HEADING", "text": "#"},
+      {"type": "HEADING", "level": 1, "text": "#"},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -26,9 +26,9 @@
     "description":"H1 in a 2-line definition",
     "input":"heading\n===\n",
     "tokens":[
-      {"type": "HEADING", "text": "==="},
+      {"type": "HEADING", "level": 1, "text": "==="},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -37,9 +37,9 @@
     "description":"H2 in a 2-line definition",
     "input":"heading\n--------\n",
     "tokens":[
-      {"type": "HEADING", "text": "---"},
+      {"type": "HEADING", "level": 2, "text": "---"},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -48,9 +48,9 @@
     "description":"sequential heading and text blocks",
     "input":"# heading\nparagraph text",
     "tokens":[
-      {"type": "HEADING", "text": "#"},
+      {"type": "HEADING", "level": 1, "text": "#"},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""},
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""},
       {"type": "CHARACTER", "text": "paragraph text"}
     ],
     "errors":[
@@ -62,9 +62,9 @@
     "description":"indented heading defined on 2 lines",
     "input":"\t heading\n\t ===",
     "tokens":[
-      {"type": "HEADING", "text": "==="},
+      {"type": "HEADING", "level": 1, "text": "==="},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -73,9 +73,9 @@
     "description":"heading with 3+ '-' chars",
     "input":"heading\n--------",
     "tokens":[
-      {"type": "HEADING", "text": "---"},
+      {"type": "HEADING", "level": 2, "text": "---"},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -84,9 +84,9 @@
     "description":"malformed 2-lined heading",
     "input":"heading\n===some text",
     "tokens":[
-      {"type": "HEADING", "text": "==="},
+      {"type": "HEADING", "level": 1, "text": "==="},
       {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "text": ""},
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""},
       {"type": "CHARACTER", "text": "some text"}
     ],
     "errors":[
@@ -98,8 +98,8 @@
     "description":"2-lined heading with no heading text",
     "input":"  \n===",
     "tokens":[
-      {"type": "HEADING", "text": "==="},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "HEADING", "level": 1, "text": "==="},
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -124,12 +124,12 @@
 
   {
     "description":"heading with block id",
-    "input":"## heading {#heading-id}\n",
+    "input":"### heading {#heading-id}\n",
     "tokens":[
-      {"type": "HEADING", "text": "##"},
+      {"type": "HEADING", "level": 3, "text": "###"},
       {"type": "CHARACTER", "text": "heading "},
       {"type": "BLOCK_ID", "text": "heading-id"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -138,10 +138,10 @@
     "description":"2-lined heading with block id",
     "input":"heading {#heading-id}\n---",
     "tokens":[
-      {"type": "HEADING", "text": "---"},
+      {"type": "HEADING", "level": 2, "text": "---"},
       {"type": "CHARACTER", "text": "heading "},
       {"type": "BLOCK_ID", "text": "heading-id"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
     ],
     "errors":[]
   },
@@ -150,10 +150,10 @@
     "description":"2-lined heading with trailing block id",
     "input":"heading {#heading-id}\n---{#block-id}paragraph text",
     "tokens":[
-      {"type": "HEADING", "text": "---"},
+      {"type": "HEADING", "level": 2, "text": "---"},
       {"type": "CHARACTER", "text": "heading "},
       {"type": "BLOCK_ID", "text": "heading-id"},
-      {"type": "BLOCK_END", "text": ""},
+      {"type": "BLOCK_END", "block": "HEADING", "text": ""},
       {"type": "BLOCK_ID", "text": "block-id"},
       {"type": "CHARACTER", "text": "paragraph text"}
     ],

@@ -22,28 +22,12 @@ blogator::parser::specs::markdown::TokenType BlockEndTk::blockType() const {
     return _block_type;
 }
 
-#ifdef TESTING
-
 /**
  * Prints out a string representation of the token
  * @param os Output stream
  */
 void  BlockEndTk::toStr( std::ostream &os ) const {
-    os << "[" << this->type() << ", " << this->blockType() << ", \"";
-    unicode::normalize( os, this->text() );
-    os << "\"]";
-}
-
-#else
-
-/**
- * Prints out a string representation of the token
- * @param os Output stream
- */
-void BlockEndTk::toStr( std::ostream &os ) const {
-    os << "MarkdownTk={ type: " << this->type() << ", block: " << this->blockType() << ", text: \"";
+    os << R"({ "type": ")" << this->type() << R"(", "block": ")" << this->blockType() << R"(", "text": ")";
     blogator::unicode::utf8::convert( os, this->text() );
-    os << "\", position: " << this->position() << " }";
+    os << R"(" })";
 }
-
-#endif

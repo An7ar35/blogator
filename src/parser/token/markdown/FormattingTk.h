@@ -14,7 +14,7 @@ namespace blogator::parser::token::markdown {
             HIGHLIGHT,      //"==...=="
             SUBSCRIPT,      //"~...~"
             SUPERSCRIPT,    //"^...^"
-            INLINE_CODE,    //"`...`"
+            INLINE_CODE,    //"`...`" or ``...``
         };
 
         FormattingTk( specs::markdown::TokenType type, TextPos position );

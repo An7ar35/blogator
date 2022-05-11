@@ -5,7 +5,7 @@
     "input":"```\n```",
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[]
   },
@@ -15,7 +15,7 @@
     "input":"``````",
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 4 }
@@ -28,7 +28,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text": "  "},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
@@ -42,7 +42,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text": " `` "},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
@@ -55,9 +55,9 @@
     "input":"````````````",
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "text": ""},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""},
       {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 4 },
@@ -70,7 +70,7 @@
     "input":"```",
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "EOF in code-block", "line": 1, "col": 4 }
@@ -82,7 +82,7 @@
     "input":"```cpp\n```",
     "tokens":[
       {"type": "CODE_BLOCK", "text": "cpp"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[]
   },
@@ -93,7 +93,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text": "t@g"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
@@ -107,7 +107,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": "cpp"},
       {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[]
   },
@@ -118,7 +118,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n   "},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[]
   },
@@ -129,7 +129,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text":  "```"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
@@ -143,7 +143,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text":  "```"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[]
   },
@@ -154,7 +154,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text": "&lt;&amp;&gt;"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
@@ -168,7 +168,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": ""},
       {"type": "CHARACTER", "text": "&lt;tag&gt; &amp; text"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[]
   },
@@ -179,7 +179,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": "lang"},
       {"type": "CHARACTER", "text": " invalid"},
-      {"type": "BLOCK_END", "text": ""}
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
     ],
     "errors":[
       { "description": "invalid format in code block declaration", "line": 1, "col": 8 }

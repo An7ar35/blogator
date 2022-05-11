@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 
+#include "../../../unicode/unicode.h"
+
 using namespace blogator::parser::token::markdown;
 
 /**
@@ -58,6 +60,7 @@ FormattingTk::Type FormattingTk::resolveFormateType( const std::u32string &text 
         { U"~",  Type::SUBSCRIPT },
         { U"^",  Type::SUPERSCRIPT },
         { U"`",  Type::INLINE_CODE },
+        { U"``", Type::INLINE_CODE },
     } );
 
     const auto it = MAP.find( text );
@@ -65,15 +68,14 @@ FormattingTk::Type FormattingTk::resolveFormateType( const std::u32string &text 
     return ( it == MAP.end() ? Type::NONE : it->second );
 }
 
-
 /**
  * Prints out a string representation of the token
  * @param os Output stream
  */
-void FormattingTk::toStr( std::ostream &os ) const {
-    os << "MarkdownTk={ type: " << this->type() << ", formatting: " << this->formatType() << ", text: \"";
-    blogator::unicode::utf8::convert( os, this->text() );
-    os << "\", position: " << this->position() << " }";
+void  FormattingTk::toStr( std::ostream &os ) const {
+    os << R"({ "type": ")" << this->type() << R"(", "formatting": ")" << this->formatType() << R"(", "text": ")";
+    unicode::normalize( os, this->text() );
+    os << R"(" })";
 }
 
 /**

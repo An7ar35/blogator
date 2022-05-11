@@ -4,11 +4,10 @@
 #include <filesystem>
 #include <string>
 
+#include "nlohmann/json.hpp"
+
 namespace test_harness::markdown {
-    struct TokenDescription {
-        std::string type;
-        std::string text;
-    };
+    typedef nlohmann::json TokenDescription_t;
 
     struct ErrorDescription {
         std::string description;
@@ -17,8 +16,8 @@ namespace test_harness::markdown {
     };
 
     struct MarkdownTkTest {
-        typedef std::vector<TokenDescription> Tokens_t;
-        typedef std::vector<ErrorDescription> Errors_t;
+        typedef std::vector<TokenDescription_t> Tokens_t;
+        typedef std::vector<ErrorDescription>   Errors_t;
 
         std::filesystem::path src         {};
         std::string           description {};

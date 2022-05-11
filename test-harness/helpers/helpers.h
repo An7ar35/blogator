@@ -29,7 +29,6 @@ namespace test_harness::commonmark_spec_tests {
 
 namespace test_harness::markdown {
     std::ostream & operator <<( std::ostream &os, const MarkdownTkTest &test );
-    std::ostream & operator <<( std::ostream &os, const TokenDescription &tk );
     std::ostream & operator <<( std::ostream &os, const ErrorDescription &err );
     std::string to_string( const blogator::parser::token::markdown::MarkdownTk & token );
     std::string to_string( const blogator::parser::logging::ErrorObject & error );

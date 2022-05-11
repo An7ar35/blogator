@@ -3,6 +3,7 @@
 
 #include <map>
 #include <deque>
+#include <algorithm>
 
 #include "TrieTracker.h"
 

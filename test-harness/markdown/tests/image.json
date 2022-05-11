@@ -1,0 +1,45 @@
+{"tests": [
+
+  {
+    "description":"valid image",
+    "input":"![alt-text](image.jpg)",
+    "tokens":[
+      {"type": "IMAGE", "alt": "alt-text", "src": "image.jpg"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"image with no alt-text",
+    "input":"![](image.jpg)",
+    "tokens":[
+      {"type": "IMAGE", "alt": "", "src": "image.jpg"}
+    ],
+    "errors":[
+      { "description": "undefined image alt-text", "line": 1, "col": 3 }
+    ]
+  },
+
+  {
+    "description":"image with no source",
+    "input":"![alt-text]()",
+    "tokens":[
+      {"type": "IMAGE", "alt": "alt-text", "src": ""}
+    ],
+    "errors":[
+      { "description": "undefined image source", "line": 1, "col": 13 }
+    ]
+  },
+
+  {
+    "description":"image with no source parentheses",
+    "input":"![alt-text]",
+    "tokens":[
+      {"type": "CHARACTER", "text": "![alt-text]"}
+    ],
+    "errors":[
+      { "description": "invalid image declaration format", "line": 1, "col": 2 }
+    ]
+  }
+
+]}

@@ -1,6 +1,7 @@
 #include "ascii.h"
 
 #include <cctype>
+#include <algorithm>
 
 /**
  * Checks if character a space
