@@ -16,8 +16,8 @@ namespace blogator::parser::specs::infra {
      */
     struct NamedCharRef {
         NamedCharRef();
-        NamedCharRef( std::u32string name, uint32_t codepoint1 );
-        NamedCharRef( std::u32string name, uint32_t codepoint1, uint32_t codepoint2 );
+        NamedCharRef( std::u32string name, char32_t codepoint1 );
+        NamedCharRef( std::u32string name, char32_t codepoint1, char32_t codepoint2 );
 
         bool operator ==( const NamedCharRef &rhs ) const;
         bool operator !=( const NamedCharRef &rhs ) const;
@@ -27,22 +27,22 @@ namespace blogator::parser::specs::infra {
         bool operator >=( const NamedCharRef &rhs ) const;
 
         static std::pair<bool, const NamedCharRef &> fetch( const std::u32string &name );
-        static bool match( TrieTracker<uint32_t> &tracker, uint32_t next_element );
+        static bool match( TrieTracker<char32_t> &tracker, char32_t next_element );
 
         std::u32string name;
-        uint32_t       codepoint1;
-        uint32_t       codepoint2;
+        char32_t       codepoint1;
+        char32_t       codepoint2;
 
       private:
         typedef std::unordered_map<std::u32string, NamedCharRef> NamedCharRefMap_t;
 
         static NamedCharRef      _not_found;
-        static Trie<uint32_t>    _ncr_trie;
+        static Trie<char32_t>    _ncr_trie;
         static NamedCharRefMap_t _ncr_map;
 
         static NamedCharRef loadNotFound() noexcept;
         static NamedCharRefMap_t loadMap() noexcept;
-        static Trie<uint32_t> loadTrie() noexcept;
+        static Trie<char32_t> loadTrie() noexcept;
     };
 }
 

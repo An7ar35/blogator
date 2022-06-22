@@ -6,7 +6,7 @@
 
 using namespace blogator::unicode;
 
-constexpr uint32_t UTF16_LEAD_OFFSET = ( 0xD800 - ( 0x10000 >> 10 ) ); //0xD7FF
+constexpr char32_t UTF16_LEAD_OFFSET = ( 0xD800 - ( 0x10000 >> 10 ) ); //0xD7FF
 
 /**
  * Joins 4 bytes into a UTF32 code unit
@@ -16,8 +16,8 @@ constexpr uint32_t UTF16_LEAD_OFFSET = ( 0xD800 - ( 0x10000 >> 10 ) ); //0xD7FF
  * @param byte4 Fourth byte (0000 0000 0000 XXXX)
  * @return U32 code unit
  */
-uint32_t utf32::join( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4 ) noexcept {
-    return ( (uint32_t) byte1 << 24 ) + ( (uint32_t) byte2 << 16 ) + ( (uint32_t) byte3 << 8 ) + ( (uint32_t) byte4 );
+char32_t utf32::join( char8_t byte1, char8_t byte2, char8_t byte3, char8_t byte4 ) noexcept {
+    return ( (char32_t) byte1 << 24 ) + ( (char32_t) byte2 << 16 ) + ( (char32_t) byte3 << 8 ) + ( (char32_t) byte4 );
 }
 
 /**
@@ -25,7 +25,7 @@ uint32_t utf32::join( uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4
  * @param c Unicode code point
  * @return Is surrogate
  */
-bool utf32::issurrogate( uint32_t c ) noexcept {
+bool utf32::issurrogate( char32_t c ) noexcept {
     return ( c >= 0xD800 && c <= 0xDFFF );
 }
 
@@ -34,7 +34,7 @@ bool utf32::issurrogate( uint32_t c ) noexcept {
  * @param c Unicode code point
  * @return Is scalar
  */
-bool utf32::isscalar( uint32_t c ) noexcept {
+bool utf32::isscalar( char32_t c ) noexcept {
     return !issurrogate( c );
 }
 
@@ -43,7 +43,7 @@ bool utf32::isscalar( uint32_t c ) noexcept {
  * @param c Unicode code point
  * @return Is non-character
  */
-bool utf32::isnonchar( uint32_t c ) noexcept {
+bool utf32::isnonchar( char32_t c ) noexcept {
     return ( c >= 0x00FDD0 && c <= 0x00FDEF )
           || c == 0x00FFFE || c == 0x00FFFF
           || c == 0x01FFFE || c == 0x01FFFF
@@ -69,7 +69,7 @@ bool utf32::isnonchar( uint32_t c ) noexcept {
  * @param c Unicode code point
  * @return Is control character (0x00->0x1F || 0x7F->0x9F)
  */
-bool utf32::iscntrl( uint32_t c ) noexcept {
+bool utf32::iscntrl( char32_t c ) noexcept {
     return ( c <= 0x1F || ( c >= 0x7F && c <= 0x9F ) );
 }
 
@@ -78,7 +78,7 @@ bool utf32::iscntrl( uint32_t c ) noexcept {
  * @param c Unicode code point
  * @return Replacement character or input character if not surrogate
  */
-uint32_t utf32::toscalar( uint32_t c ) noexcept {
+char32_t utf32::toscalar( char32_t c ) noexcept {
     if( issurrogate( c ) )
         return 0xFFFD;
     else
@@ -102,7 +102,7 @@ void utf32::toscalar( std::u32string &str ) {
  * @param byte4 Byte 4 target container
  * @return Number of 8bit code units used (0 if codepoint exceeds 0x10FFFF)
  */
-size_t utf32::toU8( uint32_t codepoint, uint8_t &byte1, uint8_t &byte2, uint8_t &byte3, uint8_t &byte4 ) noexcept {
+size_t utf32::toU8( char32_t codepoint, char8_t &byte1, char8_t &byte2, char8_t &byte3, char8_t &byte4 ) noexcept {
     if( codepoint < 0b1000'0000 ) { //0x80
         byte1 = static_cast<int8_t>( codepoint );
         return 1;
@@ -135,7 +135,7 @@ size_t utf32::toU8( uint32_t codepoint, uint8_t &byte1, uint8_t &byte2, uint8_t 
  * @param out Output byte stream (unchecked!)
  * @return Number of 8bit code units used (0 if codepoint exceeds 0x10FFFF)
  */
-size_t utf32::toU8( uint32_t codepoint, std::ostream &out ) {
+size_t utf32::toU8( char32_t codepoint, std::ostream &out ) {
     if( codepoint < 0b1000'0000 ) { //0x80
         out << static_cast<int8_t>( codepoint );
         return 1;
@@ -169,7 +169,7 @@ size_t utf32::toU8( uint32_t codepoint, std::ostream &out ) {
  * @param lo Low surrogate target container
  * @return Number of 16bit code units used
  */
-size_t utf32::toU16( uint32_t codepoint, uint16_t &hi, uint16_t &lo ) noexcept {
+size_t utf32::toU16( char32_t codepoint, uint16_t &hi, uint16_t &lo ) noexcept {
     hi = UTF16_LEAD_OFFSET + ( codepoint >> 10 );
 
     if( hi >= 0xD800 && hi <= 0xDBFF ) {
@@ -188,7 +188,7 @@ size_t utf32::toU16( uint32_t codepoint, uint16_t &hi, uint16_t &lo ) noexcept {
  * @param out Output byte stream (unchecked!)
  * @return Number of 16bit code units used
  */
-size_t utf32::toU16LE( uint32_t codepoint, std::ostream &out ) {
+size_t utf32::toU16LE( char32_t codepoint, std::ostream &out ) {
     uint16_t hi = UTF16_LEAD_OFFSET + ( codepoint >> 10 );
 
     if( hi >= 0xD800 && hi <= 0xDBFF ) {
@@ -215,7 +215,7 @@ size_t utf32::toU16LE( uint32_t codepoint, std::ostream &out ) {
  * @param out Output byte stream (unchecked!)
  * @return Number of 16bit code units used
  */
-size_t utf32::toU16BE( uint32_t codepoint, std::ostream &out ) {
+size_t utf32::toU16BE( char32_t codepoint, std::ostream &out ) {
     uint16_t hi = UTF16_LEAD_OFFSET + (codepoint >> 10 );
 
     if( hi >= 0xD800 && hi <= 0xDBFF ) {
@@ -242,17 +242,17 @@ size_t utf32::toU16BE( uint32_t codepoint, std::ostream &out ) {
  * @param prefix Hex code prefix (default="\\u")
  * @return Unicode hex string
  */
-std::u32string utf32::toxunicode( uint32_t val, const std::u32string &prefix ) {
-    static const uint32_t hex[] = { U'0', U'1', U'2', U'3', U'4', U'5', U'6', U'7', U'8', U'9',
+std::u32string utf32::toxunicode( char32_t val, const std::u32string &prefix ) {
+    static const char32_t hex[] = { U'0', U'1', U'2', U'3', U'4', U'5', U'6', U'7', U'8', U'9',
                                     U'A', U'B', U'C', U'D', U'E', U'F' };
 
-    std::vector<uint32_t> out_buffer;
-    std::vector<uint32_t> hex_buffer;
+    std::vector<char32_t> out_buffer;
+    std::vector<char32_t> hex_buffer;
 
     out_buffer.insert( out_buffer.begin(), prefix.cbegin(), prefix.cend() );
 
     while( val >= 16 ) {
-        uint32_t remainder = val % 16;
+        char32_t remainder = val % 16;
         val = ( val - remainder ) / 16;
         hex_buffer.emplace_back( remainder );
     }

@@ -95,7 +95,7 @@ class ParserLogCatcher {
  * @throws std::runtime_error when transcoding fails
  */
 blogator::parser::U32Text transcodeInput( const std::string & raw, const std::filesystem::path & path ) {
-    std::vector<uint32_t> out;
+    std::vector<char32_t> out;
     std::stringstream     ss;
 
     ss << raw;

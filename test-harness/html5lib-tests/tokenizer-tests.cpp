@@ -185,11 +185,11 @@ class ParserLogCatcher {
  * @return Processed/checked UTF-32 text
  */
 std::u32string preprocess( std::u32string &raw, const std::filesystem::path &path ) {
-    std::vector<uint32_t> processed_txt;
+    std::vector<char32_t> processed_txt;
     std::stringstream     ss; //not actually used
 
     auto     source  = blogator::parser::Source( ss, path, blogator::parser::encoding::Format::UTF32_LE );
-    uint32_t prev_cp = 0x00;
+    char32_t prev_cp = 0x00;
 
     for( auto cp : raw ) {
         /* This will send errors to the parser logger where appropriate */

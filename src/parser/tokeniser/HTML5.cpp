@@ -70,42 +70,19 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
     _src_path = text.path(); //internal caching for error calls
     _eof      = false;
 
-    bool reconsume_flag = true;
-    bool next_line_flag = false;
+    text.reconsume(); //to stay on first char during first call
 
     /**
      * [LAMBDA] Sets the state to reconsume the current code point under the caret
      */
     const auto reconsume = [&]( State_e new_state ) {
-        reconsume_flag = true;
+        text.reconsume();
         setState( new_state );
-    };
-
-    /**
-     * [LAMBDA] Moves the caret and gets the code point under it
-     */
-    const auto getNextChar = [&]( U32Text &text ) {
-        if( reconsume_flag ) {
-            reconsume_flag = false;
-        } else {
-            text.advanceCol();
-
-            if( next_line_flag ) {
-                text.advanceLineTracker();
-                next_line_flag = false;
-            }
-
-            next_line_flag = unicode::ascii::isnewline( text.character() );
-        }
-
-        return text.character();
     };
 
     // ============================== [ Tokenizer state machine ] ==================================
 
-    auto character = getNextChar( text );
-
-    next_line_flag = unicode::ascii::isnewline( text.character() ); //edge case: when the first character is a newline.
+    auto character = text.nextChar();
 
     while( !_eof ) {
         switch( currentState() ) {
@@ -928,14 +905,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 const auto next7                      = text.characters( 7 );
 
                 if( character == unicode::HYPHEN_MINUS && !end_reached && next_char == unicode::HYPHEN_MINUS ) {
-                    text.advanceCol( 1 );
+                    text.advanceCaret( 1 );
                     createCommentToken( text.position() );
                     setState( State_e::COMMENT_START );
                 } else if( unicode::ascii::toupper( next7 ) == U"DOCTYPE" ) {
-                    text.advanceCol( 6 );
+                    text.advanceCaret( 6 );
                     setState( State_e::DOCTYPE );
                 } else if( next7 == U"[CDATA[" ) {
-                    text.advanceCol( 6 );
+                    text.advanceCaret( 6 );
                     auto [ adj_node_exists, adj_node_ns ] = _tree_builder.adjustedCurrentNodeNS();
 
                     if( adj_node_exists && adj_node_ns != specs::infra::Namespace::HTML ) {
@@ -1171,10 +1148,10 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                 } else {
                     auto next6 = unicode::ascii::toupper( text.characters( 6 ) );
                     if( next6 == U"PUBLIC" ) {
-                        text.advanceCol( 5 );
+                        text.advanceCaret( 5 );
                         setState( State_e::AFTER_DOCTYPE_PUBLIC_KEYWORD );
                     } else if( next6 ==U"SYSTEM" ) {
-                        text.advanceCol( 5 );
+                        text.advanceCaret( 5 );
                         setState( State_e::AFTER_DOCTYPE_SYSTEM_KEYWORD );
                     } else {
                         logError( text.position(), ErrorCode::INVALID_CHARACTER_SEQUENCE_AFTER_DOCTYPE_NAME );
@@ -1505,14 +1482,14 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
 
             case State_e::NAMED_CHARACTER_REFERENCE: {
-                auto match_tracker  = TrieTracker<uint32_t>();
+                auto match_tracker  = TrieTracker<char32_t>();
                 auto start_position = text.position();
 
                 specs::infra::NamedCharRef::match( match_tracker, unicode::AMPERSAND );
 
                 while( specs::infra::NamedCharRef::match( match_tracker, character ) ) {
                     appendToTempBuffer( character );
-                    character = getNextChar( text );
+                    character = text.nextChar();
                 }
 
                 const auto next_input_char = ( match_tracker.complete() && match_tracker.atEnd() )
@@ -1686,7 +1663,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
             } break;
         }
 
-        character = getNextChar( text );
+        character = text.nextChar();
     }
 
     return specs::Context::HTML5; //TODO
@@ -1783,7 +1760,7 @@ inline void tokeniser::HTML5::clearPendingToken() {
  * Append a character to the temporary buffer
  * @param c Character
  */
-inline void tokeniser::HTML5::appendToTempBuffer( uint32_t c ) {
+inline void tokeniser::HTML5::appendToTempBuffer( char32_t c ) {
     _temp_buffer.emplace_back( c );
 }
 
@@ -1801,7 +1778,7 @@ template<typename InputIt> void tokeniser::HTML5::appendToTempBuffer( InputIt be
  * Gets the temporary buffer
  * @return Reference to the temporary buffer
  */
-inline const std::vector<uint32_t> & tokeniser::HTML5::tempBuffer() const {
+inline const std::vector<char32_t> & tokeniser::HTML5::tempBuffer() const {
     return _temp_buffer;
 }
 
@@ -1888,7 +1865,7 @@ inline void tokeniser::HTML5::emitPendingToken( TextPos position ) {
  * Appends a character to the pending token's buffer (will become text()/name() of token)
  * @param c Character
  */
-inline void tokeniser::HTML5::appendToPendingTokenText( uint32_t c ) {
+inline void tokeniser::HTML5::appendToPendingTokenText( char32_t c ) {
     _pending.token_name_buffer.emplace_back( c );
 }
 
@@ -1905,7 +1882,7 @@ inline void tokeniser::HTML5::appendToPendingTokenText( const std::u32string &tx
  * @param position Position of character in source text
  * @param c Character
  */
-inline void tokeniser::HTML5::emitCharacterToken( TextPos position, uint32_t c ) {
+inline void tokeniser::HTML5::emitCharacterToken( TextPos position, char32_t c ) {
     _tree_builder.dispatch( std::make_unique<token::html5::CharacterTk>( std::u32string( 1, c ), position ) );
 }
 
@@ -1995,7 +1972,7 @@ inline bool tokeniser::HTML5::isEqualToTempBuffer( const std::u32string &str ) c
  * Appends a code point to the pending token's attribute name buffer
  * @param c Code point
  */
-inline void tokeniser::HTML5::appendToPendingTokenAttrNameBuffer( uint32_t c ) {
+inline void tokeniser::HTML5::appendToPendingTokenAttrNameBuffer( char32_t c ) {
     _pending.field_buffer_a.emplace_back( c );
 }
 
@@ -2003,7 +1980,7 @@ inline void tokeniser::HTML5::appendToPendingTokenAttrNameBuffer( uint32_t c ) {
  * Appends a code point to the pending token's attribute value buffer
  * @param c Code point
  */
-inline void tokeniser::HTML5::appendToPendingTokenAttrValueBuffer( uint32_t c ) {
+inline void tokeniser::HTML5::appendToPendingTokenAttrValueBuffer( char32_t c ) {
     _pending.field_buffer_b.emplace_back( c );
 }
 
@@ -2019,7 +1996,7 @@ inline void tokeniser::HTML5::setPendingTokenAttrPosition( TextPos position ) {
  * Appends a code point to the pending token's PUBLIC ID buffer
  * @param c Code point
  */
-inline void tokeniser::HTML5::appendToPendingTokenPIDBuffer( uint32_t c ) {
+inline void tokeniser::HTML5::appendToPendingTokenPIDBuffer( char32_t c ) {
     _pending.field_buffer_a.emplace_back( c );
 }
 
@@ -2027,7 +2004,7 @@ inline void tokeniser::HTML5::appendToPendingTokenPIDBuffer( uint32_t c ) {
  * Appends a code point to the pending token's SYSTEM ID buffer
  * @param c Code point
  */
-inline void tokeniser::HTML5::appendToPendingTokenSIDBuffer( uint32_t c ) {
+inline void tokeniser::HTML5::appendToPendingTokenSIDBuffer( char32_t c ) {
     _pending.field_buffer_b.emplace_back( c );
 }
 
@@ -2128,7 +2105,7 @@ inline void tokeniser::HTML5::setPendingTokenSelfCloseFlag() {
  * Sets the cached character reference code
  * @param val Value (default: 0)
  */
-inline void tokeniser::HTML5::resetCharRefCode( uint32_t val ) {
+inline void tokeniser::HTML5::resetCharRefCode( char32_t val ) {
     _pending.char_ref_code = val;
     _pending.bad_ref_code  = false;
 }
@@ -2138,14 +2115,14 @@ inline void tokeniser::HTML5::resetCharRefCode( uint32_t val ) {
  * @param base Base
  * @param num Numeric version of the character
  */
-inline void tokeniser::HTML5::addToCharRefCode( uint32_t base, uint32_t num ) {
+inline void tokeniser::HTML5::addToCharRefCode( char32_t base, char32_t num ) {
     uint64_t temp = _pending.char_ref_code;
 
     temp *= base;
     temp += num;
 
-    if( temp <= std::numeric_limits<uint32_t>::max() ) {
-        _pending.char_ref_code = static_cast<uint32_t>( temp );
+    if( temp <= std::numeric_limits<char32_t>::max() ) {
+        _pending.char_ref_code = static_cast<char32_t>( temp );
     } else {
         _pending.bad_ref_code = true;
     }
@@ -2155,7 +2132,7 @@ inline void tokeniser::HTML5::addToCharRefCode( uint32_t base, uint32_t num ) {
  * Gets the character reference code currently cached
  * @return Character reference code
  */
-inline uint32_t tokeniser::HTML5::charRefCode() const {
+inline char32_t tokeniser::HTML5::charRefCode() const {
     return _pending.char_ref_code;
 }
 

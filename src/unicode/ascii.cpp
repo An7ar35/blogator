@@ -8,7 +8,7 @@
  * @param c Character
  * @return Is ASCII space (0x20)
  */
-bool blogator::unicode::ascii::isspace( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isspace( char32_t c ) noexcept {
     return ( c == unicode::SPACE );
 }
 
@@ -17,7 +17,7 @@ bool blogator::unicode::ascii::isspace( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII whitespace (TAB, LF, FF, CR, SPACE)
  */
-bool blogator::unicode::ascii::iswspace( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::iswspace( char32_t c ) noexcept {
     return ( c == unicode::TAB || unicode::ascii::isfeed( c ) || c == unicode::CR || c == unicode::SPACE );
 }
 
@@ -26,7 +26,7 @@ bool blogator::unicode::ascii::iswspace( uint32_t c ) noexcept {
  * @param c Character
  * @return Is feed character (0x0A || 0x0C)
  */
-bool blogator::unicode::ascii::isfeed( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isfeed( char32_t c ) noexcept {
     return ( c == unicode::LF || c == unicode::FF );
 }
 
@@ -35,7 +35,7 @@ bool blogator::unicode::ascii::isfeed( uint32_t c ) noexcept {
  * @param c Code point
  * @return Is ASCII tab (0x09)
  */
-bool blogator::unicode::ascii::istab( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::istab( char32_t c ) noexcept {
     return ( c == unicode::TAB );
 }
 
@@ -44,8 +44,8 @@ bool blogator::unicode::ascii::istab( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII alphabetic
  */
-bool blogator::unicode::ascii::isalpha( uint32_t c ) noexcept {
-    return (uint32_t)( ( 'a' - 1 - ( c | 32 ) ) & ( ( c | 32 ) - ( 'z' + 1 ) ) ) >> 31;
+bool blogator::unicode::ascii::isalpha( char32_t c ) noexcept {
+    return (char32_t)( ( 'a' - 1 - ( c | 32 ) ) & ( ( c | 32 ) - ( 'z' + 1 ) ) ) >> 31;
 }
 
 /**
@@ -53,8 +53,8 @@ bool blogator::unicode::ascii::isalpha( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII decimal digit
  */
-bool blogator::unicode::ascii::isdigit( uint32_t c ) noexcept {
-    return (uint32_t)( ( '0' - 1 - c ) & ( c - ( '9' + 1 ) ) ) >> 31;
+bool blogator::unicode::ascii::isdigit( char32_t c ) noexcept {
+    return (char32_t)( ( '0' - 1 - c ) & ( c - ( '9' + 1 ) ) ) >> 31;
 }
 
 /**
@@ -62,7 +62,7 @@ bool blogator::unicode::ascii::isdigit( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII alphanumeric
  */
-bool blogator::unicode::ascii::isalnum( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isalnum( char32_t c ) noexcept {
     return ( ascii::isdigit( c ) || ascii::isalpha( c ) );
 }
 
@@ -73,7 +73,7 @@ bool blogator::unicode::ascii::isalnum( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII blank
  */
-bool blogator::unicode::ascii::isblank( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isblank( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::isblank( static_cast<int>( c ) );
     else
@@ -85,7 +85,7 @@ bool blogator::unicode::ascii::isblank( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII control character
  */
-bool blogator::unicode::ascii::iscntrl( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::iscntrl( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::iscntrl( static_cast<int>( c ) );
     else
@@ -99,7 +99,7 @@ bool blogator::unicode::ascii::iscntrl( uint32_t c ) noexcept {
  * @param c Character
  * @return Is hexadecimal digit
  */
-bool blogator::unicode::ascii::isxdigit( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isxdigit( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::isxdigit( static_cast<int>( c ) );
     else
@@ -111,7 +111,7 @@ bool blogator::unicode::ascii::isxdigit( uint32_t c ) noexcept {
  * @param c Character
  * @return Is graphical representation
  */
-bool blogator::unicode::ascii::isgraph( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isgraph( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::isgraph( static_cast<int>( c ) );
     else
@@ -123,7 +123,7 @@ bool blogator::unicode::ascii::isgraph( uint32_t c ) noexcept {
  * @param c Character
  * @return Is uppercase ASCII letter
  */
-bool blogator::unicode::ascii::isupper( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isupper( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::isupper( static_cast<int>( c ) );
     else
@@ -135,7 +135,7 @@ bool blogator::unicode::ascii::isupper( uint32_t c ) noexcept {
  * @param c Character
  * @return Is lowercase ASCII letter
  */
-bool blogator::unicode::ascii::islower( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::islower( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::islower( static_cast<int>( c ) );
     else
@@ -147,7 +147,7 @@ bool blogator::unicode::ascii::islower( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII printable
  */
-bool blogator::unicode::ascii::isprint( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isprint( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::isprint( static_cast<int>( c ) );
     else
@@ -159,7 +159,7 @@ bool blogator::unicode::ascii::isprint( uint32_t c ) noexcept {
  * @param c Character
  * @return Is ASCII punctuation
  */
-bool blogator::unicode::ascii::ispunct( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::ispunct( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::ispunct( static_cast<int>( c ) );
     else
@@ -171,7 +171,7 @@ bool blogator::unicode::ascii::ispunct( uint32_t c ) noexcept {
  * @param c Code point
  * @return Is new line (0x0A || 0x0D)
  */
-bool blogator::unicode::ascii::isnewline( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isnewline( char32_t c ) noexcept {
     return ( c == LF || c == CR );
 }
 
@@ -180,7 +180,7 @@ bool blogator::unicode::ascii::isnewline( uint32_t c ) noexcept {
  * @param c Code point
  * @return Is upper hexadecimal digit
  */
-bool blogator::unicode::ascii::isuxdigit( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::isuxdigit( char32_t c ) noexcept {
     return ( ascii::isdigit( c ) || ( c >= 0x41 && c <= 0x46 ) );
 }
 
@@ -189,7 +189,7 @@ bool blogator::unicode::ascii::isuxdigit( uint32_t c ) noexcept {
  * @param c Code point
  * @return Is lower hexadecimal digit
  */
-bool blogator::unicode::ascii::islxdigit( uint32_t c ) noexcept {
+bool blogator::unicode::ascii::islxdigit( char32_t c ) noexcept {
     return ( ascii::isdigit( c ) || ( c >= 0x61 && c <= 0x66 ) );
 }
 
@@ -198,7 +198,7 @@ bool blogator::unicode::ascii::islxdigit( uint32_t c ) noexcept {
  * @param c Character
  * @return Lowercase ASCII letter or unchanged input if not ASCII
  */
-uint32_t blogator::unicode::ascii::tolower( uint32_t c ) noexcept {
+char32_t blogator::unicode::ascii::tolower( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::tolower( static_cast<int>( c ) );
     return c;
@@ -209,7 +209,7 @@ uint32_t blogator::unicode::ascii::tolower( uint32_t c ) noexcept {
  * @param c Character
  * @return Uppercase ASCII letter or unchanged input if not ASCII
  */
-uint32_t blogator::unicode::ascii::toupper( uint32_t c ) noexcept {
+char32_t blogator::unicode::ascii::toupper( char32_t c ) noexcept {
     if( c <= 0x7F )
         return std::toupper( static_cast<int>( c ) );
     return c;

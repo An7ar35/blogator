@@ -6,7 +6,7 @@ using namespace blogator::parser::specs::infra;
 
 NamedCharRef                                     NamedCharRef::_not_found = loadNotFound();
 std::unordered_map<std::u32string, NamedCharRef> NamedCharRef::_ncr_map   = loadMap();
-blogator::Trie<uint32_t>                         NamedCharRef::_ncr_trie  = loadTrie();
+blogator::Trie<char32_t>                         NamedCharRef::_ncr_trie  = loadTrie();
 
 /**
  * Constructor (default)
@@ -21,7 +21,7 @@ NamedCharRef::NamedCharRef() :
  * @param name Name of character reference
  * @param codepoint Code-point
  */
-NamedCharRef::NamedCharRef( std::u32string name, uint32_t codepoint ) :
+NamedCharRef::NamedCharRef( std::u32string name, char32_t codepoint ) :
     name( std::move( name ) ),
     codepoint1( codepoint ),
     codepoint2( 0 )
@@ -33,7 +33,7 @@ NamedCharRef::NamedCharRef( std::u32string name, uint32_t codepoint ) :
  * @param codepoint1 Code-point
  * @param codepoint2 Secondary code-point
  */
-NamedCharRef::NamedCharRef( std::u32string name, uint32_t codepoint1, uint32_t codepoint2 ) :
+NamedCharRef::NamedCharRef( std::u32string name, char32_t codepoint1, char32_t codepoint2 ) :
     name( std::move( name ) ),
     codepoint1( codepoint1 ),
     codepoint2( codepoint2 )
@@ -112,7 +112,7 @@ std::pair<bool, const NamedCharRef &> NamedCharRef::fetch( const std::u32string 
  * @param next_element Next element to match
  * @return Match state
  */
-bool NamedCharRef::match( blogator::TrieTracker<uint32_t> &tracker, uint32_t next_element ) {
+bool NamedCharRef::match( blogator::TrieTracker<char32_t> &tracker, char32_t next_element ) {
     return NamedCharRef::_ncr_trie.match( tracker, next_element );
 }
 
@@ -2377,9 +2377,9 @@ std::unordered_map<std::u32string, NamedCharRef> NamedCharRef::loadMap() noexcep
  * [PRIVATE] Initialises static trie
  * @return Trie
  */
-blogator::Trie<uint32_t> NamedCharRef::loadTrie() noexcept {
+blogator::Trie<char32_t> NamedCharRef::loadTrie() noexcept {
     try {
-        auto trie = blogator::Trie<uint32_t>();
+        auto trie = blogator::Trie<char32_t>();
 
         for( const auto & pair : NamedCharRef::_ncr_map ) {
             trie.add( pair.second.name.cbegin(), pair.second.name.cend() );

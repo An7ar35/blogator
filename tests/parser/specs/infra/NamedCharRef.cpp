@@ -5,12 +5,12 @@
 using namespace blogator::parser::specs::infra;
 
 TEST( parser_specs_html5_NamedCharRef_Tests, match_1 ) {
-    auto tracker = blogator::TrieTracker<uint32_t>();
+    auto tracker = blogator::TrieTracker<char32_t>();
     auto str     = std::u32string( U"&curvearrowleft;" );
     auto char_n  = 0;
 
-    for( uint32_t c : str ) {
-        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << c;
+    for( char32_t c : str ) {
+        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << (uint32_t) c;
         ++char_n;
     }
 
@@ -19,13 +19,13 @@ TEST( parser_specs_html5_NamedCharRef_Tests, match_1 ) {
 }
 
 TEST( parser_specs_html5_NamedCharRef_Tests, match_2 ) {
-    auto tracker = blogator::TrieTracker<uint32_t>();
+    auto tracker = blogator::TrieTracker<char32_t>();
     auto str     = std::u32string( U"&curvearrow;" );
     auto substr  = str.substr( 0, 11 ); //"&curvearrow"
     auto char_n  = 0;
 
-    for( uint32_t c : substr ) {
-        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << c;
+    for( char32_t c : substr ) {
+        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << (uint32_t) c;
         ++char_n;
     }
 
@@ -35,12 +35,12 @@ TEST( parser_specs_html5_NamedCharRef_Tests, match_2 ) {
 }
 
 TEST( parser_specs_html5_NamedCharRef_Tests, match_3 ) {
-    auto tracker = blogator::TrieTracker<uint32_t>();
+    auto tracker = blogator::TrieTracker<char32_t>();
     auto str     = std::u32string( U"&AElig" ); //extra ';' goes on to match "&AElig;"
     auto char_n  = 0;
 
-    for( uint32_t c : str ) {
-        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << c;
+    for( char32_t c : str ) {
+        ASSERT_TRUE( NamedCharRef::match( tracker, c ) ) << "Failed to match character " << char_n << ": " << (uint32_t) c;
         ASSERT_TRUE( c == U'g' ? !tracker.partial() : tracker.partial() );
         ASSERT_TRUE( tracker.matched() );
         ASSERT_TRUE( tracker.matching() );

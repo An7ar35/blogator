@@ -31,8 +31,8 @@ namespace blogator::parser::tokeniser {
         typedef specs::infra::TokeniserState State_e;
         typedef specs::infra::TokenType      Type_e;
 
-        static const uint32_t REPLACEMENT_CHAR      = 0xFFFD;
-        static const uint32_t UNDEFINED_CHAR_10FFFF = 0x10FFFF;
+        static const char32_t REPLACEMENT_CHAR      = 0xFFFD;
+        static const char32_t UNDEFINED_CHAR_10FFFF = 0x10FFFF;
         static const auto     THIS_CONTEXT          = specs::Context::HTML5;
 
         bool                  _eof;
@@ -42,19 +42,19 @@ namespace blogator::parser::tokeniser {
         State_e               _current_state;
         State_e               _return_state;
         std::u32string        _last_start_tag;
-        std::vector<uint32_t> _temp_buffer;
+        std::vector<char32_t> _temp_buffer;
         bool                  _acknowledgement_flag;
 
         struct Cache {
             Type_e                                 type          { Type_e::UNKNOWN };
             TextPos                                attr_position { 0, 0 };  //used for Tag.attribute duplication errors
-            std::vector<uint32_t>                  token_name_buffer;
-            std::vector<uint32_t>                  field_buffer_a;          //used for Tag.attribute.name or Doctype.pid
-            std::vector<uint32_t>                  field_buffer_b;          //used for Tag.attribute.name or Doctype.sid
+            std::vector<char32_t>                  token_name_buffer;
+            std::vector<char32_t>                  field_buffer_a;          //used for Tag.attribute.name or Doctype.pid
+            std::vector<char32_t>                  field_buffer_b;          //used for Tag.attribute.name or Doctype.sid
             bool                                   not_missing_a { false }; //used for Doctype.pid
             bool                                   not_missing_b { false }; //used for Doctype.sid
             bool                                   quirks        { false }; //used for Doctype.forceQuirks
-            uint32_t                               char_ref_code { 0 };     //used for parsing character reference codes
+            char32_t                               char_ref_code { 0 };     //used for parsing character reference codes
             bool                                   bad_ref_code  { false }; //used as an overflow flag
             std::unique_ptr<token::html5::HTML5Tk> token;
         } _pending;
@@ -67,13 +67,13 @@ namespace blogator::parser::tokeniser {
         [[nodiscard]] State_e returnState() const noexcept;
 
         void clearTempBuffer();
-        void appendToTempBuffer( uint32_t c );
+        void appendToTempBuffer( char32_t c );
         template<typename InputIt> void appendToTempBuffer( InputIt begin, InputIt end );
         [[nodiscard]] bool isEqualToTempBuffer( const std::u32string & str ) const;
-        [[nodiscard]] const std::vector<uint32_t> & tempBuffer() const;
+        [[nodiscard]] const std::vector<char32_t> & tempBuffer() const;
 
         void clearPendingToken();
-        void emitCharacterToken( TextPos position, uint32_t c );
+        void emitCharacterToken( TextPos position, char32_t c );
         void emitEndOfFileToken( TextPos position );
 
         void createCommentToken( TextPos position );
@@ -84,13 +84,13 @@ namespace blogator::parser::tokeniser {
         bool appropriateEndTagToken();
 
         void emitPendingToken( TextPos position );
-        void appendToPendingTokenText( uint32_t c );
+        void appendToPendingTokenText( char32_t c );
         void appendToPendingTokenText( const std::u32string & txt );
-        void appendToPendingTokenAttrNameBuffer( uint32_t c );
-        void appendToPendingTokenAttrValueBuffer( uint32_t c );
+        void appendToPendingTokenAttrNameBuffer( char32_t c );
+        void appendToPendingTokenAttrValueBuffer( char32_t c );
         void setPendingTokenAttrPosition( TextPos position );
-        void appendToPendingTokenPIDBuffer( uint32_t c );
-        void appendToPendingTokenSIDBuffer( uint32_t c );
+        void appendToPendingTokenPIDBuffer( char32_t c );
+        void appendToPendingTokenSIDBuffer( char32_t c );
         void setPendingDoctypeTokenQuirksFlag( bool force_quirks );
         void setPendingDoctypeTokenPIDFlag( bool not_missing );
         void setPendingDoctypeTokenSIDFlag( bool not_missing );
@@ -98,9 +98,9 @@ namespace blogator::parser::tokeniser {
         void clearPendingTokenAttribute();
         void setPendingTokenSelfCloseFlag();
 
-        void resetCharRefCode( uint32_t val = 0 );
-        void addToCharRefCode( uint32_t base, uint32_t num );
-        [[nodiscard]] uint32_t charRefCode() const;
+        void resetCharRefCode( char32_t val = 0 );
+        void addToCharRefCode( char32_t base, char32_t num );
+        [[nodiscard]] char32_t charRefCode() const;
         [[nodiscard]] bool validCharRefCode() const;
 
         void setAcknowledgementFlag();

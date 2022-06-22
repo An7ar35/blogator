@@ -40,11 +40,11 @@ std::ostream &blogator::unicode::normalize( std::ostream &os, const std::u32stri
  * @return Output stream
  */
 std::ostream &blogator::unicode::normalize( std::ostream &os, const std::string & u8str ) {
-    for( auto c : u8str ) {
+    for( char8_t c : u8str ) {
         if( unicode::ascii::iscntrl( c ) || c == '\'' || c == '\"' || c == '\\' || c == 0x00 ) {
-            os<< unicode::utf8::toxunicode( (uint8_t) c );
+            os << unicode::utf8::toxunicode( c );
         } else {
-            os << c;
+            os << std::string( c, 1 );
         }
     }
 

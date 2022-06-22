@@ -1,5 +1,7 @@
 #include "U32Text.h"
 
+#include "../../unicode/ascii.h"
+
 using namespace blogator::parser;
 
 /**
@@ -8,7 +10,9 @@ using namespace blogator::parser;
  */
 U32Text::U32Text( std::u32string text ) :
     _src( text.begin(), text.end() ),
-    _position( { 1, 1 } )
+    _position( { 1, 1 } ),
+    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
+    _reconsume( false )
 {
     _iterator = _src.begin();
 }
@@ -17,9 +21,11 @@ U32Text::U32Text( std::u32string text ) :
  * Constructor
  * @param text Source text
  */
-U32Text::U32Text( std::vector<uint32_t> text ) :
+U32Text::U32Text( std::vector<char32_t> text ) :
     _src( std::move( text ) ),
-    _position( { 1, 1 } )
+    _position( { 1, 1 } ),
+    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
+    _reconsume( false )
 {
     _iterator = _src.begin();
 }
@@ -32,7 +38,9 @@ U32Text::U32Text( std::vector<uint32_t> text ) :
 U32Text::U32Text( std::filesystem::path src_path, std::u32string text ) :
     _path( std::move( src_path ) ),
     _src( text.begin(), text.end() ),
-    _position( { 1, 1 } )
+    _position( { 1, 1 } ),
+    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
+    _reconsume( false )
 {
     _iterator = _src.begin();
 }
@@ -42,32 +50,20 @@ U32Text::U32Text( std::filesystem::path src_path, std::u32string text ) :
  * @param src_path Source file path
  * @param text Source text to reference
  */
-U32Text::U32Text( std::filesystem::path src_path, std::vector<uint32_t> text ) :
+U32Text::U32Text( std::filesystem::path src_path, std::vector<char32_t> text ) :
     _path( std::move( src_path ) ),
     _src( std::move( text ) ),
-    _position( { 1, 1 } )
+    _position( { 1, 1 } ),
+    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
+    _reconsume( false )
 {
     _iterator = _src.begin();
 }
 
-/**
- * Blindly advances the column position tracker only (pos.col += n)
- * @param n Number of code points to advance by (default=1)
- */
-void U32Text::advanceColTracker( unsigned int n ) {
-    _position.col += n;
-}
-
-/**
- * Blindly advances the position tracker by 1 line (pos.line++, pos.col = 1)
- */
-void U32Text::advanceLineTracker() {
-    _position.newline();
-}
 
 /**
  * Advance caret and position tracker (it += n, pos.col += n)
- * @param n Number of characters to advanceCol by
+ * @param n Number of characters to advance by
  * @return number of code points skipped
  */
 size_t U32Text::advanceCol( unsigned int n ) {
@@ -83,20 +79,101 @@ size_t U32Text::advanceCol( unsigned int n ) {
 }
 
 /**
- * Advance caret and position tracker to the next line (it++, pos.line++, pos.col = 1)
+ * Fast-forward caret and position tracker (ignores reconsume flag)
+ * @param n Number of characters to advance the caret by
+ * @return Number of code points skipped
  */
-void U32Text::advanceLine() {
-    if( !reachedEnd() ) {
-        std::advance( _iterator, 1 );
-        advanceLineTracker();
+size_t U32Text::advanceCaret( unsigned int n ) {
+    unsigned int count = 0;
+
+    if( !reachedEnd() && n > 0 ) {
+        while( !reachedEnd() && count < n ) {
+            ++_iterator;
+
+            if( _newline ) {
+                _line_sizes.emplace_back( _position.col );
+                _position.newline();
+                _newline = false;
+            } else {
+                ++_position.col;
+            }
+
+            _newline = unicode::ascii::isnewline( character() );
+
+            ++count;
+        }
     }
+
+    return count;
 }
+
+/**
+ * Fast-rewind caret and position tracker (ignores reconsume flag)
+ * @param n Number of characters to rewind the caret by
+ * @return Number of codepoints skipped
+ */
+size_t U32Text::reverseCaret( unsigned int n ) {
+    unsigned int count = 0;
+
+    if( _iterator != _src.begin() ) {
+        while( _iterator != _src.begin() && count < n ) {
+            --_iterator;
+
+            if( unicode::ascii::isnewline( character() ) ) {
+                _newline        = true;
+                _position.line -= 1;
+                _position.col   = _line_sizes.back();
+                _line_sizes.pop_back();
+
+            } else {
+                _newline       = false;
+                _position.col -= 1;
+            }
+
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+/**
+ * Advances the caret and position tracker and gets the code point under the latter
+ * @return Code point or 0x00 if end was reached
+ */
+char32_t U32Text::nextChar() {
+    if( _reconsume ) {
+        _reconsume = false;
+    } else if( !reachedEnd() ) {
+        ++_iterator;
+
+        if( _newline ) {
+            _line_sizes.emplace_back( _position.col );
+            _position.newline();
+            _newline = false;
+        } else {
+            ++_position.col;
+        }
+
+        _newline = unicode::ascii::isnewline( character() );
+    }
+
+    return character();
+}
+
+/**
+ * Sets the reconsume flag which holds the caret in its current position during the next call to `nextChar()`
+ */
+void U32Text::reconsume() {
+    _reconsume = true;
+}
+
 
 /**
  * Gets the current code point as pointed to by the iterator
  * @return Code point or 0x00 if end was reached
  */
-uint32_t U32Text::character() const {
+char32_t U32Text::character() const {
     if( reachedEnd() )
         return 0x00;
     else
@@ -108,7 +185,7 @@ uint32_t U32Text::character() const {
  * @param fwd_n Number of code points to skip
  * @return Code point and reached end flag
  */
-std::pair<uint32_t, bool> U32Text::character( std::u32string::iterator::difference_type fwd_n ) {
+std::pair<char32_t, bool> U32Text::character( std::u32string::iterator::difference_type fwd_n ) {
     if( reachedEnd() ) {
         return { 0x00, true };
     } else if ( fwd_n > 0 ) {
@@ -160,31 +237,6 @@ std::filesystem::path U32Text::path() const noexcept {
  */
 bool U32Text::reachedEnd() const {
     return ( _iterator == _src.cend() );
-}
-
-/**
- * Checks if the given iterator has reached the end of the text
- * @param it Iterator to check
- * @return End of text reached by iterator
- */
-bool U32Text::reachedEnd( const TextIterator_t &it ) const {
-    return ( it == _src.cend() );
-}
-
-/**
- * Gets an iterator to the currently held position
- * @return Iterator
- */
-std::vector<uint32_t>::const_iterator U32Text::iteratorCurr() const {
-    return _iterator;
-}
-
-/**
- * Gets an iterator to the end position
- * @return Iterator
- */
-std::vector<uint32_t>::const_iterator U32Text::iteratorEnd() const {
-    return _src.cend();
 }
 
 /**

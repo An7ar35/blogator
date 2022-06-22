@@ -33,14 +33,14 @@ TEST( unicode_utf32, toU8_codeunits_1 ) {
     } );
 
     for( auto i = 0; i< test_case.size(); ++i ) {
-        uint8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
+        char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 1, toU8( test_case[i], b1, b2, b3, b4 ) );
-        ASSERT_EQ( test_case[i], b1 ) << "Failed: " << b1 << " != test_case[" << i << "] (" << test_case[i] << ")";
+        ASSERT_EQ( test_case[i], b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "] (" << (uint8_t) test_case[i] << ")";
     }
 }
 
 TEST( unicode_utf32, toU8_codeunits_2 ) {
-    struct TestCase { uint32_t u32_cp; uint8_t b1; uint8_t b2; };
+    struct TestCase { uint32_t u32_cp; char8_t b1; char8_t b2; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x080, 0xC2, 0x80 },
@@ -49,15 +49,15 @@ TEST( unicode_utf32, toU8_codeunits_2 ) {
     } );
 
     for( auto i = 0; i< test_case.size(); ++i ) {
-        uint8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
+        char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 2, toU8( test_case[i].u32_cp, b1, b2, b3, b4 ) );
-        ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << b1 << " != test_case[" << i << "].b1 (" << test_case[i].b1 << ")";
-        ASSERT_EQ( test_case[i].b2, b2 ) << "Failed: " << b2 << " != test_case[" << i << "].b2 (" << test_case[i].b2 << ")";
+        ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "].b1 (" << (uint8_t) test_case[i].b1 << ")";
+        ASSERT_EQ( test_case[i].b2, b2 ) << "Failed: " << (uint8_t) b2 << " != test_case[" << i << "].b2 (" << (uint8_t) test_case[i].b2 << ")";
     }
 }
 
 TEST( unicode_utf32, toU8_codeunits_3 ) {
-    struct TestCase { uint32_t u32_cp; uint8_t b1; uint8_t b2; uint8_t b3; };
+    struct TestCase { uint32_t u32_cp; char8_t b1; char8_t b2; char8_t b3; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x0800, 0xE0, 0xA0, 0x80 },
@@ -66,16 +66,16 @@ TEST( unicode_utf32, toU8_codeunits_3 ) {
     } );
 
     for( auto i = 0; i< test_case.size(); ++i ) {
-        uint8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
+        char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 3, toU8( test_case[i].u32_cp, b1, b2, b3, b4 ) );
-        ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << b1 << " != test_case[" << i << "].b1 (" << test_case[i].b1 << ")";
-        ASSERT_EQ( test_case[i].b2, b2 ) << "Failed: " << b2 << " != test_case[" << i << "].b2 (" << test_case[i].b2 << ")";
-        ASSERT_EQ( test_case[i].b3, b3 ) << "Failed: " << b3 << " != test_case[" << i << "].b3 (" << test_case[i].b3 << ")";
+        ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "].b1 (" << (uint8_t) test_case[i].b1 << ")";
+        ASSERT_EQ( test_case[i].b2, b2 ) << "Failed: " << (uint8_t) b2 << " != test_case[" << i << "].b2 (" << (uint8_t) test_case[i].b2 << ")";
+        ASSERT_EQ( test_case[i].b3, b3 ) << "Failed: " << (uint8_t) b3 << " != test_case[" << i << "].b3 (" << (uint8_t) test_case[i].b3 << ")";
     }
 }
 
 TEST( unicode_utf32, toU8_codeunits_4 ) {
-    struct TestCase { uint32_t u32_cp; uint8_t b1; uint8_t b2; uint8_t b3; uint8_t b4; };
+    struct TestCase { uint32_t u32_cp; char8_t b1; char8_t b2; char8_t b3; char8_t b4; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x010000, 0xF0, 0x90, 0x80, 0x80 },
@@ -84,22 +84,22 @@ TEST( unicode_utf32, toU8_codeunits_4 ) {
     } );
 
     for( auto i = 0; i< test_case.size(); ++i ) {
-        uint8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
+        char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 4, toU8( test_case[i].u32_cp, b1, b2, b3, b4 ) );
-        ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << b1 << " != test_case[" << i << "].b1 (" << test_case[i].b1 << ")";
-        ASSERT_EQ( test_case[i].b2, b2 ) << "Failed: " << b2 << " != test_case[" << i << "].b2 (" << test_case[i].b2 << ")";
-        ASSERT_EQ( test_case[i].b3, b3 ) << "Failed: " << b3 << " != test_case[" << i << "].b3 (" << test_case[i].b3 << ")";
-        ASSERT_EQ( test_case[i].b4, b4 ) << "Failed: " << b4 << " != test_case[" << i << "].b4 (" << test_case[i].b4 << ")";
+        ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "].b1 (" << (uint8_t) test_case[i].b1 << ")";
+        ASSERT_EQ( test_case[i].b2, b2 ) << "Failed: " << (uint8_t) b2 << " != test_case[" << i << "].b2 (" << (uint8_t) test_case[i].b2 << ")";
+        ASSERT_EQ( test_case[i].b3, b3 ) << "Failed: " << (uint8_t) b3 << " != test_case[" << i << "].b3 (" << (uint8_t) test_case[i].b3 << ")";
+        ASSERT_EQ( test_case[i].b4, b4 ) << "Failed: " << (uint8_t) b4 << " != test_case[" << i << "].b4 (" << (uint8_t) test_case[i].b4 << ")";
     }
 }
 
 TEST( unicode_utf32, toU8_codeunits_fail ) {
-    uint8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
+    char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
     ASSERT_EQ( 0, toU8( 0x110000, b1, b2, b3, b4 ) );
 }
 
 TEST( unicode_utf32, toU8_stream_1byte ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x00, { 0x00 } },
@@ -116,7 +116,7 @@ TEST( unicode_utf32, toU8_stream_1byte ) {
 }
 
 TEST( unicode_utf32, toU8_stream_2bytes ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x080, { 0xC2, 0x80 } },
@@ -133,7 +133,7 @@ TEST( unicode_utf32, toU8_stream_2bytes ) {
 }
 
 TEST( unicode_utf32, toU8_stream_3bytes ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x0800, { 0xE0, 0xA0, 0x80 } },
@@ -150,7 +150,7 @@ TEST( unicode_utf32, toU8_stream_3bytes ) {
 }
 
 TEST( unicode_utf32, toU8_stream_4bytes ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x010000, { 0xF0, 0x90, 0x80, 0x80 } },
@@ -225,7 +225,7 @@ TEST( unicode_utf32, toU16_codeunits_2 ) {
 }
 
 TEST( unicode_utf32, toU16LE_stream_1 ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x0000, { 0x00, 0x00 } },
@@ -244,7 +244,7 @@ TEST( unicode_utf32, toU16LE_stream_1 ) {
 }
 
 TEST( unicode_utf32, toU16LE_stream_2 ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x010000, { 0x00, 0xD8, 0x00, 0xDC } }, //0xD800, 0xDC00
@@ -261,7 +261,7 @@ TEST( unicode_utf32, toU16LE_stream_2 ) {
 }
 
 TEST( unicode_utf32, toU16BE_stream_1 ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x0000, { 0x00, 0x00 } },
@@ -280,7 +280,7 @@ TEST( unicode_utf32, toU16BE_stream_1 ) {
 }
 
 TEST( unicode_utf32, toU16BE_stream_2 ) {
-    struct TestCase { uint32_t u32_cp; std::vector<uint8_t> bytes; };
+    struct TestCase { uint32_t u32_cp; std::vector<char8_t> bytes; };
 
     auto test_case = std::vector<TestCase>( {
         { 0x010000, { 0xD8, 0x00, 0xDC, 0x00 } }, //0xD800, 0xDC00

@@ -15,7 +15,7 @@ const char HEX_TABLE[16] = { '0', '1', '2', '3', '4',
  * @param first First byte of the UTF-8 code point sequence
  * @return Number of bytes to expect (0 if not valid)
  */
-size_t blogator::unicode::utf8::bytelength( uint8_t byte ) {
+size_t blogator::unicode::utf8::bytelength( char8_t byte ) {
     if     ( byte < 0x80 ) { return 1; } /* (0xxxxxxx) 0000 0000 -> 0111 1111 */
     else if( byte < 0xC0 ) { return 0; } /* INVALID */
     else if( byte < 0xE0 ) { return 2; } /* (110xxxxx) 1000 0000 -> 1101 1111 */
@@ -31,7 +31,7 @@ size_t blogator::unicode::utf8::bytelength( uint8_t byte ) {
  * @return UTF32 code point
  * @throws std::invalid_argument when byte length is invalid
  */
-uint32_t blogator::unicode::utf8::toU32( const uint8_t sequence[4], size_t ln ) {
+uint32_t blogator::unicode::utf8::toU32( const char8_t sequence[4], size_t ln ) {
     switch( ln ) {
         case 1: return toU32( sequence[0] );
         case 2: return toU32( sequence[0], sequence[1] );
@@ -46,7 +46,7 @@ uint32_t blogator::unicode::utf8::toU32( const uint8_t sequence[4], size_t ln ) 
  * @param u8_byte1 1st byte of a 1-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1 ) noexcept {
+uint32_t blogator::unicode::utf8::toU32( char8_t u8_byte1 ) noexcept {
     return static_cast<uint32_t>( u8_byte1 );
 }
 
@@ -56,7 +56,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1 ) noexcept {
  * @param u8_byte2 2nd byte of a 2-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2 ) noexcept {
+uint32_t blogator::unicode::utf8::toU32( char8_t u8_byte1, char8_t u8_byte2 ) noexcept {
     return (uint32_t)( ( u8_byte1 & 0x1F ) << 6  ) | ( u8_byte2  & 0x3F );;
 }
 
@@ -67,7 +67,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2 ) no
  * @param u8_byte3 3rd byte of a 3-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3 ) noexcept {
+uint32_t blogator::unicode::utf8::toU32( char8_t u8_byte1, char8_t u8_byte2, char8_t u8_byte3 ) noexcept {
     return (uint32_t)( ( u8_byte1 & 0x0F ) << 12 ) | ( ( u8_byte2 & 0x3F ) << 6 ) | ( u8_byte3 & 0x3F );;
 }
 
@@ -79,7 +79,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uin
  * @param u8_byte4 4th byte of a 4-byte sequence
  * @return UTF-32 code point
  */
-uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uint8_t u8_byte3, uint8_t u8_byte4 ) noexcept {
+uint32_t blogator::unicode::utf8::toU32( char8_t u8_byte1, char8_t u8_byte2, char8_t u8_byte3, char8_t u8_byte4 ) noexcept {
     return (uint32_t)( ( u8_byte1 & 0x07 ) << 18 ) | ( ( u8_byte2 & 0x3F ) << 12 ) | ( ( u8_byte3 & 0x3F ) << 6 ) | ( u8_byte4 & 0x3F );
 }
 
@@ -89,7 +89,7 @@ uint32_t blogator::unicode::utf8::toU32( uint8_t u8_byte1, uint8_t u8_byte2, uin
  * @param prefix Hex code prefix (default="\\u")
  * @return Unicode hex string
  */
-std::string blogator::unicode::utf8::toxunicode( uint8_t val, const std::string &prefix ) {
+std::string blogator::unicode::utf8::toxunicode( char8_t val, const std::string &prefix ) {
     char arr[2] = { 0, 0 };
 
     arr[1] = HEX_TABLE[ (val % 16) ];
@@ -105,7 +105,7 @@ std::string blogator::unicode::utf8::toxunicode( uint8_t val, const std::string 
  * @param prefix Hex code prefix (default="\\u")
  * @return Unicode hex string
  */
-std::string blogator::unicode::utf8::toxunicode( uint16_t val, const std::string &prefix ) {
+std::string blogator::unicode::utf8::toxunicode( char16_t val, const std::string &prefix ) {
     char arr[4] = { 0, 0, 0, 0 };
 
     for( int i = 3; i > 0; --i ) {
@@ -124,7 +124,7 @@ std::string blogator::unicode::utf8::toxunicode( uint16_t val, const std::string
  * @param prefix Hex code prefix (default="\\u")
  * @return Unicode hex string
  */
-std::string blogator::unicode::utf8::toxunicode( uint32_t val, const std::string& prefix ) {
+std::string blogator::unicode::utf8::toxunicode( char32_t val, const std::string& prefix ) {
     char arr[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
     for( int i = 7; i > 0; --i ) {
