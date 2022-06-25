@@ -1,0 +1,173 @@
+{"tests": [
+
+  {
+    "description":"LB invalid definition 1",
+    "input":"word\n: ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word :", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"}
+    ],
+    "errors":[
+      {"description": "definition list empty definition", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB invalid definition 2",
+    "input":"word\n: \n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word :", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[
+      {"description": "definition list empty definition", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB invalid definition 3",
+    "input":"word\n: \t",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word :", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"}
+    ],
+    "errors":[
+      {"description": "definition list empty definition", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"simple valid definition list 1",
+    "input":"word\n: definition",
+    "tokens":[
+      {"type": "DEFINITION_LIST_DT", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "2:1"},
+      {"type": "CHARACTER", "text": "definition", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple valid definition list 2",
+    "input":"line 1\nline 2\n: definition",
+    "tokens":[
+    ],
+    "errors":[
+      {"type": "DEFINITION_LIST_DT", "position": "1:1"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:7"},
+      {"type": "DEFINITION_LIST_DD", "position": "3:1"},
+      {"type": "CHARACTER", "text": "definition", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:13"}
+    ]
+  },
+
+  {
+    "description":"simple valid definition list 3",
+    "input":"line 1\nline 2\n: definition line 1\ndefinition line 2",
+    "tokens":[
+    ],
+    "errors":[
+      {"type": "DEFINITION_LIST_DT", "position": "1:1"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:7"},
+      {"type": "DEFINITION_LIST_DD", "position": "3:1"},
+      {"type": "CHARACTER", "text": "definition line 1 definition line 2", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:13"}
+    ]
+  },
+
+  {
+    "description":"valid definition list (no line spacing)",
+    "input":"word 1\n: definition 1\nword 2\n: definition 2\n",
+    "tokens":[
+      {"type": "DEFINITION_LIST_DT", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word 1", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "2:1"},
+      {"type": "CHARACTER", "text": "definition 1 word 2", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "4:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "4:1"},
+      {"type": "CHARACTER", "text": "definition 2", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "5:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"valid definition list (with line spacing)",
+    "input":"word 1\n: definition 1\n\nword 2\n: definition 2\n",
+    "tokens":[
+      {"type": "DEFINITION_LIST_DT", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word 1", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "2:1"},
+      {"type": "CHARACTER", "text": "definition 1", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:1"},
+      {"type": "DEFINITION_LIST_DT", "position": "4:1"},
+      {"type": "CHARACTER", "text": "word 2", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "5:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "5:1"},
+      {"type": "CHARACTER", "text": "definition 2", "position": "5:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"valid definition list (2x definitions)",
+    "input":"title\n: definition 1\n: definition 2",
+    "tokens":[
+      {"type": "DEFINITION_LIST_DT", "position": "1:1"},
+      {"type": "CHARACTER", "text": "title", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "2:1"},
+      {"type": "CHARACTER", "text": "definition 1", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:1"},
+      {"type": "DEFINITION_LIST_DD", "position": "3:1"},
+      {"type": "CHARACTER", "text": "definition 2", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid definition 1",
+    "input":"  \n: definition",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "CHARACTER", "text": ": definition", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid definition 2",
+    "input":": definition",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": ": definition", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid definition 3",
+    "input":"title\n:definition",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "title :definition", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:12"}
+    ],
+    "errors":[]
+  }
+
+]}

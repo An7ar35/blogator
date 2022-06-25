@@ -1,0 +1,1055 @@
+{"tests": [
+
+  {
+    "description":"blockquote declaration EOF 1",
+    "input":">",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote declaration EOF 2",
+    "input":">>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote declaration no space",
+    "input":">?",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "?", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple blockquote line",
+    "input":"> block quote",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "block quote", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple double blockquote line",
+    "input":">> block quote",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "1:2"},
+      {"type": "PARAGRAPH", "position": "1:4"},
+      {"type": "CHARACTER", "text": "block quote", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"indented simple blockquote line",
+    "input":"    > block quote",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:5"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "block quote", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:18"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:18"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"indented simple triple blockquote line",
+    "input":"   >>> block quote",
+    "tokens":[
+      {"type": "BLOCK_QUOTE","nesting": 0, "text": ">", "position": "1:4"},
+      {"type": "BLOCK_QUOTE","nesting": 1, "text": ">", "position": "1:5"},
+      {"type": "BLOCK_QUOTE","nesting": 2, "text": ">", "position": "1:6"},
+      {"type": "PARAGRAPH","position": "1:8"},
+      {"type": "CHARACTER", "text": "block quote", "position": "1:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:19"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:19"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:19"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:19"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"empty nested blockquote 1",
+    "input":">>\n>\n>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"empty nested blockquote 2",
+    "input":">\n>>\n>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "2:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"empty nested blockquote 3",
+    "input":">\n>\n>>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"empty blockquote",
+    "input":">\n>\n>\n>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"paragraph and blockquote 1",
+    "input":"paragraph\n>blockquote",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:2"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "2:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"paragraph and blockquote 2",
+    "input":"paragraph\n\n>blockquote\n>",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote and paragraph 1",
+    "input":">blockquote\nparagraph",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "blockquote paragraph", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:10"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote and paragraph 2",
+    "input":">blockquote\n\nparagraph",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:1"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote paragraph lines 1",
+    "input":">line 1\nline 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote paragraph lines 2",
+    "input":"> line 1\n> line 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote paragraphs 1",
+    "input":"> paragraph 1\n>\n> paragraph 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "3:3"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote paragraphs 2",
+    "input":"> paragraph 1\n>\n> paragraph 2\n>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "3:3"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote, paragraph, blockquote",
+    "input":">blockquote\nparagraph\n>blockquote",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "blockquote paragraph blockquote", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote, LF, paragraph, LF, blockquote",
+    "input":">blockquote\n\nparagraph\n\n>blockquote",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:1"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:2"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "5:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "5:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote paragraphs, blockquote LF, blockquote paragraph, LF, paragraph",
+    "input":">line 1\n>\n>line 3\n\nline 5",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "line 1", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "line 3", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:1"},
+      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "CHARACTER", "text": "line 5", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote paragraphs, blockquote 2xLF, blockquote paragraph",
+    "input":">paragraph 1\n>\n>\n>paragraph 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "4:2"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "4:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:13"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"multi-lined blockquote with 1 line of text",
+    "input":">\n>text\n>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "2:2"},
+      {"type": "CHARACTER", "text": "text", "position": "2:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote with tailing paragraph",
+    "input":">blockquote line 1\n>blockquote line 2\n\nparagraph",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "blockquote line 1 blockquote line 2", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "4:1"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote LF separated paragraphs",
+    "input":"> paragraph 1\n>\n> paragraph 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "3:3"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"aligned blockquote paragraph",
+    "input":"> line 1\n> line 2\n> line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1 line 2 line 3", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"misaligned blockquote paragraph 1",
+    "input":"    > line 1\n> line 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:5"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:9"}
+    ],
+    "errors":[
+      {"description": "block misalignment", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"misaligned blockquote paragraph 2",
+    "input":"> line 1\n    > line 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:13"}
+    ],
+    "errors":[
+      {"description": "block misalignment", "line": 2, "col": 5}
+    ]
+  },
+
+  {
+    "description":"lazy/aligned blockquote paragraph",
+    "input":"> line 1\n  line 2\n  line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1 line 2 line 3", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lazy/aligned fully indented blockquote paragraph",
+    "input":"    > line 1\n      line 2\n      line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:5"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "line 1 line 2 line 3", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lazy/aligned partially indented blockquote paragraph",
+    "input":"    > line 1\nline 2\n line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:5"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "line 1 line 2 line 3", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:8"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lazy/un-aligned blockquote paragraph",
+    "input":"> line 1\nline 2\nline 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1 line 2 line 3", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"crescendo nested blockquote",
+    "input":"> line 1\n>> line 2\n>>>> line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "CHARACTER", "text": "line 2", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"},
+      {"type": "BLOCK_QUOTE", "nesting": 2, "text": ">", "position": "3:3"},
+      {"type": "BLOCK_QUOTE", "nesting": 3, "text": ">", "position": "3:4"},
+      {"type": "PARAGRAPH", "position": "3:6"},
+      {"type": "CHARACTER", "text": "line 3", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"decrescendo spaced nested blockquote",
+    "input":">>>> line 1\n>>>>\n>> line 2\n>>\n> line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "1:2"},
+      {"type": "BLOCK_QUOTE", "nesting": 2, "text": ">", "position": "1:3"},
+      {"type": "BLOCK_QUOTE", "nesting": 3, "text": ">", "position": "1:4"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "line 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:4"},
+      {"type": "PARAGRAPH", "position": "3:4"},
+      {"type": "CHARACTER", "text": "line 2", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "5:3"},
+      {"type": "PARAGRAPH", "position": "5:3"},
+      {"type": "CHARACTER", "text": "line 3", "position": "5:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "5:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"decrescendo nested blockquote",
+    "input":">>>> line 1\n>> line 2\n> line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "1:2"},
+      {"type": "BLOCK_QUOTE", "nesting": 2, "text": ">", "position": "1:3"},
+      {"type": "BLOCK_QUOTE", "nesting": 3, "text": ">", "position": "1:4"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "line 1 line 2 line 3", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"middle nested blockquote",
+    "input":"> line 1\n>> line 2\n> line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "2:2"},
+      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "CHARACTER", "text": "line 2 line 3", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"middle nested blockquote with LF",
+    "input":"> line 1\n>\n>> line 2\n>>\n> line 3",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "BLOCK_QUOTE", "nesting": 1, "text": ">", "position": "3:2"},
+      {"type": "PARAGRAPH", "position": "3:4"},
+      {"type": "CHARACTER", "text": "line 2", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "5:3"},
+      {"type": "PARAGRAPH", "position": "5:3"},
+      {"type": "CHARACTER", "text": "line 3", "position": "5:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "5:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"paragraph, blockquote",
+    "input":"paragraph text\n> blockquote",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "paragraph text", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"blockquote in formatted paragraph",
+    "input":"paragraph *text\n> blockquote",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "paragraph ", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:11"},
+      {"type": "CHARACTER", "text": "text", "position": "1:12"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' heading in blockquote",
+    "input":"> ## heading",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HEADING", "level": 2, "text": "##", "position": "1:3"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'setext' heading in blockquote",
+    "input":"> heading\n> ---",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HEADING", "level": 2, "text": "---", "position": "2:3"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'setext' heading in lazy blockquote",
+    "input":"> heading\n---",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HEADING", "level": 2, "text": "---", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'setext' heading + paragraph in lazy blockquote",
+    "input":"> heading\n  =====\n  paragraph",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HEADING", "level": 1, "text": "=====", "position": "2:3"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:8"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:8"},
+      {"type": "PARAGRAPH", "position": "3:3"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:12"}
+
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"horizontal line declaration in blockquote 1",
+    "input":"> _____",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HORIZONTAL_RULE", "text": "_____", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:8"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"horizontal line declaration in blockquote 2",
+    "input":"> *****",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HORIZONTAL_RULE", "text": "*****", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "1:8"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"horizontal line declaration in blockquote 3",
+    "input":"> ***\ntext",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "HORIZONTAL_RULE", "text": "***", "position": "1:3"},
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "CHARACTER", "text": "text", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "2:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"horizontal line declaration in blockquote 4",
+    "input":"> paragraph 1\n>\n> ----\n>\n> paragraph 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "HORIZONTAL_RULE", "text": "----", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "5:3"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "5:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:14"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "5:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"code block in blockquote 1",
+    "input":"> ```\n> int i = 0;\n> ```\n",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "CODE_BLOCK", "text": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "int i = 0;", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"code block in blockquote 2",
+    "input":"> ~~~\n> int i = 0;\n> ~~~\n",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "CODE_BLOCK", "text": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "int i = 0;", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"code block in blockquote 3",
+    "input":"> paragraph 1\n>\n> ```\n> int i = 0;\n> ```\n>\n> paragraph 2",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"},
+      {"type": "CODE_BLOCK", "text": "", "position": "3:3"},
+      {"type": "CHARACTER", "text": "int i = 0;", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "5:6"},
+      {"type": "PARAGRAPH", "position": "7:3"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "7:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "7:14"},
+      {"type": "BLOCK_END", "block": "BLOCK_QUOTE", "position": "7:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"numerical list in fully prefixed blockquote",
+    "input":"> 1. item 1 line 1\n>    item 1 line 2\n> 2. item 2\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"OL_NUMERIC", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:6"},
+      {"type":"CHARACTER", "text":"item 1 line 1 item 1 line 2", "position":"1:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:6"},
+      {"type":"CHARACTER", "text":"item 2", "position":"3:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"alpha lower list in fully prefixed blockquote",
+    "input":"> a. item 1 line 1\n>    item 1 line 2\n> b. item 2\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"OL_ALPHA_LOWER", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:6"},
+      {"type":"CHARACTER", "text":"item 1 line 1 item 1 line 2", "position":"1:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:6"},
+      {"type":"CHARACTER", "text":"item 2", "position":"3:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"alpha upper list in fully prefixed blockquote",
+    "input":"> A. item 1 line 1\n>    item 1 line 2\n> B. item 2\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"OL_ALPHA_UPPER", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:6"},
+      {"type":"CHARACTER", "text":"item 1 line 1 item 1 line 2", "position":"1:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:6"},
+      {"type":"CHARACTER", "text":"item 2", "position":"3:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"numerical list in lazy blockquote",
+    "input":"> 1. item 1 line 1\n   item 1 line 2\n  2. item 2\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"OL_NUMERIC", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:6"},
+      {"type":"CHARACTER", "text":"item 1 line 1 item 1 line 2", "position":"1:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:6"},
+      {"type":"CHARACTER", "text":"item 2", "position":"3:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"alpha upper list in lazy blockquote",
+    "input":"> A. item 1 line 1\n   item 1 line 2\n  B. item 2\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"OL_ALPHA_UPPER", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:6"},
+      {"type":"CHARACTER", "text":"item 1 line 1 item 1 line 2", "position":"1:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:6"},
+      {"type":"CHARACTER", "text":"item 2", "position":"3:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"alpha lower list in lazy blockquote",
+    "input":"> a. item 1 line 1\n   item 1 line 2\n  b. item 2\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"OL_ALPHA_LOWER", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:6"},
+      {"type":"CHARACTER", "text":"item 1 line 1 item 1 line 2", "position":"1:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"NONE", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:6"},
+      {"type":"CHARACTER", "text":"item 2", "position":"3:6"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"4:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"paragraphed task list in fully prefixed blockquote",
+    "input":"> - [] a\n>\n>  b\n>\n> - [] c\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"UL_TASK", "tight":"false", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:8"},
+      {"type":"CHARACTER", "text":"a", "position":"1:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"2:2"},
+      {"type":"PARAGRAPH", "position":"3:4"},
+      {"type":"CHARACTER", "text":"b", "position":"3:4"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"4:2"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"5:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"5:3"},
+      {"type":"PARAGRAPH", "position":"5:8"},
+      {"type":"CHARACTER", "text":"c", "position":"5:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"6:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"6:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"6:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"paragraphed separated task list in fully prefixed blockquote (cols ==)",
+    "input":"> - [] a\n>\n> b\n>\n> - [] c\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"UL_TASK", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:8"},
+      {"type":"CHARACTER", "text":"a", "position":"1:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"2:2"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"3:3"},
+      {"type":"PARAGRAPH", "position":"3:3"},
+      {"type":"CHARACTER", "text":"b", "position":"3:3"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"4:2"},
+      {"type":"LIST", "list":"UL_TASK", "tight":"true", "position":"5:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"5:3"},
+      {"type":"PARAGRAPH", "position":"5:8"},
+      {"type":"CHARACTER", "text":"c", "position":"5:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"6:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"6:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"6:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"paragraphed separated task list in fully prefixed blockquote (cols <)",
+    "input":"> - [] a\n>\n>b\n>\n> - [] c\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"UL_TASK", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:8"},
+      {"type":"CHARACTER", "text":"a", "position":"1:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"2:2"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:2"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"3:2"},
+      {"type":"PARAGRAPH", "position":"3:2"},
+      {"type":"CHARACTER", "text":"b", "position":"3:2"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"4:2"},
+      {"type":"LIST", "list":"UL_TASK", "tight":"true", "position":"5:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"5:3"},
+      {"type":"PARAGRAPH", "position":"5:8"},
+      {"type":"CHARACTER", "text":"c", "position":"5:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"6:1"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"6:1"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"6:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"task list item in blockquote + 2xLF separated paragraph",
+    "input":"> - [] a\n>\n>\n> b\n",
+    "tokens":[
+      {"type":"BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type":"LIST", "list":"UL_TASK", "tight":"true", "position":"1:3"},
+      {"type":"LIST_ITEM", "id":"", "modality":"UNCHECKED", "position":"1:3"},
+      {"type":"PARAGRAPH", "position":"1:8"},
+      {"type":"CHARACTER", "text":"a", "position":"1:8"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH", "position":"2:2"},
+      {"type":"BLOCK_END", "block":"LIST_ITEM", "position":"3:2"},
+      {"type":"BLOCK_END", "block":"LIST", "position":"3:2"},
+      {"type":"PARAGRAPH", "position":"4:3"},
+      {"type":"CHARACTER", "text":"b", "position":"4:3"},
+      {"type":"BLOCK_END", "block":"PARAGRAPH","position":"5:1"},
+      {"type":"BLOCK_END", "block":"BLOCK_QUOTE", "position":"5:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table in blockquote",
+    "input":">|fake|\n>|table\n>",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:2"},
+      {"type": "CHARACTER", "text": "|fake| |table", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:2"},
+      {"type": "BLOCK_END", "block":"BLOCK_QUOTE", "position":"3:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table in blockquote",
+    "input":"> |h|\n> |---|\n> |c|",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "TABLE", "position": "1:3"},
+      {"type": "TABLE_ROW", "position": "1:3"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:3"},
+      {"type": "CHARACTER", "text": "h", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:6"},
+      {"type": "TABLE_ROW", "position": "3:3"},
+      {"type": "TABLE_CELL", "position": "3:3"},
+      {"type": "CHARACTER", "text": "c", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:5"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:6"},
+      {"type": "BLOCK_END", "block":"BLOCK_QUOTE", "position":"3:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table in lazy blockquote",
+    "input":"> |h|\n|---|\n|c|",
+    "tokens":[
+      {"type": "BLOCK_QUOTE", "nesting": 0, "text": ">", "position": "1:1"},
+      {"type": "TABLE", "position": "1:3"},
+      {"type": "TABLE_ROW", "position": "1:3"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:3"},
+      {"type": "CHARACTER", "text": "h", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:6"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "c", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:4"},
+      {"type": "BLOCK_END", "block":"BLOCK_QUOTE", "position":"3:4"}
+    ],
+    "errors":[]
+  }
+
+]}

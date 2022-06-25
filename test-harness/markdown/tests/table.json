@@ -1,0 +1,1359 @@
+{"tests": [
+
+  {
+    "description":"fake table heading line 1",
+    "input":"|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 2",
+    "input":"| ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 3",
+    "input":"|h",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 4",
+    "input":"|h ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 5",
+    "input":"|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 6",
+    "input":"|h\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 7",
+    "input":"| \n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 8",
+    "input":"|\\`",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|`", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 9",
+    "input":"| h",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "| h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 10",
+    "input":"|h|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 11",
+    "input":"|h| ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 12",
+    "input":"| h |",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "| h |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 13",
+    "input":"| h",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "| h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 14",
+    "input":"|h|h",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h|h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 15",
+    "input":"|h|h ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h|h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 16",
+    "input":"|h|h|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h|h|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table heading line 17",
+    "input":"|h|h\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h|h", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 0",
+    "input":"||\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "||", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 1",
+    "input":"||\n|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 2}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 2",
+    "input":"||\n| ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 3",
+    "input":"||\n|-",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |-", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 4",
+    "input":"||\n|--",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |--", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 4}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 5",
+    "input":"||\n|---",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 5}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 6",
+    "input":"||\n|---|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 7",
+    "input":"||\n|---|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 8",
+    "input":"||\n| --- |",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| | --- |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:8"}
+    ],
+    "errors":[
+      {"description": "table column definition invalid", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 9",
+    "input":"||\n|:--|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |:--|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 10",
+    "input":"||\n|:-:|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |:-:|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 11",
+    "input":"||\n|--:|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |--:|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 12",
+    "input":"||\n|---| ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 13",
+    "input":"||\n|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 2}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 14",
+    "input":"||\n|?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 15",
+    "input":"||\n?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| ?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 16",
+    "input":"||\n|---|---",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---|---", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 17",
+    "input":"||\n|---|\n\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table definition line 18",
+    "input":"||\n|---|---|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---|---|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 9}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 19",
+    "input":"||\n|--:\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |--:", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 5}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 20",
+    "input":"||\n|--:?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |--:?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "table column definition invalid", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 21",
+    "input":"||\n|---||",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---||", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 6}
+    ]
+  },
+
+  {
+    "description":"fake table definition line 22",
+    "input":"|||\n|---|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "||| |---|", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 2, "col": 6}
+    ]
+  },
+
+  {
+    "description":"fake table data line 1",
+    "input":"||\n|---|\n?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| ?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table data line 2",
+    "input":"||\n|---|\n|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:2"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 2}
+    ]
+  },
+
+  {
+    "description":"fake table data line 3",
+    "input":"||\n|---|\n|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 2}
+    ]
+  },
+
+  {
+    "description":"fake table data line 4",
+    "input":"||\n|---|\n|?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 3}
+    ]
+  },
+
+  {
+    "description":"fake table data line 5",
+    "input":"||\n|---|\n| ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 3}
+    ]
+  },
+
+  {
+    "description":"fake table data line 6",
+    "input":"||\n|---|\n|data",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |data", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:6"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 6}
+    ]
+  },
+
+  {
+    "description":"fake table data line 7",
+    "input":"||\n|---|\n| data",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| | data", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:7"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 7}
+    ]
+  },
+
+  {
+    "description":"fake table data line 8",
+    "input":"||\n|---|\n|data ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |data", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:7"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 7}
+    ]
+  },
+
+  {
+    "description":"fake table data line 9",
+    "input":"||\n|---|\n|\\*",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |*", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:4"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 4}
+    ]
+  },
+
+  {
+    "description":"fake table data line 10",
+    "input":"||\n|---|\n|?\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 3}
+    ]
+  },
+
+  {
+    "description":"simple 1x1 table",
+    "input":"| header |\n|---|\n| cell |",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "header ", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:10"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:11"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "cell ", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple 1x1 table (un-aligned)",
+    "input":"  | header |\n|---|\n    | cell |",
+    "tokens":[
+      {"type": "TABLE", "position": "1:3"},
+      {"type": "TABLE_ROW", "position": "1:3"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:3"},
+      {"type": "CHARACTER", "text": "header ", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:12"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:13"},
+      {"type": "TABLE_ROW", "position": "3:5"},
+      {"type": "TABLE_CELL", "position": "3:5"},
+      {"type": "CHARACTER", "text": "cell ", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple 2x1 table",
+    "input":"| header |\n|---|\n| a |\n| b |",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "header ", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:10"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:11"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "a ", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:5"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:6"},
+      {"type": "TABLE_ROW", "position": "4:1"},
+      {"type": "TABLE_CELL", "position": "4:1"},
+      {"type": "CHARACTER", "text": "b ", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "4:5"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "4:6"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "4:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple 1x2 table",
+    "input":"| h1 | h2 |\n|---|---|\n| a | b |",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h1 ", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:6"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:6"},
+      {"type": "CHARACTER", "text": "h2 ", "position": "1:8"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:12"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "a ", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:5"},
+      {"type": "TABLE_CELL", "position": "3:5"},
+      {"type": "CHARACTER", "text": "b ", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:10"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table alignments",
+    "input":"|none|left|center|right|\n|---|:--|:-:|--:|\n|a|b|c|d|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "none", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:6"},
+
+      {"type": "TABLE_HEADING", "alignment": "LEFT", "position": "1:6"},
+      {"type": "CHARACTER", "text": "left", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:11"},
+
+      {"type": "TABLE_HEADING", "alignment": "CENTER", "position": "1:11"},
+      {"type": "CHARACTER", "text": "center", "position": "1:12"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:18"},
+
+      {"type": "TABLE_HEADING", "alignment": "RIGHT", "position": "1:18"},
+      {"type": "CHARACTER", "text": "right", "position": "1:19"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:24"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:25"},
+
+      {"type": "TABLE_ROW", "position": "3:1"},
+
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "a", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:3"},
+
+      {"type": "TABLE_CELL", "position": "3:3"},
+      {"type": "CHARACTER", "text": "b", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:5"},
+
+      {"type": "TABLE_CELL", "position": "3:5"},
+      {"type": "CHARACTER", "text": "c", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:7"},
+
+      {"type": "TABLE_CELL", "position": "3:7"},
+      {"type": "CHARACTER", "text": "d", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:9"},
+
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:10"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid table alignment 1",
+    "input":"||\n|-:-|\n||",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |-:-| ||", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"}
+    ],
+    "errors":[
+      {"description": "table column definition invalid", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"invalid table alignment 2",
+    "input":"||\n|-?-|\n||",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |-?-| ||", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"}
+    ],
+    "errors":[
+      {"description": "table column definition invalid", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"simple 1x1 table (false start)",
+    "input":"|paragraph\n\n| header |\n|---|\n| cell |",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|paragraph", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "TABLE", "position": "3:1"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "3:1"},
+      {"type": "CHARACTER", "text": "header ", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "3:10"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:11"},
+      {"type": "TABLE_ROW", "position": "5:1"},
+      {"type": "TABLE_CELL", "position": "5:1"},
+      {"type": "CHARACTER", "text": "cell ", "position": "5:3"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "5:8"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "5:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"two simple 1x1 table in sequence (1x line separation)",
+    "input":"|h1|\n|---|\n|a|\n\n|h2|\n|---|\n|b|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h1", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:5"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "a", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "4:1"},
+
+      {"type": "TABLE", "position": "5:1"},
+      {"type": "TABLE_ROW", "position": "5:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "5:1"},
+      {"type": "CHARACTER", "text": "h2", "position": "5:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "5:4"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "5:5"},
+      {"type": "TABLE_ROW", "position": "7:1"},
+      {"type": "TABLE_CELL", "position": "7:1"},
+      {"type": "CHARACTER", "text": "b", "position": "7:2"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "7:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "7:4"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "7:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"two simple 1x1 table in sequence (2x line separation)",
+    "input":"|h1|\n|---|\n|a|\n\n\n|h2|\n|---|\n|b|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h1", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:5"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "a", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "4:1"},
+
+      {"type": "TABLE", "position": "6:1"},
+      {"type": "TABLE_ROW", "position": "6:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "6:1"},
+      {"type": "CHARACTER", "text": "h2", "position": "6:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "6:4"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "6:5"},
+      {"type": "TABLE_ROW", "position": "8:1"},
+      {"type": "TABLE_CELL", "position": "8:1"},
+      {"type": "CHARACTER", "text": "b", "position": "8:2"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "8:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "8:4"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "8:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading inlined formatting 1",
+    "input":"| *header* |\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:3"},
+      {"type": "CHARACTER", "text": "header", "position": "1:4"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:10"},
+      {"type": "CHARACTER", "text": " ", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:12"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:13"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading inlined formatting 2",
+    "input":"| *header |\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:3"},
+      {"type": "CHARACTER", "text": "header ", "position": "1:4"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:12"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading inlined link 1",
+    "input":"|[header](link)|\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "link", "position": "1:2"},
+      {"type": "CHARACTER", "text": "header", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:16"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:17"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading inlined link 2",
+    "input":"|[head|er](link)|\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "link", "position": "1:2"},
+      {"type": "CHARACTER", "text": "head|er", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:16"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:17"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:18"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading fake inlined link 1",
+    "input":"|[head|er](link|\n|---|\n||",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "link|", "position": "1:2"},
+      {"type": "CHARACTER", "text": "head|er", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:17"},
+      {"type": "CHARACTER", "text": "|---| ||", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"}
+    ],
+    "errors":[
+      {"description": "newline in hyperlink URL", "line": 1, "col": 17}
+    ]
+  },
+
+  {
+    "description":"table heading fake inlined link 2",
+    "input":"|[head|er](link|\n|---|\n||\n\np",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "link|", "position": "1:2"},
+      {"type": "CHARACTER", "text": "head|er", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:17"},
+      {"type": "CHARACTER", "text": "|---| ||", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "CHARACTER", "text": "p", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:2"}
+    ],
+    "errors":[
+      {"description": "newline in hyperlink URL", "line": 1, "col": 17}
+    ]
+  },
+
+  {
+    "description":"table heading inlined image 1",
+    "input":"|![img](src)|\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "IMAGE", "src": "src", "position": "1:2"},
+      {"type": "CHARACTER", "text": "img", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:12"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:14"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading inlined image 2",
+    "input":"|![im|g](src)|\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "IMAGE", "src": "src", "position": "1:2"},
+      {"type": "CHARACTER", "text": "im|g", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:15"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table heading fake inlined image 1",
+    "input":"|![im|g](src|\n|---|\n||",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "IMAGE", "src": "src|", "position": "1:2"},
+      {"type": "CHARACTER", "text": "im|g", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:14"},
+      {"type": "CHARACTER", "text": "|---| ||", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"}
+    ],
+    "errors":[
+      {"description": "newline in image source", "line": 1, "col": 14}
+    ]
+  },
+
+  {
+    "description":"table heading fake inlined image 2",
+    "input":"|![im|g](src|\n|---|\n||\n\np",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "IMAGE", "src": "src|", "position": "1:2"},
+      {"type": "CHARACTER", "text": "im|g", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:14"},
+      {"type": "CHARACTER", "text": "|---| ||", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "CHARACTER", "text": "p", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:2"}
+    ],
+    "errors":[
+      {"description": "newline in image source", "line": 1, "col": 14}
+    ]
+  },
+
+  {
+    "description":"table cell inlined formatting 1",
+    "input":"|h|\n|---|\n|*cell*|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:4"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "3:2"},
+      {"type": "CHARACTER", "text": "cell", "position": "3:3"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell inlined formatting 2",
+    "input":"|h|\n|---|\n|*cell|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:4"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "3:2"},
+      {"type": "CHARACTER", "text": "cell", "position": "3:3"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:8"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell inlined link 1",
+    "input":"|h|\n|---|\n|[cell](link)|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:4"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "HYPERLINK", "url": "link", "position": "3:2"},
+      {"type": "CHARACTER", "text": "cell", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:15"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell inlined link 2",
+    "input":"|h|\n|---|\n|[ce|ll](link)|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:4"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "HYPERLINK", "url": "link", "position": "3:2"},
+      {"type": "CHARACTER", "text": "ce|ll", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:15"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:16"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:16"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell fake inlined link 1",
+    "input":"|h|\n|---|\n|[ce|ll](link|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h| |---| |", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "link|", "position": "3:2"},
+      {"type": "CHARACTER", "text": "ce|ll", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "3:15"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:15"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 15},
+      {"description": "EOF in hyperlink", "line": 3, "col": 2}
+    ]
+  },
+
+  {
+    "description":"table cell fake inlined link 2",
+    "input":"|h|\n|---|\n|[ce|ll](link|\n\np",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h| |---| |", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "link|", "position": "3:2"},
+      {"type": "CHARACTER", "text": "ce|ll", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "3:15"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "CHARACTER", "text": "p", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:2"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 15},
+      {"description": "newline in hyperlink URL", "line": 3, "col": 15}
+    ]
+  },
+
+  {
+    "description":"table cell inlined image 1",
+    "input":"|h|\n|---|\n|![img](src)|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:4"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "IMAGE", "src": "src", "position": "3:2"},
+      {"type": "CHARACTER", "text": "img", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell inlined image 2",
+    "input":"|h|\n|---|\n|![im|g](src)|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "h", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:4"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "IMAGE", "src": "src", "position": "3:2"},
+      {"type": "CHARACTER", "text": "im|g", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:15"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell fake inlined image 1",
+    "input":"|h|\n|---|\n|![im|g](src|",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h| |---| |", "position": "1:1"},
+      {"type": "IMAGE", "src": "src|", "position": "3:2"},
+      {"type": "CHARACTER", "text": "im|g", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:14"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 14},
+      {"description": "EOF in image", "line": 3, "col": 2}
+    ]
+  },
+
+  {
+    "description":"table cell fake inlined image 2",
+    "input":"|h|\n|---|\n|![im|g](src|\n\np",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|h| |---| |", "position": "1:1"},
+      {"type": "IMAGE", "src": "src|", "position": "3:2"},
+      {"type": "CHARACTER", "text": "im|g", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "3:14"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "CHARACTER", "text": "p", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:2"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 14},
+      {"description": "newline in image source", "line": 3, "col": 14}
+    ]
+  },
+
+  {
+    "description":"table heading escaped char",
+    "input":"|\\*|\n|---|\n||",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "CHARACTER", "text": "*", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:5"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell escaped char",
+    "input":"||\n|---|\n|\\*|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:3"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "*", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:5"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"table cell fake footnote id",
+    "input":"||\n|---|\n|[^1|",
+    "tokens":[
+      {"type": "TABLE", "position": "1:1"},
+      {"type": "TABLE_ROW", "position": "1:1"},
+      {"type": "TABLE_HEADING", "alignment": "NONE", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "TABLE_HEADING", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "1:3"},
+      {"type": "TABLE_ROW", "position": "3:1"},
+      {"type": "TABLE_CELL", "position": "3:1"},
+      {"type": "CHARACTER", "text": "[", "position": "3:2"},
+      {"type": "FORMAT_BEGIN", "formatting": "SUPERSCRIPT", "text": "^", "position": "3:3"},
+      {"type": "CHARACTER", "text": "1", "position": "3:4"},
+      {"type": "FORMAT_END", "formatting": "SUPERSCRIPT", "text": "^", "position": "3:5"},
+      {"type": "BLOCK_END", "block": "TABLE_CELL", "position": "3:5"},
+      {"type": "BLOCK_END", "block": "TABLE_ROW", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "TABLE", "position": "3:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table cell fake footnote id",
+    "input":"||\n|---|\n|[^1\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |[", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "SUPERSCRIPT", "text": "^", "position": "3:3"},
+      {"type": "CHARACTER", "text": "1", "position": "3:4"},
+      {"type": "FORMAT_END", "formatting": "SUPERSCRIPT", "text": "^", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 5}
+    ]
+  },
+
+  {
+    "description":"fake table heading with block id",
+    "input":"|{#block-id}|\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|", "position": "1:1"},
+      {"type": "BLOCK_ID", "text": "block-id", "position": "1:2"},
+      {"type": "CHARACTER", "text": "|", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake table cell with block id",
+    "input":"||\n|---|\n|{#block-id}\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "|| |---| |", "position": "1:1"},
+      {"type": "BLOCK_ID", "text": "block-id", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"}
+    ],
+    "errors":[
+      {"description": "table column mismatch", "line": 3, "col": 13}
+    ]
+  }
+
+]}

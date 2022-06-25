@@ -4,7 +4,24 @@
     "description":"valid image",
     "input":"![alt-text](image.jpg)",
     "tokens":[
-      {"type": "IMAGE", "alt": "alt-text", "src": "image.jpg"}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "image.jpg", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt-text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:22"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:23"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"valid image with special char in alt-text",
+    "input":"![alt&text](image.jpg)",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "image.jpg", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt&amp;text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:22"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:23"}
     ],
     "errors":[]
   },
@@ -13,7 +30,10 @@
     "description":"image with no alt-text",
     "input":"![](image.jpg)",
     "tokens":[
-      {"type": "IMAGE", "alt": "", "src": "image.jpg"}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "image.jpg", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"}
     ],
     "errors":[
       { "description": "undefined image alt-text", "line": 1, "col": 3 }
@@ -24,9 +44,45 @@
     "description":"image with no source",
     "input":"![alt-text]()",
     "tokens":[
-      {"type": "IMAGE", "alt": "alt-text", "src": ""}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt-text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"}
     ],
     "errors":[
+      { "description": "undefined image source", "line": 1, "col": 13 }
+    ]
+  },
+
+  {
+    "description":"image with EOF in source start",
+    "input":"![alt-text](",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt-text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:13"}
+    ],
+    "errors":[
+      { "description": "undefined image source", "line": 1, "col": 13 },
+      { "description": "EOF in image", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"image with newline in source start",
+    "input":"![alt-text](\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt-text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "newline in image source", "line": 1, "col": 13 },
       { "description": "undefined image source", "line": 1, "col": 13 }
     ]
   },
@@ -35,11 +91,75 @@
     "description":"image with no source parentheses",
     "input":"![alt-text]",
     "tokens":[
-      {"type": "CHARACTER", "text": "![alt-text]"}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "![alt-text]", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:12"}
     ],
     "errors":[
-      { "description": "invalid image declaration format", "line": 1, "col": 2 }
+      { "description": "invalid square bracket declaration format", "line": 1, "col": 1 }
     ]
+  },
+
+  {
+    "description":"image with html special characters in source",
+    "input":"![alt-text](<source>&)",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "&lt;source&gt;&amp;", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt-text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:22"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:23"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"image with newline in source parentheses",
+    "input":"![alt-text](sour\nce)",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "IMAGE", "src": "sour", "position": "1:1"},
+      {"type": "CHARACTER", "text": "alt-text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "IMAGE", "position": "1:17"},
+      {"type": "CHARACTER", "text": "ce)", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"}
+    ],
+    "errors":[
+      { "description": "newline in image source", "line": 1, "col": 17 }
+    ]
+  },
+
+  {
+    "description":"invalid image with escaped character in alt-text",
+    "input":"![alt-\\*text\\*",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "![alt-*text*", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid image with html special characters in alt-text",
+    "input":"![alt&<text>",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "![alt&amp;&lt;text&gt;", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid image with escaped html special characters in alt-text",
+    "input":"![alt\\&\\<text\\>",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "![alt&amp;&lt;text&gt;", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:16"}
+    ],
+    "errors":[]
   }
 
 ]}

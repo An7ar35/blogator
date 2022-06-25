@@ -1,34 +1,148 @@
 {"tests": [
 
   {
-    "description":"empty code-block",
+    "description":"empty '`' code-block",
     "input":"```\n```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
-    ],
-    "errors":[]
-  },
-
-  {
-    "description":"inlined empty code-block",
-    "input":"``````",
-    "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"}
     ],
     "errors":[
-      { "description": "inlined code-block", "line": 1, "col": 4 }
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
     ]
   },
 
   {
-    "description":"inlined white-spaced code-block",
+    "description":"empty '~' code-block",
+    "input": "~~~\n~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"}
+    ],
+    "errors":[
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"empty '`' un-closed code-block",
+    "input":"```\n",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 1 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"empty '~' un-closed code-block",
+    "input": "~~~\n",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 1 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"empty '`' code-block with trailing '`'",
+    "input":"```\n````",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"},
+      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "FORMAT_BEGIN", "formatting": "INLINE_CODE_1", "text": "`", "position": "2:4"},
+      {"type": "FORMAT_END", "formatting": "INLINE_CODE_1", "text": "`", "position": "2:5"},
+      {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:5"}
+    ],
+    "errors":[
+      { "description": "block line-feed separator missing: '`'", "line": 2, "col": 4 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"empty '~' code-block with trailing '~'",
+    "input":"~~~\n~~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"},
+      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "FORMAT_BEGIN", "formatting": "SUBSCRIPT", "text": "~", "position": "2:4"},
+      {"type": "FORMAT_END", "formatting": "SUBSCRIPT", "text": "~", "position": "2:5"},
+      {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:5"}
+    ],
+    "errors":[
+      { "description": "block line-feed separator missing: '~'", "line": 2, "col": 4 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"inlined empty '`' code-block",
+    "input":"``````",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:7"}
+    ],
+    "errors":[
+      { "description": "inlined code-block", "line": 1, "col": 4 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"inlined empty '~' code-block",
+    "input":"~~~~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:7"}
+    ],
+    "errors":[
+      { "description": "inlined code-block", "line": 1, "col": 4 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"inlined empty '`' code-block with tag",
+    "input":"```cpp```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:10"}
+    ],
+    "errors":[
+      { "description": "inlined code-block", "line": 1, "col": 7 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"inlined empty '~' code-block with tag",
+    "input":"~~~cpp~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:10"}
+    ],
+    "errors":[
+      { "description": "inlined code-block", "line": 1, "col": 7 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"inlined '`' white-spaced code-block",
     "input":"```  ```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text": "  "},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "  ", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:9"}
     ],
     "errors":[
       { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
@@ -37,12 +151,26 @@
   },
 
   {
-    "description":"inlined grave accent code-block",
+    "description":"inlined '~' white-spaced code-block",
+    "input":"~~~  ~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "  ", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:9"}
+    ],
+    "errors":[
+      { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 6 }
+    ]
+  },
+
+  {
+    "description":"inlined '`' code-block with nested '`'",
     "input":"``` `` ```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text": " `` "},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": " `` ", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:11"}
     ],
     "errors":[
       { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
@@ -51,38 +179,255 @@
   },
 
   {
-    "description":"inlined double code-blocks",
+    "description":"inlined '~' code-block with nested '~'",
+    "input":"~~~ ~~ ~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": " ~~ ", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:11"}
+    ],
+    "errors":[
+      { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 8 }
+    ]
+  },
+
+  {
+    "description":"inlined '~' code-block with nested '`'",
+    "input":"~~~ `` ~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": " `` ", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:11"}
+    ],
+    "errors":[
+      { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 8 }
+    ]
+  },
+
+  {
+    "description":"inlined '`' code-block with nested '~'",
+    "input":"``` ~~ ```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": " ~~ ", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:11"}
+    ],
+    "errors":[
+      { "description": "invalid whitespace in code-block declaration", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 8 }
+    ]
+  },
+
+  {
+    "description":"inlined double '`' code-blocks",
     "input":"````````````",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""},
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:7"},
+      {"type": "CODE_BLOCK", "text": "", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:13"}
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 4 },
-      { "description": "inlined code-block", "line": 1, "col": 10 }
+      { "description": "block line-feed separator missing: '`'", "line": 1, "col": 7 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined code-block", "line": 1, "col": 10 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 7 }
     ]
   },
 
   {
-    "description":"un-closed code-block",
-    "input":"```",
+    "description":"inlined double '~' code-blocks",
+    "input":"~~~~~~~~~~~~",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:7"},
+      {"type": "CODE_BLOCK", "text": "", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:13"}
     ],
     "errors":[
-      { "description": "EOF in code-block", "line": 1, "col": 4 }
+      { "description": "inlined code-block", "line": 1, "col": 4 },
+      { "description": "block line-feed separator missing: '~'", "line": 1, "col": 7 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined code-block", "line": 1, "col": 10 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 7 }
     ]
   },
 
   {
-    "description":"empty code-block with tag",
+    "description":"un-closed '`' code-block",
+    "input":"```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:4"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 4 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '~' code-block",
+    "input":"~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:4"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 4 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '`' code-block with tag 1",
+    "input":"```cpp",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:7"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 7 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '~' code-block with tag 1",
+    "input":"~~~cpp",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:7"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 7 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '`' code-block with tag 2",
+    "input":"```cpp  ",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:9"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 9 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '~' code-block with tag 2",
+    "input":"~~~cpp  ",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:9"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 1, "col": 9 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '`' code-block with tag 3",
+    "input":"```cpp\n",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 1 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '~' code-block with tag 3",
+    "input":"~~~cpp\n",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 1 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '`' code-block with tag 4",
+    "input":"```cpp  \n",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 1 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"un-closed '~' code-block with tag 4",
+    "input":"~~~cpp  \n",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 1 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"empty '`' code-block with tag",
     "input":"```cpp\n```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": "cpp"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"}
+    ],
+    "errors":[
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"empty '~' code-block with tag",
+    "input":"~~~cpp\n~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"}
+    ],
+    "errors":[
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"nested '~' code-block within '`' code block",
+    "input":"```\n~~~\nnested\n~~~\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "~~~\nnested\n~~~", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "5:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"nested '`' code-block within '~' code block",
+    "input":"~~~\n```\nnested\n```\n~~~",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "```\nnested\n```", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "5:4"}
     ],
     "errors":[]
   },
@@ -91,9 +436,9 @@
     "description":"open/close code-block on same line with invalid tag",
     "input":"```t@g```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text": "t@g"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "t@g", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:10"}
     ],
     "errors":[
       { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
@@ -105,9 +450,9 @@
     "description":"valid multi-lined code-block",
     "input":"```cpp\nint main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": "cpp"},
-      {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "cpp", "position": "1:1"},
+      {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "6:4"}
     ],
     "errors":[]
   },
@@ -116,9 +461,9 @@
     "description":"valid multi-lined code-block with trailing whitespace",
     "input":"```\nint main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n   ```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n   "},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "int main( int argc, char **argv ) {\n\tprintf( \"Hello, world!\" );\n\treturn 0;\n}\n   ", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "6:7"}
     ],
     "errors":[]
   },
@@ -127,9 +472,9 @@
     "description":"code-block with escaped triple grave-accent inline",
     "input":"```\\`\\`\\````",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text":  "```"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text":  "```", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:13"}
     ],
     "errors":[
       { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
@@ -141,9 +486,9 @@
     "description":"code-block with escaped triple grave-accent",
     "input":"```\n\\`\\`\\`\n```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text":  "```"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text":  "```", "position": "2:2"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "3:4"}
     ],
     "errors":[]
   },
@@ -152,9 +497,9 @@
     "description":"inline code-block with special html characters",
     "input":"```<&>```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text": "&lt;&amp;&gt;"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "&lt;&amp;&gt;", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:10"}
     ],
     "errors":[
       { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
@@ -166,25 +511,116 @@
     "description":"code-block with special html characters",
     "input":"```\n<tag> & text```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": ""},
-      {"type": "CHARACTER", "text": "&lt;tag&gt; &amp; text"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "&lt;tag&gt; &amp; text", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:16"}
     ],
     "errors":[]
   },
 
   {
-    "description":"inline code-block whitespace after language tag",
-    "input":"```lang invalid\n```",
+    "description":"inline code-block whitespace after language tag 1",
+    "input":"```lang  ```",
     "tokens":[
-      {"type": "CODE_BLOCK", "text": "lang"},
-      {"type": "CHARACTER", "text": " invalid"},
-      {"type": "BLOCK_END", "block": "CODE_BLOCK", "text": ""}
+      {"type": "CODE_BLOCK", "text": "lang", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:13"}
     ],
     "errors":[
-      { "description": "invalid format in code block declaration", "line": 1, "col": 8 }
+      { "description": "inlined code-block", "line": 1, "col": 10 },
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"inline code-block whitespace after language tag 2",
+    "input":"```lang invalid\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "lang", "position": "1:1"},
+      {"type": "CHARACTER", "text": "invalid", "position": "1:9"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"}
+    ],
+    "errors":[
+      { "description": "invalid format in code block declaration", "line": 1, "col": 4 }
+    ]
+  },
+
+  {
+    "description":"inline code-block invalid 1st tag char",
+    "input":"```0```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "0", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:8"}
+    ],
+    "errors":[
+      { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 5 }
+    ]
+  },
+
+  {
+    "description":"inline code-block invalid 1st tag char + EOF",
+    "input":"```0",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "0", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "1:5"}
+    ],
+    "errors":[
+      { "description": "invalid language tag in code-block", "line": 1, "col": 4 },
+      { "description": "inlined code-block", "line": 1, "col": 5 },
+      { "description": "EOF in code-block", "line": 1, "col": 5 }
+    ]
+  },
+
+  {
+    "description":"inline code-block invalid 1st tag char + LF",
+    "input":"```0\n```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "0", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"}
+    ],
+    "errors":[
+      { "description": "invalid language tag in code-block", "line": 1, "col": 4 }
+    ]
+  },
+
+  {
+    "description":"code-block content EOF",
+    "input":"```\ncontent",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "content", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:8"}
+    ],
+    "errors":[
+      { "description": "EOF in code-block", "line": 2, "col": 8 }
+    ]
+  },
+
+  {
+    "description":"indented code-block",
+    "input":"  ```\n  line 1\n\n    line 3\n  ```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1\n\n  line 3", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "5:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"mis-indented code-block",
+    "input":"  ```\nline 1\n  ```",
+    "tokens":[
+      {"type": "CODE_BLOCK", "text": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "line 1", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "3:6"}
+    ],
+    "errors":[
+      { "description": "misaligned block content: CODE_BLOCK", "line": 2, "col": 1 }
     ]
   }
-
 
 ]}

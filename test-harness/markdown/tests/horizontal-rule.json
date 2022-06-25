@@ -1,0 +1,222 @@
+{"tests": [
+
+  {
+    "description":"lone horizontal-rule '---'",
+    "input":"---",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "---", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule + LF '---'",
+    "input":"---\n",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "---", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+
+  {
+    "description":"lone horizontal-rule '- - -'",
+    "input":"- - -",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "- - -", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule '***'",
+    "input":"***",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "***", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule + LF '***'",
+    "input":"***\n",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "***", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule '* * *'",
+    "input":"* * *",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "* * *", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule '******'",
+    "input":"******",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "******", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule '___'",
+    "input":"___",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "___", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule + LF '___'",
+    "input":"___\n",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "___", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"lone horizontal-rule '_ _ _'",
+    "input":"_ _ _",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "_ _ _", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"incomplete horizontal-rule & EOF '_'",
+    "input":"_",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "_", "position": "1:1"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "_", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"incomplete horizontal-rule & EOF \"__\"",
+    "input":"__",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__", "position": "1:1"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "__", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake horizontal-rule & EOF \"__?\"",
+    "input":"__x",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__", "position": "1:1"},
+      {"type": "CHARACTER", "text": "x", "position": "1:3"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "__", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"horizontal-rule terminating with spaces",
+    "input":"*****     ",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "*****     ", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"double horizontal-rule with bad block separation",
+    "input":"***     \n*****",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "***     ", "position": "1:1"},
+      {"type": "HORIZONTAL_RULE", "text": "*****", "position": "2:1"}
+    ],
+    "errors":[
+      { "description": "block line-feed separator missing: '*'", "line": 2, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"horizontal-rule with no block separation",
+    "input":"---\ntext",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "---", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "CHARACTER", "text": "text", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"}
+    ],
+    "errors":[
+      { "description": "block line-feed separator missing: 't'", "line": 2, "col": 1 }
+    ]
+  },
+
+  {
+    "description":"horizontal-rule between paragraphs",
+    "input":"paragraph 1\n\n-----\n\nparagraph 2",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "paragraph 1", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "HORIZONTAL_RULE", "text": "-----", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "CHARACTER", "text": "paragraph 2", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake horizontal-rule '_'",
+    "input":"___?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "_", "position": "1:3"},
+      {"type": "CHARACTER", "text": "?", "position": "1:4"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "_", "position": "1:5"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "__", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake horizontal-rule '-'",
+    "input":"---?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "---?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake horizontal-rule '*'",
+    "input":"***?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:3"},
+      {"type": "CHARACTER", "text": "?", "position": "1:4"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:5"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
+    ],
+    "errors":[]
+  }
+
+]}

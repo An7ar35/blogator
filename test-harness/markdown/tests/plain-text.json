@@ -1,10 +1,30 @@
 {"tests": [
 
   {
+    "description":"whitespace line",
+    "input":"  \t  \t",
+    "tokens":[],
+    "errors":[]
+  },
+
+  {
+    "description":"whitespace + EOF newline",
+    "input":"p\n  \t  \t",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"}
+    ],
+    "errors":[]
+  },
+
+  {
     "description":"word",
     "input":"word",
     "tokens":[
-      {"type": "CHARACTER", "text": "word"}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "word", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
     ],
     "errors":[]
   },
@@ -13,7 +33,144 @@
     "description":"sentence",
     "input":"The quick brown fox jumps over the lazy dog.",
     "tokens":[
-      {"type": "CHARACTER", "text": "The quick brown fox jumps over the lazy dog."}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "The quick brown fox jumps over the lazy dog.", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:45"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"hard-wrap",
+    "input":"The quick brown fox \njumps over the \nlazy dog.",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "The quick brown fox jumps over the lazy dog.", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"hard-wrap no space",
+    "input":"The quick brown fox\njumps over the\nlazy dog.",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "The quick brown fox jumps over the lazy dog.", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:10"}
+    ],
+    "errors":[]
+  },
+
+
+  {
+    "description":"plain text multi-lined with line break",
+    "input":"The quick brown fox jumps over  \nthe lazy dog",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "The quick brown fox jumps over", "position": "1:1"},
+      {"type": "LINE_BREAK", "position": "1:31"},
+      {"type": "CHARACTER", "text": "the lazy dog", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"plain text with potential line break",
+    "input":"The quick brown fox jumps over   the lazy dog",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "The quick brown fox jumps over   the lazy dog", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:46"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"line break on empty line",
+    "input":"  \n",
+    "tokens":[],
+    "errors":[]
+  },
+
+  {
+    "description":"empty lines",
+    "input":"\n\n\n\n",
+    "tokens":[],
+    "errors":[]
+  },
+
+  {
+    "description":"empty lines with whitespace",
+    "input":"  \n\t\n\t\t\n     \n",
+    "tokens":[],
+    "errors":[]
+  },
+
+  {
+    "description":"line break line",
+    "input":"text  \n",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "text", "position": "1:1"},
+      {"type": "LINE_BREAK", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"markdown escapable characters",
+    "input":"\\\\ \\` \\* \\_ \\{ \\} \\[ \\] \\( \\) \\# \\+ \\- \\. \\!",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "\\ ` * _ { } [ ] ( ) # + - . !", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:45"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"html escapable characters",
+    "input":"\\< \\> \\&",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "&lt; &gt; &amp;", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"html characters",
+    "input":"< > &",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "< > &", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"Non escapable character",
+    "input":"\\?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "\\?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"EOF on escape characters",
+    "input":"text\\",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "text\\", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
     ],
     "errors":[]
   }

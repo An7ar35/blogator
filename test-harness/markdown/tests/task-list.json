@@ -1,0 +1,1754 @@
+{"tests": [
+
+  {
+    "description":"fake task item \"- [\"",
+    "input":"- [",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [\"",
+    "input":"p\n- [",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [?\"",
+    "input":"p\n- [?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item \"- [ \"",
+    "input":"- [ ",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [ \"",
+    "input":"p\n- [ ",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item \"- [x\"",
+    "input":"- [x",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[x", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [x\"",
+    "input":"p\n- [x",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[x", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [x?\"",
+    "input":"p\n- [x?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[x?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item \"- [X\"",
+    "input":"- [X",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[X", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [X\"",
+    "input":"p\n- [X",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[X", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item \"- [X?\"",
+    "input":"p\n- [X?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[X?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item \"- [ x ]\"",
+    "input":"- [ x ]",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[ x ]", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:8"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:8"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:8"}
+    ],
+    "errors":[
+      { "description": "invalid square bracket declaration format", "line": 1, "col": 3 }
+    ]
+  },
+
+  {
+    "description":"fake task item (hyperlink) \"- [x](url)\"",
+    "input":"- [x](url)",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "1:3"},
+      {"type": "CHARACTER", "text": "x", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:10"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item (hyperlink) \"- [x](url)\"",
+    "input":"p\n- [x](url)",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "2:3"},
+      {"type": "CHARACTER", "text": "x", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "2:10"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item (hyperlink) \"- [X](url)\"",
+    "input":"- [X](url)",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "1:3"},
+      {"type": "CHARACTER", "text": "X", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:10"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item (hyperlink) \"- [X](url)\"",
+    "input":"p\n- [X](url)",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "2:3"},
+      {"type": "CHARACTER", "text": "X", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "2:10"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item (hyperlink) \"- [text](url)\"",
+    "input":"- [text](url)",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "1:3"},
+      {"type": "CHARACTER", "text": "text", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item (hyperlink) \"- [xtext](url)\"",
+    "input":"- [xtext](url)",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "1:3"},
+      {"type": "CHARACTER", "text": "xtext", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item (hyperlink) \"- [Xtext](url)\"",
+    "input":"- [Xtext](url)",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "HYPERLINK", "url": "url", "position": "1:3"},
+      {"type": "CHARACTER", "text": "Xtext", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task item \"[]\"",
+    "input":"- [] unchecked",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "unchecked", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:15"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task paragraph \"[]\"",
+    "input":"- [] a\n-b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "a -b", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple list paragraph x2 \"[]\"",
+    "input":"- [] a\n\n -b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "a", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-b", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB simple list item \"[]\"",
+    "input":"p\n- [] item 1",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:12"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:12"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake task item \"- []?\"",
+    "input":"- []?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[]?", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:6"}
+    ],
+    "errors":[
+      {"description": "void square bracket definition", "line": 1, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item EOF \"- []\"",
+    "input":"p\n- []",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[]", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[
+      {"description": "void square bracket definition", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item \"- []?\"",
+    "input":"p\n- []?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[]?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "void square bracket definition", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"fake task item \"- [ ]?\"",
+    "input":"- [ ]?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "[ ]?", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:7"}
+    ],
+    "errors":[
+      {"description": "invalid square bracket declaration format", "line": 1, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item EOF \"- [ ]\"",
+    "input":"p\n- [ ]",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[ ]", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "invalid square bracket declaration format", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item \"- [ ]?\"",
+    "input":"p\n- [ ]?",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[ ]?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:7"}
+    ],
+    "errors":[
+      {"description": "invalid square bracket declaration format", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"simple task item \"[ ]\"",
+    "input":"- [ ] unchecked",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "unchecked", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:16"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:16"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:16"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task paragraph \"[ ]\"",
+    "input":"- [ ] a\n -b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "a -b", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple list paragraph x2 \"[ ]\"",
+    "input":"- [ ] a\n\n -b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "a", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-b", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB simple list item \"[ ]\"",
+    "input":"p\n- [ ] item 1",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB loose list task item \"[ ]\"",
+    "input":"- [ ] p1\n\n p2\n\n- [ ] p3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "p2", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "p3", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB loose list nested task item \"[X]\"",
+    "input":"- [ ] p1\n\n -p2\n\n  - [ ] p3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-p2", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "5:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:3"},
+      {"type": "PARAGRAPH", "position": "5:9"},
+      {"type": "CHARACTER", "text": "p3", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task item \"[x]\"",
+    "input":"- [x] checked",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "checked", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task paragraph \"[x]\"",
+    "input":"- [x] a\n-b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "a -b", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple list paragraph x2 \"[x]\"",
+    "input":"- [x] a\n\n -b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "a", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-b", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB simple list item \"[x]\"",
+    "input":"p\n- [x] item 1",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB loose list task item \"[x]\"",
+    "input":"- [x] p1\n\n p2\n\n- [x] p3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "p2", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "p3", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB loose list nested task item \"[x]\"",
+    "input":"- [x] p1\n\n -p2\n\n  - [x] p3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-p2", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "5:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:3"},
+      {"type": "PARAGRAPH", "position": "5:9"},
+      {"type": "CHARACTER", "text": "p3", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task item \"[X]\"",
+    "input":"- [X] checked",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "checked", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task paragraph \"[X]\"",
+    "input":"- [X] a\n -b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "a -b", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple list paragraph x2 \"[X]\"",
+    "input":"- [X] a\n\n -b",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "a", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-b", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB simple list item \"[X]\"",
+    "input":"p\n- [X] item 1",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "p", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB loose list task item \"[X]\"",
+    "input":"- [X] p1\n\n p2\n\n- [X] p3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "p2", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "p3", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB loose list nested task item \"[X]\"",
+    "input":"- [X] p1\n\n -p2\n\n  - [X] p3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:2"},
+      {"type": "CHARACTER", "text": "-p2", "position": "3:2"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "5:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:3"},
+      {"type": "PARAGRAPH", "position": "5:9"},
+      {"type": "CHARACTER", "text": "p3", "position": "5:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:11"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple multi-lined task item 1",
+    "input":"- [] line 1\n  line 2",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple multi-lined task item 2",
+    "input":"- [] line 1\n  [text](url)",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "line 1 ", "position": "1:6"},
+      {"type": "HYPERLINK", "url": "url", "position": "2:3"},
+      {"type": "CHARACTER", "text": "text", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:14"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:14"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple multi-paragraphed task item",
+    "input":"- [] p1\n\n   p2\n\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "p1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "3:4"},
+      {"type": "CHARACTER", "text": "p2", "position": "3:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple task list",
+    "input":"- [] item 1\n- [x] item 2\n- [] item 3",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:6"},
+      {"type": "CHARACTER", "text": "item 3", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:12"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested task list",
+    "input":"- [x] item 1\n  - [] item a\n- [ ] item 2",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:8"},
+      {"type": "CHARACTER", "text": "item a", "position": "2:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:13"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple multi-lined nested task list",
+    "input":"- [] item 1\n  - [] p1\np2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:8"},
+      {"type": "CHARACTER", "text": "p1 p2", "position": "2:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 1 \"[]\"",
+    "input":"- [] item 1\n\n- [] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:6"},
+      {"type": "CHARACTER", "text": "item 2", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 2 \"[]\"",
+    "input":"- [] item 1\n  - [] item 1.1\n  - [] item 1.2\n\n- [] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:8"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:8"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:6"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 3 \"[]\"",
+    "input":"- [] item 1\n  - [] item 1.1\n\n  - [] item 1.2\n- [] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:8"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:8"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:6"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 4 \"[]\"",
+    "input":"- [] item 1\n\n  - [] item 1.1\n  - [] item 1.2\n- [] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:8"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:8"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:6"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 1 \"[ ]\"",
+    "input":"- [ ] item 1\n\n- [ ] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 2 \"[ ]\"",
+    "input":"- [ ] item 1\n  - [ ] item 1.1\n  - [ ] item 1.2\n\n- [ ] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 3 \"[ ]\"",
+    "input":"- [ ] item 1\n  - [ ] item 1.1\n\n  - [ ] item 1.2\n- [ ] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 4 \"[ ]\"",
+    "input":"- [ ] item 1\n\n  - [ ] item 1.1\n  - [ ] item 1.2\n- [ ] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 1 \"[x]\"",
+    "input":"- [x] item 1\n\n- [x] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 2 \"[x]\"",
+    "input":"- [x] item 1\n  - [x] item 1.1\n  - [x] item 1.2\n\n- [x] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 3 \"[x]\"",
+    "input":"- [x] item 1\n  - [x] item 1.1\n\n  - [x] item 1.2\n- [x] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 4 \"[x]\"",
+    "input":"- [x] item 1\n\n  - [x] item 1.1\n  - [x] item 1.2\n- [x] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 1 \"[X]\"",
+    "input":"- [X] item 1\n\n- [X] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "3:1"},
+      {"type": "PARAGRAPH", "position": "3:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "3:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 2 \"[X]\"",
+    "input":"- [X] item 1\n  - [X] item 1.1\n  - [X] item 1.2\n\n- [X] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 3 \"[X]\"",
+    "input":"- [X] item 1\n  - [X] item 1.1\n\n  - [X] item 1.2\n- [X] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "2:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:3"},
+      {"type": "PARAGRAPH", "position": "2:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"simple nested & spaced task list 4 \"[X]\"",
+    "input":"- [X] item 1\n\n  - [X] item 1.1\n  - [X] item 1.2\n- [X] item 2\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:7"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "3:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "3:3"},
+      {"type": "PARAGRAPH", "position": "3:9"},
+      {"type": "CHARACTER", "text": "item 1.1", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:3"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:3"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "4:3"},
+      {"type": "PARAGRAPH", "position": "4:9"},
+      {"type": "CHARACTER", "text": "item 1.2", "position": "4:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "5:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "5:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "5:1"},
+      {"type": "PARAGRAPH", "position": "5:7"},
+      {"type": "CHARACTER", "text": "item 2", "position": "5:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"LB fake task item 1",
+    "input":"- [] item\n- [",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:4"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 2",
+    "input":"- [] item\n-  [",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "CHARACTER", "text": "[", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 3",
+    "input":"- [] item\n- [?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 4",
+    "input":"- [] item\n- []?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[]?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1},
+      {"description": "void square bracket definition", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 5",
+    "input":"- [] item\n- [ ?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[ ?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 6",
+    "input":"- [] item\n- [ ]?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[ ]?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:7"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1},
+      {"description": "invalid square bracket declaration format", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 7",
+    "input":"- [] item\n- [x?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[x?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 8",
+    "input":"- [] item\n- [X?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[X?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:6"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 9",
+    "input":"- [] item\n- [x]?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[x]?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:7"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1},
+      {"description": "invalid square bracket declaration format", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"LB fake task item 10",
+    "input":"- [] item\n- [X]?",
+    "tokens":[
+      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:6"},
+      {"type": "CHARACTER", "text": "item", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:3"},
+      {"type": "CHARACTER", "text": "[X]?", "position": "2:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:7"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_HYPHEN in UL_TASK", "line": 2, "col": 1},
+      {"description": "invalid square bracket declaration format", "line": 2, "col": 3}
+    ]
+  },
+
+  {
+    "description":"mismatched task list prefix 1",
+    "input":"- item\n- [] mismatched",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "item", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:6"},
+      {"type": "CHARACTER", "text": "mismatched", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:16"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:16"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:16"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_TASK in UL_HYPHEN", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"mismatched task list prefix 2",
+    "input":"- item\n- [ ] mismatched",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "item", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "mismatched", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:17"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:17"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:17"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_TASK in UL_HYPHEN", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"mismatched task list prefix 3",
+    "input":"- item\n- [x] mismatched",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "item", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "mismatched", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:17"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:17"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:17"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_TASK in UL_HYPHEN", "line": 2, "col": 1}
+    ]
+  },
+
+  {
+    "description":"mismatched task list prefix 4",
+    "input":"- item\n- [X] mismatched",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "position": "1:3"},
+      {"type": "CHARACTER", "text": "item", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1"},
+      {"type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:7"},
+      {"type": "CHARACTER", "text": "mismatched", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:17"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:17"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "2:17"}
+    ],
+    "errors":[
+      {"description": "mismatched list prefix: UL_TASK in UL_HYPHEN", "line": 2, "col": 1}
+    ]
+  }
+
+]}

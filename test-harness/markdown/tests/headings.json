@@ -1,57 +1,81 @@
 {"tests": [
 
   {
-    "description":"H1 with space",
+    "description":"'atx' H1 with space",
     "input":"# heading",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "#"},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:10"}
     ],
     "errors":[]
   },
 
   {
-    "description":"H1 without space",
+    "description":"'atx' H1 without space",
     "input":"#heading",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "#"},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:9"}
     ],
     "errors":[]
   },
 
   {
-    "description":"H1 in a 2-line definition",
+    "description":"'setext' H1 with 3x'='",
     "input":"heading\n===\n",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "==="},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "HEADING", "level": 1, "text": "===", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:4"}
     ],
     "errors":[]
   },
 
   {
-    "description":"H2 in a 2-line definition",
-    "input":"heading\n--------\n",
+    "description":"'setext' H1 with 6x'='",
+    "input":"heading\n======\n",
     "tokens":[
-      {"type": "HEADING", "level": 2, "text": "---"},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "HEADING", "level": 1, "text": "======", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:7"}
     ],
     "errors":[]
   },
 
   {
-    "description":"sequential heading and text blocks",
+    "description":"'setext' H2 with 3x'-'",
+    "input":"heading\n---\n",
+    "tokens":[
+      {"type": "HEADING", "level": 2, "text": "---", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'setext' H2 with 6x'-'",
+    "input":"heading\n------\n",
+    "tokens":[
+      {"type": "HEADING", "level": 2, "text": "------", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' heading block with following text block without separation",
     "input":"# heading\nparagraph text",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "#"},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""},
-      {"type": "CHARACTER", "text": "paragraph text"}
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "CHARACTER", "text": "paragraph text", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:15"}
     ],
     "errors":[
       {"description": "block line-feed separator missing: 'p'", "line": 2, "col": 1 }
@@ -59,108 +83,358 @@
   },
 
   {
-    "description":"indented heading defined on 2 lines",
-    "input":"\t heading\n\t ===",
+    "description":"'setext' H1 indented heading",
+    "input":"    heading\n    ===",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "==="},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "HEADING", "level": 1, "text": "===", "position": "2:5"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:8"}
     ],
     "errors":[]
   },
 
   {
-    "description":"heading with 3+ '-' chars",
-    "input":"heading\n--------",
+    "description":"'setext' H2 indented heading",
+    "input":"    heading\n    ----",
     "tokens":[
-      {"type": "HEADING", "level": 2, "text": "---"},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "HEADING", "level": 2, "text": "----", "position": "2:5"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:9"}
+    ],
+    "errors":[]
+  },
+
+
+  {
+    "description":"fake 'setext' H1 indented heading",
+    "input":"    text\n    heading\n    ===",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:5"},
+      {"type": "CHARACTER", "text": "text heading ", "position": "1:5"},
+      {"type": "FORMAT_BEGIN", "formatting": "HIGHLIGHT", "text": "==", "position": "3:5"},
+      {"type": "CHARACTER", "text": "=", "position": "3:7"},
+      {"type": "FORMAT_END", "formatting": "HIGHLIGHT", "text": "==", "position": "3:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:8"}
     ],
     "errors":[]
   },
 
   {
-    "description":"malformed 2-lined heading",
+    "description":"fake 'setext' H2 indented heading",
+    "input":"   text\n    heading\n    ----",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:4"},
+      {"type": "CHARACTER", "text": "text heading ----", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"malformed 'setext' heading",
     "input":"heading\n===some text",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "==="},
-      {"type": "CHARACTER", "text": "heading"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""},
-      {"type": "CHARACTER", "text": "some text"}
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading ", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "HIGHLIGHT", "text": "==", "position": "2:1"},
+      {"type": "CHARACTER", "text": "=some text", "position": "2:3"},
+      {"type": "FORMAT_END", "formatting": "HIGHLIGHT", "text": "==", "position": "2:13"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"}
     ],
-    "errors":[
-      {"description": "block line-feed separator missing", "line": 2, "col": 4 }
-    ]
+    "errors":[]
   },
 
   {
-    "description":"2-lined heading with no heading text",
+    "description":"'setext' heading + paragraph with missing separation" ,
+    "input":"heading\n===\nsome text",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "===", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:4"},
+      {"type": "PARAGRAPH", "position": "3:1"},
+      {"type": "CHARACTER", "text": "some text", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"invalid 'setext' H1 heading with no text",
     "input":"  \n===",
     "tokens":[
-      {"type": "HEADING", "level": 1, "text": "==="},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "HIGHLIGHT", "text": "==", "position": "2:1"},
+      {"type": "CHARACTER", "text": "=", "position": "2:3"},
+      {"type": "FORMAT_END", "formatting": "HIGHLIGHT", "text": "==", "position": "2:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"}
     ],
     "errors":[]
   },
 
   {
-    "description":"1-lined heading no text",
+    "description":"invalid 'setext' H2 heading with no text",
+    "input":"  \n---",
+    "tokens":[
+      {"type": "HORIZONTAL_RULE", "text": "---", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"empty 'atx' heading with 2x' '",
     "input":"#  ",
     "tokens":[
-      {"type": "CHARACTER", "text": "#  "}
-    ],
-    "errors":[]
-  },
-
-  {
-    "description":"1-lined heading no text + LF",
-    "input":"#  \n",
-    "tokens":[
-      {"type": "CHARACTER", "text": "#  "}
-    ],
-    "errors":[]
-  },
-
-  {
-    "description":"heading with block id",
-    "input":"### heading {#heading-id}\n",
-    "tokens":[
-      {"type": "HEADING", "level": 3, "text": "###"},
-      {"type": "CHARACTER", "text": "heading "},
-      {"type": "BLOCK_ID", "text": "heading-id"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
-    ],
-    "errors":[]
-  },
-
-  {
-    "description":"2-lined heading with block id",
-    "input":"heading {#heading-id}\n---",
-    "tokens":[
-      {"type": "HEADING", "level": 2, "text": "---"},
-      {"type": "CHARACTER", "text": "heading "},
-      {"type": "BLOCK_ID", "text": "heading-id"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""}
-    ],
-    "errors":[]
-  },
-
-  {
-    "description":"2-lined heading with trailing block id",
-    "input":"heading {#heading-id}\n---{#block-id}paragraph text",
-    "tokens":[
-      {"type": "HEADING", "level": 2, "text": "---"},
-      {"type": "CHARACTER", "text": "heading "},
-      {"type": "BLOCK_ID", "text": "heading-id"},
-      {"type": "BLOCK_END", "block": "HEADING", "text": ""},
-      {"type": "BLOCK_ID", "text": "block-id"},
-      {"type": "CHARACTER", "text": "paragraph text"}
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:4"}
     ],
     "errors":[
-      {"description": "block line-feed separator missing", "line": 2, "col": 4 }
+      {"description": "empty block: HEADING", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description":"empty 'atx' heading 2x' ' + LF",
+    "input":"#  \n",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:1"}
+    ],
+    "errors":[
+      {"description": "empty block: HEADING", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description":"empty 'atx' heading 2x' ' + LF + text",
+    "input":"#  \ntext",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "CHARACTER", "text": "text", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"}
+    ],
+    "errors":[
+      {"description": "block line-feed separator missing: 't'", "line": 2, "col": 1 },
+      {"description": "empty block: HEADING", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description":"empty 'atx' heading 3x' ' + LF + text",
+    "input":"#   \ntext",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:1"},
+      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "CHARACTER", "text": "text", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"}
+    ],
+    "errors":[
+      {"description": "block line-feed separator missing: 't'", "line": 2, "col": 1 },
+      {"description": "empty block: HEADING", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description":"'atx' heading with block id",
+    "input":"### heading {#heading-id}\n",
+    "tokens":[
+      {"type": "HEADING", "level": 3, "text": "###", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading ", "position": "1:5"},
+      {"type": "BLOCK_ID", "text": "heading-id", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'setext' heading with block id",
+    "input":"heading {#heading-id}\n---",
+    "tokens":[
+      {"type": "HEADING", "level": 2, "text": "---", "position": "2:1"},
+      {"type": "CHARACTER", "text": "heading ", "position": "1:1"},
+      {"type": "BLOCK_ID", "text": "heading-id", "position": "1:9"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'setext' heading with trailing block id",
+    "input":"heading {#heading-id}\n---{#block-id}paragraph text",
+    "tokens":[
+      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading ", "position": "1:1"},
+      {"type": "BLOCK_ID", "text": "heading-id", "position": "1:9"},
+      {"type": "CHARACTER", "text": "---", "position": "2:1"},
+      {"type": "BLOCK_ID", "text": "block-id", "position": "2:4"},
+      {"type": "CHARACTER", "text": "paragraph text", "position": "2:15"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:29"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' H3 heading with closing '#'",
+    "input":"### This is an H3 ######",
+    "tokens":[
+      {"type": "HEADING", "level": 3, "text": "###", "position": "1:1"},
+      {"type": "CHARACTER", "text": "This is an H3 ", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:25"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' H1 without space and closing '#'",
+    "input":"#heading#",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' H1 without space and closing '#' + LF",
+    "input":"#heading#\n",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' H1 without space and closing '#' + block ID",
+    "input":"#heading# {#block-id}",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:2"},
+      {"type": "BLOCK_ID", "text": "block-id", "position": "1:11"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:22"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' H1 without space and closing '#' with trailing content",
+    "input":"#heading#text",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "heading", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:10"},
+      {"type": "PARAGRAPH", "position": "1:10"},
+      {"type": "CHARACTER", "text": "text", "position": "1:10"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"}
+    ],
+    "errors":[
+      {"description": "inline content after heading", "line": 1, "col": 10 },
+      {"description": "block line-feed separator missing: 't'", "line": 1, "col": 10 }
+    ]
+  },
+
+  {
+    "description":"'atx' H4 heading with closing '#' and content without block separation",
+    "input":"#### H4 ## text",
+    "tokens":[
+      {"type": "HEADING", "level": 4, "text": "####", "position": "1:1"},
+      {"type": "CHARACTER", "text": "H4 ", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:12"},
+      {"type": "PARAGRAPH", "position": "1:12"},
+      {"type": "CHARACTER", "text": "text", "position": "1:12"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:16"}
+    ],
+    "errors":[
+      {"description": "inline content after heading", "line": 1, "col": 12 },
+      {"description": "block line-feed separator missing: 't'", "line": 1, "col": 12 }
+    ]
+  },
+
+  {
+    "description":"'atx' H1 heading with closing '#' and bad block ID 1",
+    "input":"# This is an H1 #{",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "This is an H1 ", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:18"},
+      {"type": "PARAGRAPH", "position": "1:18"},
+      {"type": "CHARACTER", "text": "{", "position": "1:18"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:19"}
+    ],
+    "errors":[
+      {"description": "inline content after heading", "line": 1, "col": 18 },
+      {"description": "block line-feed separator missing: '{'", "line": 1, "col": 18 }
+    ]
+  },
+
+  {
+    "description":"'atx' H1 heading with closing '#' and bad block ID 2",
+    "input":"# This is an H1 #{#",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "This is an H1 ", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:18"},
+      {"type": "PARAGRAPH", "position": "1:18"},
+      {"type": "CHARACTER", "text": "{#", "position": "1:18"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:20"}
+    ],
+    "errors":[
+      {"description": "inline content after heading", "line": 1, "col": 18 },
+      {"description": "block line-feed separator missing: '{'", "line": 1, "col": 18 },
+      {"description": "EOF in block id", "line": 1, "col": 20 }
+    ]
+  },
+
+  {
+    "description":"'atx' H1 heading with closing '#' and bad block ID 3",
+    "input":"# This is an H1 #{#block-id",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "This is an H1 ", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:18"},
+      {"type": "PARAGRAPH", "position": "1:18"},
+      {"type": "CHARACTER", "text": "{#block-id", "position": "1:18"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:28"}
+    ],
+    "errors":[
+      {"description": "inline content after heading", "line": 1, "col": 18 },
+      {"description": "block line-feed separator missing: '{'", "line": 1, "col": 18 },
+      {"description": "EOF in block id", "line": 1, "col": 28 }
+    ]
+  },
+
+  {
+    "description":"'atx' H1 heading with closing '#' and block ID",
+    "input":"# This is an H1 #{#block-id}",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "This is an H1 ", "position": "1:3"},
+      {"type": "BLOCK_ID", "text": "block-id", "position": "1:18"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:29"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"'atx' H1 heading with closing '#' and block ID with tailing content",
+    "input":"# This is an H1 #{#block-id}text",
+    "tokens":[
+      {"type": "HEADING", "level": 1, "text": "#", "position": "1:1"},
+      {"type": "CHARACTER", "text": "This is an H1 ", "position": "1:3"},
+      {"type": "BLOCK_ID", "text": "block-id", "position": "1:18"},
+      {"type": "BLOCK_END", "block": "HEADING", "position": "1:29"},
+      {"type": "PARAGRAPH", "position": "1:29"},
+      {"type": "CHARACTER", "text": "text", "position": "1:29"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:33"}
+    ],
+    "errors":[
+      {"description": "inline content after heading", "line": 1, "col": 29 },
+      {"description": "block line-feed separator missing: 't'", "line": 1, "col": 29 }
     ]
   }
-
 
 ]}
