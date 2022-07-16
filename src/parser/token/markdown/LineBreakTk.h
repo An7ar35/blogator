@@ -8,6 +8,9 @@ namespace blogator::parser::token::markdown {
       public:
         explicit LineBreakTk( TextPos position );
         LineBreakTk( std::u32string text, TextPos position );
+
+      protected:
+        void toStr( std::ostream &os ) const override;
     };
 }
 

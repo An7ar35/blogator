@@ -18,3 +18,13 @@ LineBreakTk::LineBreakTk( blogator::parser::TextPos position ) :
 LineBreakTk::LineBreakTk( std::u32string text, blogator::parser::TextPos position ) :
     MarkdownTk( specs::markdown::TokenType::LINE_BREAK, std::move( text ), position )
 {}
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void LineBreakTk::toStr( std::ostream &os ) const {
+    os << R"({ "type": ")" << this->type()
+       << R"(", "position": ")" << this->position()
+       << R"(" })";
+}

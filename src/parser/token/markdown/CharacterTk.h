@@ -10,6 +10,7 @@ namespace blogator::parser::token::markdown {
     class CharacterTk : public  MarkdownTk {
       public:
         explicit CharacterTk( TextPos position );
+        CharacterTk( char32_t c, TextPos position );
         CharacterTk( std::u32string text, TextPos position );
     };
 }

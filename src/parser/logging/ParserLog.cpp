@@ -65,13 +65,21 @@ bool ParserLog::detachOutputCallback( const std::string &name ) {
 
 /**
  * [THREAD-SAFE] Logs a message
+ * @param err_obj Error object
+ */
+void ParserLog::log( ErrorObject && err_obj  ) {
+    ParserLog::_instance.logErrorObject( std::move( err_obj ) );
+}
+
+/**
+ * [THREAD-SAFE] Logs a message
  * @param src Source filepath
  * @param ctx Error Context enum
  * @param err_code Error code within the context
  * @param position Text position
  */
 void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position ) {
-    ParserLog::_instance.log( ErrorObject( std::move( src ), ctx, err_code, position ) );
+    ParserLog::_instance.logErrorObject( ErrorObject( std::move( src ), ctx, err_code, position ) );
 }
 
 /**
@@ -83,7 +91,7 @@ void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code
  * @param position Text position
  */
 void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code, std::string txt, TextPos position ) {
-    ParserLog::_instance.log( ErrorObject( std::move( src ), ctx, err_code, position, std::move( txt ) ) );
+    ParserLog::_instance.logErrorObject( ErrorObject( std::move( src ), ctx, err_code, position, std::move( txt ) ) );
 }
 
 /**
@@ -143,7 +151,7 @@ bool ParserLog::removeOutputCb( const std::string &name ) {
  * [PRIVATE/THREAD-SAFE] Logs an error
  * @param err Error object
  */
-void ParserLog::log( ErrorObject &&err ) {
+void ParserLog::logErrorObject( ErrorObject &&err ) {
     std::lock_guard<std::mutex> guard( _mutex );
 
     if( _buffering ) {

@@ -4,20 +4,11 @@ using namespace blogator::parser::token::markdown;
 
 /**
  * Constructor
- * @param position Line:Col position of token in source text
- */
-HeadingTk::HeadingTk( TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::HEADING, position ),
-    _level( 0 )
-{}
-
-/**
- * Constructor
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
 HeadingTk::HeadingTk( std::u32string text, TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
+    BlockBeginTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
     _level( ( this->text().size() > 6 ? 6 : this->text().size() ) )
 {}
 
@@ -28,7 +19,7 @@ HeadingTk::HeadingTk( std::u32string text, TextPos position ) :
  * @param position Line:Col position of token in source text
  */
 HeadingTk::HeadingTk( uint8_t level, std::u32string text, blogator::parser::TextPos position )  :
-    MarkdownTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
+    BlockBeginTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
     _level( level )
 {}
 
@@ -53,8 +44,10 @@ void HeadingTk::setLevel( uint8_t val ) {
  * @param os Output stream
  */
 void HeadingTk::toStr( std::ostream &os ) const {
-    os << R"({ "type": ")" << this->type() << R"(", "level": )" << (unsigned) this->level() << R"(, "text": ")";
+    os << R"({ "type": ")" << this->type()
+       << R"(", "level": )" << (unsigned) this->level()
+       << R"(, "text": ")";
     blogator::unicode::utf8::convert( os, this->text() );
-    os << R"(" })";
-//    os << R"(", "position": ")" << this->position() << R"(" })";
+    os << R"(", "position": ")" << this->position()
+       << R"(" })";
 }

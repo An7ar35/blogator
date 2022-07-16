@@ -33,8 +33,6 @@ blogator::parser::specs::markdown::TokenType markdown::MarkdownTk::type() const 
     return _type;
 }
 
-#ifdef TESTING
-
 /**
  * Prints out a string representation of the token
  * @param os Output stream
@@ -42,19 +40,6 @@ blogator::parser::specs::markdown::TokenType markdown::MarkdownTk::type() const 
 void  markdown::MarkdownTk::toStr( std::ostream &os ) const {
     os << R"({ "type": ")" << this->type() << R"(", "text": ")";
     unicode::normalize( os, this->text() );
-    os << R"(" })";
+    os << R"(", "position": ")" << this->position()
+       << R"(" })";
 }
-
-#else
-
-/**
- * Prints out a string representation of the token
- * @param os Output stream
- */
-void markdown::MarkdownTk::toStr( std::ostream & os ) const {
-    os << "MarkdownTk={ type: " << this->type() << ", text: \"";
-    unicode::utf8::convert( os, this->text() );
-    os << "\", position: " << this->lineNum() << ":" << this->colPos() << " }";
-}
-
-#endif

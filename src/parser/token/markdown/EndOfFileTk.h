@@ -10,6 +10,9 @@ namespace blogator::parser::token::markdown {
     class EndOfFileTk : public MarkdownTk {
       public:
         explicit EndOfFileTk( TextPos position );
+
+      protected:
+        void toStr( std::ostream &os ) const override;
     };
 }
 

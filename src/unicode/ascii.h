@@ -27,6 +27,7 @@ namespace blogator::unicode {
     static constexpr char32_t FULL_STOP              { 0x2E }; //'.'
     static constexpr char32_t SOLIDUS                { 0x2F }; //'/'
     static constexpr char32_t DIGIT_ZERO             { 0x30 }; //'0'
+    static constexpr char32_t COLON                  { 0x3A }; //':'
     static constexpr char32_t SEMICOLON              { 0x3B }; //';'
     static constexpr char32_t LESS_THAN_SIGN         { 0x3C }; //'<'
     static constexpr char32_t EQUALS_SIGN            { 0x3D }; //'='

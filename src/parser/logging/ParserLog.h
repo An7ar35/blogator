@@ -29,6 +29,7 @@ namespace blogator::parser::logging {
         static bool appendOutputCallback( const std::string &name, OutputCallback_f cb );
         static bool detachOutputCallback( const std::string &name );
 
+        static void log( ErrorObject && err_obj );
         static void log( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position );
         static void log( std::filesystem::path src, specs::Context ctx, int err_code, std::string txt, TextPos position );
         static void flush();
@@ -47,7 +48,7 @@ namespace blogator::parser::logging {
         void detachPrimaryOutputCb();
         bool appendOutputCb( const std::string &name, OutputCallback_f cb );
         bool removeOutputCb( const std::string &name );
-        void log( ErrorObject &&err );
+        void logErrorObject( ErrorObject &&err );
         void flushPool( const std::filesystem::path &path );
         void flushPools();
         void dispatch( const ErrorObject &err );

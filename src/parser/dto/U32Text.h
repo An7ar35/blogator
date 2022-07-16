@@ -33,16 +33,27 @@ namespace blogator::parser {
 
         [[nodiscard]] bool reachedEnd() const;
 
+        void setMarker();
+        void resetToMarker();
         void reset();
 
       private:
+        struct State {
+            State( TextPos pos, TextIterator_t it, bool nl );
+            State( const State & state );
+            State & operator =( const State & state );
+
+            std::vector<size_t> line_sizes;
+            TextPos             position;
+            TextIterator_t      iterator;
+            bool                newline;
+            bool                reconsume;
+        };
+
         std::filesystem::path _path;
         std::vector<char32_t> _src;
-        std::vector<size_t>   _line_sizes;
-        TextPos               _position;
-        TextIterator_t        _iterator;
-        bool                  _newline;
-        bool                  _reconsume;
+        State                 _state;
+        State                 _marker;
     };
 }
 

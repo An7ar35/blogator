@@ -23,7 +23,13 @@ std::string blogator::unicode::normalize( const std::u32string  &u32str ) {
  */
 std::ostream &blogator::unicode::normalize( std::ostream &os, const std::u32string & u32str ) {
     for( auto c : u32str ) {
-        if( unicode::utf32::iscntrl( c ) || c == '\'' || c == '\"' || c == '\\' || c == 0x00 ) {
+        if( unicode::utf32::iscntrl( c )   ||
+            unicode::ascii::isnewline( c ) ||
+            c == '\''                      ||
+            c == '\"'                      ||
+            c == '\\'                      ||
+            c == 0x00 )
+        {
             unicode::utf8::convert( os, unicode::utf32::toxunicode( c ) );
         } else {
             unicode::utf8::convert( os, c );

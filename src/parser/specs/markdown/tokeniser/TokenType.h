@@ -6,39 +6,48 @@
 
 namespace blogator::parser::specs::markdown {
     enum class TokenType {
-        UNKNOWN = 0,
-        CHARACTER,
+        ENUM_BEGIN = 0, //used for iteration purposes
 
+        NONE = ENUM_BEGIN,
+        UNKNOWN,
 
-        //blocks
-        HEADING, //"# ..." or ".... \n---" or "....\n==="
+        /* Blocks */
+        HEADING,             //"# ..." or ".... \n---" or "....\n==="
+        PARAGRAPH,           //text content
+        HORIZONTAL_RULE,     //"---" or more on 1 line
+        CODE_BLOCK,          //"```fenced code block```" or "~~~fenced code block~~~"
+        BLOCKQUOTE,          //'> ...', '>>' nested
+        LIST,
+        LIST_ITEM,           //"a.", "A.", "1.", '*','-','+', "- [x]", "- []", "[^..]:"
+        TABLE,               //equivalent to <table>
+        TABLE_ROW,           //equivalent to <tr>
+        TABLE_HEADING,       //equivalent to <th>
+        TABLE_CELL,          //equivalent to <td>
+        DEFINITION_LIST_DT,  //equivalent to <dt>
+        DEFINITION_LIST_DD,  //equivalent to <dd>
+
         BLOCK_END,
 
-        //inline
-        LINE_BREAK,   //"  \n"
-        FORMAT_BEGIN, //'*','-','=','`','_'
-        FORMAT_END,   //auto close on block end
-        IMAGE,        //![alt text](path)
-        BLOCK_ID,     //"{#...}"
-        CODE_BLOCK,   //```fenced code block```
+        /* Inline */
+        CHARACTER,
+        LINE_BREAK,          //"  \n"
+        FORMAT_BEGIN,        //'*','-','=','`','_'
+        FORMAT_END,          //auto close on block end
+        IMAGE,               //![alt text](path)
+        HYPERLINK,           //[title](path)
+        BLOCK_ID,            //"{#...}"
+        FOOTNOTE_REF,        //"[^1]"
 
-
-//        BLOCKQUOTE, //'> ...', '>>' nested
-//        LIST_ITEM, //ordered ('a')/unordered ('*','-','+')/task ("- [x]", "- []")
-//        HORIZONTAL_RULE, //"---" or more on 1 line
-//        LINK,  //[title](path)
-//
-//        TABLE_HEADING,
-//        TABLE_COL, //with alignment
-//        TABLE_CELL,
-//        FOOTNOTE,
-//        DEFINITION,
         END_OF_FILE,
 
         ENUM_END = END_OF_FILE //used for iteration purposes
     };
 
     std::ostream & operator <<( std::ostream &os, TokenType type );
+
+    bool isBlockToken( TokenType type );
+    bool isContainerBlock( TokenType type );
+    bool isLeafBlock( TokenType type );
 }
 
 namespace blogator {

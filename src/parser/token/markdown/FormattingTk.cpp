@@ -36,6 +36,25 @@ FormattingTk::Type FormattingTk::formatType() const {
 }
 
 /**
+ * Check for match with formatting character
+ * @param fmt_char_1 Formatting character
+ * @return Matching state
+ */
+bool FormattingTk::match( uint32_t fmt_char_1 ) const {
+    return ( this->text().size() == 1 && this->text()[0] == fmt_char_1 );
+}
+
+/**
+ * Check for match with formatting characters
+ * @param fmt_char_1 Formatting character
+ * @param fmt_char_2 Formatting character
+ * @return Matching state
+ */
+bool FormattingTk::match( uint32_t fmt_char_1, uint32_t fmt_char_2 ) const {
+    return ( this->text().size() == 2 && this->text()[0] == fmt_char_1 && this->text()[1] == fmt_char_2 );
+}
+
+/**
  * Sets the format type for the token
  * @param type Format type
  */
@@ -48,7 +67,7 @@ void FormattingTk::setFormatType( FormattingTk::Type type ) {
  * @param text Markdown formatting character(s)
  * @return Format type enum
  */
-FormattingTk::Type FormattingTk::resolveFormateType( const std::u32string &text ) {
+FormattingTk::Type FormattingTk::resolveFormatType( const std::u32string &text ) {
     static const auto MAP = std::unordered_map<std::u32string, Type>( {
         { U"",   Type::NONE },
         { U"**", Type::BOLD },
@@ -59,8 +78,8 @@ FormattingTk::Type FormattingTk::resolveFormateType( const std::u32string &text 
         { U"==", Type::HIGHLIGHT },
         { U"~",  Type::SUBSCRIPT },
         { U"^",  Type::SUPERSCRIPT },
-        { U"`",  Type::INLINE_CODE },
-        { U"``", Type::INLINE_CODE },
+        { U"`",  Type::INLINE_CODE_1 },
+        { U"``", Type::INLINE_CODE_2 },
     } );
 
     const auto it = MAP.find( text );
@@ -72,10 +91,11 @@ FormattingTk::Type FormattingTk::resolveFormateType( const std::u32string &text 
  * Prints out a string representation of the token
  * @param os Output stream
  */
-void  FormattingTk::toStr( std::ostream &os ) const {
+void FormattingTk::toStr( std::ostream &os ) const {
     os << R"({ "type": ")" << this->type() << R"(", "formatting": ")" << this->formatType() << R"(", "text": ")";
     unicode::normalize( os, this->text() );
-    os << R"(" })";
+    os << R"(", "position": ")" << this->position()
+       << R"(" })";
 }
 
 /**
@@ -92,8 +112,9 @@ std::ostream & blogator::parser::token::markdown::operator <<( std::ostream &os,
         case FormattingTk::Type::HIGHLIGHT:     { os << "HIGHLIGHT";     } break;
         case FormattingTk::Type::SUBSCRIPT:     { os << "SUBSCRIPT";     } break;
         case FormattingTk::Type::SUPERSCRIPT:   { os << "SUPERSCRIPT";   } break;
-        case FormattingTk::Type::INLINE_CODE:   { os << "INLINE_CODE";   } break;
-        default:                                { os << "NONE";          } break;;
+        case FormattingTk::Type::INLINE_CODE_1: { os << "INLINE_CODE_1"; } break;
+        case FormattingTk::Type::INLINE_CODE_2: { os << "INLINE_CODE_2"; } break;
+        default:                                { os << "NONE";          } break;
     }
 
     return os;

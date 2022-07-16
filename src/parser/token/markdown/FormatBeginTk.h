@@ -8,6 +8,8 @@ namespace blogator::parser::token::markdown {
       public:
         explicit FormatBeginTk( TextPos position );
         FormatBeginTk( std::u32string text, TextPos position );
+        FormatBeginTk( uint32_t c, TextPos position );
+        FormatBeginTk( uint32_t c1, uint32_t c2, TextPos position );
     };
 }
 

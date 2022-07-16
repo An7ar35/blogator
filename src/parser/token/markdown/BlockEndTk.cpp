@@ -27,7 +27,8 @@ blogator::parser::specs::markdown::TokenType BlockEndTk::blockType() const {
  * @param os Output stream
  */
 void  BlockEndTk::toStr( std::ostream &os ) const {
-    os << R"({ "type": ")" << this->type() << R"(", "block": ")" << this->blockType() << R"(", "text": ")";
-    blogator::unicode::utf8::convert( os, this->text() );
-    os << R"(" })";
+    os << R"({ "type": ")" << this->type()
+       << R"(", "block": ")" << this->blockType()
+       << R"(", "position": ")" << this->position()
+       << R"(" })";
 }

@@ -9,3 +9,13 @@ using namespace blogator::parser::token::markdown;
 EndOfFileTk::EndOfFileTk( blogator::parser::TextPos position ) :
     MarkdownTk( specs::markdown::TokenType::END_OF_FILE, position )
 {}
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void EndOfFileTk::toStr( std::ostream &os ) const {
+    os << R"({ "type": ")" << this->type()
+       << R"(", "position": ")" << this->position()
+       << R"(" })";
+}

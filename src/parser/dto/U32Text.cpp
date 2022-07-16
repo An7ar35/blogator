@@ -10,12 +10,9 @@ using namespace blogator::parser;
  */
 U32Text::U32Text( std::u32string text ) :
     _src( text.begin(), text.end() ),
-    _position( { 1, 1 } ),
-    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
-    _reconsume( false )
-{
-    _iterator = _src.begin();
-}
+    _state( { { 1, 1 }, _src.begin(), ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) } ),
+    _marker( _state )
+{}
 
 /**
  * Constructor
@@ -23,12 +20,9 @@ U32Text::U32Text( std::u32string text ) :
  */
 U32Text::U32Text( std::vector<char32_t> text ) :
     _src( std::move( text ) ),
-    _position( { 1, 1 } ),
-    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
-    _reconsume( false )
-{
-    _iterator = _src.begin();
-}
+    _state( { { 1, 1 }, _src.begin(), ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) } ),
+    _marker( _state )
+{}
 
 /**
  * Constructor
@@ -38,12 +32,9 @@ U32Text::U32Text( std::vector<char32_t> text ) :
 U32Text::U32Text( std::filesystem::path src_path, std::u32string text ) :
     _path( std::move( src_path ) ),
     _src( text.begin(), text.end() ),
-    _position( { 1, 1 } ),
-    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
-    _reconsume( false )
-{
-    _iterator = _src.begin();
-}
+    _state( { { 1, 1 }, _src.begin(), ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) } ),
+    _marker( _state )
+{}
 
 /**
  * Constructor
@@ -53,12 +44,9 @@ U32Text::U32Text( std::filesystem::path src_path, std::u32string text ) :
 U32Text::U32Text( std::filesystem::path src_path, std::vector<char32_t> text ) :
     _path( std::move( src_path ) ),
     _src( std::move( text ) ),
-    _position( { 1, 1 } ),
-    _newline( ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) ),
-    _reconsume( false )
-{
-    _iterator = _src.begin();
-}
+    _state( { { 1, 1 }, _src.begin(), ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false ) } ),
+    _marker( _state )
+{}
 
 
 /**
@@ -68,10 +56,10 @@ U32Text::U32Text( std::filesystem::path src_path, std::vector<char32_t> text ) :
  */
 size_t U32Text::advanceCol( unsigned int n ) {
     if( !reachedEnd() ) {
-        auto remaining = std::distance( _iterator, _src.cend() );
+        auto remaining = std::distance( _state.iterator, _src.cend() );
         auto advance   = ( remaining > n ? n : remaining );
-        std::advance( _iterator, advance );
-        _position.col += advance;
+        std::advance( _state.iterator, advance );
+        _state.position.col += advance;
         return advance;
     }
 
@@ -88,17 +76,17 @@ size_t U32Text::advanceCaret( unsigned int n ) {
 
     if( !reachedEnd() && n > 0 ) {
         while( !reachedEnd() && count < n ) {
-            ++_iterator;
+            ++_state.iterator;
 
-            if( _newline ) {
-                _line_sizes.emplace_back( _position.col );
-                _position.newline();
-                _newline = false;
+            if( _state.newline ) {
+                _state.line_sizes.emplace_back( _state.position.col );
+                _state.position.newline();
+                _state.newline = false;
             } else {
-                ++_position.col;
+                ++_state.position.col;
             }
 
-            _newline = unicode::ascii::isnewline( character() );
+            _state.newline = unicode::ascii::isnewline( character() );
 
             ++count;
         }
@@ -115,19 +103,19 @@ size_t U32Text::advanceCaret( unsigned int n ) {
 size_t U32Text::reverseCaret( unsigned int n ) {
     unsigned int count = 0;
 
-    if( _iterator != _src.begin() ) {
-        while( _iterator != _src.begin() && count < n ) {
-            --_iterator;
+    if( _state.iterator != _src.begin() ) {
+        while( _state.iterator != _src.begin() && count < n ) {
+            --_state.iterator;
 
             if( unicode::ascii::isnewline( character() ) ) {
-                _newline        = true;
-                _position.line -= 1;
-                _position.col   = _line_sizes.back();
-                _line_sizes.pop_back();
+                _state.newline        = true;
+                _state.position.line -= 1;
+                _state.position.col   = _state.line_sizes.back();
+                _state.line_sizes.pop_back();
 
             } else {
-                _newline       = false;
-                _position.col -= 1;
+                _state.newline       = false;
+                _state.position.col -= 1;
             }
 
             ++count;
@@ -142,20 +130,20 @@ size_t U32Text::reverseCaret( unsigned int n ) {
  * @return Code point or 0x00 if end was reached
  */
 char32_t U32Text::nextChar() {
-    if( _reconsume ) {
-        _reconsume = false;
+    if( _state.reconsume ) {
+        _state.reconsume = false;
     } else if( !reachedEnd() ) {
-        ++_iterator;
+        ++_state.iterator;
 
-        if( _newline ) {
-            _line_sizes.emplace_back( _position.col );
-            _position.newline();
-            _newline = false;
+        if( _state.newline ) {
+            _state.line_sizes.emplace_back( _state.position.col );
+            _state.position.newline();
+            _state.newline = false;
         } else {
-            ++_position.col;
+            ++_state.position.col;
         }
 
-        _newline = unicode::ascii::isnewline( character() );
+        _state.newline = unicode::ascii::isnewline( character() );
     }
 
     return character();
@@ -165,7 +153,7 @@ char32_t U32Text::nextChar() {
  * Sets the reconsume flag which holds the caret in its current position during the next call to `nextChar()`
  */
 void U32Text::reconsume() {
-    _reconsume = true;
+    _state.reconsume = true;
 }
 
 
@@ -177,7 +165,7 @@ char32_t U32Text::character() const {
     if( reachedEnd() )
         return 0x00;
     else
-        return *_iterator;
+        return *_state.iterator;
 }
 
 /**
@@ -189,7 +177,7 @@ std::pair<char32_t, bool> U32Text::character( std::u32string::iterator::differen
     if( reachedEnd() ) {
         return { 0x00, true };
     } else if ( fwd_n > 0 ) {
-        auto iterator = std::next( _iterator, fwd_n );
+        auto iterator = std::next( _state.iterator, fwd_n );
 
         if( iterator == _src.cend() )
             return { 0x00, true };
@@ -207,9 +195,9 @@ std::pair<char32_t, bool> U32Text::character( std::u32string::iterator::differen
  */
 std::u32string U32Text::characters( std::u32string::iterator::difference_type n ) {
     if( !reachedEnd() ) {
-        auto remaining   = std::distance( _iterator, _src.cend() );
+        auto remaining   = std::distance( _state.iterator, _src.cend() );
         auto code_points = ( remaining > n ? n : remaining );
-        return { _iterator, std::next( _iterator, code_points ) };
+        return { _state.iterator, std::next( _state.iterator, code_points ) };
     }
 
     return {};
@@ -220,7 +208,7 @@ std::u32string U32Text::characters( std::u32string::iterator::difference_type n 
  * @return Position
  */
 TextPos U32Text::position() const noexcept {
-    return _position;
+    return _state.position;
 }
 
 /**
@@ -236,13 +224,66 @@ std::filesystem::path U32Text::path() const noexcept {
  * @return End of text reached
  */
 bool U32Text::reachedEnd() const {
-    return ( _iterator == _src.cend() );
+    return ( _state.iterator == _src.cend() );
+}
+
+/**
+ * Sets a marker at the current State (position/iterator/etc)
+ */
+void U32Text::setMarker() {
+    _marker = _state;
+}
+
+/**
+ * Reloads the previously set state marker as the current state
+ */
+void U32Text::resetToMarker() {
+    _state = _marker;
 }
 
 /**
  * Resets the iterator and position back to the beginning
  */
 void U32Text::reset() {
-    _iterator = _src.cbegin();
-    _position = TextPos();
+    _state.iterator = _src.cbegin();
+    _state.position = TextPos();
+}
+
+/**
+ * [PRIVATE] Constructor
+ * @param pos Position
+ * @param it Iterator
+ * @param nl Newline flag
+ */
+U32Text::State::State( TextPos pos, TextIterator_t it, bool nl ) :
+    position( pos ),
+    iterator( it ),
+    newline( nl ),
+    reconsume( false )
+{}
+
+/**
+ * Copy-constructor
+ * @param state State to copy
+ */
+U32Text::State::State( const U32Text::State & state ) :
+    position( state.position ),
+    iterator( state.iterator ),
+    newline( state.newline ),
+    reconsume( state.reconsume ),
+    line_sizes( state.line_sizes )
+{}
+
+/**
+ * Copy-operator
+ * @param state State
+ * @return Copied state
+ */
+U32Text::State & U32Text::State::operator =( const U32Text::State &state ) {
+    this->position   = state.position;
+    this->iterator   = state.iterator;
+    this->line_sizes = state.line_sizes;
+    this->newline    = state.newline;
+    this->reconsume  = state.reconsume;
+    return *this;
 }
