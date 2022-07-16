@@ -1,5 +1,5 @@
-#ifndef BLOGATOR_PARSER_SPECS_HTML5_TOKENISER_TOKENTYPE_H
-#define BLOGATOR_PARSER_SPECS_HTML5_TOKENISER_TOKENTYPE_H
+#ifndef BLOGATOR_PARSER_SPECS_HTML5_TOKENTYPE_H
+#define BLOGATOR_PARSER_SPECS_HTML5_TOKENTYPE_H
 
 #include <ostream>
 #include <string>
@@ -22,4 +22,4 @@ namespace blogator {
     std::string to_string( blogator::parser::specs::infra::TokenType type );
 }
 
-#endif //BLOGATOR_PARSER_SPECS_HTML5_TOKENISER_TOKENTYPE_H
+#endif //BLOGATOR_PARSER_SPECS_HTML5_TOKENTYPE_H

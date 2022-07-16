@@ -3,11 +3,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../../logger/Logger.h"
-#include "../specs/infra/Attribute.h"
-#include "../logging/ParserLog.h"
-#include "../../unicode/unicode.h"
-#include "../encoding/Format.h"
 #include "node/Attr.h"
 #include "node/CDATASection.h"
 #include "node/Comment.h"
@@ -16,6 +11,12 @@
 #include "node/DocumentType.h"
 #include "node/Element.h"
 #include "node/Text.h"
+#include "../encoding/Format.h"
+#include "../specs/infra/Attribute.h"
+#include "../logging/ParserLog.h"
+#include "../../logger/Logger.h"
+#include "../../exception/failed_expectation.h"
+#include "../../unicode/unicode.h"
 
 using namespace blogator::parser::dom;
 

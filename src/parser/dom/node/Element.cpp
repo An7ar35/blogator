@@ -4,8 +4,11 @@
 #include "Comment.h"
 #include "Document.h"
 #include "Text.h"
-#include "../../../unicode/unicode.h"
+#include "../iterator/NodeIterator.h"
+#include "../iterator/ConstNodeIterator.h"
 #include "../validation/XML.h"
+#include "../../../unicode/unicode.h"
+#include "../../../exception/failed_expectation.h"
 #include "../../../string/helpers.h"
 #include "../../../logger/Logger.h"
 

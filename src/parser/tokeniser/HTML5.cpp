@@ -4,9 +4,11 @@
 #include <utility>
 #include <algorithm>
 
+#include "../logging/ParserLog.h"
+#include "../specs/infra/NamedCharRef.h"
+#include "../specs/infra/NumericCharRef.h"
 #include "../../logger/Logger.h"
 #include "../../exception/parsing_failure.h"
-#include "../logging/ParserLog.h"
 #include "../../unicode/unicode.h"
 
 using namespace blogator::parser;

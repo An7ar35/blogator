@@ -226,7 +226,6 @@ set(SOURCE_FILES
         src/parser/specs/Structure.h
         src/parser/specs/Context.cpp
         src/parser/specs/Context.h
-        src/parser/specs/config/tokeniser/TokenType.h
         src/parser/specs/native/Element.cpp
         src/parser/specs/native/Element.h
         src/parser/specs/native/ErrorCode.cpp
@@ -234,9 +233,9 @@ set(SOURCE_FILES
         src/parser/specs/native/InsertionMode.cpp
         src/parser/specs/native/InsertionMode.h
         src/parser/specs/native/specifications.h
-        src/parser/specs/infra/tokeniser/TokeniserState.h
-        src/parser/specs/infra/tokeniser/TokenType.cpp
-        src/parser/specs/infra/tokeniser/TokenType.h
+        src/parser/specs/infra/TokeniserState.h
+        src/parser/specs/infra/TokenType.cpp
+        src/parser/specs/infra/TokenType.h
         src/parser/specs/infra/Attribute.cpp
         src/parser/specs/infra/Attribute.h
         src/parser/specs/infra/ContentModel.cpp
@@ -259,18 +258,15 @@ set(SOURCE_FILES
         src/parser/specs/infra/InsertionMode.cpp
         src/parser/specs/infra/InsertionMode.h
         src/parser/specs/markdown/specifications.h
-        src/parser/specs/markdown/tokeniser/TokenType.cpp
-        src/parser/specs/markdown/tokeniser/TokenType.h
-        src/parser/specs/markdown/tokeniser/TokeniserState.cpp
-        src/parser/specs/markdown/tokeniser/TokeniserState.h
+        src/parser/specs/markdown/TokenType.cpp
+        src/parser/specs/markdown/TokenType.h
+        src/parser/specs/markdown/TokeniserState.cpp
+        src/parser/specs/markdown/TokeniserState.h
         src/parser/specs/markdown/ErrorCode.cpp
         src/parser/specs/markdown/ErrorCode.h
 
         src/parser/token/Token.cpp
         src/parser/token/Token.h
-        src/parser/token/config/tokens.h
-        src/parser/token/config/ConfigTk.cpp
-        src/parser/token/config/ConfigTk.h
         src/parser/token/html5/HTML5Tk.cpp
         src/parser/token/html5/HTML5Tk.h
         src/parser/token/html5/DoctypeTk.cpp
@@ -293,6 +289,60 @@ set(SOURCE_FILES
         src/parser/token/native/tokens.h
         src/parser/token/markdown/MarkdownTk.cpp
         src/parser/token/markdown/MarkdownTk.h
+        src/parser/token/markdown/CharacterTk.cpp
+        src/parser/token/markdown/CharacterTk.h
+        src/parser/token/markdown/HeadingTk.cpp
+        src/parser/token/markdown/HeadingTk.h
+        src/parser/token/markdown/FormatBeginTk.cpp
+        src/parser/token/markdown/FormatBeginTk.h
+        src/parser/token/markdown/FormattingTk.cpp
+        src/parser/token/markdown/FormattingTk.h
+        src/parser/token/markdown/FormatEndTk.cpp
+        src/parser/token/markdown/FormatEndTk.h
+        src/parser/token/markdown/BlockIDTk.cpp
+        src/parser/token/markdown/BlockIDTk.h
+        src/parser/token/markdown/LineBreakTk.cpp
+        src/parser/token/markdown/LineBreakTk.h
+        src/parser/token/markdown/EndOfFileTk.cpp
+        src/parser/token/markdown/EndOfFileTk.h
+        src/parser/token/markdown/BlockEndTk.cpp
+        src/parser/token/markdown/BlockEndTk.h
+        src/parser/token/markdown/CodeBlockTk.cpp
+        src/parser/token/markdown/CodeBlockTk.h
+        src/parser/token/markdown/ImageTk.cpp
+        src/parser/token/markdown/ImageTk.h
+        src/parser/token/markdown/HyperlinkTk.cpp
+        src/parser/token/markdown/HyperlinkTk.h
+        src/parser/token/markdown/HorizontalRuleTk.cpp
+        src/parser/token/markdown/HorizontalRuleTk.h
+        src/parser/token/markdown/ParagraphTk.cpp
+        src/parser/token/markdown/ParagraphTk.h
+        src/parser/token/markdown/ListItemTk.cpp
+        src/parser/token/markdown/ListItemTk.h
+        src/parser/token/markdown/BlockBeginTk.cpp
+        src/parser/token/markdown/BlockBeginTk.h
+        src/parser/token/markdown/BlockQuoteTk.cpp
+        src/parser/token/markdown/BlockQuoteTk.h
+        src/parser/specs/markdown/BlockFenceType.cpp
+        src/parser/specs/markdown/BlockFenceType.h
+        src/parser/token/markdown/ListTk.cpp
+        src/parser/token/markdown/ListTk.h
+        src/parser/specs/markdown/ListType.cpp
+        src/parser/specs/markdown/ListType.h
+        src/parser/token/markdown/FootnoteRefTk.cpp
+        src/parser/token/markdown/FootnoteRefTk.h
+        src/parser/token/markdown/TableHeadingTk.cpp
+        src/parser/token/markdown/TableHeadingTk.h
+        src/parser/token/markdown/TableRowTk.cpp
+        src/parser/token/markdown/TableRowTk.h
+        src/parser/token/markdown/TableCellTk.cpp
+        src/parser/token/markdown/TableCellTk.h
+        src/parser/token/markdown/TableTk.cpp
+        src/parser/token/markdown/TableTk.h
+        src/parser/token/markdown/DLTitleTk.cpp
+        src/parser/token/markdown/DLTitleTk.h
+        src/parser/token/markdown/DLDefinitionTk.cpp
+        src/parser/token/markdown/DLDefinitionTk.h
         src/parser/token/markdown/tokens.h
 
         src/parser/dom/node/Node.cpp
@@ -326,9 +376,6 @@ set(SOURCE_FILES
         src/unicode/utf32.h
         src/unicode/unicode.cpp
         src/unicode/unicode.h
-
-        src/parser/tokeniser/Config.cpp
-        src/parser/tokeniser/Config.h
 
         src/parser/dom/enum/NodeType.cpp
         src/parser/dom/enum/NodeType.h
@@ -426,62 +473,8 @@ set(SOURCE_FILES
 
         src/parser/builder/MarkdownToHtml.cpp
         src/parser/builder/MarkdownToHtml.h
-        src/parser/token/markdown/CharacterTk.cpp
-        src/parser/token/markdown/CharacterTk.h
-        src/parser/token/markdown/HeadingTk.cpp
-        src/parser/token/markdown/HeadingTk.h
-        src/parser/token/markdown/FormatBeginTk.cpp
-        src/parser/token/markdown/FormatBeginTk.h
-        src/parser/token/markdown/FormattingTk.cpp
-        src/parser/token/markdown/FormattingTk.h
-        src/parser/token/markdown/FormatEndTk.cpp
-        src/parser/token/markdown/FormatEndTk.h
-        src/parser/token/markdown/BlockIDTk.cpp
-        src/parser/token/markdown/BlockIDTk.h
-        src/parser/token/markdown/LineBreakTk.cpp
-        src/parser/token/markdown/LineBreakTk.h
-        src/parser/token/markdown/EndOfFileTk.cpp
-        src/parser/token/markdown/EndOfFileTk.h
-        src/parser/token/markdown/BlockEndTk.cpp
-        src/parser/token/markdown/BlockEndTk.h
-        src/parser/token/markdown/CodeBlockTk.cpp
-        src/parser/token/markdown/CodeBlockTk.h
-        src/parser/token/markdown/ImageTk.cpp
-        src/parser/token/markdown/ImageTk.h
-        src/parser/token/markdown/HyperlinkTk.cpp
-        src/parser/token/markdown/HyperlinkTk.h
-        src/parser/token/markdown/HorizontalRuleTk.cpp
-        src/parser/token/markdown/HorizontalRuleTk.h
-        src/parser/token/markdown/ParagraphTk.cpp
-        src/parser/token/markdown/ParagraphTk.h
-        src/parser/token/markdown/ListItemTk.cpp
-        src/parser/token/markdown/ListItemTk.h
-        src/parser/token/markdown/BlockBeginTk.cpp
-        src/parser/token/markdown/BlockBeginTk.h
-        src/parser/token/markdown/BlockQuoteTk.cpp
-        src/parser/token/markdown/BlockQuoteTk.h
-        src/parser/specs/markdown/tokeniser/BlockFenceType.cpp
-        src/parser/specs/markdown/tokeniser/BlockFenceType.h
-        src/parser/token/markdown/ListTk.cpp
-        src/parser/token/markdown/ListTk.h
-        src/parser/specs/markdown/ListType.cpp
-        src/parser/specs/markdown/ListType.h
-        src/parser/token/markdown/FootnoteRefTk.cpp
-        src/parser/token/markdown/FootnoteRefTk.h
-        src/parser/token/markdown/TableHeadingTk.cpp
-        src/parser/token/markdown/TableHeadingTk.h
-        src/parser/token/markdown/TableRowTk.cpp
-        src/parser/token/markdown/TableRowTk.h
-        src/parser/token/markdown/TableCellTk.cpp
-        src/parser/token/markdown/TableCellTk.h
-        src/parser/token/markdown/TableTk.cpp
-        src/parser/token/markdown/TableTk.h
         src/parser/tokeniser/markdown/Block.cpp
         src/parser/tokeniser/markdown/Block.h
-        src/parser/token/markdown/DLTitleTk.cpp
-        src/parser/token/markdown/DLTitleTk.h
-        src/parser/token/markdown/DLDefinitionTk.cpp
-        src/parser/token/markdown/DLDefinitionTk.h
         src/parser/specs/markdown/InsertionMode.cpp
         src/parser/specs/markdown/InsertionMode.h)
 
@@ -563,8 +556,8 @@ set(TEST_FILES
         tests/parser/specs/Context.cpp
         tests/parser/specs/native/Element.cpp
         tests/parser/specs/native/InsertionMode.cpp
-        tests/parser/specs/markdown/tokeniser/TokeniserState.cpp
-        tests/parser/specs/markdown/tokeniser/TokenType.cpp
+        tests/parser/specs/markdown/TokeniserState.cpp
+        tests/parser/specs/markdown/TokenType.cpp
         tests/parser/dom/node/Element.cpp
         tests/parser/dom/node/CharacterData.cpp
         tests/parser/dom/node/Text.cpp
@@ -591,7 +584,7 @@ set(TEST_FILES
         test-harness/html5lib-tests/tokenizer-tests.cpp
         test-harness/html5lib-tests/tree-construction-tests.cpp
         test-harness/commonmark-spec/commonmark-spec-tests.cpp
-        test-harness/markdown/tokenizer-tests.cpp)
+        test-harness/markdown/tokenizer-tests.cpp tests/parser/specs/markdown/InsertionMode.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)

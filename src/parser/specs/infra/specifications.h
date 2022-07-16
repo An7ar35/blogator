@@ -8,11 +8,8 @@
 #include "ErrorCode.h"
 #include "InsertionMode.h"
 #include "Namespace.h"
-#include "NamedCharRef.h"
-#include "NumericCharRef.h"
-
-#include "tokeniser/TokeniserState.h"
-#include "tokeniser/TokenType.h"
+#include "TokeniserState.h"
+#include "TokenType.h"
 
 /*
  * Specifications based on the Infra standard

@@ -96,7 +96,7 @@ namespace blogator::parser::dom::node {
         Node * insertNodeBefore( NodePtr_t node, node::Node * child ) override;
         NodePtr_t replaceChildNode( NodePtr_t &node, NodePtr_t &target ) override;
         NodePtr_t removeChildNode( Nodes_t::iterator it ) override;
-        virtual void toUTF8Stream( std::ostream &os ) const;
+        void toUTF8Stream( std::ostream &os ) const override;
 
       private:
         DOMString_t               _encoding;

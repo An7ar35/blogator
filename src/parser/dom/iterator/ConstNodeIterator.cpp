@@ -130,7 +130,7 @@ ConstNodeIterator & ConstNodeIterator::operator ++() {
  * Postfix increment operator
  * @return Iterator pre-incrementation
  */
-ConstNodeIterator ConstNodeIterator::operator ++( int ) {
+const ConstNodeIterator ConstNodeIterator::operator ++( int ) {
     ConstNodeIterator tmp = *this;
     ++(*this);
     return tmp;
@@ -149,7 +149,7 @@ ConstNodeIterator & ConstNodeIterator::operator --() {
  * Postfix decrement operator
  * @return Iterator pre-decrementation
  */
-ConstNodeIterator ConstNodeIterator::operator --( int ) {
+const ConstNodeIterator ConstNodeIterator::operator --( int ) {
     ConstNodeIterator tmp = *this;
     --(*this);
     return std::move( tmp );

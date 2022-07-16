@@ -3,8 +3,8 @@
 
 #include <set>
 
-#include "Node.h"
 #include "Attr.h"
+#include "Node.h"
 #include "../datastructure/NamedNodeMap.h"
 #include "../enum/ValidationState.h"
 #include "../../specs/infra/Namespace.h"

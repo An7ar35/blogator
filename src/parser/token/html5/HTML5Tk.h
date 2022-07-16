@@ -2,7 +2,7 @@
 #define BLOGATOR_PARSER_TOKEN_HTML5_HTML5TK_H
 
 #include "../Token.h"
-#include "../../specs/infra/tokeniser/TokenType.h"
+#include "../../specs/infra/TokenType.h"
 
 namespace blogator::parser::token::html5 {
     /**

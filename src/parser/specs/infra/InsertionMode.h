@@ -6,7 +6,9 @@
 
 namespace blogator::parser::specs::infra {
     enum class InsertionMode {
-        INITIAL = 0,
+        ENUM_BEGIN = 0, //used for iterating enums
+
+        INITIAL = ENUM_BEGIN,
         BEFORE_HTML,
         BEFORE_HEAD,
         IN_HEAD,

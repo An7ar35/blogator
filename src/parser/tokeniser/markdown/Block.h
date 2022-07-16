@@ -2,7 +2,7 @@
 #define BLOGATOR_PARSER_TOKENISER_MARKDOWN_BLOCK_H
 
 #include "../../dto/TextPos.h"
-#include "../../specs/markdown/tokeniser/TokenType.h"
+#include "../../specs/markdown/TokenType.h"
 #include "../../specs/markdown/ListType.h"
 
 namespace blogator::parser::token::markdown {

@@ -31,9 +31,9 @@ namespace blogator::parser::dom {
         reference operator *() const;
         pointer operator ->() const;
         ConstNodeIterator & operator ++();
-        ConstNodeIterator operator ++( int );
+        const ConstNodeIterator operator ++( int );
         ConstNodeIterator & operator --();
-        ConstNodeIterator operator --( int );
+        const ConstNodeIterator operator --( int );
 
         [[nodiscard]] unsigned long whatToShow() const;
         [[nodiscard]] const std::shared_ptr<NodeFilter> & nodeFilter() const;

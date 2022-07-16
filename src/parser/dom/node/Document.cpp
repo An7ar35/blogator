@@ -3,8 +3,6 @@
 #include <utility>
 #include <memory>
 
-#include "../../../logger/Logger.h"
-#include "../../../string/helpers.h"
 #include "Attr.h"
 #include "CDATASection.h"
 #include "Comment.h"
@@ -14,6 +12,8 @@
 #include "Text.h"
 #include "../validation/XML.h"
 #include "../../../unicode/unicode.h"
+#include "../../../logger/Logger.h"
+#include "../../../string/helpers.h"
 
 using namespace blogator::parser::dom::node;
 

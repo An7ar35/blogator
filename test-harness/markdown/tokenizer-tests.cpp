@@ -40,8 +40,8 @@ class ParserLogCatcher {
  */
 class MockMarkdownToHtml : public blogator::parser::builder::MarkdownToHtml {
   public:
-    explicit MockMarkdownToHtml( std::vector<uint32_t> & output ) :
-        blogator::parser::builder::MarkdownToHtml( output )
+    explicit MockMarkdownToHtml() :
+        blogator::parser::builder::MarkdownToHtml()
     {}
 
     void dispatch( std::unique_ptr<MarkdownTk> tk ) override {
@@ -83,8 +83,7 @@ testing::AssertionResult runMarkdownTokeniserTest( const test_harness::markdown:
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
 
     ParserLogCatcher      error_catcher;
-    std::vector<uint32_t> output;
-    MockMarkdownToHtml    mock_markdown_to_html( output );
+    MockMarkdownToHtml    mock_markdown_to_html;
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 

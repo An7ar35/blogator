@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/specs/markdown/tokeniser/TokenType.h"
+#include "../../../src/parser/specs/markdown/TokenType.h"
 
 using namespace blogator::parser::specs::markdown;
 
