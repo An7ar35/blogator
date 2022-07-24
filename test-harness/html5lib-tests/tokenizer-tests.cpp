@@ -12,6 +12,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dto/Source.h"

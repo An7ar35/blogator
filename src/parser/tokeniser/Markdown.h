@@ -103,7 +103,7 @@ namespace blogator::parser::tokeniser {
         std::deque<logging::ErrorObject>            _queued_errors;         //errors queued for the current root block
         std::deque<token::markdown::FormattingTk *> _formatting_markers;    //formatting characters for the block (added as single CharacterTk and converted as appropriate on dispatch)
         std::deque<SectionMarker>                   _section_markers;       //markers pointing to the beginning of sections that are not yet formally identified
-        std::stack<markdown::Block>                 _open_blocks;           //keeps track of current blocks opened
+        std::deque<markdown::Block>                 _open_blocks;           //keeps track of current blocks opened
         std::deque<markdown::Block>                 _open_container;        //keeps track of container blocks currently opened
 
         size_t                                      _empty_lines;           //consecutive counter to help with closing container blocks
@@ -127,7 +127,6 @@ namespace blogator::parser::tokeniser {
         void setPendingBufferStartPosition( TextPos position );
         void appendToPendingBuffer( char32_t c );
         void appendToPendingBuffer( const std::u32string & str );
-        void popPendingBuffer();
         void resetPendingBuffer( TextPos position );
         size_t incrementBlockLineCount();
         void setCurrentBlockFence( Fence_e fence );
@@ -151,6 +150,7 @@ namespace blogator::parser::tokeniser {
         [[nodiscard]] size_t openContainerBlockCount() const;
         void popOpenBlockStack();
         void loosenLastListBlockSpacing();
+        void setLastOpenBlockID( const std::u32string & id, TextPos position );
 
         void pushSectionMarker();
         void pushSectionMarker( size_t pos );
@@ -181,7 +181,9 @@ namespace blogator::parser::tokeniser {
         void closeOpenContainerBlocks( size_t index, TextPos position );
         void closeOpenContainerBlocks( const TextPos & target, bool inclusive, TextPos position );
         token::markdown::MarkdownTk * peekLastQueuedToken();
+        token::markdown::MarkdownTk * peekLastQueuedToken( size_t offset );
         void popLastQueuedToken();
+        void trimQueuedSpaceTokens();
         [[nodiscard]] bool requiresSpaceSeparatorToken() const;
         [[nodiscard]] bool hasQueuedTokens() const;
         void dispatchQueuedTokens();
@@ -189,6 +191,7 @@ namespace blogator::parser::tokeniser {
         static bool isEscapable( char32_t c );
         static bool isWhiteSpace( const std::u32string &str );
         static bool isFormattingChar( char32_t c ) noexcept;
+        static bool isValidIDName( const std::u32string &name );
     };
 }
 

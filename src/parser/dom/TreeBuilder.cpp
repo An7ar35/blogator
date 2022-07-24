@@ -602,29 +602,29 @@ void TreeBuilder::processAsHTMLContent( std::unique_ptr<token::html5::HTML5Tk> t
 
         } else {
             switch( _current_insert_mode ) {
-                case specs::infra::InsertionMode::INITIAL:              { this->processAsHTMLContent<InsertionMode_e::INITIAL>( std::move( token ), resolved );              } break;
-                case specs::infra::InsertionMode::BEFORE_HTML:          { this->processAsHTMLContent<InsertionMode_e::BEFORE_HTML>( std::move( token ), resolved );          } break;
-                case specs::infra::InsertionMode::BEFORE_HEAD:          { this->processAsHTMLContent<InsertionMode_e::BEFORE_HEAD>( std::move( token ), resolved );          } break;
-                case specs::infra::InsertionMode::IN_HEAD:              { this->processAsHTMLContent<InsertionMode_e::IN_HEAD>( std::move( token ), resolved );              } break;
-                case specs::infra::InsertionMode::IN_HEAD_NOSCRIPT:     { this->processAsHTMLContent<InsertionMode_e::IN_HEAD_NOSCRIPT>( std::move( token ), resolved );     } break;
-                case specs::infra::InsertionMode::AFTER_HEAD:           { this->processAsHTMLContent<InsertionMode_e::AFTER_HEAD>( std::move( token ), resolved );           } break;
-                case specs::infra::InsertionMode::IN_BODY:              { this->processAsHTMLContent<InsertionMode_e::IN_BODY>( std::move( token ), resolved );              } break;
-                case specs::infra::InsertionMode::TEXT:                 { this->processAsHTMLContent<InsertionMode_e::TEXT>( std::move( token ), resolved );                 } break;
-                case specs::infra::InsertionMode::IN_TABLE:             { this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );             } break;
-                case specs::infra::InsertionMode::IN_TABLE_TEXT:        { this->processAsHTMLContent<InsertionMode_e::IN_TABLE_TEXT>( std::move( token ), resolved );        } break;
-                case specs::infra::InsertionMode::IN_CAPTION:           { this->processAsHTMLContent<InsertionMode_e::IN_CAPTION>( std::move( token ), resolved );           } break;
-                case specs::infra::InsertionMode::IN_COLUMN_GROUP:      { this->processAsHTMLContent<InsertionMode_e::IN_COLUMN_GROUP>( std::move( token ), resolved );      } break;
-                case specs::infra::InsertionMode::IN_TABLE_BODY:        { this->processAsHTMLContent<InsertionMode_e::IN_TABLE_BODY>( std::move( token ), resolved );        } break;
-                case specs::infra::InsertionMode::IN_ROW:               { this->processAsHTMLContent<InsertionMode_e::IN_ROW>( std::move( token ), resolved );               } break;
-                case specs::infra::InsertionMode::IN_CELL:              { this->processAsHTMLContent<InsertionMode_e::IN_CELL>( std::move( token ), resolved );              } break;
-                case specs::infra::InsertionMode::IN_SELECT:            { this->processAsHTMLContent<InsertionMode_e::IN_SELECT>( std::move( token ), resolved );            } break;
-                case specs::infra::InsertionMode::IN_SELECT_IN_TABLE:   { this->processAsHTMLContent<InsertionMode_e::IN_SELECT_IN_TABLE>( std::move( token ), resolved );   } break;
-                case specs::infra::InsertionMode::IN_TEMPLATE:          { this->processAsHTMLContent<InsertionMode_e::IN_TEMPLATE>( std::move( token ), resolved );          } break;
-                case specs::infra::InsertionMode::AFTER_BODY:           { this->processAsHTMLContent<InsertionMode_e::AFTER_BODY>( std::move( token ), resolved );           } break;
-                case specs::infra::InsertionMode::IN_FRAMESET:          { this->processAsHTMLContent<InsertionMode_e::IN_FRAMESET>( std::move( token ), resolved );          } break;
-                case specs::infra::InsertionMode::AFTER_FRAMESET:       { this->processAsHTMLContent<InsertionMode_e::AFTER_FRAMESET>( std::move( token ), resolved );       } break;
-                case specs::infra::InsertionMode::AFTER_AFTER_BODY:     { this->processAsHTMLContent<InsertionMode_e::AFTER_AFTER_BODY>( std::move( token ), resolved );     } break;
-                case specs::infra::InsertionMode::AFTER_AFTER_FRAMESET: { this->processAsHTMLContent<InsertionMode_e::AFTER_AFTER_FRAMESET>( std::move( token ), resolved ); } break;
+                case InsertionMode_e::INITIAL:              { this->processAsHTMLContent<InsertionMode_e::INITIAL>( std::move( token ), resolved );              } break;
+                case InsertionMode_e::BEFORE_HTML:          { this->processAsHTMLContent<InsertionMode_e::BEFORE_HTML>( std::move( token ), resolved );          } break;
+                case InsertionMode_e::BEFORE_HEAD:          { this->processAsHTMLContent<InsertionMode_e::BEFORE_HEAD>( std::move( token ), resolved );          } break;
+                case InsertionMode_e::IN_HEAD:              { this->processAsHTMLContent<InsertionMode_e::IN_HEAD>( std::move( token ), resolved );              } break;
+                case InsertionMode_e::IN_HEAD_NOSCRIPT:     { this->processAsHTMLContent<InsertionMode_e::IN_HEAD_NOSCRIPT>( std::move( token ), resolved );     } break;
+                case InsertionMode_e::AFTER_HEAD:           { this->processAsHTMLContent<InsertionMode_e::AFTER_HEAD>( std::move( token ), resolved );           } break;
+                case InsertionMode_e::IN_BODY:              { this->processAsHTMLContent<InsertionMode_e::IN_BODY>( std::move( token ), resolved );              } break;
+                case InsertionMode_e::TEXT:                 { this->processAsHTMLContent<InsertionMode_e::TEXT>( std::move( token ), resolved );                 } break;
+                case InsertionMode_e::IN_TABLE:             { this->processAsHTMLContent<InsertionMode_e::IN_TABLE>( std::move( token ), resolved );             } break;
+                case InsertionMode_e::IN_TABLE_TEXT:        { this->processAsHTMLContent<InsertionMode_e::IN_TABLE_TEXT>( std::move( token ), resolved );        } break;
+                case InsertionMode_e::IN_CAPTION:           { this->processAsHTMLContent<InsertionMode_e::IN_CAPTION>( std::move( token ), resolved );           } break;
+                case InsertionMode_e::IN_COLUMN_GROUP:      { this->processAsHTMLContent<InsertionMode_e::IN_COLUMN_GROUP>( std::move( token ), resolved );      } break;
+                case InsertionMode_e::IN_TABLE_BODY:        { this->processAsHTMLContent<InsertionMode_e::IN_TABLE_BODY>( std::move( token ), resolved );        } break;
+                case InsertionMode_e::IN_ROW:               { this->processAsHTMLContent<InsertionMode_e::IN_ROW>( std::move( token ), resolved );               } break;
+                case InsertionMode_e::IN_CELL:              { this->processAsHTMLContent<InsertionMode_e::IN_CELL>( std::move( token ), resolved );              } break;
+                case InsertionMode_e::IN_SELECT:            { this->processAsHTMLContent<InsertionMode_e::IN_SELECT>( std::move( token ), resolved );            } break;
+                case InsertionMode_e::IN_SELECT_IN_TABLE:   { this->processAsHTMLContent<InsertionMode_e::IN_SELECT_IN_TABLE>( std::move( token ), resolved );   } break;
+                case InsertionMode_e::IN_TEMPLATE:          { this->processAsHTMLContent<InsertionMode_e::IN_TEMPLATE>( std::move( token ), resolved );          } break;
+                case InsertionMode_e::AFTER_BODY:           { this->processAsHTMLContent<InsertionMode_e::AFTER_BODY>( std::move( token ), resolved );           } break;
+                case InsertionMode_e::IN_FRAMESET:          { this->processAsHTMLContent<InsertionMode_e::IN_FRAMESET>( std::move( token ), resolved );          } break;
+                case InsertionMode_e::AFTER_FRAMESET:       { this->processAsHTMLContent<InsertionMode_e::AFTER_FRAMESET>( std::move( token ), resolved );       } break;
+                case InsertionMode_e::AFTER_AFTER_BODY:     { this->processAsHTMLContent<InsertionMode_e::AFTER_AFTER_BODY>( std::move( token ), resolved );     } break;
+                case InsertionMode_e::AFTER_AFTER_FRAMESET: { this->processAsHTMLContent<InsertionMode_e::AFTER_AFTER_FRAMESET>( std::move( token ), resolved ); } break;
             }
         }
 
@@ -706,7 +706,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
             _document->setQuirks( QuirksMode::QUIRKS );
         }
 
-        this->setCurrentInsertMode( specs::infra::InsertionMode::BEFORE_HTML );
+        this->setCurrentInsertMode( InsertionMode_e::BEFORE_HTML );
         this->processAsHTMLContent<InsertionMode_e::BEFORE_HTML>( std::move( token ), resolved ); //re-process token
     }
 }

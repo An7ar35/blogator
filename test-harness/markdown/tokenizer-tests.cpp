@@ -6,6 +6,7 @@
  * - `blogator::parser::logging::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
  */
 #include "gtest/gtest.h"
+#include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
 #include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dto/Source.h"
@@ -13,6 +14,7 @@
 
 #include "../helpers/helpers.h"
 
+using blogator::parser::dom::TreeBuilder;
 using blogator::parser::tokeniser::Markdown;
 using blogator::parser::token::markdown::MarkdownTk;
 using blogator::parser::specs::markdown::TokeniserState;
@@ -82,8 +84,8 @@ class MockMarkdownToHtml : public blogator::parser::builder::MarkdownToHtml {
 testing::AssertionResult runMarkdownTokeniserTest( const test_harness::markdown::MarkdownTkTest &test, const std::filesystem::path &path ) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter_U8toU32;
 
-    ParserLogCatcher      error_catcher;
-    MockMarkdownToHtml    mock_markdown_to_html;
+    ParserLogCatcher   error_catcher;
+    MockMarkdownToHtml mock_markdown_to_html;
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
@@ -216,5 +218,6 @@ TEST_P( parser_tokeniser_Markdown_Tests, markdown_tests ) {
 INSTANTIATE_TEST_CASE_P(
     MarkdownTokeniserTestInstance,
     parser_tokeniser_Markdown_Tests,
-    ::testing::ValuesIn( test_harness::markdown::loadMarkdownTests( test_harness::MARKDOWN_TOKENIZER_TEST_PATH ) )
+    ::testing::ValuesIn(
+        test_harness::markdown::loadTokeniserTests( test_harness::MARKDOWN_TOKENIZER_TEST_PATH ) )
 );

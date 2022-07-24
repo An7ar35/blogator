@@ -9,20 +9,19 @@ namespace blogator::parser::specs::markdown {
         ENUM_BEGIN = 0, //used for iterating enums
 
         INITIAL = ENUM_BEGIN,
-        HEADING,
-        FORMATTING,
+        CONTENT,
         BLOCKQUOTE,
         CODE_BLOCK,
-        HORIZONTAL_RULE,
         HYPERLINK,
         IMAGE,
         TABLE,
         LIST,
-        TASK_LIST,
         DEFINITION_LIST,
         FOOTNOTE,
+        BLOCK_END,
+        END_OF_FILE,
 
-        ENUM_END = FOOTNOTE, //used for iterating enums
+        ENUM_END = END_OF_FILE, //used for iterating enums
     };
 
     std::ostream & operator <<( std::ostream &os, InsertionMode mode );

@@ -39,10 +39,6 @@ The description field matches the short error description of the error code rais
 
 ## Token types
 
-### Block ID
-
-`{"type": "BLOCK_ID", "text": "...", "position": "1:1" }`
-
 ### Blockquote
 
 ```
@@ -90,13 +86,13 @@ text[^1]
 
 ```json
 [
-   { "type": "PARAGRAPH", "position": "1:1" },
+   { "type": "PARAGRAPH", "id": "", "position": "1:1" },
    { "type": "CHARACTER", "text": "text", "position": "1:1" },
    { "type": "FOOTNOTE_REF", "text": "...", "position": "1:5" },
    { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1" },
    { "type": "LIST", "list": "FOOTNOTE_DEFS", "tight": "true", "position": "3:1" },
-   { "type": "LIST_ITEM", "id": "1", "modality": "NONE", "position": "3:1" },
-   { "type": "PARAGRAPH", "position": "3:7" },
+   { "type": "LIST_ITEM", "ref": "1", "modality": "NONE", "position": "3:1" },
+   { "type": "PARAGRAPH", "id": "", "position": "3:7" },
    { "type": "CHARACTER", "text": "definition", "position": "3:7" },
    { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:17" },
    { "type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:17" },
@@ -124,7 +120,7 @@ Formatting types:
 ### Heading
 
 ```
-{ "type": "HEADING", "level": 1, "text": "#", "position": "1:1" },
+{ "type": "HEADING", "id": "", "level": 1, "text": "#", "position": "1:1" },
 { "type": "CHARACTER", "text": "heading", "position": "1:3" },
 { "type": "BLOCK_END", "block": "HEADING", "position": "1:10" }
 ```
@@ -159,12 +155,12 @@ Modality will always be `NONE` and the list item IDs empty.
 
 ```
 { "type": "LIST", "list": "OL_ALPHA_LOWER", "tight": "false", "position": "1:1" },
-{ "type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1" },
-{ "type": "PARAGRAPH", "position": "1:4" },
+{ "type": "LIST_ITEM" "ref": "", "modality": "NONE", "position": "1:1" },
+{ "type": "PARAGRAPH", "id": "", "position": "1:4" },
 { "type": "CHARACTER", "text": "item 1", "position": "1:4" },
 { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1" },
 { "type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1" },
-{ "type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "3:1" },
+{ "type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "3:1" },
 { "type": "PARAGRAPH", "position": "3:4" },
 { "type": "CHARACTER", "text": "item 2", "position": "3:4" },
 { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1" },
@@ -183,17 +179,16 @@ Modality will always be `NONE` and the list item IDs empty.
 
 ```
 { "type": "LIST", "list": "UL_HYPHEN", "tight": "false", "position": "1:1" },
-{ "type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "1:1" },
-{ "type": "PARAGRAPH", "position": "1:3" },
+{ "type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1" },
+{ "type": "PARAGRAPH", "id": "", "position": "1:3" },
 { "type": "CHARACTER", "text": "item 1", "position": "1:3" },
 { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1" },
 { "type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1" },
-{ "type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "3:1" },
+{ "type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "3:1" },
 { "type": "PARAGRAPH", "position": "3:3" },
 { "type": "CHARACTER", "text": "item 2", "position": "3:3" },
 { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1" },
 { "type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:9" },
-{ "type": "LIST_ITEM", "id": "", "modality": "NONE", "position": "4:9" },
 { "type": "BLOCK_END", "block": "LIST", "position": "4:9" }
 ```
 
@@ -208,12 +203,12 @@ Modality will always be either `CHECKED` or `UNCHECKED` and the list item IDs em
 
 ```
 { "type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1" },
-{ "type": "LIST_ITEM", "id": "", "modality": "UNCHECKED", "position": "1:1" },
-{ "type": "PARAGRAPH", "position": "1:6" },
+{ "type": "LIST_ITEM", "ref": "", "modality": "UNCHECKED", "position": "1:1" },
+{ "type": "PARAGRAPH", "id": "", "position": "1:6" },
 { "type": "CHARACTER", "text": "item 1", "position": "1:6" },
 { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1" },
 { "type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:1" },
-{ "type": "LIST_ITEM", "id": "", "modality": "CHECKED", "position": "2:1" },
+{ "type": "LIST_ITEM", "ref": "", "modality": "CHECKED", "position": "2:1" },
 { "type": "PARAGRAPH", "position": "2:6" },
 { "type": "CHARACTER", "text": "item 3", "position": "2:6" },
 { "type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:12" },
@@ -235,7 +230,7 @@ Line break tokens should only be found inside paragraph block.
 ### Tables
 
 ```
-{"type": "TABLE", "position": "1:1"},
+{"type": "TABLE", "id": "", "position": "1:1"},
 ...
 {"type": "BLOCK_END", "block": "TABLE", "position": "3:10"}
 ```
@@ -291,7 +286,7 @@ For a simple 2x2 table with column 1 right-aligned and column 2 center aligned:
 
 ```json
 [
-    { "type": "TABLE", "position": "1:1" },
+    { "type": "TABLE", "id": "", "position": "1:1" },
         { "type": "TABLE_ROW", "position": "1:1" },
             { "type": "TABLE_HEADING", "alignment": "RIGHT", "position": "1:1" },
               { "type": "CHARACTER", "text": "heading 1", "position": "1:2" },

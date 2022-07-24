@@ -56,7 +56,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
       {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"},
-      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:4"},
       {"type": "FORMAT_BEGIN", "formatting": "INLINE_CODE_1", "text": "`", "position": "2:4"},
       {"type": "FORMAT_END", "formatting": "INLINE_CODE_1", "text": "`", "position": "2:5"},
       {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:5"}
@@ -73,7 +73,7 @@
     "tokens":[
       {"type": "CODE_BLOCK", "text": "", "position": "1:1"},
       {"type": "BLOCK_END", "block": "CODE_BLOCK", "position": "2:4"},
-      {"type": "PARAGRAPH", "position": "2:4"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:4"},
       {"type": "FORMAT_BEGIN", "formatting": "SUBSCRIPT", "text": "~", "position": "2:4"},
       {"type": "FORMAT_END", "formatting": "SUBSCRIPT", "text": "~", "position": "2:5"},
       {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:5"}

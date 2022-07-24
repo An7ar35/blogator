@@ -10,9 +10,16 @@ namespace blogator::parser::token::markdown {
         BlockBeginTk( specs::markdown::TokenType type, std::u32string text, TextPos position );
 
         [[nodiscard]] unsigned indent() const;
+        [[nodiscard]] bool hasID() const;
+        [[nodiscard]] const std::u32string & id() const;
+
+        void setID( const std::u32string & id );
 
       protected:
         void toStr( std::ostream &os ) const override;
+
+      private:
+        std::u32string _id;
     };
 }
 

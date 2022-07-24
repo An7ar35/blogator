@@ -9,7 +9,7 @@ using namespace blogator::parser::token::markdown;
  * @param position Line:Col position of token in source text
  */
 ListItemTk::ListItemTk( TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::LIST_ITEM, position ),
+    BlockBeginTk( specs::markdown::TokenType::LIST_ITEM, position ),
     _modality( Modality::NONE )
 {}
 
@@ -19,17 +19,17 @@ ListItemTk::ListItemTk( TextPos position ) :
  * @param position Line:Col position of token in source text
  */
 ListItemTk::ListItemTk( bool ticked, TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::LIST_ITEM, position ),
+    BlockBeginTk( specs::markdown::TokenType::LIST_ITEM, position ),
     _modality( ( ticked ? Modality::CHECKED : Modality::UNCHECKED ) )
 {}
 
 /**
  * Constructor (Generic with ID)
- * @param id ID string
+ * @param ref_id Reference ID string
  * @param position Line:Col position of token in source text
  */
-ListItemTk::ListItemTk( std::u32string id, blogator::parser::TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::LIST_ITEM, std::move( id ), position ),
+ListItemTk::ListItemTk( std::u32string ref_id, blogator::parser::TextPos position ) :
+    BlockBeginTk( specs::markdown::TokenType::LIST_ITEM, std::move( ref_id ), position ),
     _modality( Modality::NONE )
 {}
 
@@ -47,8 +47,8 @@ ListItemTk::Modality ListItemTk::modality() const {
  */
 void ListItemTk::toStr( std::ostream &os ) const {
     os << R"({ "type": ")" << this->type()
-       << R"(", "id": ")";
-    unicode::utf8::convert( os, this->id() );
+       << R"(", "ref": ")";
+    unicode::utf8::convert( os, this->refID() );
     os << R"(", "modality": ")" << this->modality()
        << R"(", "position": ")" << this->position()
        << R"(" })";
@@ -58,7 +58,7 @@ void ListItemTk::toStr( std::ostream &os ) const {
  * Gets the list item's ID string
  * @return ID string
  */
-const std::u32string &ListItemTk::id() const {
+const std::u32string &ListItemTk::refID() const {
     return this->text();
 }
 

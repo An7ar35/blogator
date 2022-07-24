@@ -18,7 +18,7 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
         { TokenType::PARAGRAPH,          "PARAGRAPH" },
         { TokenType::HORIZONTAL_RULE,    "HORIZONTAL_RULE" },
         { TokenType::CODE_BLOCK,         "CODE_BLOCK" },
-        { TokenType::BLOCKQUOTE,         "BLOCK_QUOTE" },
+        { TokenType::BLOCKQUOTE,         "BLOCKQUOTE" },
         { TokenType::LIST,               "LIST" },
         { TokenType::LIST_ITEM,          "LIST_ITEM" },
         { TokenType::TABLE,              "TABLE" },
@@ -35,7 +35,6 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
         { TokenType::FORMAT_END,         "FORMAT_END" },
         { TokenType::IMAGE,              "IMAGE" },
         { TokenType::HYPERLINK,          "HYPERLINK" },
-        { TokenType::BLOCK_ID,           "BLOCK_ID" },
         { TokenType::FOOTNOTE_REF,       "FOOTNOTE_REF" },
 
         { TokenType::END_OF_FILE,        "EOF" },
@@ -103,6 +102,22 @@ bool blogator::parser::specs::markdown::isLeafBlock( TokenType type ) {
         TokenType::DEFINITION_LIST_DT,
         TokenType::DEFINITION_LIST_DD,
         TokenType::CODE_BLOCK,
+    } );
+
+    return BLOCKS.contains( type );
+}
+
+/**
+ * Checks token type is from the table family of tokens
+ * @param type specs::markdown::TokenType enum
+ * @return Table-family token belonging
+ */
+bool blogator::parser::specs::markdown::isTableBlock( TokenType type ) {
+    static const auto BLOCKS = std::set<TokenType>( {
+        TokenType::TABLE,
+        TokenType::TABLE_ROW,
+        TokenType::TABLE_HEADING,
+        TokenType::TABLE_CELL,
     } );
 
     return BLOCKS.contains( type );

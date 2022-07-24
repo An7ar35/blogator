@@ -5,9 +5,12 @@
 #include <memory>
 #include <filesystem>
 
-#include "../dom/TreeBuilder.h"
 #include "../specs/infra/specifications.h"
 #include "../token/html5/HTML5Tk.h"
+
+namespace blogator::parser::dom {
+    class TreeBuilder;
+}
 
 namespace blogator::parser::tokeniser {
     /**

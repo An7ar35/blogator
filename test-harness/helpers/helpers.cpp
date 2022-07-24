@@ -6,6 +6,8 @@
 
 #include "../../src/unicode/unicode.h"
 #include "../../src/string/helpers.h"
+#include "../../../src/parser/dto/Source.h"
+#include "../../../src/parser/encoding/Transcode.h"
 #include "../../../src/parser/dom/node/Attr.h"
 #include "../../../src/parser/dom/node/CDATASection.h"
 #include "../../../src/parser/dom/node/Comment.h"
@@ -53,6 +55,28 @@ std::set<std::filesystem::path> test_harness::getTestFiles( const std::filesyste
     }
 
     return test_files;
+}
+
+/**
+ * Uses Blogator's transcoder to convert the source U8 test input into U32
+ * @param raw  Original raw UTF-8 text
+ * @param path Source path
+ * @return Processed/checked UTF-32 text
+ * @throws std::runtime_error when transcoding fails
+ */
+blogator::parser::U32Text test_harness::transcodeInput( const std::string &raw, const std::filesystem::path &path ) {
+    std::vector<char32_t> out;
+    std::stringstream     ss;
+
+    ss << raw;
+
+    auto source = blogator::parser::Source( ss, path, blogator::parser::encoding::Format::UTF8 );
+
+    if( !blogator::parser::encoding::Transcode::convert( source, out ) ) {
+        throw std::runtime_error( "Failed to transcode u8 source data to u32" );
+    }
+
+    return { path, out };
 }
 
 /**
@@ -150,6 +174,17 @@ std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test
 /**
  * Output stream operator
  * @param os Output stream
+ * @param test MarkdownToHtmlTest object
+ * @return Output stream
+ */
+std::ostream & test_harness::markdown::operator <<( std::ostream &os, const test_harness::markdown::MarkdownToHtmlTest &test ) {
+    os << test.description;
+    return os;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
  * @param test ErrorDescription object
  * @return Output stream
  */
@@ -185,7 +220,7 @@ std::string test_harness::markdown::to_string( const blogator::parser::logging::
  * @param test_dir Source filepath
  * @return CommonMarkTest collection
  */
-std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::path>> test_harness::markdown::loadMarkdownTests( const std::filesystem::path &test_dir ) {
+std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::path>> test_harness::markdown::loadTokeniserTests( const std::filesystem::path &test_dir ) {
     static const auto FIELDS = std::vector<std::string>( {
         "description",
         "input",
@@ -281,6 +316,114 @@ std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::p
     }
 
     return test_collection;
+}
+
+/**
+ * Loads a 'markdown' json test file into a collection of tests
+ * @param test_dir Source filepath
+ * @return MarkdownToHtmlTest collection
+ */
+std::vector<std::pair<test_harness::markdown::MarkdownToHtmlTest, std::filesystem::path>> test_harness::markdown::loadTreeBuilderTests( const std::filesystem::path &test_dir ) {
+    static const auto FIELDS = std::vector<std::string>( {
+        "description",
+        "markdown",
+        "html",
+        "errors",
+    } );
+
+    static const auto ERROR_FIELDS = std::vector<std::string>( {
+        "description",
+        "line",
+        "col",
+    } );
+
+    std::vector<std::pair<test_harness::markdown::MarkdownToHtmlTest, std::filesystem::path>> test_collection;
+
+    auto   test_files     = getTestFiles( test_dir, ".json" );
+    size_t missing_fields = 0;
+
+    for( const auto & file : test_files ) {
+        auto   source = test_harness::loadJSONFromFile( file );
+        size_t tests  = 0;
+
+        if( !source.contains( "tests" ) ) {
+            std::cerr << "Unexpected JSON format (need root 'tests' array) in: " << file.string() << std::endl;
+
+        } else {
+            for( const auto & test: source.at( "tests" ) ) {
+                auto err = false;
+                auto obj = MarkdownToHtmlTest();
+
+                for( const auto & field : FIELDS ) {
+                    if( !test.contains( field ) ) {
+                        std::cerr << "ERROR: field \"" << field << "\" not found for test " << tests << " in " << file.string() << std::endl;
+                        err = true;
+                        ++missing_fields;
+                        break;
+                    }
+                }
+
+                for( const auto & token : test.at( "errors" ) ) {
+                    for( const auto &tk_fields: ERROR_FIELDS ) {
+                        if( !token.contains( tk_fields ) ) {
+                            std::cerr << "ERROR: error field \"" << tk_fields << "\" not found for test " << tests << " in " << file.string() << std::endl;
+                            err = true;
+                            ++missing_fields;
+                            break;
+                        }
+                    }
+                }
+
+                if( !err ) {
+                    obj.id          = ++tests;
+                    obj.src         = file;
+                    obj.description = test.at( "description" );
+                    obj.markdown    = test.at( "markdown" );
+                    obj.html_output = test.at( "html" );
+
+                    for( const auto & error : test.at( "errors" ) ) {
+                        obj.errors.emplace_back( ErrorDescription { error.at( "description" ), error.at( "line" ), error.at( "col" ) } );
+                    }
+
+                    test_collection.emplace_back( std::make_pair( std::move( obj ), file ) );
+                }
+            }
+
+            std::cout << "> Found " << tests << " tests." << std::endl;
+        }
+    }
+
+    std::cout << "> TOTAL TESTS FOUND: " << test_collection.size() << " (" << test_dir << ")" << std::endl;
+
+    if( missing_fields > 0 ) {
+        std::cerr << "> MISSING FIELDS IN TESTS (SKIPPED) FOUND: " << missing_fields << " (" << test_dir << ")" << std::endl;
+    }
+
+    return test_collection;
+}
+
+/**
+ * Prints an HTML document <body> content
+ * @param document Document root
+ * @return HTML content of the <body> tag
+ */
+std::string test_harness::markdown::printDocumentBody( blogator::parser::dom::node::Document &document ) {
+    using           blogator::unicode::utf8::convert;
+    using namespace blogator::parser::dom::node;
+
+    std::stringstream ss;
+
+    auto body_elements = document.getElementsByTagName( U"body" );
+
+    if( !body_elements.empty() ) {
+        const auto & children = body_elements.at( 0 )->childNodes();
+
+        for( const auto & c : children ) {
+            ss << *c;
+        }
+    }
+
+    return ss.str();
 }
 
 /**

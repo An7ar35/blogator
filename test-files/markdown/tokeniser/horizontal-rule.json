@@ -95,7 +95,7 @@
     "description":"incomplete horizontal-rule & EOF '_'",
     "input":"_",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "_", "position": "1:1"},
       {"type": "FORMAT_END", "formatting": "ITALIC", "text": "_", "position": "1:2"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:2"}
@@ -107,7 +107,7 @@
     "description":"incomplete horizontal-rule & EOF \"__\"",
     "input":"__",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__", "position": "1:1"},
       {"type": "FORMAT_END", "formatting": "BOLD", "text": "__", "position": "1:3"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
@@ -119,7 +119,7 @@
     "description":"fake horizontal-rule & EOF \"__?\"",
     "input":"__x",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__", "position": "1:1"},
       {"type": "CHARACTER", "text": "x", "position": "1:3"},
       {"type": "FORMAT_END", "formatting": "BOLD", "text": "__", "position": "1:4"},
@@ -154,7 +154,7 @@
     "input":"---\ntext",
     "tokens":[
       {"type": "HORIZONTAL_RULE", "text": "---", "position": "1:1"},
-      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:1"},
       {"type": "CHARACTER", "text": "text", "position": "2:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"}
     ],
@@ -167,11 +167,11 @@
     "description":"horizontal-rule between paragraphs",
     "input":"paragraph 1\n\n-----\n\nparagraph 2",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "paragraph 1", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
       {"type": "HORIZONTAL_RULE", "text": "-----", "position": "3:1"},
-      {"type": "PARAGRAPH", "position": "5:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "5:1"},
       {"type": "CHARACTER", "text": "paragraph 2", "position": "5:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "5:12"}
     ],
@@ -182,7 +182,7 @@
     "description":"fake horizontal-rule '_'",
     "input":"___?",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "__", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "_", "position": "1:3"},
       {"type": "CHARACTER", "text": "?", "position": "1:4"},
@@ -197,7 +197,7 @@
     "description":"fake horizontal-rule '-'",
     "input":"---?",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "---?", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
     ],
@@ -208,7 +208,7 @@
     "description":"fake horizontal-rule '*'",
     "input":"***?",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:3"},
       {"type": "CHARACTER", "text": "?", "position": "1:4"},

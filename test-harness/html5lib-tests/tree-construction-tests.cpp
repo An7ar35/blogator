@@ -88,28 +88,6 @@ class ParserLogCatcher {
 };
 
 /**
- * [HELPER] Uses Blogator's transcoder to convert the source U8 test input into U32
- * @param raw  Original raw UTF-8 text
- * @param path Source path
- * @return Processed/checked UTF-32 text
- * @throws std::runtime_error when transcoding fails
- */
-blogator::parser::U32Text transcodeInput( const std::string & raw, const std::filesystem::path & path ) {
-    std::vector<char32_t> out;
-    std::stringstream     ss;
-
-    ss << raw;
-
-    auto source = blogator::parser::Source( ss, path, blogator::parser::encoding::Format::UTF8 );
-
-    if( !blogator::parser::encoding::Transcode::convert( source, out ) ) {
-        throw std::runtime_error( "Failed to transcode u8 source data to u32" );
-    }
-
-    return { path, out };
-}
-
-/**
  * Run a test
  * @param test Tree construction '.dat'-formatted test
  * @param path Source file path of the test
@@ -124,7 +102,7 @@ testing::AssertionResult runTest( const test_harness::html5lib_tests::TreeConstr
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
-    auto src             = transcodeInput( test.data, path );
+    auto src             = test_harness::transcodeInput( test.data, path );
     auto builder         = blogator::parser::dom::TreeBuilder( test.scripting );
     auto tokeniser       = blogator::parser::tokeniser::HTML5( builder );
     auto context_element = std::unique_ptr<node::Element>();

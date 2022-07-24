@@ -7,6 +7,9 @@ namespace blogator::parser::token::markdown {
     class HorizontalRuleTk : public BlockBeginTk {
       public:
         HorizontalRuleTk( std::u32string text, TextPos position );
+
+      protected:
+        void toStr( std::ostream &os ) const override;
     };
 }
 

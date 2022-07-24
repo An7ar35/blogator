@@ -4,7 +4,7 @@
     "description":"LB invalid definition 1",
     "input":"word\n: ",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "word :", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:3"}
     ],
@@ -17,7 +17,7 @@
     "description":"LB invalid definition 2",
     "input":"word\n: \n",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "word :", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"}
     ],
@@ -30,7 +30,7 @@
     "description":"LB invalid definition 3",
     "input":"word\n: \t",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "word :", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"}
     ],
@@ -57,30 +57,28 @@
     "description":"simple valid definition list 2",
     "input":"line 1\nline 2\n: definition",
     "tokens":[
-    ],
-    "errors":[
       {"type": "DEFINITION_LIST_DT", "position": "1:1"},
       {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:1"},
-      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "3:1"},
       {"type": "DEFINITION_LIST_DD", "position": "3:1"},
       {"type": "CHARACTER", "text": "definition", "position": "3:3"},
       {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:13"}
-    ]
+    ],
+    "errors":[]
   },
 
   {
     "description":"simple valid definition list 3",
     "input":"line 1\nline 2\n: definition line 1\ndefinition line 2",
     "tokens":[
-    ],
-    "errors":[
       {"type": "DEFINITION_LIST_DT", "position": "1:1"},
       {"type": "CHARACTER", "text": "line 1 line 2", "position": "1:1"},
-      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "2:7"},
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DT", "position": "3:1"},
       {"type": "DEFINITION_LIST_DD", "position": "3:1"},
       {"type": "CHARACTER", "text": "definition line 1 definition line 2", "position": "3:3"},
-      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "3:13"}
-    ]
+      {"type": "BLOCK_END", "block": "DEFINITION_LIST_DD", "position": "4:18"}
+    ],
+    "errors":[]
   },
 
   {
@@ -141,7 +139,7 @@
     "description":"invalid definition 1",
     "input":"  \n: definition",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "2:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:1"},
       {"type": "CHARACTER", "text": ": definition", "position": "2:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:13"}
     ],
@@ -152,7 +150,7 @@
     "description":"invalid definition 2",
     "input":": definition",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": ": definition", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:13"}
     ],
@@ -163,7 +161,7 @@
     "description":"invalid definition 3",
     "input":"title\n:definition",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "title :definition", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:12"}
     ],

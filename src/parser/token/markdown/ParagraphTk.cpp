@@ -16,6 +16,8 @@ ParagraphTk::ParagraphTk( TextPos position ) :
  */
 void ParagraphTk::toStr( std::ostream &os ) const {
     os << R"({ "type": ")" << this->type()
-       << R"(", "position": ")" << this->position()
+       << R"(", "id": ")";
+    unicode::utf8::convert( os, this->id() );
+    os << R"(", "position": ")" << this->position()
        << R"(" })";
 }

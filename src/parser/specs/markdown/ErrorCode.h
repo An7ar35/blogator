@@ -17,6 +17,7 @@ namespace blogator::parser::specs::markdown {
             BLOCK_MISALIGNMENT,
             HORIZONTAL_RULE_NEW_LINE_SEPARATOR_MISSING,
             INLINE_CONTENT_AFTER_HEADING,
+            BLOCK_ID_OVERRIDE,
             INVALID_BLOCK_ID_NAME,
             INVALID_CHARACTER_IN_BLOCK_ID_NAME,
             EMPTY_BLOCK,

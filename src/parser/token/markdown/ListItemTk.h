@@ -3,10 +3,10 @@
 
 #include <ostream>
 
-#include "MarkdownTk.h"
+#include "BlockBeginTk.h"
 
 namespace blogator::parser::token::markdown {
-    class ListItemTk : public MarkdownTk {
+    class ListItemTk : public BlockBeginTk {
       public:
         enum class Modality {
             NONE,
@@ -16,10 +16,10 @@ namespace blogator::parser::token::markdown {
 
         explicit ListItemTk( TextPos position );
         ListItemTk( bool ticked, TextPos position );
-        ListItemTk( std::u32string id, TextPos position );
+        ListItemTk( std::u32string ref_id, TextPos position );
 
         [[nodiscard]] Modality modality() const;
-        [[nodiscard]] const std::u32string & id() const;
+        [[nodiscard]] const std::u32string & refID() const;
 
       protected:
         void toStr( std::ostream &os ) const override;

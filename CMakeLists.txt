@@ -36,6 +36,7 @@ set(CMAKE_RESOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
 set(CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(TEMP_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tmp")
 set(SUBMODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+set(TEST_FILES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test-files")
 
 #Installation directories
 set(CTUNE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
@@ -299,8 +300,6 @@ set(SOURCE_FILES
         src/parser/token/markdown/FormattingTk.h
         src/parser/token/markdown/FormatEndTk.cpp
         src/parser/token/markdown/FormatEndTk.h
-        src/parser/token/markdown/BlockIDTk.cpp
-        src/parser/token/markdown/BlockIDTk.h
         src/parser/token/markdown/LineBreakTk.cpp
         src/parser/token/markdown/LineBreakTk.h
         src/parser/token/markdown/EndOfFileTk.cpp
@@ -584,7 +583,11 @@ set(TEST_FILES
         test-harness/html5lib-tests/tokenizer-tests.cpp
         test-harness/html5lib-tests/tree-construction-tests.cpp
         test-harness/commonmark-spec/commonmark-spec-tests.cpp
-        test-harness/markdown/tokenizer-tests.cpp tests/parser/specs/markdown/InsertionMode.cpp)
+        test-harness/markdown/tokenizer-tests.cpp
+        tests/parser/specs/markdown/InsertionMode.cpp
+        test-harness/markdown/tree-construction-tests.cpp
+        test-harness/helpers/MarkdownToHtmlTest.h
+        test-harness/helpers/ErrorDescription.h)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)

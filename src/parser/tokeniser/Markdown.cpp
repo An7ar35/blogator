@@ -198,7 +198,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_UNDERSCORE: {
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) { //"_ "
                     appendToPendingBuffer( character );
@@ -219,7 +219,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_UNDERSCORE_UNDERSCORE: {
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::UNDERSCORE ) { //"___"
                     appendToPendingBuffer( character );
@@ -237,7 +237,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_ASTERISK: {
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::SPACE ) { //"* "
                     appendToPendingBuffer( character );
@@ -258,7 +258,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_ASTERISK_ASTERISK: {
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::ASTERISK ) { //"***"
                     appendToPendingBuffer( character );
@@ -276,7 +276,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_ASTERISK_SPACE: { //paragraph formatting or unordered list
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::SPACE ) { //"*  "
                     appendToPendingBuffer( character );
@@ -290,7 +290,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::UL_ASTERISK, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     reconsume( consumeReturnState() );
@@ -300,7 +300,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_HYPHEN: { //"-"
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::SPACE ) { //"- "
                     appendToPendingBuffer( character );
@@ -316,7 +316,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::BLOCK_BEGIN_HYPHEN_HYPHEN: { //"--"
                 if( text.reachedEnd() ) {
                     queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::HYPHEN_MINUS ) { //"---"
                     appendToPendingBuffer( character );
@@ -436,7 +436,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( true, pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                 resetPendingBuffer( text.position() );
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( consumeReturnState() );
@@ -449,7 +449,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( false, pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                 resetPendingBuffer( text.position() );
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( consumeReturnState() );
@@ -462,7 +462,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
                 queueListToken( ListType_e::UL_HYPHEN, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                 resetPendingBuffer( text.position() );
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( consumeReturnState() );
@@ -549,7 +549,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::UL_ASTERISK, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( consumeReturnState() );
@@ -591,7 +591,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::UL_PLUS_SIGN, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( consumeReturnState() );
@@ -722,7 +722,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( true, pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                 resetPendingBuffer( text.position() );
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( consumeReturnState() );
@@ -738,7 +738,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( false, pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                 resetPendingBuffer( text.position() );
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( consumeReturnState() );
@@ -754,7 +754,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
                 queueListToken( ListType_e::UL_HYPHEN, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                 resetPendingBuffer( text.position() );
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( consumeReturnState() );
@@ -784,7 +784,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::OL_ALPHA_LOWER, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( consumeReturnState() );
@@ -817,7 +817,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::OL_ALPHA_UPPER, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     pushSectionMarker();
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
@@ -851,7 +851,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::OL_NUMERIC, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( consumeReturnState() );
@@ -919,7 +919,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     queueListToken( ListType_e::FOOTNOTE_DEFS, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferToStr(), pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     pushSectionMarker();
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
@@ -953,12 +953,12 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                        tk_ptr = std::make_unique<DLTitleTk>( tk_ptr->position() );
                        queueToken( std::make_unique<BlockEndTk>( Type_e::DEFINITION_LIST_DT, pendingBufferPosition() ) );
                        popOpenBlockStack();
-                       pushToOpenBlockStack( { Type_e::DEFINITION_LIST_DD, pendingBufferPosition() } );
                        queueToken( std::make_unique<DLDefinitionTk>( pendingBufferPosition() ) );
+                       pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                    } else if( peekLastOpenBlockType() == Type_e::DEFINITION_LIST_DD ) {
                        closeLastOpenedBlock( pendingBufferPosition() );
-                       pushToOpenBlockStack( { Type_e::DEFINITION_LIST_DD, pendingBufferPosition() } );
                        queueToken( std::make_unique<DLDefinitionTk>( pendingBufferPosition() ) );
+                       pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                    }
 
                    resetPendingBuffer( text.position() );
@@ -1171,7 +1171,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
 
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                     ++_curr_open_container_i;
 
@@ -1215,7 +1215,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
 
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                     ++_curr_open_container_i;
 
@@ -1259,7 +1259,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
 
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                     ++_curr_open_container_i;
 
@@ -1292,7 +1292,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
 
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                     ++_curr_open_container_i;
 
@@ -1325,7 +1325,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
 
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                     ++_curr_open_container_i;
 
@@ -1509,7 +1509,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
 
                 queueToken( std::make_unique<ListItemTk>( true, pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                 ++_curr_open_container_i;
 
@@ -1537,7 +1537,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
 
                 queueToken( std::make_unique<ListItemTk>( false, pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                 ++_curr_open_container_i;
 
@@ -1565,7 +1565,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
 
                 queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                 ++_curr_open_container_i;
 
@@ -1593,7 +1593,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
 
                 queueToken( std::make_unique<ListItemTk>( pendingBufferToStr(), pendingBufferPosition() ) );
-                pushToOpenBlockStack( { Type_e::LIST_ITEM, pendingBufferPosition() } );
+                pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 
                 ++_curr_open_container_i;
 
@@ -1637,7 +1637,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::PARAGRAPH_BLOCK_LINE_CONTENT: {
-                flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
 
                 if( text.reachedEnd() ) {
                     reconsume( State_e::END_OF_FILE );
@@ -1705,7 +1705,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     resetPendingBuffer( pendingBufferPosition() );
                     setState( State_e::IMAGE_ALT_TEXT );
                 } else {
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING ); //"!"
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY ); //"!"
                     reconsume( consumeReturnState() );
                 }
             } break;
@@ -1741,10 +1741,11 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET: {
                 if( text.reachedEnd() ) {
+                    flushPendingBufferToQueue( CharacterProcessing::NONE ); //i.e.: "{"
                     reconsume( consumeReturnState() );
                 } else if( character == unicode::LEFT_CURLY_BRACKET ) {
                     setState( State_e::INLINE_CONTENT_DOUBLE_LEFT_CURLY_BRACKET );
-                } else if( character == unicode::NUMBER_SIGN ) {
+                } else if( character == unicode::NUMBER_SIGN ) { //"{#"
                     appendToPendingBuffer( character );
                     setState( State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET_NUMBER_SIGN );
                 } else {
@@ -1756,8 +1757,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET_NUMBER_SIGN: { //"{#"
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_BLOCK_ID );
-                    flushPendingBufferToQueue( CharacterProcessing::NONE ); //i.e. '{#'
-                    reconsume( consumeReturnState() );
+                    text.reverseCaret( 2 ); //back to '{'
+                    resetPendingBuffer( text.position() );
+                    queueToken( std::make_unique<CharacterTk>( unicode::LEFT_CURLY_BRACKET, text.position() ) );
+                    setState( consumeReturnState() );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( consumeReturnState() );
                 } else if( unicode::ascii::isalnum( character ) ||
@@ -1769,8 +1772,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     setState( State_e::BLOCK_ID_NAME );
                 } else {
                     logError( text.position(), ErrorCode::INVALID_CHARACTER_IN_BLOCK_ID_NAME );
-                    flushPendingBufferToQueue( CharacterProcessing::NONE ); //i.e. '{#'
-                    reconsume( consumeReturnState() );
+                    text.reverseCaret( 2 ); //back to '{'
+                    resetPendingBuffer( text.position() );
+                    queueToken( std::make_unique<CharacterTk>( unicode::LEFT_CURLY_BRACKET, text.position() ) );
+                    setState( consumeReturnState() );
                 }
             } break;
 
@@ -1961,7 +1966,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() || unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<CharacterTk>( unicode::EXCLAMATION_MARK, pendingBufferPosition() ) );
                     queueToken( std::make_unique<CharacterTk>( unicode::LEFT_SQUARE_BRACKET, pendingBufferPosition() + TextPos( 0, 1 ) ) );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( consumeReturnState() );
                 } else if( character == unicode::RIGHT_SQUARE_BRACKET ) {
                     setState( State_e::IMAGE_AFTER_ALT_TEXT );
@@ -1982,7 +1987,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                         logError( pendingBufferPosition(), ErrorCode::UNDEFINED_IMAGE_ALT_TEXT );
                     }
 
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     setState( State_e::IMAGE_SOURCE );
                 } else {
                     logError( pendingBufferPosition(), ErrorCode::INVALID_SQUARE_BRACKET_DECLARATION_FORMAT );
@@ -1990,7 +1995,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     queueToken( std::make_unique<CharacterTk>( unicode::LEFT_SQUARE_BRACKET, pendingBufferPosition() + TextPos( 0, 1 ) ) );
                     setPendingBufferStartPosition( pendingBufferPosition() + TextPos( 0, 2 ) ); //adjust position to after '!['
                     appendToPendingBuffer( unicode::RIGHT_SQUARE_BRACKET );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( consumeReturnState() );
                 }
             } break;
@@ -2072,14 +2077,14 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                         logError( pendingBufferPosition(), ErrorCode::UNDEFINED_HYPERLINK_TEXT );
                     }
 
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     setState( State_e::HYPERLINK_URL );
                 } else {
                     logError( pendingBufferPosition(), ErrorCode::INVALID_SQUARE_BRACKET_DECLARATION_FORMAT );
                     queueToken( std::make_unique<CharacterTk>( unicode::LEFT_SQUARE_BRACKET, pendingBufferPosition() ) );
                     setPendingBufferStartPosition( pendingBufferPosition() + TextPos( 0, 1 ) ); //adjust position to after '['
                     appendToPendingBuffer( unicode::RIGHT_SQUARE_BRACKET );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_AND_ENCODING );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( consumeReturnState() );
                 }
             } break;
@@ -2141,7 +2146,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     appendToPendingBuffer( character );
                 } else {
                     queueToken( std::make_unique<HeadingTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::HEADING, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::HEADING_BLOCK_ATX_BEFORE_TEXT );
                 }
             } break;
@@ -2158,9 +2163,8 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() ) {
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::LEFT_CURLY_BRACKET ) {
-                    text.setMarker();
-                    pushSectionMarker();
-                    pushReturnState( State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING_BLOCK_ID );
+                    resetPendingBuffer( text.position() );
+                    pushReturnState( State_e::HEADING_BLOCK_ATX_TEXT );
                     setState( State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     setState( State_e::AFTER_BLOCK );
@@ -2176,11 +2180,6 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::HEADING_BLOCK_ATX_TEXT_CLOSING: {
                 if( text.reachedEnd() ) {
                     reconsume( State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING );
-                } else if( character == unicode::LEFT_CURLY_BRACKET ) { //"..#{"
-                    text.setMarker();
-                    pushSectionMarker();
-                    pushReturnState( State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING_BLOCK_ID );
-                    setState( State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET );
                 } else if( unicode::ascii::isnewline( character ) ) { //"..#\n"
                     setState( State_e::AFTER_BLOCK );
                 } else if( character == unicode::SPACE ) { //"..# "
@@ -2189,7 +2188,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 } else if( character != unicode::NUMBER_SIGN ) { //"..#?"
                     logError( text.position(), ErrorCode::INLINE_CONTENT_AFTER_HEADING );
                     reconsume( State_e::AFTER_BLOCK );
-                }
+                } //else: ignore '#' characters
             } break;
 
             case State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING: {
@@ -2197,11 +2196,6 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     reconsume( State_e::END_OF_FILE );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     setState( State_e::AFTER_BLOCK );
-                } else if( character == unicode::LEFT_CURLY_BRACKET ) {
-                    text.setMarker();
-                    pushSectionMarker();
-                    pushReturnState( State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING_BLOCK_ID );
-                    setState( State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET );
                 } else if( character != unicode::SPACE && character != unicode::TAB ) {
                     logError( text.position(), ErrorCode::INLINE_CONTENT_AFTER_HEADING );
                     reconsume( State_e::AFTER_BLOCK );
@@ -2210,26 +2204,21 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
             } break;
 
-            case State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING_BLOCK_ID: {
-                 if( peekLastQueuedToken() != nullptr && peekLastQueuedToken()->type() == Type_e::BLOCK_ID ) {
-                     popSectionMarker();
-                     reconsume( State_e::HEADING_BLOCK_ATX_TEXT_AFTER_CLOSING );
-                 } else {
-                     text.resetToMarker();
-                     clearPendingTokensFromLastSectionMarkerPosition();
-                     logError( text.position(), ErrorCode::INLINE_CONTENT_AFTER_HEADING );
-                     reconsume( State_e::AFTER_BLOCK );
-                 }
-            } break;
-
             case State_e::HEADING_BLOCK_SETEXT_FMT_EQUAL_SIGN: {
                 if( character == unicode::EQUALS_SIGN ) {
                     appendToPendingBuffer( character );
                 } else if( unicode::ascii::isnewline( character ) || text.reachedEnd() ) {
                     if( hasQueuedTokens() ) {
-                        getQueuedToken( peekLastSectionMarker() ) = std::make_unique<HeadingTk>( 1, std::move( pendingBufferToStr() ), pendingBufferPosition() );
+                        auto &     old_section_tk    = getQueuedToken( peekLastSectionMarker() );
+                        const auto old_section_id    = dynamic_cast<BlockBeginTk *>( old_section_tk.get() )->id();
+                        auto       new_section_block = std::make_unique<HeadingTk>( 1, std::move( pendingBufferToStr() ), pendingBufferPosition() );
+
+                        dynamic_cast<BlockBeginTk *>( new_section_block.get() )->setID( old_section_id );
+                        old_section_tk = std::move( new_section_block );
+
                         popSectionMarker();
                         popOpenBlockStack(); //'PARAGRAPH'
+                        trimQueuedSpaceTokens();
                         queueToken( std::make_unique<BlockEndTk>( Type_e::HEADING, text.position() ) );
                         reconsume( State_e::AFTER_BLOCK );
                     } else {
@@ -2254,9 +2243,16 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     appendToPendingBuffer( character );
                 } else if( unicode::ascii::isnewline( character ) || text.reachedEnd() ) {
                     if( hasQueuedTokens() ) {
-                        getQueuedToken( peekLastSectionMarker() ) = std::make_unique<HeadingTk>( 2, std::move( pendingBufferToStr() ), pendingBufferPosition() );
+                        auto &     old_section_tk    = getQueuedToken( peekLastSectionMarker() );
+                        const auto old_section_id    = dynamic_cast<BlockBeginTk *>( old_section_tk.get() )->id();
+                        auto       new_section_block = std::make_unique<HeadingTk>( 2, std::move( pendingBufferToStr() ), pendingBufferPosition() );
+
+                        dynamic_cast<BlockBeginTk *>( new_section_block.get() )->setID( old_section_id );
+                        old_section_tk = std::move( new_section_block );
+
                         popSectionMarker();
                         popOpenBlockStack(); //'PARAGRAPH'
+                        trimQueuedSpaceTokens();
                         queueToken( std::make_unique<BlockEndTk>( Type_e::HEADING, text.position() ) );
                         reconsume( State_e::AFTER_BLOCK );
                     } else {
@@ -2280,11 +2276,11 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_CODE_BLOCK );
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     resetPendingBuffer( text.position() );
@@ -2292,20 +2288,20 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     logError( text.position(), ErrorCode::INVALID_WHITESPACE_IN_CODE_BLOCK_DECLARATION );
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     reconsume( State_e::CODE_BLOCK_INLINED_CONTENT );
                 } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
                            ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)" ) )
                 {
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     reconsume( State_e::CODE_BLOCK_INLINED_CONTENT );
                 } else { //any other characters
                     logError( text.position(), ErrorCode::INVALID_LANGUAGE_TAG_IN_CODE_BLOCK );
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     reconsume( State_e::CODE_BLOCK_INLINED_CONTENT );
                 }
@@ -2339,29 +2335,29 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_CODE_BLOCK );
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() - TextPos( 0, 3 ) } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() - TextPos( 0, 3 ) } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_WHITESPACE_AFTER_LANGUAGE_TAG );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() - TextPos( 0, 3 ) } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
                 } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
                            ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)" ) )
                 {
                     logError( text.position(), ErrorCode::INLINED_CODE_BLOCK );
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() - TextPos( 0, 3 ) } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::CODE_BLOCK_END );
                 } else {
                     logError( pendingBufferPosition(), ErrorCode::INVALID_LANGUAGE_TAG_IN_CODE_BLOCK );
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() - TextPos( 0, 3 ) ) );
-                    pushToOpenBlockStack( { Type_e::CODE_BLOCK, pendingBufferPosition() - TextPos( 0, 3 ) } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::CODE_BLOCK_INLINED_CONTENT );
                 }
             } break;
@@ -2454,7 +2450,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::GREATER_THAN_SIGN ) {
                     queueToken( std::make_unique<BlockQuoteTk>( _actual_blockquote_lvl, text.position() ) );
-                    pushToOpenBlockStack( { Type_e::BLOCKQUOTE, text.position() } );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     appendToPendingBuffer( character );
                     ++_actual_blockquote_lvl;
                 } else if( character != unicode::TAB && character != unicode::SPACE ) {
@@ -2522,17 +2518,17 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::BLOCK_ID_NAME: {
-                if( text.reachedEnd() ) {
+                if( text.reachedEnd() ) { //"{#..."
                     logError( text.position(), ErrorCode::EOF_IN_BLOCK_ID );
                     text.reverseCaret( _pending.buffer.size() + 2 ); //back to '{'
                     resetPendingBuffer( text.position() );
                     queueToken( std::make_unique<CharacterTk>( unicode::LEFT_CURLY_BRACKET, text.position() ) );
                     setState( consumeReturnState() );
-                } else if( character == unicode::RIGHT_CURLY_BRACKET ) {
+                } else if( character == unicode::RIGHT_CURLY_BRACKET ) { //"{#...}"
                     auto name = pendingBufferToStr();
 
-                    if( BlockIDTk::validateName( name ) ) {
-                        queueToken( std::make_unique<BlockIDTk>( std::move( name ), pendingBufferPosition() - TextPos( 0, 2 ) ) ); //(- "{#")
+                    if( Markdown::isValidIDName( name ) ) {
+                        setLastOpenBlockID( name, text.position() );
                         setState( State_e::AFTER_BLOCK_ID );
                     } else {
                         logError( text.position(), ErrorCode::INVALID_BLOCK_ID_NAME, "\"" + unicode::utf8::convert( name ) + "\"" );
@@ -2619,6 +2615,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() || unicode::ascii::isnewline( character ) ) {
                     reconsume( State_e::TABLE_ABORT );
                 } else if( character == unicode::VERTICAL_LINE ) {
+                    trimQueuedSpaceTokens();
                     closeFormattingMarkers( text.position() );
                     closeLastOpenedBlock( text.position() ); //'TABLE_HEADING'
                     resetPendingBuffer( text.position() );
@@ -2765,6 +2762,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() || unicode::ascii::isnewline( character ) ) {
                     reconsume( State_e::TABLE_DATA_ROW_END );
                 } else if( character == unicode::VERTICAL_LINE ) {
+                    trimQueuedSpaceTokens();
                     closeFormattingMarkers( text.position() );
                     closeLastOpenedBlock( text.position() ); //'TABLE_CELL'
                     resetPendingBuffer( text.position() );
@@ -3013,15 +3011,6 @@ void tokeniser::Markdown::appendToPendingBuffer( const std::u32string &str ) {
 }
 
 /**
- * Pops the last character added to the temporary text buffer
- */
-inline void tokeniser::Markdown::popPendingBuffer() {
-    if( !_pending.buffer.empty() ) {
-        _pending.buffer.pop_back();
-    }
-}
-
-/**
  * Clears the content of the temporary pending buffer
  * @param Buffer New start position of buffer relative to the source text
  */
@@ -3204,7 +3193,7 @@ inline void tokeniser::Markdown::pushToOpenBlockStack( tokeniser::markdown::Bloc
         _open_container.push_back( block );
     }
 
-    _open_blocks.push( block );
+    _open_blocks.push_back( block );
 }
 
 /**
@@ -3212,7 +3201,7 @@ inline void tokeniser::Markdown::pushToOpenBlockStack( tokeniser::markdown::Bloc
  * @return Last opened block
  */
 inline const tokeniser::markdown::Block & tokeniser::Markdown::peekLastOpenBlock() const {
-    return _open_blocks.top();
+    return _open_blocks.back();
 }
 
 /**
@@ -3247,7 +3236,7 @@ inline const tokeniser::markdown::Block & tokeniser::Markdown::peekLastOpenConta
  */
 inline tokeniser::Markdown::Type_e tokeniser::Markdown::peekLastOpenBlockType() const {
     if( !_open_blocks.empty() ) {
-        return _open_blocks.top().type;
+        return _open_blocks.back().type;
     }
 
     return Type_e::NONE;
@@ -3306,11 +3295,11 @@ inline size_t tokeniser::Markdown::openContainerBlockCount() const {
  */
 inline void tokeniser::Markdown::popOpenBlockStack() {
     if( !_open_blocks.empty() ) {
-        if( !_open_container.empty() && _open_blocks.top() == _open_container.back() ) {
+        if( !_open_container.empty() && _open_blocks.back() == _open_container.back() ) {
             _open_container.pop_back();
         }
 
-        _open_blocks.pop();
+        _open_blocks.pop_back();
     }
 }
 
@@ -3330,6 +3319,59 @@ inline void tokeniser::Markdown::loosenLastListBlockSpacing() {
             "[parser::tokeniser::Markdown::loosenLastListBlockSpacing()] "
             "Expected opened 'LIST' block absent from opened container blocks."
         );
+    }
+}
+
+/**
+ * Sets the last opened block's ID
+ * @param id ID string
+ * @param position Current text position (for errors)
+ */
+void tokeniser::Markdown::setLastOpenBlockID( const std::u32string & id, TextPos position  ) {
+    if( !hasOpenBlock() ) {
+        LOG_ERROR(
+            "[parser::tokeniser::Markdown::setLastOpenBlockID( \"", unicode::utf8::convert( id ), "\", ", position, " )] "
+            "Trying to set ID when there are no opened blocks."
+        );
+
+        return; //EARLY RETURN
+    }
+
+    if( !specs::markdown::isBlockToken( peekLastOpenBlockType() ) ) {
+        LOG_ERROR(
+            "[parser::tokeniser::Markdown::setLastOpenBlockID( \"", unicode::utf8::convert( id ), "\", ", position, " )] "
+            "Trying to set ID on a non-Block token."
+        );
+
+        return; //EARLY RETURN
+    }
+
+    auto & block = _open_blocks.back();
+    auto * tk    = dynamic_cast<BlockBeginTk *>( block.token );
+
+    if( specs::markdown::isTableBlock( block.type ) && block.type != Type_e::TABLE ) {
+        auto it = std::find_if( _open_blocks.rbegin(),
+                                _open_blocks.rend(),
+                                []( const markdown::Block & blk ) { return blk.type == Type_e::TABLE; } );
+
+        if( it != _open_blocks.rend() ) {
+            tk = dynamic_cast<BlockBeginTk *>( it->token );
+
+        } else {
+            LOG_ERROR(
+                "[parser::tokeniser::Markdown::setLastOpenBlockID( \"", unicode::utf8::convert( id ), "\", ", position, " )] "
+                "Failed to find parent TABLE block in open elements."
+            );
+        }
+    }
+
+    if( tk->hasID() ) {
+        std::stringstream ss;
+        ss << R"(')" << unicode::utf8::convert( tk->id() ) << R"(' <- ')" << unicode::utf8::convert( id ) << R"(')";
+        logError( position, ErrorCode::BLOCK_ID_OVERRIDE, ss.str() );
+
+    } else {
+        tk->setID( id );
     }
 }
 
@@ -3369,7 +3411,7 @@ tokeniser::Markdown::TokenPtr_t & tokeniser::Markdown::getQueuedToken( size_t qu
  */
 size_t tokeniser::Markdown::queueParagraphToken( TextPos position ) {
     const auto i = queueToken( std::make_unique<ParagraphTk>( position ) );
-    pushToOpenBlockStack( { Type_e::PARAGRAPH, position } );
+    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
     return i;
 }
 
@@ -3522,7 +3564,7 @@ inline void tokeniser::Markdown::queueListToken( tokeniser::Markdown::ListType_e
 inline size_t tokeniser::Markdown::queueTableToken( TextPos position ) {
     const auto i = queueToken( std::make_unique<TableTk>( position ) );
     _table_cache.starting_block_i = _open_container.size();
-    pushToOpenBlockStack( { Type_e::TABLE, position } );
+    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
     return i;
 }
 
@@ -3532,7 +3574,7 @@ inline size_t tokeniser::Markdown::queueTableToken( TextPos position ) {
  */
 inline void tokeniser::Markdown::queueTableRowToken( TextPos position ) {
     queueToken( std::make_unique<TableRowTk>( position ) );
-    pushToOpenBlockStack( { Type_e::TABLE_ROW, position } );
+    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
 }
 
 /**
@@ -3541,7 +3583,7 @@ inline void tokeniser::Markdown::queueTableRowToken( TextPos position ) {
  */
 inline void tokeniser::Markdown::queueTableHeadingToken( TextPos position ) {
     const auto i = queueToken( std::make_unique<TableHeadingTk>( position ) );
-    pushToOpenBlockStack( { Type_e::TABLE_HEADING, position } );
+    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
     _table_cache.heading_tokens.emplace_back( dynamic_cast<TableHeadingTk *>( _queued_tokens.at( i ).get() ) );
 }
 
@@ -3551,7 +3593,7 @@ inline void tokeniser::Markdown::queueTableHeadingToken( TextPos position ) {
  */
 inline void tokeniser::Markdown::queueTableCellToken( TextPos position ) {
     queueToken( std::make_unique<TableCellTk>( position ) );
-    pushToOpenBlockStack( { Type_e::TABLE_CELL, position } );
+    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
     ++_table_cache.col_i;
 }
 
@@ -3573,10 +3615,8 @@ inline void tokeniser::Markdown::closeLastOpenedBlock( TextPos position ) {
     if( !_open_blocks.empty() ) {
         auto last = peekLastOpenBlockType();
 
-        if( peekLastQueuedToken() != nullptr && peekLastOpenBlockType() == Type_e::PARAGRAPH ) {
-            while( peekLastQueuedToken()->type() == Type_e::CHARACTER && Markdown::isWhiteSpace( peekLastQueuedToken()->text() ) ) {
-                popLastQueuedToken(); //i.e.: remove trailing TAB and SPACE characters if any
-            }
+        if( peekLastQueuedToken() != nullptr && ( peekLastOpenBlockType() == Type_e::PARAGRAPH || peekLastOpenBlockType() == Type_e::HEADING ) ) {
+            trimQueuedSpaceTokens(); //i.e.: remove trailing TAB and SPACE characters if any
         }
 
         if( peekLastQueuedToken() != nullptr && specs::markdown::isLeafBlock( peekLastQueuedToken()->type() ) && peekLastQueuedToken()->type() == last ) {
@@ -3777,6 +3817,17 @@ inline void tokeniser::Markdown::popLastQueuedToken() {
 }
 
 /**
+ * Trim any queued SPACE or TAB character tokens from the end of the token queue
+ */
+inline void tokeniser::Markdown::trimQueuedSpaceTokens() {
+    if( peekLastQueuedToken() != nullptr ) {
+        while( peekLastQueuedToken()->type() == Type_e::CHARACTER && Markdown::isWhiteSpace( peekLastQueuedToken()->text() ) ) {
+            popLastQueuedToken();
+        }
+    }
+}
+
+/**
  * Checks if there are any token(s) in the queue
  * @return Queue not empty state
  */
@@ -3791,12 +3842,9 @@ inline bool tokeniser::Markdown::hasQueuedTokens() const {
 inline bool tokeniser::Markdown::requiresSpaceSeparatorToken() const {
     auto it = _queued_tokens.crbegin();
 
-    while( it != _queued_tokens.crend() && !specs::markdown::isBlockToken( (*it)->type() ) && (*it)->type() != Type_e::BLOCK_ID ) {
+    while( it != _queued_tokens.crend() && !specs::markdown::isBlockToken( (*it)->type() ) ) {
         if( (*it)->type() == Type_e::CHARACTER ) {
-            return ( (*it)->text() != U" " ); //EARLY RETURN
-
-        } else if( (*it)->type() == Type_e::BLOCK_ID ) {
-            return false; //EARLY RETURN
+            return ( ( *it )->text() != U" " ); //EARLY RETURN
         }
 
         ++it;
@@ -3812,6 +3860,19 @@ inline bool tokeniser::Markdown::requiresSpaceSeparatorToken() const {
 inline token::markdown::MarkdownTk * tokeniser::Markdown::peekLastQueuedToken() {
     if( !_queued_tokens.empty() ) {
         return _queued_tokens.back().get();
+    }
+
+    return nullptr;
+}
+
+/**
+ * Gets a pointer to the last queued token
+ * @param offset Offset from the last added token in the queue
+ * @return Pointer to queued token at offset from the last added
+ */
+inline token::markdown::MarkdownTk *tokeniser::Markdown::peekLastQueuedToken( size_t offset ) {
+    if( !_queued_tokens.empty() && offset < _queued_tokens.size() ) {
+        return std::next( _queued_tokens.rbegin(), offset )->get();
     }
 
     return nullptr;
@@ -3871,4 +3932,35 @@ inline bool tokeniser::Markdown::isFormattingChar( char32_t c ) noexcept {
         || c == unicode::TILDE
         || c == unicode::CIRCUMFLEX_ACCENT
         || c == unicode::GRAVE_ACCENT;
+}
+
+/**
+ * Validate an name ID
+ * @param name ID
+ * @return Validation state
+ */
+inline bool tokeniser::Markdown::isValidIDName( const std::u32string &name ) {
+    auto it = name.cbegin();
+
+    if( it == name.cend() ) {
+        return false; //EARLY RETURN
+    }
+
+    if( unicode::ascii::isdigit( *it ) ) {
+        return false; //EARLY RETURN
+    }
+
+    if( *it++ == unicode::HYPHEN_MINUS && ( it == name.cend() || unicode::ascii::isdigit( *it ) ) ) {
+        return false; //EARLY RETURN
+    }
+
+    while( it != name.cend() ) {
+        if( !( unicode::ascii::isalnum( *it ) || *it == unicode::HYPHEN_MINUS || *it == unicode::UNDERSCORE ) ) {
+            return false; //EARLY RETURN
+        }
+
+        ++it;
+    }
+
+    return true;
 }

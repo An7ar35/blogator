@@ -1,0 +1,24 @@
+{"tests": [
+
+  {
+    "description": "ID in paragraph 1",
+    "markdown": "{#block-id} text",
+    "html": "<p id=\"block-id\">text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "ID in paragraph 2",
+    "markdown": "te{#block-id}xt",
+    "html": "<p id=\"block-id\">text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "ID in paragraph 3",
+    "markdown": "text {#block-id}",
+    "html": "<p id=\"block-id\">text</p>",
+    "errors": []
+  }
+
+]}

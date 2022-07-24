@@ -16,7 +16,8 @@ blogator::parser::token::markdown::FootnoteRefTk::FootnoteRefTk( std::u32string 
  * @param os Output stream
  */
 void blogator::parser::token::markdown::FootnoteRefTk::toStr( std::ostream &os ) const {
-    os << R"({ "type": ")" << this->type() << R"(", "text": ")";
+    os << R"({ "type": ")" << this->type()
+       << R"(", "text": ")";
     unicode::utf8::convert( os, this->text() );
     os << R"(", "position": ")" << this->position()
        << R"(" })";

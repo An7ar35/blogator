@@ -7,7 +7,7 @@ using namespace blogator::parser::token::markdown;
  * @param position Line:Col position of token in source text
  */
 CodeBlockTk::CodeBlockTk( blogator::parser::TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::CODE_BLOCK, position )
+    BlockBeginTk( specs::markdown::TokenType::CODE_BLOCK, position )
 {}
 
 /**
@@ -16,7 +16,7 @@ CodeBlockTk::CodeBlockTk( blogator::parser::TextPos position ) :
  * @param position Line:Col position of token in source text
  */
 CodeBlockTk::CodeBlockTk( std::u32string lang, blogator::parser::TextPos position ) :
-    MarkdownTk( specs::markdown::TokenType::CODE_BLOCK, std::move( lang ), position )
+    BlockBeginTk( specs::markdown::TokenType::CODE_BLOCK, std::move( lang ), position )
 {}
 
 /**
@@ -25,4 +25,16 @@ CodeBlockTk::CodeBlockTk( std::u32string lang, blogator::parser::TextPos positio
  */
 const std::u32string & CodeBlockTk::lang() const {
     return this->text();
+}
+
+/**
+ * Prints out a string representation of the token
+ * @param os Output stream
+ */
+void CodeBlockTk::toStr( std::ostream &os ) const {
+    os << R"({ "type": ")" << this->type()
+       << R"(", "text": ")";
+    unicode::utf8::convert( os, this->text() );
+    os << R"(", "position": ")" << this->position()
+       << R"(" })";
 }

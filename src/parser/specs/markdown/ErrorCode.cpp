@@ -43,6 +43,10 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "inline content after heading",
             R"(This error occurs when content that is not a block ID is found after a heading is closed ('atx-style'). For example: "## heading ## content.)"
         };
+        arr[ ErrorCode::BLOCK_ID_OVERRIDE ] = {
+            "block id override",
+            R"(This error occurs when an ID has already been declared for the current block and a new block ID is trying to overwrite it.)"
+        };
         arr[ ErrorCode::INVALID_BLOCK_ID_NAME ] = {
             "invalid block id name",
             R"(This error occurs when a block id name is invalid (valid format: \"-?[_a-zA-Z]+[_a-zA-Z0-9-]*\"). The block ID declaration will be treated as normal text.)"

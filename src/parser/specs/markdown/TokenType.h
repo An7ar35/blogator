@@ -35,7 +35,6 @@ namespace blogator::parser::specs::markdown {
         FORMAT_END,          //auto close on block end
         IMAGE,               //![alt text](path)
         HYPERLINK,           //[title](path)
-        BLOCK_ID,            //"{#...}"
         FOOTNOTE_REF,        //"[^1]"
 
         END_OF_FILE,
@@ -48,6 +47,7 @@ namespace blogator::parser::specs::markdown {
     bool isBlockToken( TokenType type );
     bool isContainerBlock( TokenType type );
     bool isLeafBlock( TokenType type );
+    bool isTableBlock( TokenType type );
 }
 
 namespace blogator {

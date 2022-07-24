@@ -45,7 +45,9 @@ void HeadingTk::setLevel( uint8_t val ) {
  */
 void HeadingTk::toStr( std::ostream &os ) const {
     os << R"({ "type": ")" << this->type()
-       << R"(", "level": )" << (unsigned) this->level()
+       << R"(", "id": ")";
+    unicode::utf8::convert( os, this->id() );
+    os << R"(", "level": )" << (unsigned) this->level()
        << R"(, "text": ")";
     blogator::unicode::utf8::convert( os, this->text() );
     os << R"(", "position": ")" << this->position()

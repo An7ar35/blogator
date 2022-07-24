@@ -10,6 +10,7 @@
 #include "../helpers/CommonMarkTest.h"
 #include "../helpers/TreeConstructionTest.h"
 
+#include "../helpers/MarkdownToHtmlTest.h"
 #include "../helpers/MarkdownTkTest.h"
 
 #include "../../src/parser/token/html5/tokens.h"
@@ -20,6 +21,7 @@
 namespace test_harness {
     nlohmann::json loadJSONFromFile( const std::filesystem::path &path );
     std::set<std::filesystem::path> getTestFiles( const std::filesystem::path &test_dir, const std::string & file_ext );
+    blogator::parser::U32Text transcodeInput( const std::string & raw, const std::filesystem::path & path );
 }
 
 namespace test_harness::commonmark_spec_tests {
@@ -29,11 +31,14 @@ namespace test_harness::commonmark_spec_tests {
 
 namespace test_harness::markdown {
     std::ostream & operator <<( std::ostream &os, const MarkdownTkTest &test );
+    std::ostream & operator <<( std::ostream &os, const MarkdownToHtmlTest &test );
     std::ostream & operator <<( std::ostream &os, const ErrorDescription &err );
     std::string to_string( const blogator::parser::token::markdown::MarkdownTk & token );
     std::string to_string( const blogator::parser::logging::ErrorObject & error );
 
-    std::vector<std::pair<MarkdownTkTest, std::filesystem::path>> loadMarkdownTests( const std::filesystem::path &test_dir );
+    std::vector<std::pair<MarkdownTkTest, std::filesystem::path>> loadTokeniserTests( const std::filesystem::path &test_dir );
+    std::vector<std::pair<MarkdownToHtmlTest, std::filesystem::path>> loadTreeBuilderTests( const std::filesystem::path &test_dir );
+    std::string printDocumentBody( blogator::parser::dom::node::Document & document );
 }
 
 namespace test_harness::html5lib_tests {

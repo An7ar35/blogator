@@ -4,6 +4,7 @@
 #include <utility>
 #include <algorithm>
 
+#include "../dom/TreeBuilder.h"
 #include "../logging/ParserLog.h"
 #include "../specs/infra/NamedCharRef.h"
 #include "../specs/infra/NumericCharRef.h"

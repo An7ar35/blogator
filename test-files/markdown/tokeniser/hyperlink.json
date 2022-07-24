@@ -4,7 +4,7 @@
     "description":"valid link 1",
     "input":"[text](https://example.com)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:27"},
@@ -17,9 +17,9 @@
     "description":"valid link 2",
     "input":"[a&b](https://example.com)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
-      {"type": "CHARACTER", "text": "a&amp;b", "position": "1:2"},
+      {"type": "CHARACTER", "text": "a&b", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:26"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:27"}
     ],
@@ -30,7 +30,7 @@
     "description":"valid link 3",
     "input":"[\\*a\\*](https://example.com)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
       {"type": "CHARACTER", "text": "*a*", "position": "1:3"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:28"},
@@ -43,7 +43,7 @@
     "description":"valid link 4",
     "input":"[\\<a\\>](https://example.com)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
       {"type": "CHARACTER", "text": "&lt;a&gt;", "position": "1:3"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:28"},
@@ -56,7 +56,7 @@
     "description":"void []",
     "input":"[](text)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "[](text)", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:9"}
     ],
@@ -69,7 +69,7 @@
     "description":"link with no url",
     "input":"[text]()",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:8"},
@@ -84,7 +84,7 @@
     "description":"link with EOF in url start",
     "input":"[text](",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:8"},
@@ -100,7 +100,7 @@
     "description":"link with newline in url start",
     "input":"[text](\n",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:8"},
@@ -116,7 +116,7 @@
     "description":"malformed link with no url",
     "input":"[text]",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "[text]", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:7"}
     ],
@@ -129,7 +129,7 @@
     "description":"abrupt EOF in link text 1",
     "input":"[",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "[", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:2"}
     ],
@@ -140,7 +140,7 @@
     "description":"abrupt EOF in link text 2",
     "input":"[text",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "[text", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
     ],
@@ -151,7 +151,7 @@
     "description":"newline in hyperlink url",
     "input":"[text](ur\nl)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "ur", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:10"},
@@ -167,7 +167,7 @@
     "description":"abrupt EOF in link url 1",
     "input":"[text](",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:8"},
@@ -183,7 +183,7 @@
     "description":"abrupt EOF in link url 2",
     "input":"[text](http",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "http", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:12"},
@@ -198,7 +198,7 @@
     "description":"valid link with nested formatting",
     "input":"[*text*](https://example.com)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:2"},
       {"type": "CHARACTER", "text": "text", "position": "1:3"},
@@ -213,7 +213,7 @@
     "description":"valid link with nested formatting opening",
     "input":"[*text](https://example.com)*",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:2"},
       {"type": "CHARACTER", "text": "text", "position": "1:3"},
@@ -228,7 +228,7 @@
     "description":"valid link with nested formatting closing",
     "input":"*[text*](https://example.com)*",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com", "position": "1:2"},
       {"type": "CHARACTER", "text": "text", "position": "1:3"},
@@ -245,7 +245,7 @@
     "description":"valid link with html special characters in url",
     "input":"[text](https://example.com/<query>&?)",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "HYPERLINK", "url": "https://example.com/&lt;query&gt;&amp;?", "position": "1:1"},
       {"type": "CHARACTER", "text": "text", "position": "1:2"},
       {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:37"},
@@ -258,7 +258,7 @@
     "description":"abrupt EOF in formatted link text 1",
     "input":"*[text",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:1"},
       {"type": "CHARACTER", "text": "[text", "position": "1:2"},
       {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:7"},
@@ -271,7 +271,7 @@
     "description":"abrupt EOF in formatted link text 2",
     "input":"[*text]",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "[", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:2"},
       {"type": "CHARACTER", "text": "text]", "position": "1:3"},
@@ -287,7 +287,7 @@
     "description":"abrupt EOF in formatted link",
     "input":"*[text](url",
     "tokens":[
-      {"type": "PARAGRAPH", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:1"},
       {"type": "HYPERLINK", "url": "url", "position": "1:2"},
       {"type": "CHARACTER", "text": "text", "position": "1:3"},
@@ -298,6 +298,19 @@
     "errors":[
       { "description": "EOF in hyperlink", "line": 1, "col": 2 }
     ]
+  },
+
+  {
+    "description":"valid link with block id",
+    "input":"[text {#block-id}](https://example.com)",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "HYPERLINK", "url": "https://example.com", "position": "1:1"},
+      {"type": "CHARACTER", "text": "text {#block-id}", "position": "1:2"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:39"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:40"}
+    ],
+    "errors":[]
   }
 
 ]}
