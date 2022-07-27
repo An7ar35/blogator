@@ -1,0 +1,10 @@
+{"tests": [
+
+  {
+    "description": "<b> in paragraph",
+    "markdown": "<b>text</b>",
+    "html": "<p><b>text</b></p>",
+    "errors": []
+  }
+
+]}

@@ -1,0 +1,40 @@
+{"tests": [
+
+  {
+    "description": "container nesting 1",
+    "markdown": "1. item 1\n   - text\n     > blockquote\n",
+    "html": "<ol type=\"1\"><li>item 1<ul><li>text<blockquote><p>blockquote</p></blockquote></li></ul></li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "container nesting 2",
+    "markdown": "1. item 1\n   - text\n\n     > blockquote\n",
+    "html": "<ol type=\"1\"><li>item 1<ul><li>text<blockquote><p>blockquote</p></blockquote></li></ul></li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "container nesting 3",
+    "markdown": "1. a. > item a\n   b. > item b\n\n      > blockquote",
+    "html": "<ol type=\"1\"><li><ol type=\"a\"><li><blockquote><p>item a</p></blockquote></li><li><blockquote><p>item b</p></blockquote><blockquote><p>blockquote</p></blockquote></li></ol></li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "container nesting 4",
+    "markdown": "1. a. item a\n   b. item b\n\n      > blockquote",
+    "html": "<ol type=\"1\"><li><ol type=\"a\"><li>item a</li><li>item b<blockquote><p>blockquote</p></blockquote></li></ol></li></ol>",
+    "errors": []
+  },
+
+
+  {
+    "description": "container nesting 5",
+    "markdown": "1. item 1\n\n  > blockquote 1\n\n2. a. item a\n   b. > blockquote B\n   c. item c\n\n      > blockquote C\n\n3. item 3",
+    "html": "<ol type=\"1\"><li><p>item 1</p><blockquote><p>blockquote 1</p></blockquote></li><li><ol type=\"a\"><li>item a</li><li><blockquote><p>blockquote B</p></blockquote></li><li>item c<blockquote><p>blockquote C</p></blockquote></li></ol></li><li><p>item 3</p></li></ol>",
+    "errors": []
+  }
+
+]}
+

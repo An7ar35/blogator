@@ -1050,6 +1050,120 @@
       {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "3:4"}
     ],
     "errors":[]
+  },
+
+  {
+    "description": "double nested list and blockquote",
+    "input": "1. item 1\n   - > blockquote\n",
+    "tokens":[
+      {"type": "LIST", "list": "OL_NUMERIC", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:4"},
+      {"type": "CHARACTER", "text": "item 1", "position": "1:4"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "2:4"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "2:4"},
+      {"type": "BLOCKQUOTE", "nesting": 0, "text": ">", "position": "2:6"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:8"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "2:8"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "blockquote in tight list item",
+    "input": "- text\n   > blockquote\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:4"},
+      {"type": "BLOCKQUOTE", "nesting": 0, "text": ">", "position": "2:4"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:6"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "2:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "blockquote in item with line separation",
+    "input": "- text\n\n   > blockquote\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "text", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCKQUOTE", "nesting": 0, "text": ">", "position": "3:4"},
+      {"type": "PARAGRAPH", "id": "", "position": "3:6"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "3:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "double nested list inlined and blockquote",
+    "input": "1. - text\n      > blockquote\n",
+    "tokens":[
+      {"type": "LIST", "list": "OL_NUMERIC", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
+      {"type": "LIST", "list": "UL_HYPHEN", "tight": "true", "position": "1:4"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:4"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:6"},
+      {"type": "CHARACTER", "text": "text", "position": "1:6"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
+      {"type": "BLOCKQUOTE", "nesting": 0, "text": ">", "position": "2:7"},
+      {"type": "PARAGRAPH", "id": "", "position": "2:9"},
+      {"type": "CHARACTER", "text": "blockquote", "position": "2:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "double nested list with 2x blockquotes 1",
+    "input": "1. a. > blockquote A\n\n      > blockquote B\n",
+    "tokens":[
+      {"type": "LIST", "list": "OL_NUMERIC", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
+      {"type": "LIST", "list": "OL_ALPHA_LOWER", "tight": "true", "position": "1:4"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:4"},
+      {"type": "BLOCKQUOTE", "nesting": 0, "text": ">", "position": "1:7"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:9"},
+      {"type": "CHARACTER", "text": "blockquote A", "position": "1:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "2:1"},
+      {"type": "BLOCKQUOTE", "nesting": 0, "text": ">", "position": "3:7"},
+      {"type": "PARAGRAPH", "id": "", "position": "3:9"},
+      {"type": "CHARACTER", "text": "blockquote B", "position": "3:9"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "BLOCKQUOTE", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "4:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "4:1"}
+    ],
+    "errors":[]
   }
 
 ]}

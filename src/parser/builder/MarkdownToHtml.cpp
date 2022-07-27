@@ -49,7 +49,7 @@ void MarkdownToHtml::init( std::filesystem::path path ) {
  * @throw blogator::exception::failed_expectation when builder has not been initialised
  * @throw blogator::exception::parsing_failure when builder is in a EOF state
  */
-void MarkdownToHtml::dispatch( std::unique_ptr<token::markdown::MarkdownTk> token ) { //TODO
+void MarkdownToHtml::dispatch( std::unique_ptr<token::markdown::MarkdownTk> token ) {
     if( !_output ) {
         throw FAILED_EXPECTATION_EXCEPTION(
             "[parser::builder::MarkdownToHtml::dispatch( std::unique_ptr<token::markdown::MarkdownTk> )] "
@@ -131,7 +131,7 @@ void MarkdownToHtml::logError( TextPos position, int err_code ) {
  */
 void MarkdownToHtml::processContent( std::unique_ptr<token::markdown::MarkdownTk> token ) {
     try {
-//        LOG_CRITICAL( "Insertion mode: ", currentInsertionMode(), " -> Type: ", token->type() );
+//        LOG_CRITICAL( "Insertion mode: ", currentInsertionMode(), " -> Type: ", token->type() ); //TODO remove/temp
         switch( currentInsertionMode() ) {
             case InsertionMode_e::INITIAL:         { this->processContent<InsertionMode_e::INITIAL>( std::move( token ) );         } break;
             case InsertionMode_e::CONTENT:         { this->processContent<InsertionMode_e::CONTENT>( std::move( token ) );         } break;
@@ -159,8 +159,8 @@ void MarkdownToHtml::processContent( std::unique_ptr<token::markdown::MarkdownTk
  * Sets up the initial document up to where tokens can be converted to HTML proper
  * @param token First token to process
  */
-template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::INITIAL>( std::unique_ptr<token::markdown::MarkdownTk> token ) {//
-//    //TODO add basic CSS markdown template?
+template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::INITIAL>( std::unique_ptr<token::markdown::MarkdownTk> token ) {
+    //TODO add basic CSS markdown template?
     static const std::u32string DOCTYPE = U"<!DOCTYPE html>";
     _output->insert( _output->end(), DOCTYPE.cbegin(), DOCTYPE.cend() );
     openElement( HtmlElement_e::HTML5_HTML );
@@ -226,34 +226,36 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
         } break;
 
         case TkType_e::CODE_BLOCK: {
+            const auto * tk = dynamic_cast<const CodeBlockTk *>( token.get() );
             openElement( HtmlElement_e::HTML5_PRE );
-            openElement( HtmlElement_e::HTML5_CODE );
+            openElement( HtmlElement_e::HTML5_CODE, UR"(class="code-block-tag-)" + tk->lang() + UR"(")" );
         } break;
 
         case TkType_e::BLOCKQUOTE: {
             openElement( HtmlElement_e::HTML5_BLOCKQUOTE );
         } break;
 
-        case TkType_e::LIST: { //TODO
+        case TkType_e::LIST: {
             const auto * tk = dynamic_cast<const ListTk *>( token.get() );
 
             _open_list_tightness.push( tk->tight() );
 
-            //TODO starting number on <ol>?
-            //TODO style on <ul>?
             switch( tk->listType() ) {
                 case specs::markdown::ListType::UL_HYPHEN:
                 case specs::markdown::ListType::UL_ASTERISK:    [[fallthrough]];
-                case specs::markdown::ListType::UL_PLUS_SIGN:   { openElement( HtmlElement_e::HTML5_UL ); } break;
-                case specs::markdown::ListType::UL_TASK:        { openElement( HtmlElement_e::HTML5_UL, UR"(class="task-list")" ); } break;
-                case specs::markdown::ListType::OL_ALPHA_UPPER:
-                case specs::markdown::ListType::OL_ALPHA_LOWER: [[fallthrough]];
-                case specs::markdown::ListType::OL_NUMERIC:     { openElement( HtmlElement_e::HTML5_OL ); } break;
+                case specs::markdown::ListType::UL_PLUS_SIGN:   { openElement( HtmlElement_e::HTML5_UL );                              } break;
+                case specs::markdown::ListType::UL_TASK:        { openElement( HtmlElement_e::HTML5_UL, UR"(class="task-list")" );     } break;
+                case specs::markdown::ListType::OL_ALPHA_UPPER: { openElement( HtmlElement_e::HTML5_OL, UR"(type="A")" );              } break;
+                case specs::markdown::ListType::OL_ALPHA_LOWER: { openElement( HtmlElement_e::HTML5_OL, UR"(type="a")" );              } break;
+                case specs::markdown::ListType::OL_NUMERIC:     { openElement( HtmlElement_e::HTML5_OL, UR"(type="1")" );              } break;
                 case specs::markdown::ListType::FOOTNOTE_DEFS:  { openElement( HtmlElement_e::HTML5_OL, UR"(class="footnote-defs")" ); } break;
 
                 default: {
-                    //TODO error
-                } break;
+                    throw exception::parsing_failure(
+                        "[parser::builder::MarkdownToHtml::processContent<InsertionMode_e::" + blogator::to_string( InsertionMode_e::CONTENT ) + ">( std::unique_ptr<token::markdown::MarkdownTk> )] "
+                        "Unrecognised list type: " + blogator::to_string( tk->listType() )
+                    );
+                }
             }
         } break;
 
@@ -462,7 +464,7 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
         } break;
 
         default: {
-            if( _open_elements.back() == HtmlElement_e::HTML5_DL ) {
+            if( peekOpenElements() == HtmlElement_e::HTML5_DL ) {
                 closeElement( HtmlElement_e::HTML5_DL );
                 popInsertionMode();
             }
@@ -481,7 +483,7 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
         _insertion_mode.pop();
     }
 
-    _insertion_mode.push( InsertionMode_e::END_OF_FILE );
+    pushInsertionMode( InsertionMode_e::END_OF_FILE );
 
     while( !_open_elements.empty() ) {
         MarkdownToHtml::closeElement( _open_elements.back() );
@@ -515,7 +517,7 @@ inline void MarkdownToHtml::popInsertionMode() {
  * Gets the last inserted insertion mode on the stack
  * @return Last insertion mode or default ('CONTENT')
  */
-inline MarkdownToHtml::InsertionMode_e MarkdownToHtml::currentInsertionMode() const {
+inline auto MarkdownToHtml::currentInsertionMode() const -> MarkdownToHtml::InsertionMode_e {
     if( !_insertion_mode.empty() ) {
         return _insertion_mode.top();
     }
@@ -527,7 +529,7 @@ inline MarkdownToHtml::InsertionMode_e MarkdownToHtml::currentInsertionMode() co
  * Peeks last open element
  * @return Last open element or 'UNKNOWN' when list is empty
  */
-inline MarkdownToHtml::HtmlElement_e MarkdownToHtml::peekOpenElements() const {
+inline auto MarkdownToHtml::peekOpenElements() const -> MarkdownToHtml::HtmlElement_e {
     if( !_open_elements.empty() ) {
         return _open_elements.back();
     }
@@ -536,10 +538,19 @@ inline MarkdownToHtml::HtmlElement_e MarkdownToHtml::peekOpenElements() const {
 }
 
 /**
+ * Pop the last flag off the stack of opened list tightness
+ */
+inline void MarkdownToHtml::popOpenListTightnessStack() {
+    if( !_open_list_tightness.empty() ) {
+        _open_list_tightness.pop();
+    }
+}
+
+/**
  * Peeks last opened list's tightness
  * @return Tightness flag (default: true)
  */
-inline bool MarkdownToHtml::peekOpenListTightness() const {
+inline auto MarkdownToHtml::peekOpenListTightness() const -> bool {
     return ( _open_list_tightness.empty() ? true : _open_list_tightness.top() );
 }
 
@@ -596,7 +607,7 @@ inline void MarkdownToHtml::closeElement( MarkdownToHtml::HtmlElement_e element 
  * Closes the last opened element on the stack of open elements
  * @return Closed element or 'UNKNOWN' if stack is empty
  */
-inline MarkdownToHtml::HtmlElement_e MarkdownToHtml::closeLastElement() {
+inline auto MarkdownToHtml::closeLastElement() -> MarkdownToHtml::HtmlElement_e {
     if( !_open_elements.empty() ) {
         const auto           el  = _open_elements.back();
         const std::u32string str = U"</" + blogator::to_u32string( el ) + U">";
@@ -620,7 +631,7 @@ inline void MarkdownToHtml::sendToOutput( const std::u32string &str ) {
  * Closes a block
  * @param token BlockEndTk token
  */
-inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) { //TODO finish implementation
+inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) {
     switch( token->blockType() ) {
         case specs::markdown::TokenType::HEADING: {
             const auto last_opened_element = peekOpenElements();
@@ -643,7 +654,9 @@ inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) { //TODO fini
         } break;
 
         case specs::markdown::TokenType::PARAGRAPH: {
-            closeElement( HtmlElement_e::HTML5_P );
+            if( peekOpenElements() != HtmlElement_e::HTML5_LI || !peekOpenListTightness() ) {
+                closeLastElement();
+            } //else: <li> paragraph close in tight list
         } break;
 
         case specs::markdown::TokenType::CODE_BLOCK: {
@@ -656,13 +669,16 @@ inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) { //TODO fini
         } break;
 
         case specs::markdown::TokenType::LIST: {
-            if( peekOpenElements() != HtmlElement_e::HTML5_LI || !peekOpenListTightness() ) {
-                if( !_open_list_tightness.empty() ) {
-                    _open_list_tightness.pop();
-                }
-
+            if( isListElement( peekOpenElements() ) ) {
+                popOpenListTightnessStack();
                 closeLastElement();
-            } //else: <li> paragraph close in tight list
+
+            } else {
+                LOG_ERROR(
+                    "[parser:builder::MarkdownToHtml::closeBlock( const BlockEndTk * )] "
+                    "Last opened element '", peekOpenElements(), "' is not a list."
+                );
+            }
         } break;
 
         case specs::markdown::TokenType::LIST_ITEM:          { closeElement( HtmlElement_e::HTML5_LI );    } break;
@@ -674,7 +690,12 @@ inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) { //TODO fini
         case specs::markdown::TokenType::DEFINITION_LIST_DD: { closeElement( HtmlElement_e::HTML5_DD );    } break;
         case specs::markdown::TokenType::HYPERLINK:          { closeElement( HtmlElement_e::HTML5_A );     } break;
 
-        default: break;
+        default: {
+            LOG_ERROR(
+                "[parser:builder::MarkdownToHtml::closeBlock( const BlockEndTk * )] "
+                "Unrecognised block: '", token->blockType(), "'"
+            );
+        } break;
     }
 }
 
@@ -701,6 +722,20 @@ inline void MarkdownToHtml::clearImageCache() {
  */
 inline void MarkdownToHtml::appendToImageCacheBuffer( const std::u32string &str ) {
     _image_cache.buffer.insert( _image_cache.buffer.end(), str.cbegin(), str.cend() );
+}
+
+/**
+ * Checks element is of a list category
+ * @param el HTML element
+ * @return List category state
+ */
+bool MarkdownToHtml::isListElement( MarkdownToHtml::HtmlElement_e el ) {
+    static const auto LIST_ELEMENTS = std::set<HtmlElement_e>( {
+        HtmlElement_e::HTML5_UL, //UL_HYPHEN, UL_ASTERISK, UL_PLUS_SIGN, UL_TASK, FOOTNOTE_DEFS
+        HtmlElement_e::HTML5_OL, //OL_ALPHA_UPPER, OL_ALPHA_LOWER, OL_NUMERIC
+    } );
+
+    return LIST_ELEMENTS.contains( el );
 }
 
 /**

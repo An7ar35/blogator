@@ -472,7 +472,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( character == unicode::GREATER_THAN_SIGN ) { //blockquote
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeFormattingMarkers( text.position() );
-                        closeLastOpenedBlock( pendingBufferPosition() );
+                        closeLastOpenedBlock( text.position() );
                     }
                     resetPendingBuffer( text.position() );
                     reconsume( State_e::BLOCKQUOTE_NEW_BLOCKQUOTE_BLOCK );
@@ -2452,6 +2452,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     queueToken( std::make_unique<BlockQuoteTk>( _actual_blockquote_lvl, text.position() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     appendToPendingBuffer( character );
+                    ++_curr_blockquote_lvl;
                     ++_actual_blockquote_lvl;
                 } else if( character != unicode::TAB && character != unicode::SPACE ) {
                     reconsume( State_e::BLOCKQUOTE_BLOCK_BEGIN );
@@ -3571,9 +3572,9 @@ inline void tokeniser::Markdown::queueEndOfFileToken( TextPos position ) {
  */
 inline void tokeniser::Markdown::closeLastOpenedBlock( TextPos position ) {
     if( !_open_blocks.empty() ) {
-        auto last = peekLastOpenBlockType();
+        const auto last = peekLastOpenBlockType();
 
-        if( peekLastQueuedToken() != nullptr && ( peekLastOpenBlockType() == Type_e::PARAGRAPH || peekLastOpenBlockType() == Type_e::HEADING ) ) {
+        if( peekLastQueuedToken() != nullptr && ( last == Type_e::PARAGRAPH || last == Type_e::HEADING ) ) {
             trimQueuedSpaceTokens(); //i.e.: remove trailing TAB and SPACE characters if any
         }
 
@@ -3584,7 +3585,11 @@ inline void tokeniser::Markdown::closeLastOpenedBlock( TextPos position ) {
             );
         }
 
-        queueToken( std::make_unique<BlockEndTk>( peekLastOpenBlockType(), position ) );
+        if( last == Type_e::BLOCKQUOTE && _actual_blockquote_lvl > 0 ) {
+            --_actual_blockquote_lvl;
+        }
+
+        queueToken( std::make_unique<BlockEndTk>( last, position ) );
         popOpenBlockStack();
     }
 
@@ -3809,6 +3814,29 @@ inline bool tokeniser::Markdown::requiresSpaceSeparatorToken() const {
     }
 
     return false;
+}
+
+/**
+ * Checks if given text position is an indented code-block start location
+ * @return Is indented code block start location
+ */
+bool tokeniser::Markdown::isIndentedCodeBlock( const TextPos & position ) const {
+    const auto & block = peekLastOpenContainerBlock();
+
+    switch( block.type ) {
+        case Type_e::BLOCKQUOTE: {
+            return ( ( position.col - block.column() ) == 5 ); //EARLY RETURN
+        } break;
+
+        case Type_e::LIST:      [[fallthrough]];
+        case Type_e::LIST_ITEM: { //indented code-blocks not supported in lists
+            return false; //EARLY RETURN
+        } break;
+
+        default: break;
+    }
+
+    return ( position.col == 4 ); //no container blocks
 }
 
 /**

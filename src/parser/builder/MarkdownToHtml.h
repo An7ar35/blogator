@@ -82,6 +82,8 @@ namespace blogator::parser::builder {
         void popInsertionMode();
 
         [[nodiscard]] HtmlElement_e peekOpenElements() const;
+
+        void popOpenListTightnessStack();
         [[nodiscard]] bool peekOpenListTightness() const;
 
         void openElement( HtmlElement_e element );
@@ -96,6 +98,8 @@ namespace blogator::parser::builder {
         void initImageCache( std::unique_ptr<token::markdown::MarkdownTk> token );
         void clearImageCache();
         void appendToImageCacheBuffer( const std::u32string & str );
+
+        static bool isListElement( HtmlElement_e el );
     };
 }
 

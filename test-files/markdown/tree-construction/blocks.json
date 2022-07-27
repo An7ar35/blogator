@@ -1,0 +1,17 @@
+{"tests": [
+
+  {
+    "description": "paragraph and blockquote 1",
+    "markdown": "paragraph\n> blockquote",
+    "html": "<p>paragraph</p><blockquote><p>blockquote</p></blockquote>",
+    "errors": []
+  },
+
+  {
+    "description": "paragraph and blockquote 2",
+    "markdown": "paragraph\n\n> blockquote",
+    "html": "<p>paragraph</p><blockquote><p>blockquote</p></blockquote>",
+    "errors": []
+  }
+
+]}

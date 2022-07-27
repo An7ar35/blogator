@@ -77,11 +77,11 @@ testing::AssertionResult runMarkdownTreeBuilderTest( const test_harness::markdow
     tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
     html5_tokeniser.parse( *raw_html );
 
-    const auto   document           = tree_builder.reset();
-    const auto   returned_u8        = test_harness::markdown::printDocumentBody( *document );
-    const bool   output_match       = ( returned_u8 == test.html_output );
-    const auto & errors_received    = error_catcher.errors();
-    bool         failed_err         = false;
+    const auto   document        = tree_builder.reset();
+    const auto   returned_u8     = test_harness::markdown::printDocumentBody( *document );
+    const bool   output_match    = ( returned_u8 == test.html_output );
+    const auto & errors_received = error_catcher.errors();
+    bool         failed_err      = false;
 
     if( test.errors.size() == errors_received.size() ) {
         auto expected_err_it = test.errors.cbegin();

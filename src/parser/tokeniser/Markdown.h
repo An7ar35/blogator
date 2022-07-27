@@ -184,6 +184,7 @@ namespace blogator::parser::tokeniser {
         void popLastQueuedToken();
         void trimQueuedSpaceTokens();
         [[nodiscard]] bool requiresSpaceSeparatorToken() const;
+        [[maybe_unused]] [[nodiscard]] bool isIndentedCodeBlock( const TextPos & position ) const; //unused: for potential future feature
         [[nodiscard]] bool hasQueuedTokens() const;
         void dispatchQueuedTokens();
 
