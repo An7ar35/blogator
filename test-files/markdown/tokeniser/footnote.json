@@ -32,7 +32,7 @@
     "input":"[^1]",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "1", "position": "1:1"},
+      {"type": "FOOTNOTE_REF", "ref": "1", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
     ],
     "errors":[]
@@ -43,7 +43,7 @@
     "input":"[^note]",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "note", "position": "1:1"},
+      {"type": "FOOTNOTE_REF", "ref": "note", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:8"}
     ],
     "errors":[]
@@ -54,7 +54,7 @@
     "input":"[^note&1]",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "note&1", "position": "1:1"},
+      {"type": "FOOTNOTE_REF", "ref": "note&1", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:10"}
     ],
     "errors":[]
@@ -80,7 +80,7 @@
     "input":"[^1]:a",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "1", "position": "1:1"},
+      {"type": "FOOTNOTE_REF", "ref": "1", "position": "1:1"},
       {"type": "CHARACTER", "text": ":a", "position": "1:5"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:7"}
     ],
@@ -93,7 +93,7 @@
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "text ", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "1", "position": "2:1"},
+      {"type": "FOOTNOTE_REF", "ref": "1", "position": "2:1"},
       {"type": "CHARACTER", "text": ":a", "position": "2:5"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"}
     ],
@@ -108,7 +108,7 @@
       {"type": "LIST_ITEM", "ref": "1", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:7"},
       {"type": "CHARACTER", "text": "a", "position": "1:7"},
-      {"type": "FOOTNOTE_REF", "text": "2", "position": "1:8"},
+      {"type": "FOOTNOTE_REF", "ref": "2", "position": "1:8"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:12"},
       {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "1:12"},
       {"type": "BLOCK_END", "block": "LIST", "position": "1:12"}
@@ -167,7 +167,7 @@
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "p", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "1", "position": "1:2"},
+      {"type": "FOOTNOTE_REF", "ref": "1", "position": "1:2"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
     ],
     "errors":[]
@@ -179,7 +179,7 @@
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
       {"type": "CHARACTER", "text": "p", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "1", "position": "1:2"},
+      {"type": "FOOTNOTE_REF", "ref": "1", "position": "1:2"},
       {"type": "CHARACTER", "text": ": a", "position": "1:6"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:9"}
     ],
@@ -231,7 +231,7 @@
     "input":"[^a]\n[^a]: def",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "a", "position": "1:1"},
+      {"type": "FOOTNOTE_REF", "ref": "a", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
       {"type": "LIST", "list": "FOOTNOTE_DEFS", "tight": "true", "position": "2:1"},
       {"type": "LIST_ITEM", "ref": "a", "modality": "NONE", "position": "2:1"},
@@ -249,7 +249,7 @@
     "input":"[^a]\n\n[^a]: def",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "FOOTNOTE_REF", "text": "a", "position": "1:1"},
+      {"type": "FOOTNOTE_REF", "ref": "a", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
       {"type": "LIST", "list": "FOOTNOTE_DEFS", "tight": "true", "position": "3:1"},
       {"type": "LIST_ITEM", "ref": "a", "modality": "NONE", "position": "3:1"},
@@ -270,7 +270,7 @@
       {"type": "LIST_ITEM", "ref": "a", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:7"},
       {"type": "CHARACTER", "text": "def ", "position": "1:7"},
-      {"type": "FOOTNOTE_REF", "text": "a", "position": "2:1"},
+      {"type": "FOOTNOTE_REF", "ref": "a", "position": "2:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:5"},
       {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:5"},
       {"type": "BLOCK_END", "block": "LIST", "position": "2:5"}
@@ -290,7 +290,7 @@
       {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
       {"type": "BLOCK_END", "block": "LIST", "position": "3:1"},
       {"type": "PARAGRAPH", "id": "", "position": "3:1"},
-      {"type": "FOOTNOTE_REF", "text": "a", "position": "3:1"},
+      {"type": "FOOTNOTE_REF", "ref": "a", "position": "3:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "3:5"}
     ],
     "errors":[]
@@ -515,7 +515,7 @@
       {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:3"},
       {"type": "CHARACTER", "text": "item ", "position": "1:3"},
-      {"type": "FOOTNOTE_REF", "text": "1", "position": "2:1"},
+      {"type": "FOOTNOTE_REF", "ref": "1", "position": "2:1"},
       {"type": "CHARACTER", "text": ":?", "position": "2:5"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:7"},
       {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "2:7"},

@@ -61,7 +61,7 @@ The description field matches the short error description of the error code rais
 
 #### Reference token
 
-`{ "type": "FOOTNOTE_REF", "text": "...", "position": "1:1" }`
+`{ "type": "FOOTNOTE_REF", "ref": "...", "position": "1:1" }`
 
 #### Definition tokens
 

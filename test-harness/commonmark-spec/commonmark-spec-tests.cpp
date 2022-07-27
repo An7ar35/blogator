@@ -61,36 +61,37 @@ testing::AssertionResult runMarkdownTest( const test_harness::commonmark_spec_te
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
     auto src             = test_harness::transcodeInput( test.markdown, path );
-    auto builder         = blogator::parser::dom::TreeBuilder();
     auto md2html         = blogator::parser::builder::MarkdownToHtml();
-    auto tokeniser       = blogator::parser::tokeniser::Markdown( md2html );
+    auto md_tokeniser    = blogator::parser::tokeniser::Markdown( md2html );
+    auto tree_builder    = blogator::parser::dom::TreeBuilder();
+    auto html5_tokeniser = blogator::parser::tokeniser::HTML5( tree_builder );
 
     md2html.init( path );
-    builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
-    builder.setStrictChecking( false ); //some tests have some funky tags/attributes
+    md_tokeniser.parse( src );
 
-    try {
-        tokeniser.parse( src );
-    } catch( ... ) {
-        return testing::AssertionFailure() << "Exception thrown";
+    auto raw_html = md2html.reset();
+
+    tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
+    tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
+    html5_tokeniser.parse( *raw_html );
+
+    const auto   document           = tree_builder.reset();
+    const auto   returned_u8        = test_harness::markdown::printDocumentBody( *document ) + "\n";
+    const bool   output_match       = ( returned_u8 == test.html_output );
+    const auto & errors_received    = error_catcher.errors();
+    bool         failed_err         = false;
+
+    if( !output_match ) {
+        return testing::AssertionFailure()
+            << "Failed test #" << test.example_no << "\n"
+            << "File .............: " << test.src.filename().string() << ":" << test.start_line << "\n"
+            << "Section ..........: " << test.section_desc << "\n"
+            << "Input ............: " << "\n" << test.markdown << "\n"
+            << "Expected .........: " << "\n" << test.html_output << "\n"
+            << "Actual ...........: " << "\n" << returned_u8 << "\n"; //TODO
     }
 
-    auto builder_errors = builder.errors();
-    auto document       = builder.reset();
-
-    std::stringstream html_output;
-    html_output << *document;
-
-    const auto returned_u8        = html_output.str();
-    const bool output_match       = ( returned_u8 == test.html_output );
-
-
-    return testing::AssertionFailure()
-        << "Failed test #" << test.example_no << "\n"
-        << "File .............: " << test.src.filename().string() << ":" << test.start_line << "\n"
-        << "Input ............: " << "\n" << test.markdown << "\n"
-        << "Expected .........: " << "\n" << test.html_output << "\n"
-        << "Actual ...........: " << "\n" << returned_u8 << "\n"; //TODO
+    return testing::AssertionSuccess();
 }
 
 class parser_tokeniser_CommonMarkSpec_Tests : public testing::TestWithParam<std::pair<test_harness::commonmark_spec_tests::CommonMarkTest, std::filesystem::path>> {};

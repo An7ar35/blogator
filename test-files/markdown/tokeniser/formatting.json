@@ -203,8 +203,8 @@
       {"type": "FORMAT_BEGIN", "formatting": "BOLD", "text": "**", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:3"},
       {"type": "CHARACTER", "text": "italic and bold", "position": "1:4"},
-      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:19"},
-      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**", "position": "1:20"},
+      {"type": "FORMAT_END", "formatting": "BOLD", "text": "**", "position": "1:19"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:21"},
       {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "1:22"}
     ],
     "errors":[]
@@ -399,14 +399,36 @@
       {"type": "FORMAT_BEGIN", "formatting":"BOLD", "text":"**", "position": "1:1"},
       {"type": "FORMAT_BEGIN", "formatting":"ITALIC", "text":"*", "position": "1:3"},
       {"type": "CHARACTER", "text":"   text ", "position": "1:4"},
-      {"type": "FORMAT_END", "formatting":"ITALIC", "text":"*", "position": "2:1"},
       {"type": "FORMAT_END", "formatting":"BOLD", "text":"__", "position": "2:1"},
       {"type": "FORMAT_BEGIN", "formatting":"BOLD", "text":"**", "position": "2:3"},
-      {"type": "FORMAT_BEGIN", "formatting":"ITALIC","text":"_", "position": "2:5"},
-      {"type": "FORMAT_END", "formatting":"ITALIC", "text":"_", "position": "2:6"},
+      {"type": "FORMAT_END", "formatting":"ITALIC", "text":"_", "position": "2:5"},
       {"type": "FORMAT_END", "formatting":"BOLD", "text":"**", "position": "2:6"},
       {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:6"}
     ],
     "errors":[]
+  },
+
+  {
+    "description":"multi-paragraph formatting closing",
+    "input":"*italic**bold**\n\nnormal**bold",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting":"ITALIC", "text":"*", "position": "1:1"},
+      {"type": "CHARACTER", "text":"italic", "position": "1:2"},
+      {"type": "FORMAT_BEGIN", "formatting":"BOLD", "text":"**", "position": "1:8"},
+      {"type": "CHARACTER", "text":"bold", "position": "1:10"},
+      {"type": "FORMAT_END", "formatting":"BOLD", "text":"**", "position": "1:14"},
+      {"type": "FORMAT_END", "formatting":"ITALIC", "text":"*", "position": "2:1"},
+      {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:1"},
+
+      {"type": "PARAGRAPH", "id": "", "position": "3:1"},
+      {"type": "CHARACTER", "text":"normal", "position": "3:1"},
+      {"type": "FORMAT_BEGIN", "formatting":"BOLD", "text":"**", "position": "3:7"},
+      {"type": "CHARACTER", "text":"bold", "position": "3:9"},
+      {"type": "FORMAT_END", "formatting":"BOLD", "text":"**", "position": "3:13"},
+      {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "3:13"}
+    ],
+    "errors":[]
   }
+
 ]}

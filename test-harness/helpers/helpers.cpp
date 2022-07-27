@@ -137,9 +137,9 @@ std::vector<std::pair<test_harness::commonmark_spec_tests::CommonMarkTest, std::
                     obj.example_no = test.at( "example" ).get<unsigned>();
                     obj.start_line = test.at( "start_line" ).get<unsigned>();
                     obj.end_line = test.at( "end_line" ).get<unsigned>();
-                    obj.markdown = to_string( test.at( "markdown" ) );
-                    obj.html_output = to_string( test.at( "html" ) );
-                    obj.section_desc = to_string( test.at( "section" ) );
+                    obj.markdown = test.at( "markdown" );
+                    obj.html_output = test.at( "html" );
+                    obj.section_desc = test.at( "section" );
 
                     test_collection.emplace_back( std::make_pair( std::move( obj ), file ) );
 

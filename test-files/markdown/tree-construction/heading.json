@@ -1,0 +1,128 @@
+{"tests": [
+
+  {
+    "description": "'atx' H1",
+    "markdown": "# heading",
+    "html": "<h1>heading</h1>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H2",
+    "markdown": "## heading",
+    "html": "<h2>heading</h2>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H3",
+    "markdown": "### heading",
+    "html": "<h3>heading</h3>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H4",
+    "markdown": "#### heading",
+    "html": "<h4>heading</h4>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H5",
+    "markdown": "##### heading",
+    "html": "<h5>heading</h5>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H6",
+    "markdown": "###### heading",
+    "html": "<h6>heading</h6>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H6 with 7x '#'",
+    "markdown": "####### heading",
+    "html": "<h6>heading</h6>",
+    "errors": [
+      {"description": "invalid heading level", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "'setext' H1",
+    "markdown": "heading\n===\n",
+    "html": "<h1>heading</h1>",
+    "errors": []
+  },
+
+  {
+    "description": "'setext' H2",
+    "markdown": "heading\n---\n",
+    "html": "<h2>heading</h2>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' heading block with following text block without separation",
+    "markdown": "# heading\nparagraph text",
+    "html": "<h1>heading</h1><p>paragraph text</p>",
+    "errors": [
+      {"description": "block line-feed separator missing: 'p'", "line": 2, "col": 1 }
+    ]
+  },
+
+  {
+    "description": "'setext' heading + paragraph with missing separation" ,
+    "markdown": "heading\n===\nparagraph text",
+    "html": "<h1>heading</h1><p>paragraph text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "empty 'atx' heading with 2x' '",
+    "markdown": "#  ",
+    "html": "<h1></h1>",
+    "errors": [
+      {"description": "empty block: HEADING", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "'atx' heading with block id",
+    "markdown": "### heading {#heading-id}\n",
+    "html": "<h3 id=\"heading-id\">heading</h3>",
+    "errors": []
+  },
+
+  {
+    "description": "'setext' heading with block id",
+    "markdown": "heading {#heading-id}\n---",
+    "html": "<h2 id=\"heading-id\">heading</h2>",
+    "errors": []
+  },
+
+  {
+    "description": "'setext' heading and paragraph with trailing block ids",
+    "markdown": "heading {#heading-id}\n---\n{#block-id}paragraph text",
+    "html": "<h2 id=\"heading-id\">heading</h2><p id=\"block-id\">paragraph text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H3 heading with closing '#'",
+    "markdown": "### heading ######",
+    "html": "<h3>heading</h3>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H1 without space and closing '#'",
+    "markdown": "#heading#",
+    "html": "<h1>heading</h1>",
+    "errors": []
+  }
+
+]}

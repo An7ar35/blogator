@@ -9,7 +9,7 @@ using namespace blogator::parser::token::markdown;
  */
 HeadingTk::HeadingTk( std::u32string text, TextPos position ) :
     BlockBeginTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
-    _level( ( this->text().size() > 6 ? 6 : this->text().size() ) )
+    _level( this->text().size() )
 {}
 
 /**

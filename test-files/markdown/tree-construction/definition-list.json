@@ -1,0 +1,24 @@
+{"tests": [
+
+  {
+    "description": "simple definition list",
+    "markdown": "title\n: definition",
+    "html": "<dl><dt>title</dt><dd>definition</dd></dl>",
+    "errors": []
+  },
+
+  {
+    "description": "simple definition list",
+    "markdown": "title\n: multi-lined\ndefinition",
+    "html": "<dl><dt>title</dt><dd>multi-lined definition</dd></dl>",
+    "errors": []
+  },
+
+  {
+    "description": "multi definition list",
+    "markdown": "title 1\n: definition 1\n\ntitle 2\n: definition 2",
+    "html": "<dl><dt>title 1</dt><dd>definition 1</dd><dt>title 2</dt><dd>definition 2</dd></dl>",
+    "errors": []
+  }
+
+]}

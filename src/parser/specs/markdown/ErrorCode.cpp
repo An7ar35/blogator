@@ -152,6 +152,18 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "undefined heading",
             R"(This error occurs when a heading block is declared without any text for the heading (e.g.: \"#  \n\").)"
         };
+        arr[ ErrorCode::INVALID_HEADING_LEVEL ] = {
+            "invalid heading level",
+            R"(This error occurs when a heading's specified level is not between 1-6 inclusive (<H1> to <H6>). Make sure the prefixing number of '#' characters the heading does not exceed 6.)"
+        };
+        arr[ ErrorCode::ORPHANED_FOOTNOTE_REFERENCE ] = {
+            "orphaned footnote reference",
+            R"(This error occurs when a footnote reference ID has no matching definitions.)"
+        };
+        arr[ ErrorCode::ORPHANED_FOOTNOTE_DEFINITION ] = {
+            "orphaned footnote definition",
+            R"(This error occurs when a footnote definition is never referenced within the source text.)"
+        };
 
         return std::move( arr );
 

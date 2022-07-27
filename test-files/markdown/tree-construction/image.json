@@ -1,0 +1,10 @@
+{"tests": [
+
+  {
+    "description": "simple image",
+    "markdown": "![alt](source)",
+    "html": "<p><img src=\"source\" alt=\"alt\"></p>",
+    "errors": []
+  }
+
+]}

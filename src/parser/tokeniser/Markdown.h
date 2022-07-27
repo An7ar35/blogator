@@ -181,7 +181,6 @@ namespace blogator::parser::tokeniser {
         void closeOpenContainerBlocks( size_t index, TextPos position );
         void closeOpenContainerBlocks( const TextPos & target, bool inclusive, TextPos position );
         token::markdown::MarkdownTk * peekLastQueuedToken();
-        token::markdown::MarkdownTk * peekLastQueuedToken( size_t offset );
         void popLastQueuedToken();
         void trimQueuedSpaceTokens();
         [[nodiscard]] bool requiresSpaceSeparatorToken() const;

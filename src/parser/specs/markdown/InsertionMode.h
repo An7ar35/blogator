@@ -10,15 +10,8 @@ namespace blogator::parser::specs::markdown {
 
         INITIAL = ENUM_BEGIN,
         CONTENT,
-        BLOCKQUOTE,
-        CODE_BLOCK,
-        HYPERLINK,
         IMAGE,
-        TABLE,
-        LIST,
         DEFINITION_LIST,
-        FOOTNOTE,
-        BLOCK_END,
         END_OF_FILE,
 
         ENUM_END = END_OF_FILE, //used for iterating enums

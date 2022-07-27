@@ -225,6 +225,24 @@
   },
 
   {
+    "description":"valid link with mid formatted text",
+    "input":"*text [*link*](url)*",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:1"},
+      {"type": "CHARACTER", "text": "text ", "position": "1:2"},
+      {"type": "HYPERLINK", "url": "url", "position": "1:7"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:8"},
+      {"type": "CHARACTER", "text": "link", "position": "1:9"},
+      {"type": "FORMAT_BEGIN", "formatting": "ITALIC", "text": "*", "position": "1:13"},
+      {"type": "BLOCK_END", "block": "HYPERLINK", "position": "1:19"},
+      {"type": "FORMAT_END", "formatting": "ITALIC", "text": "*", "position": "1:20"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:21"}
+    ],
+    "errors":[]
+  },
+
+  {
     "description":"valid link with nested formatting closing",
     "input":"*[text*](https://example.com)*",
     "tokens":[

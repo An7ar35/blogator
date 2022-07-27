@@ -46,6 +46,9 @@ namespace blogator::parser::specs::markdown {
 
             /* MarkdownToHTML errors */
             UNDEFINED_HEADING,
+            INVALID_HEADING_LEVEL,
+            ORPHANED_FOOTNOTE_REFERENCE,
+            ORPHANED_FOOTNOTE_DEFINITION,
 
             ENUM_END
         };

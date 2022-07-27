@@ -16,15 +16,8 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
     static const auto map = std::unordered_map<InsertionMode, std::string>( {
         { InsertionMode::INITIAL,         "initial" },
         { InsertionMode::CONTENT,         "content" },
-        { InsertionMode::BLOCKQUOTE,      "blockquote" },
-        { InsertionMode::CODE_BLOCK,      "code block" },
-        { InsertionMode::HYPERLINK,       "hyperlink" },
         { InsertionMode::IMAGE,           "image" },
-        { InsertionMode::TABLE,           "table" },
-        { InsertionMode::LIST,            "list" },
         { InsertionMode::DEFINITION_LIST, "definition list" },
-        { InsertionMode::FOOTNOTE,        "footnote" },
-        { InsertionMode::BLOCK_END,       "block end" },
         { InsertionMode::END_OF_FILE,     "EOF" },
     } );
 

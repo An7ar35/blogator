@@ -6,7 +6,9 @@
 namespace blogator::parser::token::markdown {
     class FootnoteRefTk : public MarkdownTk {
       public:
-        FootnoteRefTk( std::u32string text, TextPos position );
+        FootnoteRefTk( std::u32string ref, TextPos position );
+
+        const std::u32string & ref() const;
 
       protected:
         void toStr( std::ostream &os ) const override;

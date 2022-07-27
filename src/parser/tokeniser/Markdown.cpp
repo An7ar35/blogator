@@ -3430,33 +3430,20 @@ size_t tokeniser::Markdown::queueFormattingToken( TextPos position, char32_t fmt
         return 0; //EARLY RETURN
     }
 
-    if( last_opened_marker != nullptr && last_opened_marker->match( fmt_char ) ) {
-        _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char, position ) );
-        _formatting_markers.pop_back();
+    auto earliest_marker_it = std::find_if( _formatting_markers.begin(),
+                                            _formatting_markers.end(),
+                                            [new_fmt_type]( auto * fmt_ptr ) { return fmt_ptr->formatType() == new_fmt_type; } );
 
-    } else if( last_opened_marker_type == FormattingTk::Type::BOLD && new_fmt_type == FormattingTk::Type::ITALIC ) {
+    if( earliest_marker_it != _formatting_markers.end() ) {
+        _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char, position ) );
+        _formatting_markers.erase( earliest_marker_it );
+
+    } else {
         pushFormattingMarker(
             dynamic_cast<FormattingTk *> (
                 _queued_tokens.emplace_back( std::make_unique<FormatBeginTk>( fmt_char, position ) ).get()
             )
         );
-
-    } else {
-        auto earliest_marker_it = std::find_if( _formatting_markers.begin(),
-                                                _formatting_markers.end(),
-                                                [new_fmt_type]( auto * fmt_ptr ) { return fmt_ptr->formatType() == new_fmt_type; } );
-
-        if( earliest_marker_it != _formatting_markers.end() ) {
-            _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char, position ) );
-            _formatting_markers.erase( earliest_marker_it );
-
-        } else {
-            pushFormattingMarker(
-                dynamic_cast<FormattingTk *> (
-                    _queued_tokens.emplace_back( std::make_unique<FormatBeginTk>( fmt_char, position ) ).get()
-                )
-            );
-        }
     }
 
     return 1;
@@ -3481,65 +3468,36 @@ size_t tokeniser::Markdown::queueFormattingToken( TextPos position, char32_t fmt
     const auto * last_opened_marker      = peekLastFormattingMarker();
     const auto   last_opened_marker_type = lastFormattingMarker();
 
-    if( last_opened_marker != nullptr ) {
-        if( last_opened_marker->match( fmt_char_1 ) ) {
-            _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char_1, position ) );
-            _formatting_markers.pop_back();
-            return 1; //EARLY RETURN
-        }
-
-        if( last_opened_marker->match( fmt_char_1, fmt_char_2 ) ) {
-            _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char_1, fmt_char_2, position ) );
-            _formatting_markers.pop_back();
-            return 2; //EARLY RETURN
-        }
-    }
-
     if( new_fmt_type_double == FormattingTk::Type::NONE ) { //only first char is a valid formatting character
-        if( last_opened_marker_type == FormattingTk::Type::BOLD && new_fmt_type_single == FormattingTk::Type::ITALIC ) {
+        auto earliest_marker_it = findEarliestMarker( new_fmt_type_single );
+
+        if( earliest_marker_it != _formatting_markers.end() && (*earliest_marker_it)->match( fmt_char_1 ) ) {
+            _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char_1, position ) );
+            _formatting_markers.erase( earliest_marker_it );
+
+        } else {
             pushFormattingMarker(
                 dynamic_cast<FormattingTk *> (
                     _queued_tokens.emplace_back( std::make_unique<FormatBeginTk>( fmt_char_1, position ) ).get()
                 )
             );
-        } else {
-            auto earliest_marker_it = findEarliestMarker( new_fmt_type_single );
-
-            if( earliest_marker_it != _formatting_markers.end() && (*earliest_marker_it)->match( fmt_char_1 ) ) {
-                _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char_1, position ) );
-                _formatting_markers.erase( earliest_marker_it );
-
-            } else {
-                pushFormattingMarker(
-                    dynamic_cast<FormattingTk *> (
-                        _queued_tokens.emplace_back( std::make_unique<FormatBeginTk>( fmt_char_1, position ) ).get()
-                    )
-                );
-            }
         }
 
         return 1; //EARLY RETURN
 
     } else { //double char format
-        if( last_opened_marker_type == FormattingTk::Type::ITALIC && new_fmt_type_double == FormattingTk::Type::BOLD ) {
-            _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( last_opened_marker->text(), position ) );
-            _formatting_markers.pop_back();
+        auto earliest_marker_it = findEarliestMarker( new_fmt_type_double );
 
-            return queueFormattingToken( position, fmt_char_1, fmt_char_2 ); //recurse since '_formatting_markers' has changed
+        if( earliest_marker_it != _formatting_markers.end() ) {
+            _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char_1, fmt_char_2, position ) );
+            _formatting_markers.erase( earliest_marker_it );
+
         } else {
-            auto earliest_marker_it = findEarliestMarker( new_fmt_type_double );
-
-            if( earliest_marker_it != _formatting_markers.end() ) {
-                _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( fmt_char_1, fmt_char_2, position ) );
-                _formatting_markers.erase( earliest_marker_it );
-
-            } else {
-                pushFormattingMarker(
-                    dynamic_cast<FormattingTk *> (
-                        _queued_tokens.emplace_back( std::make_unique<FormatBeginTk>( fmt_char_1, fmt_char_2, position ) ).get()
-                    )
-                );
-            }
+            pushFormattingMarker(
+                dynamic_cast<FormattingTk *> (
+                    _queued_tokens.emplace_back( std::make_unique<FormatBeginTk>( fmt_char_1, fmt_char_2, position ) ).get()
+                )
+            );
         }
 
         return 2; //EARLY RETURN
@@ -3860,19 +3818,6 @@ inline bool tokeniser::Markdown::requiresSpaceSeparatorToken() const {
 inline token::markdown::MarkdownTk * tokeniser::Markdown::peekLastQueuedToken() {
     if( !_queued_tokens.empty() ) {
         return _queued_tokens.back().get();
-    }
-
-    return nullptr;
-}
-
-/**
- * Gets a pointer to the last queued token
- * @param offset Offset from the last added token in the queue
- * @return Pointer to queued token at offset from the last added
- */
-inline token::markdown::MarkdownTk *tokeniser::Markdown::peekLastQueuedToken( size_t offset ) {
-    if( !_queued_tokens.empty() && offset < _queued_tokens.size() ) {
-        return std::next( _queued_tokens.rbegin(), offset )->get();
     }
 
     return nullptr;
