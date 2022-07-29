@@ -2355,17 +2355,17 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::CODE_BLOCK_LANGUAGE_TAG: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_CODE_BLOCK );
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
+                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
+                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_WHITESPACE_AFTER_LANGUAGE_TAG );
                 } else if( unicode::ascii::isnewline( character ) ) {
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
+                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
                 } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)"  ) ||
@@ -2374,12 +2374,12 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                            ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE          && text.characters( 4 ) == UR"(~~~~)" ) )
                 {
                     logError( text.position(), ErrorCode::INLINED_CODE_BLOCK );
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
+                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::CODE_BLOCK_END );
                 } else {
                     logError( pendingBufferPosition(), ErrorCode::INVALID_LANGUAGE_TAG_IN_CODE_BLOCK );
-                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() - TextPos( 0, 3 ) ) );
+                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::CODE_BLOCK_INLINED_CONTENT );
                 }
@@ -3116,6 +3116,14 @@ inline std::u32string tokeniser::Markdown::pendingBufferToStr( size_t offset ) c
     } else {
         return {};
     }
+}
+
+/**
+ * Gets the pending block-fence size as a TextPos object { 0, x }
+ * @return Number of characters taken by the block fence
+ */
+inline TextPos tokeniser::Markdown::currentFenceSize() const {
+    return { 0, specs::markdown::sizeOf( _pending.block_fence ) };
 }
 
 /**

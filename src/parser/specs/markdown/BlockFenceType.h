@@ -14,6 +14,8 @@ namespace blogator::parser::specs::markdown {
     };
 
     std::ostream & operator <<( std::ostream &os, BlockFenceType type );
+
+    size_t sizeOf( BlockFenceType fence );
 }
 
 namespace blogator {

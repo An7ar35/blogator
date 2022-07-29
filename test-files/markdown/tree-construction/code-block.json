@@ -1,0 +1,73 @@
+{"tests": [
+
+  {
+    "description": "simple code-block",
+    "markdown": "```\ncode\n```",
+    "html": "<pre><code>code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple code-block",
+    "markdown": "~~~\ncode\n~~~",
+    "html": "<pre><code>code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple code-block with language tag 1",
+    "markdown": "```cpp\ncode\n```",
+    "html": "<pre><code class=\"code-block-cpp\">code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple code-block with language tag 2",
+    "markdown": "~~~cpp\ncode\n~~~",
+    "html": "<pre><code class=\"code-block-cpp\">code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple quad code-block 1",
+    "markdown": "````\ncode\n````",
+    "html": "<pre><code>code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple quad code-block 2",
+    "markdown": "~~~~\ncode\n~~~~",
+    "html": "<pre><code>code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple quad code-block with language tag 1",
+    "markdown": "````markdown\ncode\n````",
+    "html": "<pre><code class=\"code-block-markdown\">code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "simple quad code-block with language tag 2",
+    "markdown": "~~~~markdown\ncode\n~~~~",
+    "html": "<pre><code class=\"code-block-markdown\">code</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "quad code-block with nested markdown markup 1",
+    "markdown": "````\n```\ncode\n```\n````",
+    "html": "<pre><code>```\ncode\n```</code></pre>",
+    "errors": []
+  },
+
+  {
+    "description": "quad code-block with nested markdown markup 2",
+    "markdown": "~~~~\n~~~\ncode\n~~~\n~~~~",
+    "html": "<pre><code>~~~\ncode\n~~~</code></pre>",
+    "errors": []
+  }
+
+]}

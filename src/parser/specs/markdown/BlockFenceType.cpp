@@ -28,6 +28,21 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
 }
 
 /**
+ * Gets the character width of a fence
+ * @param fence BlockFenceType enum
+ * @return Number of characters
+ */
+size_t blogator::parser::specs::markdown::sizeOf( BlockFenceType fence ) {
+    switch( fence ) {
+        case BlockFenceType::NONE:                return 0;
+        case BlockFenceType::TRIPLE_TILDE:        [[fallthrough]];
+        case BlockFenceType::TRIPLE_GRAVE_ACCENT: return 3;
+        case BlockFenceType::QUAD_TILDE:          [[fallthrough]];
+        case BlockFenceType::QUAD_GRAVE_ACCENT:   return 4;
+    }
+}
+
+/**
  * Converts a parser::specs::markdown::BlockFenceType enum to a string representation
  * @param attr BlockFenceType enum
  * @return String representation

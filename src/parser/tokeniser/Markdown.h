@@ -135,6 +135,7 @@ namespace blogator::parser::tokeniser {
         [[nodiscard]] bool isPendingBufferLastChar( char32_t c );
         [[nodiscard]] TextPos pendingBufferPosition() const;
         [[nodiscard]] std::u32string pendingBufferToStr( size_t offset = 0 ) const;
+        [[nodiscard]] TextPos currentFenceSize() const;
 
         size_t flushPendingBufferToQueue( CharacterProcessing auto_process, size_t offset = 0 );
 

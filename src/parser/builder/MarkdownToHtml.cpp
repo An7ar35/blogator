@@ -227,8 +227,14 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
 
         case TkType_e::CODE_BLOCK: {
             const auto * tk = dynamic_cast<const CodeBlockTk *>( token.get() );
+
             openElement( HtmlElement_e::HTML5_PRE );
-            openElement( HtmlElement_e::HTML5_CODE, UR"(class="code-block-tag-)" + tk->lang() + UR"(")" );
+
+            if( tk->lang().empty() ) {
+                openElement( HtmlElement_e::HTML5_CODE );
+            } else {
+                openElement( HtmlElement_e::HTML5_CODE, UR"(class="code-block-)" + tk->lang() + UR"(")" );
+            }
         } break;
 
         case TkType_e::BLOCKQUOTE: {
