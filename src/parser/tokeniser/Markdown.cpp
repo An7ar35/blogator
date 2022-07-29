@@ -156,12 +156,12 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     text.advanceCaret( 2 );
                     setCurrentBlockFence( Fence_e::TRIPLE_GRAVE_ACCENT );
                     modifyReturnState( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
-                    setState( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                    setState( State_e::CODE_BLOCK_DECLARATION );
                 } else if( character == unicode::TILDE && text.characters( 3 ) == UR"(~~~)" ) { //code block
                     text.advanceCaret( 2 );
                     setCurrentBlockFence( Fence_e::TRIPLE_TILDE );
                     modifyReturnState( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
-                    setState( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                    setState( State_e::CODE_BLOCK_DECLARATION );
                 } else if( character == unicode::VERTICAL_LINE ) { //could be a table
                     if( _table_cache.is_fake_table ) {
                         _table_cache.is_fake_table = false; //reset flag for next block
@@ -2272,6 +2272,23 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
             } break;
 
+            case State_e::CODE_BLOCK_DECLARATION: {
+                if( text.reachedEnd() ) {
+                    logError( text.position(), ErrorCode::EOF_IN_CODE_BLOCK );
+                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
+                    reconsume( State_e::END_OF_FILE );
+                } else if( _pending.block_fence == Fence_e::TRIPLE_TILDE && character == unicode::TILDE ) { //"~~~~"
+                    setCurrentBlockFence( Fence_e::QUAD_TILDE );
+                    setState( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                } else if( _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && character == unicode::GRAVE_ACCENT ) { //"````"
+                    setCurrentBlockFence( Fence_e::QUAD_GRAVE_ACCENT );
+                    setState( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                } else {
+                    reconsume( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                }
+            } break;
+
             case State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_CODE_BLOCK );
@@ -2291,8 +2308,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     reconsume( State_e::CODE_BLOCK_INLINED_CONTENT );
-                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
-                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)" ) )
+                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)"  ) ||
+                           ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::QUAD_GRAVE_ACCENT   && text.characters( 4 ) == UR"(````)" ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)"  ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE          && text.characters( 4 ) == UR"(~~~~)" ) )
                 {
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
@@ -2316,8 +2335,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 } else if( unicode::ascii::isnewline( character ) ) {
                     flushPendingBufferToQueue( CharacterProcessing::ENCODING_ONLY );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
-                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
-                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)" ) )
+                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)"  ) ||
+                           ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::QUAD_GRAVE_ACCENT   && text.characters( 4 ) == UR"(````)" ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)"  ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE          && text.characters( 4 ) == UR"(~~~~)" ) )
                 {
                     logError( text.position(), ErrorCode::INLINED_CODE_BLOCK );
                     flushPendingBufferToQueue( CharacterProcessing::ENCODING_ONLY );
@@ -2347,8 +2368,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
-                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
-                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)" ) )
+                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)"  ) ||
+                           ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::QUAD_GRAVE_ACCENT   && text.characters( 4 ) == UR"(````)" ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)"  ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE          && text.characters( 4 ) == UR"(~~~~)" ) )
                 {
                     logError( text.position(), ErrorCode::INLINED_CODE_BLOCK );
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - TextPos( 0, 3 ) ) );
@@ -2368,8 +2391,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     reconsume( State_e::END_OF_FILE );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
-                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
-                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)") )
+                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)"  ) ||
+                           ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::QUAD_GRAVE_ACCENT   && text.characters( 4 ) == UR"(````)" ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)"  ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE          && text.characters( 4 ) == UR"(~~~~)" ) )
                 {
                     logError( text.position(), ErrorCode::INLINED_CODE_BLOCK );
                     reconsume( State_e::CODE_BLOCK_END );
@@ -2429,8 +2454,6 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::CODE_BLOCK_END: {
-                const auto next_characters = text.characters( 3 );
-
                 if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)" ) ||
                     ( character == unicode::TILDE        && _pending.block_fence == Fence_e::TRIPLE_TILDE        && text.characters( 3 ) == UR"(~~~)" ) )
                 {
@@ -2439,6 +2462,16 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     }
                     text.advanceCaret( 2 );
                     setState( State_e::AFTER_BLOCK );
+
+                } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::QUAD_GRAVE_ACCENT && text.characters( 4 ) == UR"(````)" ) ||
+                           ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE        && text.characters( 4 ) == UR"(~~~~)" ) )
+                {
+                    if( unicode::ascii::isnewline( peekLastQueuedToken()->text().back() ) ) {
+                        popLastQueuedToken();
+                    }
+                    text.advanceCaret( 3 );
+                    setState( State_e::AFTER_BLOCK );
+
                 } else {
                     queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
                     setState( State_e::CODE_BLOCK_CONTENT );
@@ -2480,12 +2513,12 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     text.advanceCaret( 2 );
                     setCurrentBlockFence( Fence_e::TRIPLE_GRAVE_ACCENT );
                     modifyReturnState( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
-                    setState( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                    setState( State_e::CODE_BLOCK_DECLARATION );
                 } else if( character == unicode::TILDE && text.characters( 3 ) == UR"(~~~)" ) { //code block
                     text.advanceCaret( 2 );
                     setCurrentBlockFence( Fence_e::TRIPLE_TILDE );
                     modifyReturnState( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
-                    setState( State_e::CODE_BLOCK_BEFORE_LANGUAGE_TAG );
+                    setState( State_e::CODE_BLOCK_DECLARATION );
                 } else if( character == unicode::VERTICAL_LINE ) { //could be a table
                     if( _table_cache.is_fake_table ) {
                         _table_cache.is_fake_table = false; //reset flag for next block

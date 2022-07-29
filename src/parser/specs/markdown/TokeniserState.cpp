@@ -149,6 +149,7 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
         { TokeniserState::HEADING_BLOCK_SETEXT_FMT_EQUAL_SIGN,                                                           "HEADING_BLOCK_SETEXT_FMT_EQUAL_SIGN" },
         { TokeniserState::HEADING_BLOCK_SETEXT_FMT_HYPHEN,                                                               "HEADING_BLOCK_SETEXT_FMT_HYPHEN" },
 
+        { TokeniserState::CODE_BLOCK_DECLARATION,                                                                        "CODE_BLOCK_DECLARATION" },
         { TokeniserState::CODE_BLOCK_BEFORE_LANGUAGE_TAG,                                                                "CODE_BLOCK_BEFORE_LANGUAGE_TAG" },
         { TokeniserState::CODE_BLOCK_INLINED_CONTENT,                                                                    "CODE_BLOCK_INLINED_CONTENT" },
         { TokeniserState::CODE_BLOCK_LANGUAGE_TAG,                                                                       "CODE_BLOCK_LANGUAGE_TAG" },

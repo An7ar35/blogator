@@ -295,6 +295,8 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
             } else {
                 openElement( HtmlElement_e::HTML5_TABLE );
             }
+
+            openElement( HtmlElement_e::HTML5_THEAD );
         } break;
 
         case TkType_e::TABLE_ROW: {
@@ -452,7 +454,6 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
     switch( token->type() ) {
         case TkType_e::DEFINITION_LIST_DT: {
             openElement( HtmlElement_e::HTML5_DT );
-
         } break;
 
         case TkType_e::DEFINITION_LIST_DD: {
@@ -633,7 +634,7 @@ inline void MarkdownToHtml::sendToOutput( const std::u32string &str ) {
  */
 inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) {
     switch( token->blockType() ) {
-        case specs::markdown::TokenType::HEADING: {
+        case TkType_e::HEADING: {
             const auto last_opened_element = peekOpenElements();
 
             if( last_opened_element == HtmlElement_e::HTML5_H1 ||
@@ -653,22 +654,22 @@ inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) {
             }
         } break;
 
-        case specs::markdown::TokenType::PARAGRAPH: {
+        case TkType_e::PARAGRAPH: {
             if( peekOpenElements() != HtmlElement_e::HTML5_LI || !peekOpenListTightness() ) {
                 closeLastElement();
             } //else: <li> paragraph close in tight list
         } break;
 
-        case specs::markdown::TokenType::CODE_BLOCK: {
+        case TkType_e::CODE_BLOCK: {
             closeElement( HtmlElement_e::HTML5_CODE );
             closeElement( HtmlElement_e::HTML5_PRE );
         } break;
 
-        case specs::markdown::TokenType::BLOCKQUOTE: {
+        case TkType_e::BLOCKQUOTE: {
             closeElement( HtmlElement_e::HTML5_BLOCKQUOTE );
         } break;
 
-        case specs::markdown::TokenType::LIST: {
+        case TkType_e::LIST: {
             if( isListElement( peekOpenElements() ) ) {
                 popOpenListTightnessStack();
                 closeLastElement();
@@ -681,14 +682,29 @@ inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) {
             }
         } break;
 
-        case specs::markdown::TokenType::LIST_ITEM:          { closeElement( HtmlElement_e::HTML5_LI );    } break;
-        case specs::markdown::TokenType::TABLE:              { closeElement( HtmlElement_e::HTML5_TABLE ); } break;
-        case specs::markdown::TokenType::TABLE_ROW:          { closeElement( HtmlElement_e::HTML5_TR );    } break;
-        case specs::markdown::TokenType::TABLE_HEADING:      { closeElement( HtmlElement_e::HTML5_TH );    } break;
-        case specs::markdown::TokenType::TABLE_CELL:         { closeElement( HtmlElement_e::HTML5_TD );    } break;
-        case specs::markdown::TokenType::DEFINITION_LIST_DT: { closeElement( HtmlElement_e::HTML5_DT );    } break;
-        case specs::markdown::TokenType::DEFINITION_LIST_DD: { closeElement( HtmlElement_e::HTML5_DD );    } break;
-        case specs::markdown::TokenType::HYPERLINK:          { closeElement( HtmlElement_e::HTML5_A );     } break;
+        case TkType_e::LIST_ITEM: {
+            closeElement( HtmlElement_e::HTML5_LI );
+        } break;
+
+        case TkType_e::TABLE: {
+            closeElement( HtmlElement_e::HTML5_TBODY );
+            closeElement( HtmlElement_e::HTML5_TABLE );
+        } break;
+
+        case TkType_e::TABLE_ROW:          {
+            closeElement( HtmlElement_e::HTML5_TR );
+
+            if( peekOpenElements() == HtmlElement_e::HTML5_THEAD ) {
+                closeElement( HtmlElement_e::HTML5_THEAD );
+                openElement( HtmlElement_e::HTML5_TBODY );
+            }
+        } break;
+
+        case TkType_e::TABLE_HEADING:      { closeElement( HtmlElement_e::HTML5_TH );    } break;
+        case TkType_e::TABLE_CELL:         { closeElement( HtmlElement_e::HTML5_TD );    } break;
+        case TkType_e::DEFINITION_LIST_DT: { closeElement( HtmlElement_e::HTML5_DT );    } break;
+        case TkType_e::DEFINITION_LIST_DD: { closeElement( HtmlElement_e::HTML5_DD );    } break;
+        case TkType_e::HYPERLINK:          { closeElement( HtmlElement_e::HTML5_A );     } break;
 
         default: {
             LOG_ERROR(

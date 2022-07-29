@@ -14,6 +14,8 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
         { BlockFenceType::NONE,                "NONE" },
         { BlockFenceType::TRIPLE_TILDE,        "TRIPLE_TILDE" },
         { BlockFenceType::TRIPLE_GRAVE_ACCENT, "TRIPLE_GRAVE_ACCENT" },
+        { BlockFenceType::QUAD_TILDE,          "QUAD_TILDE" },
+        { BlockFenceType::QUAD_GRAVE_ACCENT,   "QUAD_GRAVE_ACCENT" },
     } );
 
     if( map.contains( type ) ) {

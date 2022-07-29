@@ -1,0 +1,10 @@
+{"tests": [
+
+  {
+    "description": "simple 1x1 table",
+    "markdown": "| header |\n|---|\n| cell |",
+    "html": "<table><thead><tr><th>header</th></tr></thead><tbody><tr><td>cell</td></tr></tbody></table>",
+    "errors": []
+  }
+
+]}

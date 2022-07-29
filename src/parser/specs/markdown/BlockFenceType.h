@@ -9,6 +9,8 @@ namespace blogator::parser::specs::markdown {
         NONE = 0,
         TRIPLE_TILDE,
         TRIPLE_GRAVE_ACCENT,
+        QUAD_TILDE,
+        QUAD_GRAVE_ACCENT,
     };
 
     std::ostream & operator <<( std::ostream &os, BlockFenceType type );
