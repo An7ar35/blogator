@@ -62,8 +62,9 @@
       {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:5"}
     ],
     "errors":[
-      { "description": "block line-feed separator missing: '`'", "line": 2, "col": 4 },
-      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined content after code-block", "line": 2, "col": 4 },
+      { "description": "block line-feed separator missing: '`'", "line": 2, "col": 4 }
     ]
   },
 
@@ -79,8 +80,9 @@
       {"type": "BLOCK_END", "block":"PARAGRAPH", "position": "2:5"}
     ],
     "errors":[
-      { "description": "block line-feed separator missing: '~'", "line": 2, "col": 4 },
-      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 }
+      { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined content after code-block", "line": 2, "col": 4 },
+      { "description": "block line-feed separator missing: '~'", "line": 2, "col": 4 }
     ]
   },
 
@@ -269,8 +271,9 @@
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 5 },
-      { "description": "block line-feed separator missing: '`'", "line": 1, "col": 9 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined content after code-block", "line": 1, "col": 9 },
+      { "description": "block line-feed separator missing: '`'", "line": 1, "col": 9 },
       { "description": "EOF in code-block", "line": 1, "col": 13 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 9 }
     ]
@@ -287,8 +290,9 @@
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 5 },
-      { "description": "block line-feed separator missing: '`'", "line": 1, "col": 9 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined content after code-block", "line": 1, "col": 9 },
+      { "description": "block line-feed separator missing: '`'", "line": 1, "col": 9 },
       { "description": "inlined code-block", "line": 1, "col": 13 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 9 }
     ]
@@ -305,8 +309,9 @@
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 5 },
-      { "description": "block line-feed separator missing: '~'", "line": 1, "col": 9 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined content after code-block", "line": 1, "col": 9 },
+      { "description": "block line-feed separator missing: '~'", "line": 1, "col": 9 },
       { "description": "EOF in code-block", "line": 1, "col": 13 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 9 }
     ]
@@ -323,8 +328,9 @@
     ],
     "errors":[
       { "description": "inlined code-block", "line": 1, "col": 5 },
-      { "description": "block line-feed separator missing: '~'", "line": 1, "col": 9 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 1 },
+      { "description": "inlined content after code-block", "line": 1, "col": 9 },
+      { "description": "block line-feed separator missing: '~'", "line": 1, "col": 9 },
       { "description": "EOF in code-block", "line": 1, "col": 13 },
       { "description": "empty block: CODE_BLOCK", "line": 1, "col": 9 }
     ]

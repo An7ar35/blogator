@@ -1,0 +1,10 @@
+{"tests": [
+
+  {
+    "description": "nested markdown in <div> block",
+    "markdown": "<DIV class=\"foo\">\n\n*bold markdown*\n\n</div>",
+    "html": "<div class=\"foo\"><p><em>bold markdown</em></p></div>",
+    "errors": []
+  }
+
+]}

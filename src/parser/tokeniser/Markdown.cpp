@@ -25,7 +25,7 @@ blogator::parser::tokeniser::Markdown::Markdown( parser::builder::MarkdownToHtml
     _actual_blockquote_lvl( 0 ),
     _curr_blockquote_lvl( 0 ),
     _curr_open_container_i( 0 ),
-    _loose_list_spacing( false ),
+    _list_spacing( ListSpacing_e::DEFAULT_TIGHT ),
     _error_count( 0 ),
     _eof( false )
 {}
@@ -56,6 +56,13 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
     auto character = text.nextChar();
 
     while( !_eof ) {
+//        { //TODO remove
+//            std::stringstream ss;
+//            ss << "State: " << currentState() << " ['";
+//            unicode::utf8::convert( ss, text.character() );
+//            ss << "'] @ " << text.position();
+//            LOG_ERROR( ss.str() );
+//        }
         switch( currentState() ) {
             case State_e::BEFORE_BLOCK: {
                 if( text.reachedEnd() ) {
@@ -71,7 +78,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::AFTER_BLOCK: {
                 if( text.reachedEnd() ) {
                     reconsume( State_e::END_OF_FILE );
-                } else if( specs::markdown::isContainerBlock( peekLastOpenBlockType() ) ) {
+                } else if( peekLastOpenContainerBlockType() != Type_e::NONE ) {
                     closeFormattingMarkers( text.position() );
 
                     if( hasOpenBlock() && specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
@@ -82,9 +89,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 } else {
                     if( !unicode::ascii::isnewline( character ) ) {
                         logError( text.position(), ErrorCode::BLOCK_LINEFEED_SEPARATOR_MISSING, character );
+                        reconsume( State_e::AFTER_BLOCK_DOUBLE_NEWLINE );
+                    } else {
+                        setState( State_e::AFTER_BLOCK_DOUBLE_NEWLINE );
                     }
-
-                    reconsume( State_e::AFTER_BLOCK_DOUBLE_NEWLINE );
                 }
             } break;
 
@@ -97,6 +105,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                 if( unicode::ascii::isnewline( character ) ) {
                     ++_empty_lines;
+                    setListSpacingFlag( ListSpacing_e::LOOSE );
                     setState( State_e::BEFORE_BLOCK );
                 } else {
                     reconsume( State_e::BEFORE_BLOCK );
@@ -133,6 +142,16 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( character == unicode::NUMBER_SIGN ) { //'atx' styled heading
                     modifyReturnState( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
                     reconsume( State_e::HEADING_BLOCK_ATX_DEFINITION );
+                } else if( character == unicode::LESS_THAN_SIGN ) { //html block
+                    clearHtmlCache( text.position() );
+                    _html_cache.fallback_state = std::make_unique<U32Text::State>( text.createMarker() );
+                    pushSectionMarker(
+                        queueToken( std::make_unique<HtmlBlockTk>( text.position() ) )
+                    );
+                    pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
+                    appendToPendingBuffer( character );
+                    pushReturnState( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
+                    setState( State_e::HTML_BLOCK_BEGIN );
                 } else if( character == unicode::GREATER_THAN_SIGN ) { //blockquote
                     reconsume( State_e::BLOCKQUOTE_NEW_BLOCKQUOTE_BLOCK );
                 } else if( character == unicode::HYPHEN_MINUS ) { //could be either unordered list, task list, or paragraph text
@@ -170,7 +189,8 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                         );
                         reconsume( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
                     } else {
-                        text.setMarker();
+                        _table_cache = TableCache();
+                        _table_cache.fallback_state = std::make_unique<U32Text::State>( text.createMarker() );
                         appendToPendingBuffer( character );
                         modifyReturnState( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                         setState( State_e::TABLE_BEGIN );
@@ -197,9 +217,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::BLOCK_BEGIN_UNDERSCORE: {
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) { //"_ "
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_UNDERSCORE );
@@ -218,9 +236,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::BLOCK_BEGIN_UNDERSCORE_UNDERSCORE: {
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::UNDERSCORE ) { //"___"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_UNDERSCORE );
@@ -236,12 +252,13 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::BLOCK_BEGIN_ASTERISK: {
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::SPACE ) { //"* "
                     appendToPendingBuffer( character );
                     setState( State_e::BLOCK_BEGIN_ASTERISK_SPACE );
+                } else if( character == unicode::TAB ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::BLOCK_BEGIN_ASTERISK_TAB );
                 } else if( character == unicode::ASTERISK ) { //"**"
                     appendToPendingBuffer( character );
                     setState( State_e::BLOCK_BEGIN_ASTERISK_ASTERISK );
@@ -257,9 +274,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::BLOCK_BEGIN_ASTERISK_ASTERISK: {
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::ASTERISK ) { //"***"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_ASTERISK );
@@ -273,20 +288,18 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
             } break;
 
-            case State_e::BLOCK_BEGIN_ASTERISK_SPACE: { //paragraph formatting or unordered list
+            case State_e::BLOCK_BEGIN_ASTERISK_SPACE: { //paragraph formatting, horizontal rule or unordered list
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::SPACE ) { //"*  "
                     appendToPendingBuffer( character );
                 } else if( character == unicode::ASTERISK ) { //"* *"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_ASTERISK );
                 } else { //"* ?" i.e.: unordered list
-                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::UL_ASTERISK, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -297,14 +310,28 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 }
             } break;
 
+            case State_e::BLOCK_BEGIN_ASTERISK_TAB: { //paragraph formatting or horizontal rule
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
+                } else if( character == unicode::SPACE || character == unicode::TAB ) { //"*\t "
+                    appendToPendingBuffer( character );
+                } else if( character == unicode::ASTERISK ) { //"* ... *"
+                    appendToPendingBuffer( character );
+                    setState( State_e::HORIZONTAL_RULE_ASTERISK );
+                } else {
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
+                }
+            } break;
+
             case State_e::BLOCK_BEGIN_HYPHEN: { //"-"
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::SPACE ) { //"- "
                     appendToPendingBuffer( character );
                     setState( State_e::BLOCK_BEGIN_HYPHEN_SPACE );
+                } else if( character == unicode::TAB ) { //"-\t"
+                    appendToPendingBuffer( character );
+                    setState( State_e::BLOCK_BEGIN_HYPHEN_TAB );
                 } else if( character == unicode::HYPHEN_MINUS ) { //"--"
                     appendToPendingBuffer( character );
                     setState( State_e::BLOCK_BEGIN_HYPHEN_HYPHEN );
@@ -315,9 +342,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::BLOCK_BEGIN_HYPHEN_HYPHEN: { //"--"
                 if( text.reachedEnd() ) {
-                    queueParagraphToken( pendingBufferPosition() );
-                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
-                    reconsume( State_e::END_OF_FILE );
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::HYPHEN_MINUS ) { //"---"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_HYPHEN );
@@ -337,6 +362,19 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     setState( State_e::BLOCK_BEGIN_HYPHEN_SPACE_LEFT_SQUARE_BRACKET );
                 } else { //"- ?" i.e.: unordered list
                     reconsume( State_e::BLOCK_BEGIN_UNORDERED_LIST_ITEM_HYPHEN );
+                }
+            } break;
+
+            case State_e::BLOCK_BEGIN_HYPHEN_TAB: { //paragraph formatting or horizontal rule
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
+                } else if( character == unicode::SPACE || character == unicode::TAB ) { //"-\t "
+                    appendToPendingBuffer( character );
+                } else if( character == unicode::HYPHEN_MINUS ) { //"- ... -"
+                    appendToPendingBuffer( character );
+                    setState( State_e::HORIZONTAL_RULE_ASTERISK );
+                } else { //paragraph content
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 }
             } break;
 
@@ -430,9 +468,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::BLOCK_BEGIN_TASK_LIST_CHECKED_ITEM: {
-                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( true, pendingBufferPosition() ) );
@@ -443,9 +481,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::BLOCK_BEGIN_TASK_LIST_UNCHECKED_ITEM: {
-                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( false, pendingBufferPosition() ) );
@@ -456,9 +494,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::BLOCK_BEGIN_UNORDERED_LIST_ITEM_HYPHEN: {
-                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                 }
                 queueListToken( ListType_e::UL_HYPHEN, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -543,9 +581,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
-                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::UL_ASTERISK, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -585,9 +623,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
-                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::UL_PLUS_SIGN, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -716,9 +754,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                     closeLastOpenedBlock( pendingBufferPosition() );
                 }
-                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( true, pendingBufferPosition() ) );
@@ -732,9 +770,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                     closeLastOpenedBlock( pendingBufferPosition() );
                 }
-                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                 }
                 queueListToken( ListType_e::UL_TASK, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( false, pendingBufferPosition() ) );
@@ -748,9 +786,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                     closeLastOpenedBlock( pendingBufferPosition() );
                 }
-                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                 }
                 queueListToken( ListType_e::UL_HYPHEN, pendingBufferPosition() );
                 queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -778,9 +816,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
-                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::OL_ALPHA_LOWER, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -811,9 +849,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
-                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::OL_ALPHA_UPPER, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -845,9 +883,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
-                    if( peekLastOpenContainerBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenContainerBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::OL_NUMERIC, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferPosition() ) );
@@ -913,9 +951,9 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
-                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _loose_list_spacing ) {
+                    if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
-                        _loose_list_spacing = false;
+                        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
                     }
                     queueListToken( ListType_e::FOOTNOTE_DEFS, pendingBufferPosition() );
                     queueToken( std::make_unique<ListItemTk>( pendingBufferToStr(), pendingBufferPosition() ) );
@@ -1008,6 +1046,12 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                         }
 
                     } else {
+                        if( peekLastOpenContainerBlockType() == Type_e::LIST_ITEM &&
+                            _list_spacing                    != ListSpacing_e::DEFAULT_TIGHT )
+                        {
+                            loosenLastListBlockSpacing();
+                        }
+
                         reconsume( consumeReturnState() );
                     }
                 }
@@ -1016,7 +1060,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             case State_e::NEWLINE_CONSUME_PREFIXES_END: {
                 closeFormattingMarkers( text.position() );
 
-                while( hasOpenBlock() && ( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) ) {
+                while( hasOpenBlock() && specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                     closeLastOpenedBlock( text.position() );
                 }
 
@@ -1041,7 +1085,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                         closeLastOpenedBlock( text.position() );
                     }
 
-                    if( _empty_lines > 0 ) {
+                    if( _empty_lines > 1 ) {
                         closeFormattingMarkers( text.position() );
 
                         while( hasOpenContainerBlock() && peekLastOpenBlockType() != Type_e::BLOCKQUOTE ) {
@@ -1166,7 +1210,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                     closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                    if( _loose_list_spacing ) {
+                    if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
                     }
 
@@ -1178,7 +1222,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
 
                 } else {
                     reconsume( State_e::NEWLINE_CONSUME_LIST_PREFIX_ABORT );
@@ -1210,7 +1254,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                     closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                    if( _loose_list_spacing ) {
+                    if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
                     }
 
@@ -1222,7 +1266,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
 
                 } else {
                     reconsume( State_e::NEWLINE_CONSUME_LIST_PREFIX_ABORT );
@@ -1254,7 +1298,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                     closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                    if( _loose_list_spacing ) {
+                    if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
                     }
 
@@ -1266,7 +1310,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
 
                 } else {
                     reconsume( State_e::NEWLINE_CONSUME_LIST_PREFIX_ABORT );
@@ -1287,7 +1331,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                     closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                    if( _loose_list_spacing ) {
+                    if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
                     }
 
@@ -1299,7 +1343,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
 
                 } else {
                     reconsume( State_e::NEWLINE_CONSUME_LIST_PREFIX_ABORT );
@@ -1320,7 +1364,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                     closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                    if( _loose_list_spacing ) {
+                    if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                         loosenLastListBlockSpacing();
                     }
 
@@ -1332,7 +1376,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     setState( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                    _loose_list_spacing = false;
+                    setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
 
                 } else {
                     reconsume( State_e::NEWLINE_CONSUME_LIST_PREFIX_ABORT );
@@ -1504,7 +1548,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                 closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                if( _loose_list_spacing ) {
+                if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
                 }
 
@@ -1516,7 +1560,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                _loose_list_spacing = false;
+                setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
             } break;
 
             case State_e::NEWLINE_CONSUME_LIST_PREFIX_TASK_LIST_UNCHECKED_ITEM: { //"- []" or "- [ ]"
@@ -1532,7 +1576,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                 closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                if( _loose_list_spacing ) {
+                if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
                 }
 
@@ -1544,7 +1588,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                _loose_list_spacing = false;
+                setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
             } break;
 
             case State_e::NEWLINE_CONSUME_LIST_PREFIX_UNORDERED_LIST_ITEM_HYPHEN: { //"- ?"
@@ -1560,7 +1604,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                 closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                if( _loose_list_spacing ) {
+                if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
                 }
 
@@ -1572,7 +1616,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                _loose_list_spacing = false;
+                setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
             } break;
 
             case State_e::NEWLINE_CONSUME_LIST_PREFIX_FOOTNOTE_DEFINITION_ITEM: {
@@ -1588,7 +1632,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
                 closeOpenContainerBlocks( _curr_open_container_i, pendingBufferPosition() );
 
-                if( _loose_list_spacing ) {
+                if( _list_spacing != ListSpacing_e::DEFAULT_TIGHT ) {
                     loosenLastListBlockSpacing();
                 }
 
@@ -1600,7 +1644,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                 reconsume( State_e::NEWLINE_CONSUME_PREFIXES_CONTINUE );
 
-                _loose_list_spacing = false;
+                setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT );
             } break;
 
             case State_e::NEWLINE_CONSUME_LIST_PREFIX_ABORT: {
@@ -1623,7 +1667,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::NEWLINE_AFTER_EMPTY_LINE: {
-                _loose_list_spacing = true;
+                if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing == ListSpacing_e::DEFAULT_TIGHT ) {
+                    setListSpacingFlag( ListSpacing_e::MAYBE_LOOSE );
+                }
+
                 ++_empty_lines;
                 modifyReturnState( State_e::BLOCK_BEGIN );
                 reconsume( consumeReturnState() );
@@ -1889,7 +1936,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::ASTERISK ) {
                     appendToPendingBuffer( character );
-                } else if( character == unicode::SPACE ) {
+                } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( State_e::HORIZONTAL_RULE_WHITESPACE );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
@@ -1907,7 +1954,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::HYPHEN_MINUS ) {
                     appendToPendingBuffer( character );
-                } else if( character == unicode::SPACE ) {
+                } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( State_e::HORIZONTAL_RULE_WHITESPACE );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
@@ -1925,7 +1972,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::UNDERSCORE ) {
                     appendToPendingBuffer( character );
-                } else if( character == unicode::SPACE ) {
+                } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( State_e::HORIZONTAL_RULE_WHITESPACE );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
@@ -1941,7 +1988,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() ) {
                     queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
                     reconsume( State_e::END_OF_FILE );
-                } else if( character == unicode::SPACE ) {
+                } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     appendToPendingBuffer( character );
                 } else if( unicode::ascii::isnewline( character ) ) {
                     queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
@@ -2460,8 +2507,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( unicode::ascii::isnewline( peekLastQueuedToken()->text().back() ) ) {
                         popLastQueuedToken();
                     }
-                    text.advanceCaret( 2 );
-                    setState( State_e::AFTER_BLOCK );
+
+                    text.advanceCaret( 3 );
+                    closeLastOpenedBlock( text.position() );
+                    reconsume( State_e::CODE_BLOCK_AFTER_END );
 
                 } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::QUAD_GRAVE_ACCENT && text.characters( 4 ) == UR"(````)" ) ||
                            ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE        && text.characters( 4 ) == UR"(~~~~)" ) )
@@ -2469,13 +2518,30 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     if( unicode::ascii::isnewline( peekLastQueuedToken()->text().back() ) ) {
                         popLastQueuedToken();
                     }
-                    text.advanceCaret( 3 );
-                    setState( State_e::AFTER_BLOCK );
+
+                    text.advanceCaret( 4 );
+                    closeLastOpenedBlock( text.position() );
+                    reconsume( State_e::CODE_BLOCK_AFTER_END );
 
                 } else {
                     queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
                     setState( State_e::CODE_BLOCK_CONTENT );
                 }
+            } break;
+
+            case State_e::CODE_BLOCK_AFTER_END: {
+                if( text.reachedEnd() ) {
+                    modifyReturnState( State_e::AFTER_BLOCK );
+                    reconsume( consumeReturnState() );
+                } else if( unicode::ascii::isnewline( character ) ) {
+                    modifyReturnState( State_e::BEFORE_BLOCK );
+                    setState( consumeReturnState() );
+                } else if( character != unicode::SPACE && character != unicode::TAB ) {
+                    logError( text.position(), ErrorCode::INLINED_CONTENT_AFTER_CODE_BLOCK );
+                    logError( text.position(), ErrorCode::BLOCK_LINEFEED_SEPARATOR_MISSING, character );
+                    modifyReturnState( State_e::BEFORE_BLOCK );
+                    reconsume( consumeReturnState() );
+                } //else: ignore
             } break;
 
             case State_e::BLOCKQUOTE_NEW_BLOCKQUOTE_BLOCK: {
@@ -2527,7 +2593,8 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                         );
                         reconsume( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
                     } else {
-                        text.setMarker();
+                        _table_cache = TableCache();
+                        _table_cache.fallback_state = std::make_unique<U32Text::State>( text.createMarker() );
                         appendToPendingBuffer( character );
                         modifyReturnState( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                         setState( State_e::TABLE_BEGIN );
@@ -2617,7 +2684,6 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::TABLE_BEGIN: { //"|"
                 if( !text.reachedEnd() && !unicode::ascii::isnewline( character ) ) {
-                    _table_cache = TableCache();
                     pushSectionMarker(
                         queueTableToken( pendingBufferPosition() )
                     );
@@ -2847,7 +2913,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::TABLE_ABORT: {
                 _table_cache.is_fake_table = true;
-                text.resetToMarker();
+                text.resetToMarker( *_table_cache.fallback_state );
 
                 while( _open_blocks.size() > _table_cache.starting_block_i ) { //discard all blocks opened in table context + table itself
                     popOpenBlockStack();
@@ -2856,6 +2922,407 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 clearPendingTokensFromLastSectionMarkerPosition(); //discard all table tokens and associated buffered errors
                 modifyReturnState( State_e::BLOCK_BEGIN_AFTER_WHITESPACE );
                 reconsume( consumeReturnState() );
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN: { //"<"
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_CONCLUSION );
+                } else if( character == unicode::SOLIDUS ) { //"</"
+                    appendToPendingBuffer( character );
+                    pushReturnState( State_e::HTML_BLOCK_BEGIN_CONCLUSION );
+                    setState( State_e::HTML_BLOCK_BEGIN_END_TAG_OPEN ); //condition 6 or 7
+                } else if( character == unicode::EXCLAMATION_MARK ) { //"<!"
+                    appendToPendingBuffer( character );
+                    pushReturnState( State_e::HTML_BLOCK_BEGIN_CONCLUSION );
+                    setState( State_e::HTML_BLOCK_BEGIN_MARKUP_DECLARATION ); //condition 2, 4 or 5
+                } else if( character == unicode::QUESTION_MARK ) { //"<?"
+                    appendToPendingBuffer( character );
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_3 );
+                    setState( State_e::HTML_BLOCK_BEGIN_CONCLUSION );
+                } else if( unicode::ascii::isalpha( character ) ) { //"<[A-Za-z]"
+                    pushReturnState( State_e::HTML_BLOCK_BEGIN_CONCLUSION );
+                    reconsume( State_e::HTML_BLOCK_BEGIN_TAG_NAME ); //condition 1, 6 or 7
+                } else {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_CONCLUSION );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_END_TAG_OPEN: { //"</"
+                if( text.reachedEnd() ) {
+                    setState( consumeReturnState() );
+                } else if( character == unicode::GREATER_THAN_SIGN ) { //"</>"
+                    reconsume( consumeReturnState() );
+                } else if( unicode::ascii::isalpha( character ) ) {
+                    pendingHtmlTag().type = markdown::HtmlTag::Type::END;
+                    reconsume( State_e::HTML_BLOCK_BEGIN_TAG_NAME );
+                } else {
+                    reconsume( consumeReturnState() );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_MARKUP_DECLARATION: { //"<!"
+                if( text.reachedEnd() ) {
+                    setState( consumeReturnState() );
+                } else if( character == unicode::HYPHEN_MINUS && text.characters( 2 ) == UR"(--)" ) { //"<!--"
+                    appendToPendingBuffer( UR"(--)" );
+                    text.advanceCaret( 1 );
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_2 );
+                    setState( consumeReturnState() );
+                } else if( unicode::ascii::isalpha( character ) ) { //"<![A-Za-z]"
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_4 );
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::LEFT_SQUARE_BRACKET && text.characters( 7 ) == UR"([CDATA[)" ) { //"<![CDATA["
+                    appendToPendingBuffer( UR"([CDATA[)" );
+                    text.advanceCaret( 6 );
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_5 );
+                    setState( consumeReturnState() );
+                } else {
+                    setState( consumeReturnState() );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_TAG_NAME: { //cond 1, 6 or 7
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    pendingHtmlTag().name = std::u32string( _html_cache.buffer.cbegin(), _html_cache.buffer.cend() );
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
+                } else if( character == unicode::SOLIDUS ) {
+                    pendingHtmlTag().name = std::u32string( _html_cache.buffer.cbegin(), _html_cache.buffer.cend() );
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_SELF_CLOSING_START_TAG );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    pendingHtmlTag().name = std::u32string( _html_cache.buffer.cbegin(), _html_cache.buffer.cend() );
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
+                } else if( unicode::ascii::isupper( character ) ) { //"</[A-Z]"
+                    appendToPendingBuffer( character );
+                    appendToHtmlBuffer( unicode::ascii::tolower( character ) );
+                } else if( unicode::ascii::islower( character ) ) { //"<![a-z]"
+                    appendToPendingBuffer( character );
+                    appendToHtmlBuffer( character );
+                } else {
+                    reconsume( consumeReturnState() );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME: {
+                if( text.reachedEnd() || character == unicode::SOLIDUS || character == unicode::GREATER_THAN_SIGN ) {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_NAME );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    appendToPendingBuffer( character );
+                } else if( character == unicode::EQUALS_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_NAME );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_NAME );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_NAME: {
+                if( text.reachedEnd()                    ||
+                    unicode::ascii::isfeed( character )  ||
+                    character == unicode::SPACE          ||
+                    character == unicode::TAB            ||
+                    character == unicode::SOLIDUS        ||
+                    character == unicode::GREATER_THAN_SIGN )
+                {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_NAME );
+                } else if( character == unicode::EQUALS_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_VALUE );
+                } else {
+                    appendToPendingBuffer( character );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_NAME: {
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    appendToPendingBuffer( character );
+                } else if( character == unicode::SOLIDUS ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_SELF_CLOSING_START_TAG );
+                } else if( character == unicode::EQUALS_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_VALUE );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_7 );
+                    setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
+                } else {
+                    appendToPendingBuffer( character );
+                    reconsume( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_NAME );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_VALUE: {
+                if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    appendToPendingBuffer( character );
+                } else if( character == unicode::QUOTATION_MARK ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_DOUBLE_QUOTED );
+                } else if( character == unicode::APOSTROPHE ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_SINGLE_QUOTED );
+                } else if( character == unicode::GREATER_THAN_SIGN ) { //bad format
+                    appendToPendingBuffer( character );
+                    reconsume( consumeReturnState() );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_UNQUOTED );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_DOUBLE_QUOTED: {
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::QUOTATION_MARK ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_VALUE_QUOTED );
+                } else {
+                    appendToPendingBuffer( character );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_SINGLE_QUOTED: {
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::APOSTROPHE ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_VALUE_QUOTED );
+                } else {
+                    appendToPendingBuffer( character );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_UNQUOTED: {
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_7 );
+                    setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
+                } else {
+                    appendToPendingBuffer( character );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_VALUE_QUOTED: {
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
+                } else if( character == unicode::SOLIDUS ) {
+                    setState( State_e::HTML_BLOCK_BEGIN_SELF_CLOSING_START_TAG );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setHtmlBlockType( HtmlBlockType_e::TYPE_7 );
+                    setState( consumeReturnState() );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_SELF_CLOSING_START_TAG: {
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    pendingHtmlTag().type = markdown::HtmlTag::Type::SELF_CLOSE;
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE: { //for tags with no attributes on same line
+                if( _html_cache.block_type == HtmlBlockType_e::UNKNOWN ) {
+                    if( pendingHtmlTag().type == markdown::HtmlTag::Type::START &&
+                        specs::markdown::isHtmlBlockType1( pendingHtmlTag().name ) )
+                    {
+                        setHtmlBlockType( HtmlBlockType_e::TYPE_1 );
+
+                    } else if( specs::markdown::isHtmlBlockType6( pendingHtmlTag().name ) ) {
+                        setHtmlBlockType( HtmlBlockType_e::TYPE_6 );
+
+                    } else {
+                        setHtmlBlockType( HtmlBlockType_e::TYPE_7 );
+                    }
+                }
+
+                reconsume( consumeReturnState() ); //'HTML_BLOCK_BEGIN_CONCLUSION'
+            } break;
+
+            case State_e::HTML_BLOCK_BEGIN_CONCLUSION: {
+                if( currentHtmlBlockType() == HtmlBlockType_e::UNKNOWN ) {
+                    text.resetToMarker( *_html_cache.fallback_state );
+                    resetPendingBuffer( text.position() );
+                    clearPendingTokensFromLastSectionMarkerPosition(); //'HtmlBlockTk' -> ...
+                    popOpenBlockStack(); //'HTML'
+                    reconsume( consumeReturnState() ); //'PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK'
+                } else { //TYPE 1-7
+                    flushPendingBufferToQueue( CharacterProcessing::NONE ); //as raw HTML
+                    pendingHtmlTag()  = {};
+                    modifyReturnState( State_e::AFTER_BLOCK );
+                    reconsume( State_e::HTML_BLOCK_CONTENT );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_CONTENT: {
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
+                } else if( unicode::ascii::isfeed( character ) ) {
+                    resetHtmlBuffer( text.position() );
+                    appendToHtmlBuffer( character );
+                    setState( State_e::HTML_BLOCK_CONTENT_NEWLINE );
+
+                } else if( character              == unicode::LESS_THAN_SIGN &&
+                           currentHtmlBlockType() == HtmlBlockType_e::TYPE_1 )
+                {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                    setState( State_e::HTML_BLOCK_CONTENT_TAG_OPEN );
+
+                } else if( character              == unicode::HYPHEN_MINUS   &&
+                           currentHtmlBlockType() == HtmlBlockType_e::TYPE_2 &&
+                           text.characters( 3 )   == UR"(-->)" )
+                {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'-'
+                    text.advanceCaret();
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'-'
+                    text.advanceCaret();
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'>'
+                    setState( consumeReturnState() );
+
+                } else if( character              == unicode::QUESTION_MARK  &&
+                           currentHtmlBlockType() == HtmlBlockType_e::TYPE_3 &&
+                           text.characters( 3 )   == UR"(?>)" )
+                {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'?'
+                    text.advanceCaret();
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'>'
+                    setState( consumeReturnState() );
+
+                } else if( character              == unicode::GREATER_THAN_SIGN &&
+                           currentHtmlBlockType() == HtmlBlockType_e::TYPE_4 )
+                {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'>'
+                    setState( consumeReturnState() );
+
+                } else if( character              == unicode::RIGHT_SQUARE_BRACKET &&
+                           currentHtmlBlockType() == HtmlBlockType_e::TYPE_5       &&
+                           text.characters( 3 )   == UR"(]]>)" )
+                {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //']'
+                    text.advanceCaret();
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //']'
+                    text.advanceCaret();
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); //'>'
+                    setState( consumeReturnState() );
+
+                } else {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_CONTENT_NEWLINE: {
+                if( text.reachedEnd() ) {
+                    switch( currentHtmlBlockType() ) {
+                        case HtmlBlockType_e::TYPE_6: [[fallthrough]];
+                        case HtmlBlockType_e::TYPE_7: {
+                            //TODO close HTML block
+                            reconsume( consumeReturnState() );
+                        } break;
+
+                        default: {
+                            flushHtmlBufferToQueue();
+                            logError( text.position(), ErrorCode::EOF_IN_HTML_BLOCK );
+                            reconsume( consumeReturnState() );
+                        } break;
+                    }
+                } else if( character == unicode::SPACE || character == unicode::TAB ) {
+                    appendToHtmlBuffer( character );
+                } else if( unicode::ascii::isfeed( character ) ) {
+                    switch( currentHtmlBlockType() ) {
+                        case HtmlBlockType_e::TYPE_6: [[fallthrough]];
+                        case HtmlBlockType_e::TYPE_7: {
+                            reconsume( consumeReturnState() );
+                        } break;
+
+                        default: {
+                            appendToHtmlBuffer( character );
+                            flushHtmlBufferToQueue();
+                            setState( State_e::HTML_BLOCK_CONTENT );
+                        } break;
+                    }
+                } else {
+                    flushHtmlBufferToQueue();
+                    reconsume( State_e::HTML_BLOCK_CONTENT );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_CONTENT_TAG_OPEN: { //'<'
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
+                } else if( character == unicode::SOLIDUS ) { //"</"
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                    setState( State_e::HTML_BLOCK_END_END_TAG_OPEN );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_CONTENT );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_END_END_TAG_OPEN: { //"</"
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
+                } else if( unicode::ascii::isalpha( character ) ) {
+                    resetHtmlBuffer( text.position() );
+                    reconsume( State_e::HTML_BLOCK_END_TAG_NAME );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_CONTENT );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_END_TAG_NAME: {
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                    setState( State_e::HTML_BLOCK_END_TAG_AFTER_TAG_NAME );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    reconsume( State_e::HTML_BLOCK_END_TAG_AFTER_TAG_NAME );
+                } else if( unicode::ascii::isupper( character ) ) { //"</[A-Z]"
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                    appendToHtmlBuffer( unicode::ascii::tolower( character ) );
+                } else if( unicode::ascii::islower( character ) ) { //"<![a-z]"
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                    appendToHtmlBuffer( character );
+                } else {
+                    reconsume( State_e::HTML_BLOCK_CONTENT );
+                }
+            } break;
+
+            case State_e::HTML_BLOCK_END_TAG_AFTER_TAG_NAME: {
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
+                } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+
+                    const auto tag_name = std::u32string( _html_cache.buffer.cbegin(), _html_cache.buffer.cend() );
+
+                    if( specs::markdown::isHtmlBlockType1( tag_name ) ) {
+                        setState( consumeReturnState() ); //'AFTER_BLOCK'
+                    } else {
+                        setState( State_e::HTML_BLOCK_CONTENT );
+                    }
+                } else {
+                    reconsume( State_e::HTML_BLOCK_CONTENT );
+                }
             } break;
 
             case State_e::END_OF_FILE: {
@@ -2893,9 +3360,10 @@ void tokeniser::Markdown::reset() {
     _actual_blockquote_lvl = 0;
     _curr_blockquote_lvl   = 0;
     _curr_open_container_i = 0;
-    _loose_list_spacing    = false;
+    _list_spacing          = ListSpacing_e::DEFAULT_TIGHT;
     _pending               = {};
     _table_cache           = {};
+    _html_cache            = {};
     _return_states         = {};
     _open_blocks           = {};
     _queued_tokens.clear();
@@ -2914,7 +3382,6 @@ size_t tokeniser::Markdown::errors() const {
 }
 
 //==========================================[ PRIVATE ]=============================================
-
 /**
  * Sends a parse error to the parser log
  * @param position Position in source text
@@ -3234,7 +3701,7 @@ inline void tokeniser::Markdown::pushToOpenBlockStack( tokeniser::markdown::Bloc
     if( specs::markdown::isContainerBlock( block.type ) ) {
         _open_container.push_back( block );
     }
-
+//    LOG_CRITICAL( "> opening block: ", block.type );
     _open_blocks.push_back( block );
 }
 
@@ -3346,6 +3813,14 @@ inline void tokeniser::Markdown::popOpenBlockStack() {
 }
 
 /**
+ * Sets the "loose list" flag
+ * @param flag Value (default= true)
+ */
+inline void tokeniser::Markdown::setListSpacingFlag( ListSpacing_e flag ) {
+    _list_spacing = flag;
+}
+
+/**
  * Sets the last current list block's spacing property
  * @param spacing spacing flag
  */
@@ -3356,6 +3831,7 @@ inline void tokeniser::Markdown::loosenLastListBlockSpacing() {
 
     if( it != _open_container.rend() ) {
         dynamic_cast<ListTk *>( it->token )->setTightFlag( false );
+        setListSpacingFlag( ListSpacing_e::DEFAULT_TIGHT ); //reset to avoid sequential repeat calls for the same list
     } else {
         LOG_ERROR(
             "[parser::tokeniser::Markdown::loosenLastListBlockSpacing()] "
@@ -3628,10 +4104,16 @@ inline void tokeniser::Markdown::closeLastOpenedBlock( TextPos position ) {
 
         if( last == Type_e::BLOCKQUOTE && _actual_blockquote_lvl > 0 ) {
             --_actual_blockquote_lvl;
+        } else if( last == Type_e::LIST && _list_spacing == ListSpacing_e::LOOSE ) {
+            loosenLastListBlockSpacing(); //TODO do i still need this?
         }
-
+//        LOG_CRITICAL( "<  closing block: ", last ); //TODO remove
         queueToken( std::make_unique<BlockEndTk>( last, position ) );
         popOpenBlockStack();
+
+        if( peekLastOpenBlockType() == Type_e::LIST_ITEM && _list_spacing == ListSpacing_e::MAYBE_LOOSE ) {
+            setListSpacingFlag( ListSpacing_e::LOOSE );
+        }
     }
 
     if( _open_blocks.empty() ) {
@@ -3810,6 +4292,79 @@ inline void tokeniser::Markdown::closeFormattingMarkers( TextPos position ) {
 inline void tokeniser::Markdown::clearFormattingMarkers() {
     _formatting_markers.clear();
 }
+
+/**
+ * Sets the cached HTML block's type
+ */
+inline void tokeniser::Markdown::setHtmlBlockType( Markdown::HtmlBlockType_e type ) {
+    _html_cache.block_type = type;
+}
+
+/**
+ * Get the current HTML block's type
+ * @return HTML block type enum
+ */
+inline specs::markdown::HtmlBlockType tokeniser::Markdown::currentHtmlBlockType() const {
+    return _html_cache.block_type;
+}
+
+/**
+ * Gets the current HTML pending tag
+ * @return Reference for the current HTML pending tag
+ */
+inline tokeniser::markdown::HtmlTag &tokeniser::Markdown::pendingHtmlTag() {
+    return _html_cache.pending_tag;
+}
+
+/**
+ * Appends a character to the HTML character buffer
+ * @param c Character
+ */
+inline void tokeniser::Markdown::appendToHtmlBuffer( char32_t c ) {
+    _html_cache.buffer.emplace_back( c );
+}
+
+/**
+ * Resets the buffer
+ * @param position Source text position of the first character in the buffer
+ */
+void tokeniser::Markdown::resetHtmlBuffer( TextPos position ) {
+    _html_cache.buffer.clear();
+    _html_cache.buffer_pos = position;
+}
+
+/**
+ * Flushes all characters in HTML buffer to the token queue
+ */
+inline void tokeniser::Markdown::flushHtmlBufferToQueue() {
+    auto position = _html_cache.buffer_pos;
+
+    for( size_t i = 0; i < _html_cache.buffer.size(); ++i ) {
+        const auto c = _html_cache.buffer[ i ];
+
+        queueToken( std::make_unique<CharacterTk>( c, position ) );
+
+        if( unicode::ascii::isnewline( c ) ) {
+            position = { position.line + 1, 1 };
+        } else {
+            position += { 0, 1 };
+        }
+    }
+
+    _html_cache.buffer.clear();
+}
+
+/**
+ * Clears HTML block cache
+ * @param position Source text position of the first character in the buffer
+ */
+inline void tokeniser::Markdown::clearHtmlCache( TextPos position ) {
+    _html_cache.block_type  = specs::markdown::HtmlBlockType::UNKNOWN;
+    _html_cache.pending_tag = {};
+    _html_cache.buffer.clear();
+    _html_cache.buffer_pos = position;
+}
+
 
 /**
  * Pops the last queued token

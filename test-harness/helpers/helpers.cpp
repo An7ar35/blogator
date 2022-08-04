@@ -80,6 +80,20 @@ blogator::parser::U32Text test_harness::transcodeInput( const std::string &raw, 
 }
 
 /**
+ * Prints a UTF-32 character buffer to a UTF-8 stream
+ * @param os Output stream
+ * @param u32text U32 text
+ */
+void test_harness::printU32Buffer( std::ostream &os, blogator::parser::U32Text & u32text ) {
+    while( !u32text.reachedEnd() ) {
+        blogator::unicode::utf8::convert( os, u32text.character() );
+        u32text.nextChar();
+    }
+
+    u32text.reset();
+}
+
+/**
  * Output stream operator
  * @param os Output stream
  * @param test CommonMarkTest object

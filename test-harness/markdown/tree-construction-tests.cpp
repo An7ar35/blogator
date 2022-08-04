@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "../../../src/parser/encoding/Transcode.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
+#include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
 #include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dom/node/Element.h"
@@ -72,6 +73,8 @@ testing::AssertionResult runMarkdownTreeBuilderTest( const test_harness::markdow
     md_tokeniser.parse( src );
 
     auto raw_html = md2html.reset();
+
+//    test_harness::printU32Buffer( std::cout, *raw_html );
 
     tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
     tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes

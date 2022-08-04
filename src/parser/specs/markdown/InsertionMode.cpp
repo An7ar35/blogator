@@ -14,11 +14,11 @@ using namespace blogator::parser::specs::markdown;
  */
 std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os, blogator::parser::specs::markdown::InsertionMode mode ) {
     static const auto map = std::unordered_map<InsertionMode, std::string>( {
-        { InsertionMode::INITIAL,         "initial" },
-        { InsertionMode::CONTENT,         "content" },
-        { InsertionMode::IMAGE,           "image" },
-        { InsertionMode::DEFINITION_LIST, "definition list" },
-        { InsertionMode::END_OF_FILE,     "EOF" },
+        { InsertionMode::INITIAL,         "INITIAL" },
+        { InsertionMode::CONTENT,         "CONTENT" },
+        { InsertionMode::IMAGE,           "IMAGE" },
+        { InsertionMode::DEFINITION_LIST, "DEFINITION_LIST" },
+        { InsertionMode::END_OF_FILE,     "END_OF_FILE" },
     } );
 
     if( map.contains( mode ) ) {

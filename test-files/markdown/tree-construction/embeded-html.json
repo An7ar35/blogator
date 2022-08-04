@@ -2,8 +2,15 @@
 
   {
     "description": "<b> in paragraph",
-    "markdown": "<b>text</b>",
-    "html": "<p><b>text</b></p>",
+    "markdown": "text <b>bold</b>",
+    "html": "<p>text <b>bold</b></p>",
+    "errors": []
+  },
+
+  {
+    "description": "<b> as HTML block",
+    "markdown": "<b>bold</b>",
+    "html": "<b>bold</b>",
     "errors": []
   }
 

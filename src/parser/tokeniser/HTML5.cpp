@@ -737,7 +737,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
                     unicode::ascii::istab( character )   ||
                     unicode::ascii::isfeed( character )  ||
                     unicode::ascii::isspace( character ) ||
-                    character == unicode::SOLIDUS                 ||
+                    character == unicode::SOLIDUS        ||
                     character == unicode::GREATER_THAN_SIGN )
                 {
                     reconsume( State_e::AFTER_ATTRIBUTE_NAME );

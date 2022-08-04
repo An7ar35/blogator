@@ -25,6 +25,7 @@ namespace blogator::parser::specs::markdown {
         TABLE_CELL,          //equivalent to <td>
         DEFINITION_LIST_DT,  //equivalent to <dt>
         DEFINITION_LIST_DD,  //equivalent to <dd>
+        HTML,                //HTML markup block
 
         BLOCK_END,
 

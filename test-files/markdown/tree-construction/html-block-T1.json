@@ -1,0 +1,66 @@
+{"tests": [
+
+  {
+    "description": "<pre> block",
+    "markdown": "<pre>content</pre>",
+    "html": "<pre>content</pre>",
+    "errors": []
+  },
+
+  {
+    "description": "<PRE> block",
+    "markdown": "<PRE>content</PRE>",
+    "html": "<pre>content</pre>",
+    "errors": []
+  },
+
+  {
+    "description": "<script> block",
+    "markdown": "<script>content</script>",
+    "html": "<script>content</script>",
+    "errors": []
+  },
+
+  {
+    "description": "<SCRIPT> block",
+    "markdown": "<SCRIPT>content</SCRIPT>",
+    "html": "<script>content</script>",
+    "errors": []
+  },
+
+  {
+    "description": "<style> block",
+    "markdown": "<style>content</style>",
+    "html": "<style>content</style>",
+    "errors": []
+  },
+
+  {
+    "description": "<STYLE> block",
+    "markdown": "<STYLE>content</STYLE>",
+    "html": "<style>content</style>",
+    "errors": []
+  },
+
+  {
+    "description": "<textarea> block",
+    "markdown": "<textarea>content</textarea>",
+    "html": "<textarea>content</textarea>",
+    "errors": []
+  },
+
+  {
+    "description": "<TEXTAREA> block",
+    "markdown": "<TEXTAREA>content</TEXTAREA>",
+    "html": "<textarea>content</textarea>",
+    "errors": []
+  },
+
+  {
+    "description": "<pre> multi-lined block",
+    "markdown": "<pre\n>\nmulti-lined\ncontent\n</pre>",
+    "html": "<pre>multi-lined\ncontent</pre>",
+    "errors": []
+  }
+
+]}

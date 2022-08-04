@@ -475,7 +475,15 @@ set(SOURCE_FILES
         src/parser/tokeniser/markdown/Block.cpp
         src/parser/tokeniser/markdown/Block.h
         src/parser/specs/markdown/InsertionMode.cpp
-        src/parser/specs/markdown/InsertionMode.h)
+        src/parser/specs/markdown/InsertionMode.h
+        src/parser/tokeniser/markdown/HtmlTag.cpp
+        src/parser/tokeniser/markdown/HtmlTag.h
+        src/parser/specs/markdown/HtmlBlockType.cpp
+        src/parser/specs/markdown/HtmlBlockType.h
+        src/parser/token/markdown/HtmlBlockTk.cpp
+        src/parser/token/markdown/HtmlBlockTk.h
+        src/parser/specs/markdown/ListSpacing.cpp
+        src/parser/specs/markdown/ListSpacing.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )

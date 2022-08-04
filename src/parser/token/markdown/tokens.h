@@ -13,6 +13,7 @@
 #include "FormatEndTk.h"
 #include "HeadingTk.h"
 #include "HorizontalRuleTk.h"
+#include "HtmlBlockTk.h"
 #include "HyperlinkTk.h"
 #include "ImageTk.h"
 #include "ListTk.h"

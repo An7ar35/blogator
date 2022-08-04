@@ -5,7 +5,11 @@
 #include <stack>
 
 #include "markdown/Block.h"
-#include "../specs/markdown/specifications.h"
+#include "markdown/HtmlTag.h"
+#include "../specs/markdown/HtmlBlockType.h"
+#include "../specs/markdown/TokeniserState.h"
+#include "../specs/markdown/BlockFenceType.h"
+#include "../specs/markdown/ListSpacing.h"
 #include "../token/markdown/FormatBeginTk.h"
 #include "../builder/MarkdownToHtml.h"
 #include "../logging/ErrorObject.h"
@@ -32,6 +36,8 @@ namespace blogator::parser::tokeniser {
         typedef specs::markdown::TokenType                   Type_e;
         typedef specs::markdown::BlockFenceType              Fence_e;
         typedef specs::markdown::ListType                    ListType_e;
+        typedef specs::markdown::HtmlBlockType               HtmlBlockType_e;
+        typedef specs::markdown::ListSpacing                 ListSpacing_e;
         typedef std::unique_ptr<token::markdown::MarkdownTk> TokenPtr_t;
 
         static constexpr auto     THIS_CONTEXT     = specs::Context::MARKDOWN;
@@ -57,7 +63,7 @@ namespace blogator::parser::tokeniser {
 
         /**
          * Section Marker
-         * @param tk_i Index in token queue
+         * @param tk_i  Index in token queue
          * @param fmt_i Index in formatting markers
          * @param err_i Index in error queue
          */
@@ -69,9 +75,9 @@ namespace blogator::parser::tokeniser {
 
         /**
          * Block cache
-         * @param setext_flag edge-case signal flag to signal the possibility of the current block being an 'setext' styled heading
-         * @param position start position in source text of the buffer
-         * @param buffer character buffer
+         * @param setext_flag Edge-case signal flag to signal the possibility of the current block being an 'setext' styled heading
+         * @param position    Start position in source text of the buffer
+         * @param buffer      Character buffer
          * @param block_lines Current block line count
          * @param block_fence Current block's fence type (for code-blocks)
          */
@@ -85,20 +91,39 @@ namespace blogator::parser::tokeniser {
 
         /**
          * Table cache
-         * @param is_fake_table Flag to treat line beginning with '|' as normal text (indicates table is not actually a table or is mis-formatted)
+         * @param fallback_state   U32Text::State at the beginning of the block
+         * @param is_fake_table    Flag to treat line beginning with '|' as normal text (indicates table is not actually a table or is mis-formatted)
          * @param starting_block_i Index in open blocks where the initial TABLE token is opened
-         * @param heading_tokens Pointers to heading tokens (helps keep track of n° of columns)
-         * @param col_i Current column
+         * @param col_i            Current column
+         * @param heading_tokens   Pointers to heading tokens (helps keep track of n° of columns)
          */
         struct TableCache {
+            std::unique_ptr<U32Text::State>                fallback_state;
             bool                                           is_fake_table    { false };
             size_t                                         starting_block_i { 0 };
             size_t                                         col_i            { 0 };
             std::vector<token::markdown::TableHeadingTk *> heading_tokens;
         };
 
+        /**
+         * HTML block cache
+         * @param fallback_state U32Text::State at the beginning of the block
+         * @param block_type     Block type (1-7)
+         * @param pending_tag    Current tag being processed
+         * @param buffer_pos     Text position of the first character in the buffer
+         * @param buffer         Character buffer
+         */
+        struct HtmlBlockCache {
+            std::unique_ptr<U32Text::State> fallback_state;
+            HtmlBlockType_e                 block_type      { HtmlBlockType_e::UNKNOWN };
+            markdown::HtmlTag               pending_tag;
+            TextPos                         buffer_pos;
+            std::vector<char32_t>           buffer;
+        };
+
         BlockCache                                  _pending;               //cached variables for current block
         TableCache                                  _table_cache;           //cached variable for current table block
+        HtmlBlockCache                              _html_cache;            //cached variables for current HTML block
         std::deque<TokenPtr_t>                      _queued_tokens;         //token queue for the current root block
         std::deque<logging::ErrorObject>            _queued_errors;         //errors queued for the current root block
         std::deque<token::markdown::FormattingTk *> _formatting_markers;    //formatting characters for the block (added as single CharacterTk and converted as appropriate on dispatch)
@@ -110,7 +135,7 @@ namespace blogator::parser::tokeniser {
         size_t                                      _curr_open_container_i; //helper for keeping track of current container block prefixes to consume on a line
         size_t                                      _actual_blockquote_lvl; //number of '>' prefixing the last opened Blockquote block
         size_t                                      _curr_blockquote_lvl;   //number of '>' currently found on the line
-        bool                                        _loose_list_spacing;    //flag signalling a potential 'loosened' spacing for the current list (i.e.: paragraphed)
+        ListSpacing_e                               _list_spacing;          //flag signalling a potential 'loosened' spacing for the current list (i.e.: paragraphed)
 
         void logError( TextPos position, int err_code, bool bypass_buffer = false );
         void logError( TextPos position, int err_code, char32_t c );
@@ -150,6 +175,7 @@ namespace blogator::parser::tokeniser {
         [[nodiscard]] bool hasOpenContainerBlock() const;
         [[nodiscard]] size_t openContainerBlockCount() const;
         void popOpenBlockStack();
+        void setListSpacingFlag( ListSpacing_e flag );
         void loosenLastListBlockSpacing();
         void setLastOpenBlockID( const std::u32string & id, TextPos position );
 
@@ -166,6 +192,14 @@ namespace blogator::parser::tokeniser {
         token::markdown::FormattingTk * peekLastFormattingMarker();
         void closeFormattingMarkers( TextPos position );
         void clearFormattingMarkers();
+
+        void setHtmlBlockType( HtmlBlockType_e type );
+        [[nodiscard]] specs::markdown::HtmlBlockType currentHtmlBlockType() const;
+        markdown::HtmlTag & pendingHtmlTag();
+        void appendToHtmlBuffer( char32_t c );
+        void resetHtmlBuffer( TextPos position );
+        void flushHtmlBufferToQueue();
+        void clearHtmlCache( TextPos position );
 
         size_t queueToken( TokenPtr_t token );
         TokenPtr_t & getQueuedToken( size_t queue_position );

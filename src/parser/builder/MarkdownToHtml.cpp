@@ -1,9 +1,7 @@
 #include "MarkdownToHtml.h"
 
-#include <utility>
+#include <set>
 
-#include "../dom/TreeBuilder.h"
-#include "../dto/U32Text.h"
 #include "../specs/markdown/ListType.h"
 #include "../specs/markdown/ErrorCode.h"
 #include "../token/markdown/tokens.h"
@@ -237,6 +235,8 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
             }
         } break;
 
+        case TkType_e::HTML: { /* ignore token */ } break;
+
         case TkType_e::BLOCKQUOTE: {
             openElement( HtmlElement_e::HTML5_BLOCKQUOTE );
         } break;
@@ -340,7 +340,7 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
         } break;
 
         case TkType_e::LINE_BREAK: {
-            sendToOutput( UR"(<br/>)" );
+            sendToOutput( UR"(<br />)" );
         } break;
 
         case TkType_e::FORMAT_BEGIN: {
@@ -670,6 +670,8 @@ inline void MarkdownToHtml::closeBlock( const BlockEndTk * token ) {
             closeElement( HtmlElement_e::HTML5_CODE );
             closeElement( HtmlElement_e::HTML5_PRE );
         } break;
+
+        case TkType_e::HTML: { /* ignore token */ } break;
 
         case TkType_e::BLOCKQUOTE: {
             closeElement( HtmlElement_e::HTML5_BLOCKQUOTE );

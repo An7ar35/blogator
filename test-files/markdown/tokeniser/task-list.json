@@ -362,7 +362,7 @@
     "description": "simple list paragraph x2 \"[]\"",
     "input": "- [] a\n\n -b",
     "tokens":[
-      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "UNCHECKED", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:6"},
       {"type": "CHARACTER", "text": "a", "position": "1:6"},
@@ -542,7 +542,7 @@
     "description": "simple list paragraph x2 \"[ ]\"",
     "input": "- [ ] a\n\n -b",
     "tokens":[
-      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "UNCHECKED", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:7"},
       {"type": "CHARACTER", "text": "a", "position": "1:7"},
@@ -656,7 +656,7 @@
     "description": "simple list paragraph x2 \"[x]\"",
     "input": "- [x] a\n\n -b",
     "tokens":[
-      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "CHECKED", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:7"},
       {"type": "CHARACTER", "text": "a", "position": "1:7"},
@@ -770,7 +770,7 @@
     "description": "simple list paragraph x2 \"[X]\"",
     "input": "- [X] a\n\n -b",
     "tokens":[
-      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "CHECKED", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:7"},
       {"type": "CHARACTER", "text": "a", "position": "1:7"},
@@ -887,7 +887,7 @@
     "description": "simple multi-paragraphed task item",
     "input": "- [] p1\n\n   p2\n\n",
     "tokens":[
-      {"type": "LIST", "list": "UL_TASK", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "UL_TASK", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "UNCHECKED", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:6"},
       {"type": "CHARACTER", "text": "p1", "position": "1:6"},

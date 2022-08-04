@@ -1,0 +1,46 @@
+{"tests": [
+
+  {
+    "description": "list tightness 1",
+    "markdown": "1. item 1\n2. item 2",
+    "html": "<ol type=\"1\"><li>item 1</li><li>item 2</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "list tightness 1",
+    "markdown": "1. item 1\n\n2. item 2",
+    "html": "<ol type=\"1\"><li><p>item 1</p></li><li><p>item 2</p></li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "list tightness 3",
+    "markdown": "1. item 1\n  - a\n  - b\n2. item 2",
+    "html": "<ol type=\"1\"><li>item 1<ul><li>a</li><li>b</li></ul></li><li>item 2</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "list tightness 4",
+    "markdown": "1. 1\n  - a\n  - b\n\n2. 2",
+    "html": "<ol type=\"1\"><li><p>1</p><ul><li>a</li><li>b</li></ul></li><li><p>2</p></li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "list tightness 5",
+    "markdown": "1. 1\n  - a\n    * 1a1\n    * 1a2\n  - b\n\n2. 2",
+    "html": "<ol type=\"1\"><li><p>1</p><ul><li>a<ul><li>1a1</li><li>1a2</li></ul></li><li>b</li></ul></li><li><p>2</p></li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "list tightness 6",
+    "markdown": "1. 1\n  - a\n    * 1a1\n\n    * 1a2\n  - b\n2. 2",
+    "html": "<ol type=\"1\"><li>1<ul><li>a<ul><li><p>1a1</p></li><li><p>1a2</p></li></ul></li><li>b</li></ul></li><li>2</li></ol>",
+    "errors": []
+  }
+
+]}
+

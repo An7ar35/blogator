@@ -22,6 +22,7 @@ namespace test_harness {
     nlohmann::json loadJSONFromFile( const std::filesystem::path &path );
     std::set<std::filesystem::path> getTestFiles( const std::filesystem::path &test_dir, const std::string & file_ext );
     blogator::parser::U32Text transcodeInput( const std::string & raw, const std::filesystem::path & path );
+    void printU32Buffer( std::ostream &os, blogator::parser::U32Text & u32text );
 }
 
 namespace test_harness::commonmark_spec_tests {

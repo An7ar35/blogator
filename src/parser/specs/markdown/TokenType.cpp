@@ -28,6 +28,7 @@ std::ostream & blogator::parser::specs::markdown::operator <<( std::ostream &os,
         { TokenType::TABLE_CELL,         "TABLE_CELL" },
         { TokenType::DEFINITION_LIST_DT, "DEFINITION_LIST_DT" },
         { TokenType::DEFINITION_LIST_DD, "DEFINITION_LIST_DD" },
+        { TokenType::HTML,               "HTML" },
         { TokenType::BLOCK_END,          "BLOCK_END" },
         /* Inline */
         { TokenType::CHARACTER,          "CHARACTER" },
@@ -70,6 +71,7 @@ bool blogator::parser::specs::markdown::isBlockToken( TokenType type ) {
         TokenType::TABLE_CELL,
         TokenType::DEFINITION_LIST_DT,
         TokenType::DEFINITION_LIST_DD,
+        TokenType::HTML,
         TokenType::BLOCK_END,
     } );
 
@@ -103,6 +105,7 @@ bool blogator::parser::specs::markdown::isLeafBlock( TokenType type ) {
         TokenType::DEFINITION_LIST_DT,
         TokenType::DEFINITION_LIST_DD,
         TokenType::CODE_BLOCK,
+        TokenType::HTML,
     } );
 
     return BLOCKS.contains( type );

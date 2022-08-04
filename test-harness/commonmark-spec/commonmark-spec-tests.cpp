@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "../../../src/parser/encoding/Transcode.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
+#include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
 #include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dom/node/Element.h"
@@ -60,35 +61,48 @@ testing::AssertionResult runMarkdownTest( const test_harness::commonmark_spec_te
 
     blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
-    auto src             = test_harness::transcodeInput( test.markdown, path );
-    auto md2html         = blogator::parser::builder::MarkdownToHtml();
-    auto md_tokeniser    = blogator::parser::tokeniser::Markdown( md2html );
-    auto tree_builder    = blogator::parser::dom::TreeBuilder();
-    auto html5_tokeniser = blogator::parser::tokeniser::HTML5( tree_builder );
+    auto input_src           = test_harness::transcodeInput( test.markdown, path );
+    auto md2html             = blogator::parser::builder::MarkdownToHtml();
+    auto md_tokeniser        = blogator::parser::tokeniser::Markdown( md2html );
+    auto md_tree_builder     = blogator::parser::dom::TreeBuilder();
+    auto html5_tokeniser     = blogator::parser::tokeniser::HTML5( md_tree_builder );
+
+    auto expected_output_src = test_harness::transcodeInput( test.html_output, path );
+    auto exp_tree_builder    = blogator::parser::dom::TreeBuilder();
+    auto exp_tokeniser       = blogator::parser::tokeniser::HTML5( exp_tree_builder );
 
     md2html.init( path );
-    md_tokeniser.parse( src );
+    md_tokeniser.parse( input_src );
 
     auto raw_html = md2html.reset();
 
-    tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
-    tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
+//    test_harness::printU32Buffer( std::cout, *raw_html );
+
+    md_tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
+    md_tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
     html5_tokeniser.parse( *raw_html );
 
-    const auto   document           = tree_builder.reset();
-    const auto   returned_u8        = test_harness::markdown::printDocumentBody( *document ) + "\n";
-    const bool   output_match       = ( returned_u8 == test.html_output );
+    exp_tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
+    exp_tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
+    exp_tokeniser.parse( expected_output_src );
+
+    const auto   output_document    = md_tree_builder.reset();
+    const auto   expected_document  = exp_tree_builder.reset();
+    const auto   returned_u8        = test_harness::markdown::printDocumentBody( *output_document ) + "\n";
+    const auto   expected_u8        = test_harness::markdown::printDocumentBody( *expected_document );
+    const bool   output_match       = ( returned_u8 == expected_u8 );
     const auto & errors_received    = error_catcher.errors();
     bool         failed_err         = false;
 
     if( !output_match ) {
         return testing::AssertionFailure()
             << "Failed test #" << test.example_no << "\n"
-            << "File .............: " << test.src.filename().string() << ":" << test.start_line << "\n"
-            << "Section ..........: " << test.section_desc << "\n"
-            << "Input ............: " << "\n" << test.markdown << "\n"
-            << "Expected .........: " << "\n" << test.html_output << "\n"
-            << "Actual ...........: " << "\n" << returned_u8 << "\n"; //TODO
+            << "File ...............: " << test.src.filename().string() << ":" << test.start_line << "\n"
+            << "Section ............: " << test.section_desc << "\n"
+            << "Input ..............: " << "\n" << test.markdown << "\n"
+            << "Expected (raw)......: " << "\n" << test.html_output << "\n"
+            << "Expected (processed): " << "\n" << expected_u8 << "\n"
+            << "Actual .............: " << "\n" << returned_u8 << "\n"; //TODO
     }
 
     return testing::AssertionSuccess();

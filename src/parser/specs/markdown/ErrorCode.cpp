@@ -77,11 +77,15 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ ErrorCode::EOF_IN_HYPERLINK ] = {
             "EOF in hyperlink",
-            R"(This error occurs when end-of-file reached inside a hyperlink URL declaration.)"
+            R"(This error occurs when end-of-file is reached inside a hyperlink URL declaration.)"
         };
         arr[ ErrorCode::EOF_IN_IMAGE ] = {
             "EOF in image",
-            R"(This error occurs when end-of-file reached inside an image source declaration.)"
+            R"(This error occurs when end-of-file is reached inside an image source declaration.)"
+        };
+        arr[ ErrorCode::EOF_IN_HTML_BLOCK ] = {
+            "EOF in HTML block",
+            R"(This error occurs when end-of-file is reached inside an HTML block.)"
         };
         arr[ ErrorCode::INVALID_WHITESPACE_IN_CODE_BLOCK_DECLARATION ] = {
             "invalid whitespace in code-block declaration",
@@ -98,6 +102,10 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         arr[ ErrorCode::INLINED_CODE_BLOCK ] = {
             "inlined code-block",
             R"(This error occurs when a code block is opened and closed on the same line. The opening and closing declaration (```) should be at the start of separate lines with the code content between them.)"
+        };
+        arr[ ErrorCode::INLINED_CONTENT_AFTER_CODE_BLOCK ] = {
+            "inlined content after code-block",
+            R"(This error occurs when a non-whitespace character is found one the same line after the closing fence of a code-block.)"
         };
         arr[ ErrorCode::VOID_SQUARE_BRACKET_DEFINITION ] = {
             "void square bracket definition",

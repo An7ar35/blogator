@@ -8,10 +8,10 @@
 #include <deque>
 #include <unordered_map>
 
+#include "../dto/TextPos.h"
 #include "../specs/markdown/InsertionMode.h"
 #include "../specs/markdown/TokenType.h"
 #include "../specs/infra/Element.h"
-#include "../tokeniser/HTML5.h"
 
 namespace blogator::parser {
     class U32Text;
@@ -56,6 +56,11 @@ namespace blogator::parser::builder {
             bool           has_def;
         };
 
+        /**
+         * Image cache
+         * @param token Opening image token
+         * @param buffer Character buffer for the 'alt' text field
+         */
         struct ImageCache {
             std::unique_ptr<token::markdown::MarkdownTk> token;
             std::vector<char32_t>                        buffer;

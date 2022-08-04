@@ -10,10 +10,14 @@
 namespace blogator::parser {
     typedef std::vector<char32_t>::const_iterator TextIterator_t;
 
+    /**
+     * Read-only UTF-32 buffered text container
+     */
     class U32Text {
       public:
-        explicit U32Text( std::u32string text );
-        explicit U32Text( std::vector<char32_t> text );
+        class State; //pre-declaration
+        typedef size_t ID_t;
+
         U32Text( std::filesystem::path src_path, std::u32string text );
         U32Text( std::filesystem::path src_path, std::vector<char32_t> text );
 
@@ -25,35 +29,48 @@ namespace blogator::parser {
         char32_t nextChar();
         void reconsume();
 
+        [[nodiscard]] ID_t id() const;
         [[nodiscard]] char32_t character() const;
         [[nodiscard]] std::pair<char32_t, bool> character( std::u32string::iterator::difference_type fwd_n );
         [[nodiscard]] std::u32string characters( std::u32string::iterator::difference_type n );
         [[nodiscard]] TextPos position() const noexcept;
         [[nodiscard]] std::filesystem::path path() const noexcept;
-
         [[nodiscard]] bool reachedEnd() const;
 
-        void setMarker();
-        void resetToMarker();
+        void resetToMarker( const State & state );
+        [[nodiscard]] State createMarker() const;
         void reset();
 
-      private:
-        struct State {
-            State( TextPos pos, TextIterator_t it, bool nl );
-            State( const State & state );
-            State & operator =( const State & state );
+        /**
+         * Internal tracker state for U32Text
+         */
+        class State {
+            friend U32Text;
 
-            std::vector<size_t> line_sizes;
+          public:
+            [[nodiscard]] ID_t id() const;
+
+          private:
+            State( ID_t id, TextPos pos, TextIterator_t it, bool nl, bool rc );
+
+            ID_t                text_id;
             TextPos             position;
             TextIterator_t      iterator;
             bool                newline;
             bool                reconsume;
         };
 
+      private:
+        ID_t                  _id;
         std::filesystem::path _path;
         std::vector<char32_t> _src;
-        State                 _state;
-        State                 _marker;
+        std::vector<size_t>   _line_sizes;
+        TextPos               _position;
+        TextIterator_t        _iterator;
+        bool                  _newline;
+        bool                  _reconsume;
+
+        void cacheLineSize( const TextPos & pos );
     };
 }
 

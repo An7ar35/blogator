@@ -133,7 +133,7 @@
     "description": "simple list paragraph x2 '1'",
     "input": "1. 1\n\n 2",
     "tokens":[
-      {"type": "LIST", "list": "OL_NUMERIC", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "OL_NUMERIC", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:4"},
       {"type": "CHARACTER", "text": "1", "position": "1:4"},
@@ -265,7 +265,7 @@
     "description": "simple list paragraph x2 'a'",
     "input": "a. a\n\n b",
     "tokens":[
-      {"type": "LIST", "list": "OL_ALPHA_LOWER", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "OL_ALPHA_LOWER", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:4"},
       {"type": "CHARACTER", "text": "a", "position": "1:4"},
@@ -398,7 +398,7 @@
     "description": "simple list paragraph x2 'A'",
     "input": "A. A\n\n B",
     "tokens":[
-      {"type": "LIST", "list": "OL_ALPHA_UPPER", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "OL_ALPHA_UPPER", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:4"},
       {"type": "CHARACTER", "text": "A", "position": "1:4"},
@@ -546,7 +546,7 @@
     "description": "simple multi-paragraphed list item '1'",
     "input": "1. p1\n\n   p2\n\n",
     "tokens":[
-      {"type": "LIST", "list": "OL_NUMERIC", "tight": "true", "position": "1:1"},
+      {"type": "LIST", "list": "OL_NUMERIC", "tight": "false", "position": "1:1"},
       {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
       {"type": "PARAGRAPH", "id": "", "position": "1:4"},
       {"type": "CHARACTER", "text": "p1", "position": "1:4"},
