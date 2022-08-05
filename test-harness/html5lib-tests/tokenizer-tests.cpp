@@ -142,7 +142,7 @@ class ParserLogCatcher {
 /**
  * MOCK TreeBuilder class
  */
-  class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
+class MockTreeBuilder : public blogator::parser::dom::TreeBuilder {
   public:
     explicit MockTreeBuilder() :
         blogator::parser::dom::TreeBuilder()
@@ -157,8 +157,13 @@ class ParserLogCatcher {
                 _tokens.back() = concatCharacterTk( std::move( _tokens.back() ), std::move( tk ) );
             } else {
                 _tokens.emplace_back( std::move( tk ) );
+                _acknowledgeSelfClosingTag_cb(); //auto-acknowledge everything (since testing tokeniser)
             }
         }
+    }
+
+    void setSelfClosingTagAckCallback( std::function<void()> cb ) override {
+        _acknowledgeSelfClosingTag_cb = cb;
     }
 
     [[nodiscard]] std::string toStr() const {
@@ -173,6 +178,7 @@ class ParserLogCatcher {
 
   private:
     std::vector<std::unique_ptr<HTML5Tk>> _tokens;
+    std::function<void()>                 _acknowledgeSelfClosingTag_cb;
 
     static std::unique_ptr<HTML5Tk> concatCharacterTk( std::unique_ptr<HTML5Tk> tk1, std::unique_ptr<HTML5Tk> tk2 ) {
         return std::make_unique<blogator::parser::token::html5::CharacterTk>( ( tk1->text() + tk2->text() ), tk1->position() );
@@ -253,6 +259,7 @@ testing::AssertionResult runHTML5TokeniserTest( const nlohmann::json &test, cons
 
         if( nlohmann::json::parse( actual_output ) != expected_output ) {
             return testing::AssertionFailure() << "Failed test - input-output mismatch\n"
+                                               << "Source file: " << path.filename().string() << "\n"
                                                << "Description: " << test.at( "description" ) << "\n"
                                                << "Init state.: " << init_states[i].second << " (" << (i + 1) << "/" << init_states.size() << ")\n"
                                                << "Input .....: " << test.at( "input" ) << "\n"
@@ -262,6 +269,7 @@ testing::AssertionResult runHTML5TokeniserTest( const nlohmann::json &test, cons
 
         if( test.contains( "errors" ) && ( test.at( "errors") != actual_errors ) ) {
             return testing::AssertionFailure() << "Failed test - error mismatch\n"
+                                               << "Source file: " << path.filename().string() << "\n"
                                                << "Description: " << test.at( "description" ) << "\n"
                                                << "Expected ..: " << test.at( "errors" ) << "\n"
                                                << "Actual ....: " << actual_errors;

@@ -38,24 +38,6 @@ U32Text::U32Text( std::filesystem::path src_path, std::vector<char32_t> text ) :
     _reconsume( false )
 {}
 
-
-/**
- * Advance caret and position tracker (it += n, pos.col += n)
- * @param n Number of characters to advance by
- * @return number of code points skipped
- */
-size_t U32Text::advanceCol( unsigned int n ) {
-    if( !reachedEnd() ) {
-        auto remaining = std::distance( _iterator, _src.cend() );
-        auto advance   = ( remaining > n ? n : remaining );
-        std::advance( _iterator, advance );
-        _position.col += advance;
-        return advance;
-    }
-
-    return 0;
-}
-
 /**
  * Fast-forward caret and position tracker (ignores reconsume flag)
  * @param n Number of characters to advance the caret by
@@ -100,7 +82,7 @@ size_t U32Text::reverseCaret( unsigned int n ) {
             if( unicode::ascii::isnewline( character() ) ) {
                 _newline        = true;
                 _position.line -= 1;
-                _position.col   = _line_sizes.back();
+                _position.col   = _line_sizes.at( _position.line - 1 );
 
             } else {
                 _newline       = false;
@@ -246,8 +228,8 @@ void U32Text::resetToMarker( const U32Text::State & state ) {
 
     } else {
         throw FAILED_EXPECTATION_EXCEPTION(
-            "[blogator::parser::U32Text::loadState( {" + std::to_string( state.id() ) + "} )] "
-            "Mismatched IDs (source: " + std::to_string( this->_id ) + ")."
+            "[blogator::parser::U32Text::loadState( { " + std::to_string( state.id() ) + " } )] "
+            "Mismatched IDs (source: { " + std::to_string( this->_id ) + " })."
         );
     }
 }

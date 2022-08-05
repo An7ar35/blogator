@@ -21,8 +21,6 @@ namespace blogator::parser {
         U32Text( std::filesystem::path src_path, std::u32string text );
         U32Text( std::filesystem::path src_path, std::vector<char32_t> text );
 
-        [[deprecated]] size_t advanceCol( unsigned int n = 1 );
-
         size_t advanceCaret( unsigned int n = 1 );
         size_t reverseCaret( unsigned int n = 1 );
 
