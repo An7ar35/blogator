@@ -1,0 +1,166 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class Attr {
+    - _namespace_id : NamespaceMap::id_t
+    -  _prefix : DOMString_t
+    -  _name : DOMString_t
+    -  _value : DOMString_t
+    -  _has_value : bool
+    __
+    + swap( rhs : Node& ) : void
+    + swap( rhs : Attr& ) : void
+    + equivalent( rhs : const Attr & ) const : bool
+    + namespaceID() : NamespaceMap::id_t
+    + namespaceURI() : DOMString_t
+    + prefix() : const DOMString_t &
+    + localName() : const DOMString_t &
+    + name() : const DOMString_t &
+    + value() : DOMString_t *
+    + value() : const DOMString_t *
+    + hasValue() : bool
+    + ownerElement() : Element *
+    --override--
+    + nodeName() : DOMString_t
+    + nodeValue() : DOMString_t *
+    + textContent() : DOMString_t
+    + length() : size_t
+    + cloneNode( deep : bool ) : NodePtr_t
+    + isEqualNode( other : const Node & ) : bool
+    + lookupPrefix( ns : const DOMString_t & ) : DOMString_t
+    + lookupNamespaceURI( prefix : const DOMString_t & ) : DOMString_t
+    # Node * insertNodeBefore( node : NodePtr_t, child : Node * )
+    # NodePtr_t replaceChildNode( node : NodePtr_t &, target : NodePtr_t & )
+}
+
+class CDATASection {
+    + swap( rhs : CDATASection & ) : void
+    --override--
+    + swap( rhs : Node & ) : void
+    + nodeName() : DOMString_t
+    + cloneNode( deep : bool ) ; NodePtr_t
+    # insertNodeBefore( node : NodePtr_t, child, Node * ) : Node *
+    # replaceChildNode( node : NodePtr_t &, target : NodePtr_t & ) : NodePtr_t
+}
+
+class CharacterData {
+    - _data : DOMString_t
+    __
+    + swap( rhs : CharacterData & ) : void
+    + data() : DOMString_t &
+    + data() : const DOMString_t &
+    + substringData( offset : size_t, length : size_t ) : DOMString_t
+    + appendData( data : const DOMString_t & ) : DOMString_t &
+    + insertData( offset : size_t, data : const DOMString_t & ) : const DOMString_t &
+    + deleteData( offset : size_t, count : size_t ) : const DOMString_t &
+    + replaceData( offset : size_t, count : size_t, replacement_data : const DOMString_t & ) : const DOMString_t &
+    --override--
+    + swap( rhs : Node & ) : void
+    + textContent() : DOMString_t
+    + length() : size_t
+    + nodeValue() : DOMString_t *
+    + cloneNode( deep : bool ) : NodePtr_t
+    + isEqualNode( other : const Node & ) : bool
+    # insertNodeBefore( node : NodePtr_t, child : Node * ) : Node *
+    # replaceChildNode( node : NodePtr_t &, target : NodePtr_t & ) : NodePtr_t
+}
+
+class Comment {
+    + swap( rhs : Comment & ) : void
+    --override--
+    + swap( rhs : Node & ) : void
+    + nodeName() : DOMString_t
+    + cloneNode( deep : bool ) : NodePtr_t
+    + insertNodeBefore( node : NodePtr_t, child : Node * ) : Node *
+    + replaceChildNode( node : NodePtr_t &, target : NodePtr_t & ) : NodePtr_t
+}
+
+class Document {
+    - _encoding : DOMString_t
+    - _content_type : specs::infra::ContentType
+    - _url : DOMString_t
+    - _origin : std::filesystem::path
+    - _type : Type
+    - _quirks : QuirksMode
+    - _doctype : DocumentType *
+    - _element : Element *
+    __
+
+}
+
+class DocumentFragment {
+    + host() : Node *
+    --override--
+    + lookupPrefix( ns : const DOMString_t & ) : DOMString_t
+    + lookupNamespaceURI( prefix : const DOMString_t & ) : DOMString_t
+}
+
+class DocumentType {
+    - _name : DOMString_t
+    - _public_id : DOMString_t
+    - _system_id : DOMString_t
+}
+
+class Element
+class Node
+class Text {
+    + splitText( offset : size_t ) : node::Text *
+    + wholeText() : DOMString_t
+    --override--
+    + nodeName() : DOMString_t
+}
+
+enum Type {
+    XML
+    HTML
+}
+
+enum QuirksMode {
+    NO_QUIRKS = 0
+    LIMITED_QUIRKS
+    QUIRKS
+}
+
+enum "specs::infra::ContentType" as ContentType {
+    APPLICATION_XHTML_XML
+    APPLICATION_RSS_XML
+    APPLICATION_XML
+    IMAGE_SVG_XML
+}
+
+enum NodeType {
+    UNDEFINED = 0
+    ELEMENT_NODE = 1
+    ATTRIBUTE_NODE = 2
+    TEXT_NODE = 3
+    CDATA_SECTION_NODE = 4
+    COMMENT_NODE = 8
+    DOCUMENT_NODE = 9
+    DOCUMENT_TYPE_NODE = 10
+    DOCUMENT_FRAGMENT_NODE = 11
+}
+
+Node             -> NodeType
+Attr             -right-|> Node
+CharacterData    -up-|> Node
+Document         -up-|> Node
+Document         -up-> Type
+Document         -up-> QuirksMode
+Document         -up-> ContentType
+DocumentFragment --down-|> Node
+DocumentType     -left-|> Node
+Element          -up-|> Node
+Comment          -up-|> CharacterData
+Text             -up-|> CharacterData
+CDATASection     -up-|> Text
+
+Document         *.. "0..n" Comment
+Document         *.. "0..1" DocumentType
+Document         *.. "0..1" Element
+Element          *.. "0..n" Element
+Element          *.. "0..n" CharacterData
+Element          *.. "0..n" Attr
+DocumentFragment *.. "0..n" Node
+
+
+@enduml

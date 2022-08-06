@@ -1,0 +1,136 @@
+Blogator's flavour of markdown is difference in a couple of key aspects compared to the common-mark specifications.
+
+
+# Processing Pipeline
+
+source -> [transcoder] -> [markdown tokeniser] -> [MarkdownToHtml] -> [HTML tokeniser] -> [DOM TreeBuilder] -> output
+
+# Features not supported
+
+- Emojis by name
+- Indented code blocks
+
+# Testing output
+
+Just run blogator with the special single file and raw flag
+
+# HTML markup
+
+HTML markup has limited support for inlined and contiguous blocks without blank spaces.
+
+For example:
+
+```
+markdown paragraph <b>with inline HTML</b>.
+```
+
+```
+<div>
+    <div>
+        <p>HTML block</p>
+    </div>
+</div>
+```
+
+# Blocks
+
+Blocks are for the most parts auto-detected based on the prefixing character sequences when an empty new line is missing between.
+
+For example:
+
+```
+paragraph text
+> blockquote
+```
+
+and
+
+```
+paragraph text
+
+> blockquote
+```
+
+will both produce the following HTML markup:
+
+```html
+<p>paragraph text</p>
+<blockquote>
+    <p>blockquote</p>
+</blockquote>
+```
+
+# Nested container blocks
+
+Container blocks (blockquotes and lists/list items) can be nested within each other. The nesting is controlled via tabulation alignment.
+
+For example:
+
+```
+1. list item
+
+   > blockquote A
+
+2. a. sub-list item 1
+   b. > blockquote B
+   c. sub-list item 3
+
+   > blockquote C
+
+```
+
+will produce the following HTML markup:
+
+```html
+<ol>
+    <li>
+        <p>list item</p>
+        <blockquote>
+            <p>blockquote A</p>
+        </blockquote>
+    </li>
+    <li>
+        <ol>
+            <li>sub-list item 1</li>
+            <li>
+                <blockquote>
+                    <p>blockquote B</p>
+                </blockquote>
+            </li>
+            <li>sub-list item 3</li>
+        </ol>
+    </li>
+</ol>
+```
+
+Note that the parent list (1.) is loosened (`<li><p>..</p></li>`) as there are single empty lines whilst the child list is tightened since there ar not empty lines (`<li>...</li>`).
+
+2 empty lines will break the nesting completely.
+
+# Escaped characters
+
+Any characters outside markdown's list of special characters are treated as-is. Meaning that HTML special characters ('<', '>', '&') used outside an HTML context need to be escaped with '\' or replaced with their respective character code to avoid issues.
+
+
+## Items
+
+### Code blocks
+
+Code blocks require matching block fencing with either 3 tilde or back-tick characters.
+
+It is possible to put Markdown markup inside a blockquote by using different fencing inside and out of the code block. Alternatively, using quad fencing can achieve the same results with the bonus of being able to display both standard fencing inside the code block (e.g.: in the case of displaying markdown markup examples).
+
+Indented code block declarations are __unsupported__.
+
+### Links/Images
+
+```
+[text](url)
+```
+
+```
+![alt-text](source)
+```
+
+Link reference are __unsupported__.
+

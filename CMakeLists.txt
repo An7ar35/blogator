@@ -106,7 +106,6 @@ set(SOURCE_FILES
         src/exception/not_implemented.h
         src/exception/logger_exception.cpp
         src/exception/logger_exception.h
-        src/dom/exception/DOMException.h
         src/fs/fs.cpp
         src/fs/fs.h
         src/fs/ConfigReader.cpp
@@ -160,49 +159,6 @@ set(SOURCE_FILES
         src/html/editor/editor.h
         src/output/helper/OrderedPostInsertion.cpp
         src/output/helper/OrderedPostInsertion.h
-        src/checker/Checker.cpp
-        src/checker/Checker.h
-        src/encoding/encoding.cpp
-        src/encoding/encoding.h
-        src/dom/dot/DOT.cpp
-        src/dom/dot/DOT.h
-        src/dom/dot/DOTConfig.cpp
-        src/dom/dot/DOTConfig.h
-        src/dom/dot/DOTNode.cpp
-        src/dom/dot/DOTNode.h
-        src/dom/dot/enums/ComplianceLevel.h
-        src/dom/dot/enums/DOTSetting.h
-        src/dom/dto/Attribute.cpp
-        src/dom/dto/Attribute.h
-        src/dom/dto/GlobalMaps.h
-        src/dom/dto/TagSpecs.h
-        src/dom/dto/Text.cpp
-        src/dom/dto/Text.h
-        src/dom/html5/special_char.h
-        src/dom/html5/enums/AttrBoundaryChar.h
-        src/dom/html5/enums/Attribute.h
-        src/dom/html5/enums/ContentModel.h
-        src/dom/html5/enums/NameSpace.h
-        src/dom/html5/enums/Tag.h
-        src/dom/html5/enums/TagStructure.h
-        src/dom/html5/kb/kb_attributes.cpp
-        src/dom/html5/kb/kb_attributes.h
-        src/dom/html5/kb/kb_relationships.cpp
-        src/dom/html5/kb/kb_relationships.h
-        src/dom/html5/kb/kb_tags.cpp
-        src/dom/html5/kb/kb_tags.h
-        src/dom/html5/kb/KnowledgeBase.cpp
-        src/dom/html5/kb/KnowledgeBase.h
-        src/dom/html5/properties/content_model.cpp
-        src/dom/html5/properties/content_model.h
-        src/dom/html5/properties/relationships.cpp
-        src/dom/html5/properties/relationships.h
-        src/dom/html5/validator/validator.cpp
-        src/dom/html5/validator/validator.h
-        src/dom/parser/Parser.cpp
-        src/dom/parser/Parser.h
-        src/dom/parser/Tokeniser.cpp
-        src/dom/parser/Tokeniser.h
 
         src/exception/parsing_failure.cpp
         src/exception/parsing_failure.h
@@ -528,15 +484,6 @@ set(TEST_FILES
         tests/dto/TableOfContents.cpp
         tests/output/json/json.cpp
         tests/string/helpers_tests.cpp
-        tests/dom/dot/DOT_tests.cpp
-        tests/dom/dot/DOTNode_tests.cpp
-        tests/dom/parser/Tokeniser_tests.cpp
-        tests/dom/parser/Parser_tests.cpp
-        tests/dom/html5/validator/validator_tests.cpp
-        tests/dom/html5/validator/validator_validateOpeningTag_tests.cpp
-        tests/dom/html5/validator/validator_validateClosingTag_tests.cpp
-        tests/dom/html5/validator/validator_validateAttributes_tests.cpp
-        tests/dom/dto/Attribute.cpp
         tests/parser/tokeniser/Blogator.cpp
         tests/parser/dto/U32Text.cpp
         tests/parser/dto/TextPos.cpp
