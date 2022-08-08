@@ -6,13 +6,18 @@
 
 #include "markdown/Block.h"
 #include "markdown/HtmlTag.h"
+#include "../dto/U32Text.h"
+#include "../token/markdown/FormattingTk.h"
 #include "../specs/markdown/HtmlBlockType.h"
 #include "../specs/markdown/TokeniserState.h"
 #include "../specs/markdown/BlockFenceType.h"
 #include "../specs/markdown/ListSpacing.h"
-#include "../token/markdown/FormatBeginTk.h"
 #include "../builder/MarkdownToHtml.h"
 #include "../logging/ErrorObject.h"
+
+namespace blogator::parser {
+    class U32Text;
+}
 
 namespace blogator::parser::token::markdown {
     class MarkdownTk;

@@ -1,0 +1,34 @@
+{"tests": [
+
+  {
+    "description": "simple footnote",
+    "markdown": "text[^1].\n\n[^1]: definition",
+    "html": "<p>text<sup class=\"footnote-ref\"><a href=\"#footnote-ref:1\">1</a></sup>.</p><ol class=\"footnote-defs\"><li id=\"footnote-ref:1\">definition</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "multiple paragraph footnotes",
+    "markdown": "Paragraph 1[^1] text.\n\nParagraph 2[^second] text.\n\n[^1]: definition 1\n[^second]: definition 2",
+    "html": "<p>Paragraph 1<sup class=\"footnote-ref\"><a href=\"#footnote-ref:1\">1</a></sup> text.</p><p>Paragraph 2<sup class=\"footnote-ref\"><a href=\"#footnote-ref:2\">2</a></sup> text.</p><ol class=\"footnote-defs\"><li id=\"footnote-ref:1\">definition 1</li><li id=\"footnote-ref:2\">definition 2</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "non-referenced footnote definition",
+    "markdown": "[^unknown]: definition",
+    "html": "<ol class=\"footnote-defs\"><li>definition</li></ol>",
+    "errors": [
+      { "description": "orphaned footnote definition: \"unknown\"", "line": 1, "col": 1 }
+    ]
+  },
+
+  {
+    "description": "non-defined footnote reference",
+    "markdown": "[^undefined]",
+    "html": "<p><sup class=\"footnote-ref\"><a href=\"#footnote-ref:1\">1</a></sup></p>",
+    "errors": [
+      { "description": "orphaned footnote reference: \"undefined\"", "line": 1, "col": 1 }
+    ]
+  }
+]}

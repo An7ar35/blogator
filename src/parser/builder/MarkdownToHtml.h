@@ -78,6 +78,7 @@ namespace blogator::parser::builder {
 
 
         void logError( TextPos position, int err_code );
+        void logError( TextPos position, int err_code, std::string str );
 
         void processContent( std::unique_ptr<token::markdown::MarkdownTk> token );
         template<InsertionMode_e mode> void processContent( std::unique_ptr<token::markdown::MarkdownTk> token );

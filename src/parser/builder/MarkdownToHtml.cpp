@@ -123,13 +123,28 @@ void MarkdownToHtml::logError( TextPos position, int err_code ) {
 }
 
 /**
+ * Sends a parse error to the parser log
+ * @param position Position in source text
+ * @param err_code Markdown error code
+ * @param str Description string to append
+ */
+void MarkdownToHtml::logError( blogator::parser::TextPos position, int err_code, std::string str ) {
+    ++_error_count;
+    logging::ParserLog::log( _src_path, specs::Context::MARKDOWN, err_code, std::move( str ), position );
+}
+
+/**
  * Processes Markdown tokens
  * @param token Token to process
  * @throws blogator::exception::parsing_failure when unknown/invalid state is reached
  */
 void MarkdownToHtml::processContent( std::unique_ptr<token::markdown::MarkdownTk> token ) {
     try {
-//        LOG_CRITICAL( "Insertion mode: ", currentInsertionMode(), " -> Type: ", token->type() ); //TODO remove/temp
+//        { //TODO remove
+//            std::stringstream ss;
+//            ss << *token;
+//            LOG_CRITICAL( "Insertion mode: ", currentInsertionMode(), ": ",  ss.str() ); //TODO remove/temp
+//        }
         switch( currentInsertionMode() ) {
             case InsertionMode_e::INITIAL:         { this->processContent<InsertionMode_e::INITIAL>( std::move( token ) );         } break;
             case InsertionMode_e::CONTENT:         { this->processContent<InsertionMode_e::CONTENT>( std::move( token ) );         } break;
@@ -275,12 +290,13 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
                 auto it = _footnotes.find( tk->refID() );
 
                 if( it == _footnotes.end() ) {
-                    logError( tk->position(), ErrorCode::ORPHANED_FOOTNOTE_DEFINITION );
+                    logError( tk->position(), ErrorCode::ORPHANED_FOOTNOTE_DEFINITION, ( "\"" + unicode::utf8::convert( tk->refID() ) + "\"" ) );
+                    openElement( HtmlElement_e::HTML5_LI );
+
                 } else {
+                    openElement( HtmlElement_e::HTML5_LI, UR"(id="footnote-ref:)" + it->second.id + UR"(")" );
                     it->second.has_def = true;
                 }
-
-                openElement( HtmlElement_e::HTML5_LI, UR"(id="footnote-ref:)" + tk->refID() + UR"(")" );
 
             } else {
                 openElement( HtmlElement_e::HTML5_LI );
@@ -391,8 +407,8 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
 
             auto [it, inserted] = _footnotes.try_emplace( tk->ref(), FootnoteRef( tk->position(), std::u32string( ref_id.cbegin(), ref_id.cend() ) ) );
 
-            const auto html = UR"(<sup id="footnote-ref:)" + it->second.id + UR"(">)"
-                            + UR"(<a href=#footnote-ref:")" + it->second.id + UR"(" class="footnote-ref">)"
+            const auto html = UR"(<sup class="footnote-ref"><a href="#footnote-ref:)"
+                            + it->second.id + UR"(">)"
                             + it->second.id
                             + UR"(</a></sup>)";
 
@@ -458,17 +474,9 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
  */
 template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::DEFINITION_LIST>( std::unique_ptr<token::markdown::MarkdownTk> token ) {
     switch( token->type() ) {
-        case TkType_e::DEFINITION_LIST_DT: {
-            openElement( HtmlElement_e::HTML5_DT );
-        } break;
-
-        case TkType_e::DEFINITION_LIST_DD: {
-            openElement( HtmlElement_e::HTML5_DD );
-        } break;
-
-        case TkType_e::BLOCK_END: {
-            closeBlock( dynamic_cast<const BlockEndTk *>( token.get() ) );
-        } break;
+        case TkType_e::DEFINITION_LIST_DT: { openElement( HtmlElement_e::HTML5_DT );                        } break;
+        case TkType_e::DEFINITION_LIST_DD: { openElement( HtmlElement_e::HTML5_DD );                        } break;
+        case TkType_e::BLOCK_END:          { closeBlock( dynamic_cast<const BlockEndTk *>( token.get() ) ); } break;
 
         default: {
             if( peekOpenElements() == HtmlElement_e::HTML5_DL ) {
@@ -498,7 +506,7 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
 
     for( const auto & footnote : _footnotes ) {
         if( !footnote.second.has_def ) {
-            logError( footnote.second.position, ErrorCode::ORPHANED_FOOTNOTE_REFERENCE );
+            logError( footnote.second.position, ErrorCode::ORPHANED_FOOTNOTE_REFERENCE, ( "\"" + unicode::utf8::convert( footnote.first ) + "\"" ) );
         }
     }
 }

@@ -27,7 +27,7 @@ namespace blogator::parser::dom {
 
         void setStrictChecking( bool flag = true );
         void setTokeniserStateChangeCallback( std::function<void( specs::infra::TokeniserState )> cb );
-        void setSelfClosingTagAckCallback( std::function<void()> cb );
+        virtual void setSelfClosingTagAckCallback( std::function<void()> cb );
 
         void init( std::unique_ptr<node::Document> document );
         void init( node::Element * context_element, TextPos position = { 0, 0 } );
