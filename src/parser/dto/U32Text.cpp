@@ -209,9 +209,10 @@ bool U32Text::reachedEnd() const {
  * Resets the iterator and position back to the beginning
  */
 void U32Text::reset() {
-    _iterator = _src.cbegin();
-    _position = TextPos();
-    _newline = true;
+    _iterator  = _src.begin();
+    _position  = TextPos( 1, 1 );
+    _newline   = ( !_src.empty() ? unicode::ascii::isnewline( _src.front() ) : false );
+    _reconsume = false;
 }
 
 /**

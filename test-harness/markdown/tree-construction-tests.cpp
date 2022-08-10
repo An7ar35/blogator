@@ -74,7 +74,12 @@ testing::AssertionResult runMarkdownTreeBuilderTest( const test_harness::markdow
 
     auto raw_html = md2html.reset();
 
-//    test_harness::printU32Buffer( std::cout, *raw_html );
+    std::string pre_html5_tokeniser_html; //raw HTML passed from the MarkdownToHTML builder to the HTML5 pipeline
+    {
+        std::stringstream ss;
+        test_harness::printU32Buffer( ss, *raw_html );
+        pre_html5_tokeniser_html = ss.str();
+    }
 
     tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
     tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
@@ -120,6 +125,7 @@ testing::AssertionResult runMarkdownTreeBuilderTest( const test_harness::markdow
             ss << "Output match .....: YES\n";
         } else {
             ss << "Output match .....: NO\n"
+               << "Pre-HTML tokenizer: " << "\n" << pre_html5_tokeniser_html << "\n"
                << "Expected .........: " << "\n" << test.html_output << "\n"
                << "Actual ...........: " << "\n" << returned_u8 << "\n";
         }

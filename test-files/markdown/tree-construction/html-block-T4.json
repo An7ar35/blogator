@@ -1,0 +1,21 @@
+{"tests": [
+
+  {
+    "description": "HTML markup",
+    "markdown": "<!abc content>",
+    "html": "<!-- abc content -->",
+    "errors": [
+      { "description": "incorrectly opened comment", "line": 1, "col": 30 }
+    ]
+  },
+
+  {
+    "description": "HTML multi-lined markup",
+    "markdown": "<!abc\ncontent\n>",
+    "html": "<!-- abc\ncontent\n -->",
+    "errors": [
+      { "description": "incorrectly opened comment", "line": 1, "col": 30 }
+    ]
+  }
+
+]}

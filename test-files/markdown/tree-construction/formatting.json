@@ -1,0 +1,52 @@
+{"tests": [
+
+  {
+    "description": "formatting bold",
+    "markdown": "**bold** text",
+    "html": "<p><strong>bold</strong> text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "formatting strikethrough",
+    "markdown": "~~strikethrough~~ text",
+    "html": "<p><del>strikethrough</del> text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "formatting highlight",
+    "markdown": "==highlight== text",
+    "html": "<p><mark>highlight</mark> text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "formatting subscript",
+    "markdown": "~subscript~ text",
+    "html": "<p><sub>subscript</sub> text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "formatting superscript",
+    "markdown": "^superscript^ text",
+    "html": "<p><sup>superscript</sup> text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "formatting inline code '`'",
+    "markdown": "text `inlined code` text",
+    "html": "<p>text <code>inlined code</code> text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "formatting inline code '``'",
+    "markdown": "text ``inlined ` code`` text",
+    "html": "<p>text <code>inlined ` code</code> text</p>",
+    "errors": []
+  }
+
+]}

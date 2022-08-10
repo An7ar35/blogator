@@ -1,0 +1,486 @@
+{"tests": [
+
+  {
+    "description":"fake HTML block 1",
+    "input":"<",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 2",
+    "input":"</",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "</", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 3",
+    "input":"</>",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "</>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 4",
+    "input":"</?",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "</?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 5",
+    "input":"<!",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<!", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 6",
+    "input":"<!?",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<!?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 7",
+    "input":"<a",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<a", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 8",
+    "input":"<a ",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<a", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 9",
+    "input":"<a/",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<a/", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 10",
+    "input":"<A?",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<A?", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 11",
+    "input":"<tag  ",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 12",
+    "input":"<tag =",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag =", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 13",
+    "input":"<tag attr",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 14",
+    "input":"<tag attr=",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 15",
+    "input":"<tag attr=\"",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=\"", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 16",
+    "input":"<tag attr='",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr='", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 17",
+    "input":"<tag attr=val",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=val", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 18",
+    "input":"<tag attr='val",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr='val", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 19",
+    "input":"<tag attr=\"val",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=\"val", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 20",
+    "input":"<tag attr='val'",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr='val'", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:16"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 21",
+    "input":"<tag attr=\"val\"",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=\"val\"", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:16"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"fake HTML block 22",
+    "input":"<tag attr= \"val\"",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr= \"val\"", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:17"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 1",
+    "input":"<pre>text</pre>",
+    "tokens":[
+      {"type": "HTML", "html type": "1", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<pre>text</pre>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:16"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 1 with incomplete end condition 1",
+    "input":"<pre>text<",
+    "tokens":[
+      {"type": "HTML", "html type": "1", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<pre>text<", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:11"}
+    ],
+    "errors":[
+      {"description": "EOF in HTML block", "line": 1, "col": 11}
+    ]
+  },
+
+  {
+    "description":"HTML block type 1 with incomplete end condition 2",
+    "input":"<pre>text</",
+    "tokens":[
+      {"type": "HTML", "html type": "1", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<pre>text</", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:12"}
+    ],
+    "errors":[
+      {"description": "EOF in HTML block", "line": 1, "col": 12}
+    ]
+  },
+
+  {
+    "description":"HTML block type 1 with incomplete end condition 3",
+    "input":"<pre>text</pre",
+    "tokens":[
+      {"type": "HTML", "html type": "1", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<pre>text</pre", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:15"}
+    ],
+    "errors":[
+      {"description": "EOF in HTML block", "line": 1, "col": 15}
+    ]
+  },
+
+  {
+    "description":"HTML block type 1 with nested tags",
+    "input":"<pre><nested>text</nested><?></?></pre>",
+    "tokens":[
+      {"type": "HTML", "html type": "1", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<pre><nested>text</nested><?></?></pre>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:40"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 1 (uppercase with spacing)",
+    "input":"<PRE ></PRE >paragraph",
+    "tokens":[
+      {"type": "HTML", "html type": "1", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<PRE ></PRE >", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:14"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:14"},
+      {"type": "CHARACTER", "text": "paragraph", "position": "1:14"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:23"}
+    ],
+    "errors":[
+      {"description": "block line-feed separator missing: 'p'", "line": 1, "col": 14}
+    ]
+  },
+
+  {
+    "description":"HTML block type 2",
+    "input":"<!--text-->",
+    "tokens":[
+      {"type": "HTML", "html type": "2", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<!--text-->", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 3",
+    "input":"<? content ?>",
+    "tokens":[
+      {"type": "HTML", "html type": "3", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<? content ?>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 4",
+    "input":"<!text>",
+    "tokens":[
+      {"type": "HTML", "html type": "4", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<!text>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:8"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 5",
+    "input":"<![CDATA[content]]>",
+    "tokens":[
+      {"type": "HTML", "html type": "5", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<![CDATA[content]]>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:20"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 6",
+    "input":"<div>\ncontent\n  \n",
+    "tokens":[
+      {"type": "HTML", "html type": "6", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<div>\ncontent", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 6 (closing tag)",
+    "input":"</div>\ncontent\n  \n",
+    "tokens":[
+      {"type": "HTML", "html type": "6", "position": "1:1"},
+      {"type": "CHARACTER", "text": "</div>\ncontent", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "4:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7",
+    "input":"<unknown>content\n  \n",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<unknown>content", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 EOF",
+    "input":"<unknown>content\n",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<unknown>content", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (closing tag)",
+    "input":"</unknown>content\n  \n",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "</unknown>content", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "3:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (attribute)",
+    "input":"<tag attr>",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (multi-attributes)",
+    "input":"<tag attr1 attr2=val attr3 = 'val'  attr4  >",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr1 attr2=val attr3 = 'val'  attr4  >", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:45"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (attribute + self-closing)",
+    "input":"<tag attr/>",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr/>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (attribute with unquoted value)",
+    "input":"<tag attr=val>",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=val>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (attribute with single quoted value)",
+    "input":"<tag attr='val'>",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr='val'>", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:17"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description":"HTML block type 7 (attribute with double quoted value)",
+    "input":"<tag attr=\"val\">",
+    "tokens":[
+      {"type": "HTML", "html type": "7", "position": "1:1"},
+      {"type": "CHARACTER", "text": "<tag attr=\"val\">", "position": "1:1"},
+      {"type": "BLOCK_END", "block": "HTML", "position": "1:17"}
+    ],
+    "errors":[]
+  }
+]}

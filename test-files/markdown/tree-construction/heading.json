@@ -43,9 +43,60 @@
   },
 
   {
+    "description": "'atx' H1 with block ID",
+    "markdown": "# heading {#block-id}",
+    "html": "<h1 id=\"block-id\">heading</h1>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H2 with block ID",
+    "markdown": "## heading {#block-id}",
+    "html": "<h2 id=\"block-id\">heading</h2>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H3 with block ID",
+    "markdown": "### heading {#block-id}",
+    "html": "<h3 id=\"block-id\">heading</h3>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H4 with block ID",
+    "markdown": "#### heading {#block-id}",
+    "html": "<h4 id=\"block-id\">heading</h4>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H5 with block ID",
+    "markdown": "##### heading {#block-id}",
+    "html": "<h5 id=\"block-id\">heading</h5>",
+    "errors": []
+  },
+
+  {
+    "description": "'atx' H6 with block ID",
+    "markdown": "###### heading {#block-id}",
+    "html": "<h6 id=\"block-id\">heading</h6>",
+    "errors": []
+  },
+
+  {
     "description": "'atx' H6 with 7x '#'",
     "markdown": "####### heading",
     "html": "<h6>heading</h6>",
+    "errors": [
+      {"description": "invalid heading level", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "'atx' H6 with 7x '#' and block ID",
+    "markdown": "####### heading {#block-id}",
+    "html": "<h6 id=\"block-id\">heading</h6>",
     "errors": [
       {"description": "invalid heading level", "line": 1, "col": 1}
     ]

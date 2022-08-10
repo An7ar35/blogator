@@ -1,0 +1,21 @@
+{"tests": [
+
+  {
+    "description": "<div> HTML block",
+    "markdown": "<div \n>content\n",
+    "html": "<div>content</div>",
+    "errors": [
+      { "description": "unclosed opened tag: { 'in body' | <div> inside <body> scope }", "line": 2, "col": 11 }
+    ]
+  },
+
+  {
+    "description": "HTML block 6 -> 7 with nested markdown",
+    "markdown": "<div><pre>\n_not markdown_\n\n_markdown_\n</pre></div>",
+    "html": "<div><pre>_not markdown_<p><em>markdown</em></p></pre></div><p></p>",
+    "errors": [
+      { "description": "orphaned end tag: { 'in body' | </p> }", "line": 2, "col": 49 }
+    ]
+  }
+
+]}

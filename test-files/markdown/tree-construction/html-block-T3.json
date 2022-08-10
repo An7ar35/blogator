@@ -1,0 +1,21 @@
+{"tests": [
+
+  {
+    "description": "HTML <?..?> block",
+    "markdown": "<?content?>",
+    "html": "<!-- ?content? -->",
+    "errors": [
+      { "description": "unexpected question mark instead of tag name", "line": 1, "col": 29 }
+    ]
+  },
+
+  {
+    "description": "HTML multi-lined <?..?> block",
+    "markdown": "<? \ncontent\n ?>",
+    "html": "<!-- ? \ncontent\n ? -->",
+    "errors": [
+      { "description": "unexpected question mark instead of tag name", "line": 1, "col": 29 }
+    ]
+  }
+
+]}

@@ -12,6 +12,34 @@
     "markdown": "paragraph\n\n> blockquote",
     "html": "<p>paragraph</p><blockquote><p>blockquote</p></blockquote>",
     "errors": []
+  },
+
+  {
+    "description": "horizontal rule between paragraphs",
+    "markdown": "paragraph 1\n\n - - - - - \n\nparagraph 2",
+    "html": "<p>paragraph 1</p><hr><p>paragraph 2</p>",
+    "errors": []
+  },
+
+  {
+    "description": "line breaking",
+    "markdown": "paragraph  \ntext",
+    "html": "<p>paragraph<br>text</p>",
+    "errors": []
+  },
+
+  {
+    "description": "simple image",
+    "markdown": "![alt](source)",
+    "html": "<p><img src=\"source\" alt=\"alt\"></p>",
+    "errors": []
+  },
+
+  {
+    "description": "simple hyperlink",
+    "markdown": "[text](https://example.com)",
+    "html": "<p><a href=\"https://example.com\">text</a></p>",
+    "errors": []
   }
 
 ]}

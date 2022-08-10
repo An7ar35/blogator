@@ -1,0 +1,21 @@
+{"tests": [
+
+  {
+    "description": "HTML CDATA block",
+    "markdown": "<![CDATA[content]]>",
+    "html": "<!-- [CDATA[content]] -->",
+    "errors": [
+      { "description": "CDATA in html content", "line": 1, "col": 36 }
+    ]
+  },
+
+  {
+    "description": "HTML multi-line CDATA block",
+    "markdown": "<![CDATA[content line 1\ncontent line 2]]>",
+    "html": "<!-- [CDATA[content line 1\ncontent line 2]] -->",
+    "errors": [
+      { "description": "CDATA in html content", "line": 1, "col": 36 }
+    ]
+  }
+
+]}

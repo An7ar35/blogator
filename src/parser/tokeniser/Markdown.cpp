@@ -3006,7 +3006,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     pendingHtmlTag().name = std::u32string( _html_cache.buffer.cbegin(), _html_cache.buffer.cend() );
                     appendToPendingBuffer( character );
                     setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
-                } else if( unicode::ascii::isupper( character ) ) { //"</[A-Z]"
+                } else if( unicode::ascii::isupper( character ) ) { //"</[A-Z]" or "<[A-Z]"
                     appendToPendingBuffer( character );
                     appendToHtmlBuffer( unicode::ascii::tolower( character ) );
                 } else if( unicode::ascii::islower( character ) ) { //"<![a-z]"
@@ -3018,8 +3018,14 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
             } break;
 
             case State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME: {
-                if( text.reachedEnd() || character == unicode::SOLIDUS || character == unicode::GREATER_THAN_SIGN ) {
-                    reconsume( State_e::HTML_BLOCK_BEGIN_AFTER_ATTRIBUTE_NAME );
+                if( text.reachedEnd() ) {
+                    reconsume( consumeReturnState() );
+                } else if( character == unicode::GREATER_THAN_SIGN ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
+                } else if( character == unicode::SOLIDUS ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::HTML_BLOCK_BEGIN_SELF_CLOSING_START_TAG );
                 } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::EQUALS_SIGN ) {
@@ -3063,7 +3069,6 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     setHtmlBlockType( HtmlBlockType_e::TYPE_7 );
                     setState( State_e::HTML_BLOCK_BEGIN_TAG_RESOLVE );
                 } else {
-                    appendToPendingBuffer( character );
                     reconsume( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_NAME );
                 }
             } break;
@@ -3078,7 +3083,6 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                     appendToPendingBuffer( character );
                     setState( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_SINGLE_QUOTED );
                 } else if( character == unicode::GREATER_THAN_SIGN ) { //bad format
-                    appendToPendingBuffer( character );
                     reconsume( consumeReturnState() );
                 } else {
                     reconsume( State_e::HTML_BLOCK_BEGIN_ATTRIBUTE_VALUE_UNQUOTED );
@@ -3111,6 +3115,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() ) {
                     reconsume( consumeReturnState() );
                 } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    appendToPendingBuffer( character );
                     setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
                 } else if( character == unicode::GREATER_THAN_SIGN ) {
                     appendToPendingBuffer( character );
@@ -3125,8 +3130,10 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
                 if( text.reachedEnd() ) {
                     reconsume( consumeReturnState() );
                 } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
+                    appendToPendingBuffer( character );
                     setState( State_e::HTML_BLOCK_BEGIN_BEFORE_ATTRIBUTE_NAME );
                 } else if( character == unicode::SOLIDUS ) {
+                    appendToPendingBuffer( character );
                     setState( State_e::HTML_BLOCK_BEGIN_SELF_CLOSING_START_TAG );
                 } else if( character == unicode::GREATER_THAN_SIGN ) {
                     appendToPendingBuffer( character );
@@ -3277,6 +3284,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::HTML_BLOCK_CONTENT_TAG_OPEN: { //'<'
                 if( text.reachedEnd() ) {
+                    resetHtmlBuffer( text.position() );
                     reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
                 } else if( character == unicode::SOLIDUS ) { //"</"
                     queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
@@ -3288,6 +3296,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::HTML_BLOCK_END_END_TAG_OPEN: { //"</"
                 if( text.reachedEnd() ) {
+                    resetHtmlBuffer( text.position() );
                     reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
                 } else if( unicode::ascii::isalpha( character ) ) {
                     resetHtmlBuffer( text.position() );
@@ -3299,6 +3308,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::HTML_BLOCK_END_TAG_NAME: {
                 if( text.reachedEnd() ) {
+                    resetHtmlBuffer( text.position() );
                     reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
                 } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
                     queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
@@ -3318,6 +3328,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::HTML_BLOCK_END_TAG_AFTER_TAG_NAME: {
                 if( text.reachedEnd() ) {
+                    resetHtmlBuffer( text.position() );
                     reconsume( State_e::HTML_BLOCK_CONTENT_NEWLINE );
                 } else if( character == unicode::SPACE || character == unicode::TAB || unicode::ascii::isfeed( character ) ) {
                     queueToken( std::make_unique<CharacterTk>( character, text.position() ) );

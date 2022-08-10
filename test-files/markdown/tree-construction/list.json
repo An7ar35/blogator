@@ -1,6 +1,55 @@
 {"tests": [
 
   {
+    "description": "simple numeric ordered list",
+    "markdown": "1. item 1\n2. item 2",
+    "html": "<ol type=\"1\"><li>item 1</li><li>item 2</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "simple lower alpha ordered list",
+    "markdown": "a. item 1\nb. item 2",
+    "html": "<ol type=\"a\"><li>item 1</li><li>item 2</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "simple upper alpha ordered list",
+    "markdown": "A. item 1\nB. item 2",
+    "html": "<ol type=\"A\"><li>item 1</li><li>item 2</li></ol>",
+    "errors": []
+  },
+
+  {
+    "description": "simple hyphen unordered list",
+    "markdown": "- item 1\n- item 2",
+    "html": "<ul><li>item 1</li><li>item 2</li></ul>",
+    "errors": []
+  },
+
+  {
+    "description": "simple asterisk unordered list",
+    "markdown": "* item 1\n* item 2",
+    "html": "<ul><li>item 1</li><li>item 2</li></ul>",
+    "errors": []
+  },
+
+  {
+    "description": "simple plus unordered list",
+    "markdown": "+ item 1\n+ item 2",
+    "html": "<ul><li>item 1</li><li>item 2</li></ul>",
+    "errors": []
+  },
+
+  {
+    "description": "task list",
+    "markdown": "- [x] item 1\n- [ ] item 2\n- [] item 3",
+    "html": "<ul class=\"task-list\"><li><input class=\"task-list-item-checkbox\" type=\"checkbox\" disabled checked>item 1</li><li><input class=\"task-list-item-checkbox\" type=\"checkbox\" disabled>item 2</li><li><input class=\"task-list-item-checkbox\" type=\"checkbox\" disabled>item 3</li></ul>",
+    "errors": []
+  },
+
+  {
     "description": "list tightness 1",
     "markdown": "1. item 1\n2. item 2",
     "html": "<ol type=\"1\"><li>item 1</li><li>item 2</li></ol>",

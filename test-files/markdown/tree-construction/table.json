@@ -5,6 +5,13 @@
     "markdown": "| header |\n|---|\n| cell |",
     "html": "<table><thead><tr><th>header</th></tr></thead><tbody><tr><td>cell</td></tr></tbody></table>",
     "errors": []
+  },
+
+  {
+    "description": "simple 1x1 table with block id",
+    "markdown": "| {#block-id} header |\n|---|\n| cell |",
+    "html": "<table id=\"block-id\"><thead><tr><th>header</th></tr></thead><tbody><tr><td>cell</td></tr></tbody></table>",
+    "errors": []
   }
 
 ]}

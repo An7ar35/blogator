@@ -1,0 +1,17 @@
+{"tests": [
+
+  {
+    "description": "HTML comment block",
+    "markdown": "<!--comment-->",
+    "html": "<!-- comment -->",
+    "errors": []
+  },
+
+  {
+    "description": "HTML multi-line comment block",
+    "markdown": "<!--comment line 1\ncomment line 2-->",
+    "html": "<!-- comment line 1\ncomment line 2 -->",
+    "errors": []
+  }
+
+]}

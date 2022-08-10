@@ -59,7 +59,7 @@
   {
     "description": "<pre> multi-lined block",
     "markdown": "<pre\n>\nmulti-lined\ncontent\n</pre>",
-    "html": "<pre>multi-lined\ncontent</pre>",
+    "html": "<pre>multi-lined\ncontent\n</pre>",
     "errors": []
   }
 
