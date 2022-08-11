@@ -3,14 +3,14 @@
  *
  * Test subjects:
  * - `blogator::parser::tokeniser::Markdown`: main subject of the tests
- * - `blogator::parser::logging::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
+ * - `blogator::reporter::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
  */
 #include "gtest/gtest.h"
+#include "../../../src/encoding/Transcode.h"
+#include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
-#include "../../../src/parser/logging/ParserLog.h"
-#include "../../../src/parser/dto/Source.h"
-#include "../../../src/parser/encoding/Transcode.h"
+#include "../../../src/encoding/dto/Source.h"
 
 #include "../helpers/helpers.h"
 
@@ -18,23 +18,23 @@ using blogator::parser::dom::TreeBuilder;
 using blogator::parser::tokeniser::Markdown;
 using blogator::parser::token::markdown::MarkdownTk;
 using blogator::parser::specs::markdown::TokeniserState;
-using blogator::parser::logging::ParserLog;
+using blogator::reporter::ParseReporter;
 
 /**
  * Parsing log catcher
  */
 class ParserLogCatcher {
   public:
-    void log( const blogator::parser::logging::ErrorObject & e ) {
+    void log( const blogator::reporter::ReporterObject & e ) {
         _errors.push_back( e );
     }
 
-    [[nodiscard]] const std::vector<blogator::parser::logging::ErrorObject> & errors() const {
+    [[nodiscard]] const std::vector<blogator::reporter::ReporterObject> & errors() const {
         return _errors;
     }
 
   private:
-    std::vector<blogator::parser::logging::ErrorObject> _errors;
+    std::vector<blogator::reporter::ReporterObject> _errors;
 };
 
 /**
@@ -87,11 +87,11 @@ testing::AssertionResult runMarkdownTokeniserTest( const test_harness::markdown:
     ParserLogCatcher   error_catcher;
     MockMarkdownToHtml mock_markdown_to_html;
 
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
     std::u32string raw_txt = converter_U8toU32.from_bytes( test.input );
 
-    auto input     = blogator::parser::U32Text( path, raw_txt );
+    auto input     = blogator::U32Text( path, raw_txt );
     auto tokeniser = Markdown( mock_markdown_to_html );
 
     tokeniser.parse( input );

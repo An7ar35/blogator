@@ -1,5 +1,7 @@
 #include "GenericTagTk.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::token::html5;
 
 /**
@@ -7,7 +9,7 @@ using namespace blogator::parser::token::html5;
  * @param type HTML5 token type
  * @param position Line:Col position of token in source text
  */
-GenericTagTk::GenericTagTk( specs::infra::TokenType type, blogator::parser::TextPos position ) :
+GenericTagTk::GenericTagTk( specs::infra::TokenType type, blogator::TextPos position ) :
     HTML5Tk( type, position ),
     _self_closing( false )
 {}
@@ -18,7 +20,7 @@ GenericTagTk::GenericTagTk( specs::infra::TokenType type, blogator::parser::Text
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
-GenericTagTk::GenericTagTk( specs::infra::TokenType type, std::u32string text, blogator::parser::TextPos position ) :
+GenericTagTk::GenericTagTk( specs::infra::TokenType type, std::u32string text, blogator::TextPos position ) :
     HTML5Tk( type, std::move( text ), position ),
     _self_closing( false )
 {}

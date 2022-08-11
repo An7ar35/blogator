@@ -6,7 +6,7 @@ using namespace blogator::parser::token::html5;
  * Constructor
  * @param position Line:Col position of token in source text
  */
-CommentTk::CommentTk( blogator::parser::TextPos position ) :
+CommentTk::CommentTk( blogator::TextPos position ) :
     HTML5Tk( specs::infra::TokenType::COMMENT, position )
 {}
 
@@ -15,7 +15,7 @@ CommentTk::CommentTk( blogator::parser::TextPos position ) :
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
-CommentTk::CommentTk( std::u32string text, blogator::parser::TextPos position ) :
+CommentTk::CommentTk( std::u32string text, blogator::TextPos position ) :
     HTML5Tk( specs::infra::TokenType::COMMENT, std::move( text ), position )
 {}
 

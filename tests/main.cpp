@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "../src/logger/Logger.h"
-#include "../src/parser/logging/ParserLog.h"
+#include "../src/reporter/ParseReporter.h"
 
 int main(int argc, char **argv) {
     blogator::logger::Logger::addOutput(
@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     );
 
     blogator::logger::Logger::start();
-    blogator::parser::logging::ParserLog::setBuffering( false );
+    blogator::reporter::ParseReporter::setBuffering( false );
 
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

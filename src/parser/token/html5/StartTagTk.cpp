@@ -8,7 +8,7 @@ using namespace blogator::parser::token::html5;
  * Constructor
  * @param position Line:Col position of token in source text
  */
-StartTagTk::StartTagTk( blogator::parser::TextPos position ) :
+StartTagTk::StartTagTk( blogator::TextPos position ) :
     GenericTagTk( specs::infra::TokenType::START_TAG, position )
 {}
 
@@ -17,7 +17,7 @@ StartTagTk::StartTagTk( blogator::parser::TextPos position ) :
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
-StartTagTk::StartTagTk( std::u32string text, blogator::parser::TextPos position ) :
+StartTagTk::StartTagTk( std::u32string text, blogator::TextPos position ) :
     GenericTagTk( specs::infra::TokenType::START_TAG, std::move( text ), position )
 {}
 

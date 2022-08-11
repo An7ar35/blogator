@@ -1,6 +1,6 @@
 #include "InsertionMode.h"
 
-#include <map>
+#include <unordered_map>
 #include <ostream>
 #include <sstream>
 
@@ -11,7 +11,7 @@
  * @return Output stream
  */
 std::ostream &blogator::parser::specs::native::operator <<( std::ostream &os, blogator::parser::specs::native::InsertionMode mode ) {
-    static const auto map = std::map<InsertionMode, std::string>( {
+    static const auto map = std::unordered_map<InsertionMode, std::string>( {
         { InsertionMode::INITIAL, "INITIAL" },
         { InsertionMode::PRE_NAMESPACE, "PRE_NAMESPACE" },
         { InsertionMode::IN_NAMESPACE, "IN_NAMESPACE" },

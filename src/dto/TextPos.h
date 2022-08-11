@@ -1,10 +1,10 @@
-#ifndef BLOGATOR_PARSER_DTO_TEXTPOS_H
-#define BLOGATOR_PARSER_DTO_TEXTPOS_H
+#ifndef BLOGATOR_DTO_TEXTPOS_H
+#define BLOGATOR_DTO_TEXTPOS_H
 
 #include <string>
 #include <ostream>
 
-namespace blogator::parser {
+namespace blogator {
     struct TextPos {
         TextPos();
         TextPos( size_t line, size_t col );
@@ -35,4 +35,4 @@ namespace blogator::parser {
     };
 }
 
-#endif //BLOGATOR_PARSER_DTO_TEXTPOS_H
+#endif //BLOGATOR_DTO_TEXTPOS_H

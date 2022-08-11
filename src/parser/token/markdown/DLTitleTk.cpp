@@ -6,7 +6,7 @@ using namespace blogator::parser::token::markdown;
  * Constructor
  * @param position Line:Col position of token in source text
  */
-DLTitleTk::DLTitleTk( blogator::parser::TextPos position ) :
+DLTitleTk::DLTitleTk( blogator::TextPos position ) :
     BlockBeginTk( specs::markdown::TokenType::DEFINITION_LIST_DT, position )
 {}
 

@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-using namespace blogator::parser;
+using namespace blogator;
 
 /**
  * Constructor

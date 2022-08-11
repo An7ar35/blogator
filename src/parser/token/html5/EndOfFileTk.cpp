@@ -6,7 +6,7 @@ using namespace blogator::parser::token::html5;
  * Constructor
  * @param position Line:Col position of token in source text
  */
-EndOfFileTk::EndOfFileTk( blogator::parser::TextPos position ) :
+EndOfFileTk::EndOfFileTk( blogator::TextPos position ) :
     HTML5Tk( specs::infra::TokenType::END_OF_FILE, position )
 {}
 

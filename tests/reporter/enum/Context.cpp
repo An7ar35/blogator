@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/specs/Context.h"
+#include "../../../src/reporter/enum/Context.h"
 
-using namespace blogator::parser::specs;
+using namespace blogator::reporter;
 
 TEST( parser_specs_Tests, output_stream_operator ) {
     for( auto i = 0; i <= static_cast<int>( Context::ENUM_END ); ++i ) {

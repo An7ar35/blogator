@@ -1,5 +1,5 @@
-#ifndef BLOGATOR_PARSER_DTO_U32TEXT_H
-#define BLOGATOR_PARSER_DTO_U32TEXT_H
+#ifndef BLOGATOR_DTO_U32TEXT_H
+#define BLOGATOR_DTO_U32TEXT_H
 
 #include <string>
 #include <vector>
@@ -7,7 +7,7 @@
 
 #include "TextPos.h"
 
-namespace blogator::parser {
+namespace blogator {
     typedef std::vector<char32_t>::const_iterator TextIterator_t;
 
     /**
@@ -72,4 +72,4 @@ namespace blogator::parser {
     };
 }
 
-#endif //BLOGATOR_PARSER_DTO_U32TEXT_H
+#endif //BLOGATOR_DTO_U32TEXT_H

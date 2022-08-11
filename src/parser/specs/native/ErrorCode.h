@@ -9,13 +9,6 @@ namespace blogator::parser::specs::native {
         enum {
             NONE    = 0,
             UNKNOWN = 1,
-            INVALID_UTF8_CODEPOINT_START_BYTE,
-            INVALID_UTF16_SURROGATE_PAIR,
-            INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
-            INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
-            INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
-            INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
-            NULL_CHARACTER,
             TOKEN_OF_UNKNOWN_TYPE,
             ENUM_END
         };

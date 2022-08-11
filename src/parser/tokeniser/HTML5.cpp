@@ -5,15 +5,16 @@
 #include <algorithm>
 
 #include "../dom/TreeBuilder.h"
-#include "../logging/ParserLog.h"
 #include "../specs/infra/NamedCharRef.h"
 #include "../specs/infra/NumericCharRef.h"
+#include "../../dto/U32Text.h"
+#include "../../reporter/ParseReporter.h"
 #include "../../logger/Logger.h"
 #include "../../exception/parsing_failure.h"
 #include "../../unicode/unicode.h"
 
 using namespace blogator::parser;
-using           blogator::parser::logging::ParserLog;
+using           blogator::reporter::ParseReporter;
 using           blogator::parser::specs::infra::ErrorCode;
 using           blogator::parser::specs::infra::TokeniserState;
 
@@ -63,8 +64,8 @@ tokeniser::HTML5::HTML5( dom::TreeBuilder & tree_builder, specs::infra::Tokenise
  * @return Ending/break Context
  * @throws parsing_failure if parsing fails
  */
-specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_ctx ) { //TODO
-//    if( starting_ctx != specs::Context::HTML5 ) { //that would be good in the tree builder, not here really
+blogator::reporter::Context tokeniser::HTML5::parse( U32Text &text, reporter::Context starting_ctx ) { //TODO
+//    if( starting_ctx != reporter::Context::HTML5 ) { //that would be good in the tree builder, not here really
 //        return parseSnippet( text, tokens, starting_ctx );
 //    }
 
@@ -1669,7 +1670,7 @@ specs::Context tokeniser::HTML5::parse( U32Text &text, specs::Context starting_c
         character = text.nextChar();
     }
 
-    return specs::Context::HTML5; //TODO
+    return reporter::Context::HTML5; //TODO
 }
 
 /**
@@ -1701,7 +1702,7 @@ size_t tokeniser::HTML5::errors() const {
  */
 inline void tokeniser::HTML5::logError( TextPos position, int err_code ) {
     ++_error_count;
-    ParserLog::log( _src_path, THIS_CONTEXT, err_code, position );
+    ParseReporter::log( _src_path, THIS_CONTEXT, err_code, position );
 }
 
 /**

@@ -1,6 +1,6 @@
 #include "Element.h"
 
-#include <map>
+#include <unordered_map>
 #include <ostream>
 #include <sstream>
 
@@ -11,7 +11,7 @@
  * @return Output stream
  */
 std::ostream & blogator::parser::specs::native::operator <<( std::ostream &os, blogator::parser::specs::native::Element el ) {
-    static const auto map = std::map<Element, std::string>( {
+    static const auto map = std::unordered_map<Element, std::string>( {
         { Element::NONE, "NONE" },
         { Element::UNKNOWN, "UNKNOWN" },
         { Element::NAMESPACE_OPEN, "NAMESPACE_OPEN" },

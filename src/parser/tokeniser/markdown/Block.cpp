@@ -10,7 +10,7 @@ using namespace blogator::parser::tokeniser::markdown;
  * @param t Block type
  * @param pos Text position
  */
-Block::Block( specs::markdown::TokenType t, parser::TextPos pos ) :
+Block::Block( specs::markdown::TokenType t, TextPos pos ) :
     type( t ), position( pos ), token( nullptr )
 {}
 

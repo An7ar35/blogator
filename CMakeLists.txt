@@ -173,16 +173,16 @@ set(SOURCE_FILES
         src/datastructure/TrieNode.h
         src/datastructure/TrieTracker.h
 
-        src/parser/dto/TextPos.cpp
-        src/parser/dto/TextPos.h
-        src/parser/dto/U32Text.cpp
-        src/parser/dto/U32Text.h
-        src/parser/dto/Source.cpp
-        src/parser/dto/Source.h
+        src/dto/TextPos.cpp
+        src/dto/TextPos.h
+        src/dto/U32Text.cpp
+        src/dto/U32Text.h
+        src/encoding/dto/Source.cpp
+        src/encoding/dto/Source.h
 
         src/parser/specs/Structure.h
-        src/parser/specs/Context.cpp
-        src/parser/specs/Context.h
+        src/reporter/enum/Context.cpp
+        src/reporter/enum/Context.h
         src/parser/specs/native/Element.cpp
         src/parser/specs/native/Element.h
         src/parser/specs/native/ErrorCode.cpp
@@ -310,16 +310,18 @@ set(SOURCE_FILES
         src/parser/tokeniser/Markdown.cpp
         src/parser/tokeniser/Markdown.h
 
-        src/parser/encoding/Transcode.cpp
-        src/parser/encoding/Transcode.h
-        src/parser/encoding/Format.cpp
-        src/parser/encoding/Format.h
-        src/parser/encoding/Confidence.h
+        src/encoding/Transcode.cpp
+        src/encoding/Transcode.h
+        src/encoding/specs/Format.cpp
+        src/encoding/specs/Format.h
+        src/encoding/specs/Confidence.h
+        src/encoding/specs/ErrorCode.cpp
+        src/encoding/specs/ErrorCode.h
 
-        src/parser/logging/ErrorObject.cpp
-        src/parser/logging/ErrorObject.h
-        src/parser/logging/ParserLog.cpp
-        src/parser/logging/ParserLog.h
+        src/reporter/dto/ReporterObject.cpp
+        src/reporter/dto/ReporterObject.h
+        src/reporter/ParseReporter.cpp
+        src/reporter/ParseReporter.h
 
         src/unicode/ascii.cpp
         src/unicode/ascii.h
@@ -439,7 +441,9 @@ set(SOURCE_FILES
         src/parser/token/markdown/HtmlBlockTk.cpp
         src/parser/token/markdown/HtmlBlockTk.h
         src/parser/specs/markdown/ListSpacing.cpp
-        src/parser/specs/markdown/ListSpacing.h)
+        src/parser/specs/markdown/ListSpacing.h
+        src/engine/config/parser/token/ConfigTk.cpp
+        src/engine/config/parser/token/ConfigTk.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -485,8 +489,8 @@ set(TEST_FILES
         tests/output/json/json.cpp
         tests/string/helpers_tests.cpp
         tests/parser/tokeniser/Blogator.cpp
-        tests/parser/dto/U32Text.cpp
-        tests/parser/dto/TextPos.cpp
+        tests/dto/U32Text.cpp
+        tests/dto/TextPos.cpp
         tests/datastructure/TrieNode.cpp
         tests/datastructure/Trie.cpp
         tests/parser/specs/infra/NamedCharRef.cpp
@@ -495,7 +499,7 @@ set(TEST_FILES
         tests/unicode/ascii.cpp
         tests/unicode/utf32.cpp
         tests/unicode/utf8.cpp
-        tests/parser/encoding/Transcode.cpp
+        tests/encoding/Transcode.cpp
         tests/unicode/utf16.cpp
         tests/parser/dom/node/Node.cpp
         tests/logger/global/LogLevel.cpp
@@ -507,7 +511,7 @@ set(TEST_FILES
         tests/parser/specs/infra/Namespace.cpp
         tests/parser/specs/infra/InsertionMode.cpp
         tests/parser/specs/infra/Attribute.cpp
-        tests/parser/specs/Context.cpp
+        tests/reporter/enum/Context.cpp
         tests/parser/specs/native/Element.cpp
         tests/parser/specs/native/InsertionMode.cpp
         tests/parser/specs/markdown/TokeniserState.cpp

@@ -8,22 +8,22 @@
  * Test subjects:
  * - `blogator::parser::tokeniser::HTML5`: main subject of the tests
  * - `blogator::parser::encoding::Transcode::addToCodePoint(..)`: tests for some of the stream error messages
- * - `blogator::parser::logging::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
+ * - `blogator::reporter::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
  */
 
 #include "gtest/gtest.h"
+#include "../../../src/encoding/Transcode.h"
+#include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
-#include "../../../src/parser/logging/ParserLog.h"
-#include "../../../src/parser/dto/Source.h"
-#include "../../../src/parser/encoding/Transcode.h"
+#include "../../../src/encoding/dto/Source.h"
 
 #include "../helpers/helpers.h"
 
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;
 using blogator::parser::specs::infra::TokeniserState;
-using blogator::parser::logging::ParserLog;
+using blogator::reporter::ParseReporter;
 
 TokeniserState getStateEnum( const std::string &str ) {
     static const std::map<std::string, TokeniserState> map = {
@@ -120,7 +120,7 @@ TokeniserState getStateEnum( const std::string &str ) {
  */
 class ParserLogCatcher {
   public:
-    void log( const blogator::parser::logging::ErrorObject & e ) {
+    void log( const blogator::reporter::ReporterObject & e ) {
         _errors.push_back( e );
     }
 
@@ -136,7 +136,7 @@ class ParserLogCatcher {
     }
 
   private:
-    std::vector<blogator::parser::logging::ErrorObject> _errors;
+    std::vector<blogator::reporter::ReporterObject> _errors;
 };
 
 /**
@@ -195,12 +195,12 @@ std::u32string preprocess( std::u32string &raw, const std::filesystem::path &pat
     std::vector<char32_t> processed_txt;
     std::stringstream     ss; //not actually used
 
-    auto     source  = blogator::parser::Source( ss, path, blogator::parser::encoding::Format::UTF32_LE );
+    auto     source  = blogator::encoding::Source( ss, path, blogator::encoding::specs::Format::UTF32_LE );
     char32_t prev_cp = 0x00;
 
     for( auto cp : raw ) {
         /* This will send errors to the parser logger where appropriate */
-        blogator::parser::encoding::Transcode::addCodePoint( source, prev_cp, cp, processed_txt );
+        blogator::encoding::Transcode::addCodePoint( source, prev_cp, cp, processed_txt );
         prev_cp = cp;
     }
 
@@ -219,7 +219,7 @@ testing::AssertionResult runHTML5TokeniserTest( const nlohmann::json &test, cons
     MockTreeBuilder  mock_tree_builder;
     ParserLogCatcher error_catcher;
 
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
     std::u32string raw_txt = converter_U8toU32.from_bytes( test.at( "input" ) );
 
@@ -227,7 +227,7 @@ testing::AssertionResult runHTML5TokeniserTest( const nlohmann::json &test, cons
         raw_txt = test_harness::html5lib_tests::unescape( raw_txt );
     }
 
-    auto text        = blogator::parser::U32Text( path, preprocess( raw_txt, path ) );
+    auto text        = blogator::U32Text( path, preprocess( raw_txt, path ) );
     auto init_states = std::vector<std::pair<TokeniserState, std::string>>();
 
     if( test.contains( "initialStates" ) && !test.at( "initialStates" ).empty() ) { //"[ ... ]"

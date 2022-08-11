@@ -1,5 +1,7 @@
 #include "Token.h"
 
+#include "../../unicode/utf8.h"
+
 using namespace blogator::parser;
 
 /**
@@ -7,7 +9,7 @@ using namespace blogator::parser;
  * @param ns Context namespace
  * @param position Line:Col position of token
  */
-token::Token::Token( specs::Context ns, TextPos position ) :
+token::Token::Token( reporter::Context ns, TextPos position ) :
     _context( ns ),
     _position( position )
 {}
@@ -18,7 +20,7 @@ token::Token::Token( specs::Context ns, TextPos position ) :
  * @param text UTF32 Text
  * @param position Line:Col position of token
  */
-token::Token::Token( specs::Context ns, std::u32string text, TextPos position ) :
+token::Token::Token( reporter::Context ns, std::u32string text, TextPos position ) :
     _context( ns ),
     _text( std::move( text ) ),
     _position( position )
@@ -36,7 +38,7 @@ void token::Token::setText( std::u32string text ) {
  * Gets the context for the token
  * @return Token context/namespace
  */
-specs::Context token::Token::context() const {
+blogator::reporter::Context token::Token::context() const {
     return _context;
 }
 
@@ -76,7 +78,7 @@ size_t token::Token::colPos() const {
  * Gets the line:col position of the token
  * @return Token position from the source text
  */
-TextPos token::Token::position() const {
+blogator::TextPos token::Token::position() const {
     return _position;
 }
 

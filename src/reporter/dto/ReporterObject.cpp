@@ -1,15 +1,20 @@
-#include "ErrorObject.h"
+#include "ReporterObject.h"
 
 #include <utility>
 
-using namespace blogator::parser::logging;
+#include "../../parser/specs/native/ErrorCode.h"
+#include "../../parser/specs/infra/ErrorCode.h"
+#include "../../parser/specs/markdown/ErrorCode.h"
+
+using namespace blogator::reporter;
+using namespace blogator::parser;
 
 /**
  * Constructor
  */
-ErrorObject::ErrorObject() :
+ReporterObject::ReporterObject() :
     _src_file( "" ),
-    _context( specs::Context::UNKNOWN ),
+    _context( Context::UNKNOWN ),
     _code( 0 ),
     _position( { 0, 0 } )
 {}
@@ -21,7 +26,7 @@ ErrorObject::ErrorObject() :
  * @param err_code Error code
  * @param position Position in source file
  */
-ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position ) :
+ReporterObject::ReporterObject( std::filesystem::path src, Context ctx, int err_code, TextPos position ) :
     _src_file( std::move( src ) ),
     _context( ctx ),
     _code( err_code ),
@@ -36,7 +41,7 @@ ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err
  * @param txt Optional text to append to the error message
  * @param position Position in source file
  */
-ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position, std::string txt ) :
+ReporterObject::ReporterObject( std::filesystem::path src, Context ctx, int err_code, TextPos position, std::string txt ) :
     _src_file( std::move( src ) ),
     _context( ctx ),
     _code( err_code ),
@@ -50,7 +55,7 @@ ErrorObject::ErrorObject( std::filesystem::path src, specs::Context ctx, int err
  * @param err ErrorObject
  * @return Output stream
  */
-std::ostream & blogator::parser::logging::operator <<( std::ostream &os, const ErrorObject &err ) {
+std::ostream & blogator::reporter::operator <<( std::ostream &os, const ReporterObject &err ) {
     os << "{ path: " << err.filepath()
        << ", position: " << err.position()
        << ", context: " << err.context()
@@ -64,7 +69,7 @@ std::ostream & blogator::parser::logging::operator <<( std::ostream &os, const E
  * @param rhs Error object to compare to
  * @return Equivalence state (filepath is ignored)
  */
-bool ErrorObject::operator ==( const ErrorObject &rhs ) const {
+bool ReporterObject::operator ==( const ReporterObject &rhs ) const {
     return context()  == rhs.context()
         && errcode()  == rhs.errcode()
         && position() == rhs.position();
@@ -75,7 +80,7 @@ bool ErrorObject::operator ==( const ErrorObject &rhs ) const {
  * @param rhs Error object to compare to
  * @return Non-equivalence state (filepath is ignored)
  */
-bool ErrorObject::operator !=( const ErrorObject &rhs ) const {
+bool ReporterObject::operator !=( const ReporterObject &rhs ) const {
     return !( *this == rhs );
 }
 
@@ -83,7 +88,7 @@ bool ErrorObject::operator !=( const ErrorObject &rhs ) const {
  * Gets the source filepath string
  * @return Filepath string
  */
-std::string ErrorObject::filepath() const {
+std::string ReporterObject::filepath() const {
     return _src_file.string();
 }
 
@@ -91,7 +96,7 @@ std::string ErrorObject::filepath() const {
  * Gets the context of the error
  * @return Context
  */
-std::string ErrorObject::context() const {
+std::string ReporterObject::context() const {
     return blogator::to_string( _context );
 }
 
@@ -99,17 +104,17 @@ std::string ErrorObject::context() const {
  * Gets the short error description
  * @return Short error description string
  */
-std::string ErrorObject::error() const {
+std::string ReporterObject::error() const {
     switch( _context ) {
-        case specs::Context::NATIVE:
+        case Context::NATIVE:
             return ( _text.empty()
                      ? specs::native::ErrorCode::str( _code )
                      : specs::native::ErrorCode::str( _code ) + ": " + _text );
-        case specs::Context::HTML5:
+        case Context::HTML5:
             return ( _text.empty()
                      ? specs::infra::ErrorCode::str( _code )
                      : specs::infra::ErrorCode::str( _code ) + ": " + _text );
-        case specs::Context::MARKDOWN:
+        case Context::MARKDOWN:
             return ( _text.empty()
                      ? specs::markdown::ErrorCode::str( _code )
                      : specs::markdown::ErrorCode::str( _code ) + ": " + _text );
@@ -122,13 +127,13 @@ std::string ErrorObject::error() const {
  * Gets the long error description
  * @return Long error description string
  */
-std::string ErrorObject::detailed() const {
+std::string ReporterObject::detailed() const {
     switch( _context ) {
-        case specs::Context::NATIVE:
+        case Context::NATIVE:
             return specs::native::ErrorCode::detailed( _code );
-        case specs::Context::HTML5:
+        case Context::HTML5:
             return specs::infra::ErrorCode::detailed( _code );
-        case specs::Context::MARKDOWN:
+        case Context::MARKDOWN:
             return specs::markdown::ErrorCode::detailed( _code );
         default:
             return "Unknown Context";
@@ -139,7 +144,7 @@ std::string ErrorObject::detailed() const {
  * Gets the position as a string
  * @return Position string
  */
-std::string ErrorObject::position() const {
+std::string ReporterObject::position() const {
     std::stringstream ss;
     ss << _position.line << ":" << _position.col;
     return ss.str();
@@ -149,7 +154,7 @@ std::string ErrorObject::position() const {
  * Gets the position
  * @return TextPos
  */
-blogator::parser::TextPos ErrorObject::textpos() const {
+blogator::TextPos ReporterObject::textpos() const {
     return _position;
 }
 
@@ -158,7 +163,7 @@ blogator::parser::TextPos ErrorObject::textpos() const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream & ErrorObject::filepath( std::ostream &os ) const {
+std::ostream & ReporterObject::filepath( std::ostream &os ) const {
     os << _src_file.string();
     return os;
 }
@@ -168,7 +173,7 @@ std::ostream & ErrorObject::filepath( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream & ErrorObject::context( std::ostream &os ) const {
+std::ostream & ReporterObject::context( std::ostream &os ) const {
     os << _context;
     return os;
 }
@@ -178,17 +183,17 @@ std::ostream & ErrorObject::context( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream & ErrorObject::error( std::ostream &os ) const {
+std::ostream & ReporterObject::error( std::ostream &os ) const {
     switch( _context ) {
-        case specs::Context::NATIVE:
+        case Context::NATIVE:
             os << specs::native::ErrorCode::str( _code );
             break;
 
-        case specs::Context::HTML5:
+        case Context::HTML5:
             os << specs::infra::ErrorCode::str( _code );
             break;
 
-        case specs::Context::MARKDOWN:
+        case Context::MARKDOWN:
             os << specs::markdown::ErrorCode::str( _code );
             break;
 
@@ -205,17 +210,17 @@ std::ostream & ErrorObject::error( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream & ErrorObject::detailed( std::ostream &os ) const {
+std::ostream & ReporterObject::detailed( std::ostream &os ) const {
     switch( _context ) {
-        case specs::Context::NATIVE:
+        case Context::NATIVE:
             os << specs::native::ErrorCode::detailed( _code );
             break;
 
-        case specs::Context::HTML5:
+        case Context::HTML5:
             os << specs::infra::ErrorCode::detailed( _code );
             break;
 
-        case specs::Context::MARKDOWN:
+        case Context::MARKDOWN:
             os << specs::markdown::ErrorCode::detailed( _code );
             break;
 
@@ -232,7 +237,7 @@ std::ostream & ErrorObject::detailed( std::ostream &os ) const {
  * @param os Output stream
  * @return Output stream
  */
-std::ostream & ErrorObject::position( std::ostream &os ) const {
+std::ostream & ReporterObject::position( std::ostream &os ) const {
     os << _position.line << ":" << _position.col;
     return os;
 }
@@ -242,7 +247,7 @@ std::ostream & ErrorObject::position( std::ostream &os ) const {
  * Gets the context code
  * @return Context
  */
-blogator::parser::specs::Context ErrorObject::ctxcode() const {
+blogator::reporter::Context ReporterObject::ctxcode() const {
     return _context;
 }
 
@@ -250,6 +255,6 @@ blogator::parser::specs::Context ErrorObject::ctxcode() const {
  * Gets the error code within the context
  * @return Contextual error code
  */
-int ErrorObject::errcode() const {
+int ReporterObject::errcode() const {
     return _code;
 }

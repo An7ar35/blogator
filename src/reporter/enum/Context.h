@@ -1,12 +1,13 @@
-#ifndef BLOGATOR_PARSER_SPECS_H
-#define BLOGATOR_PARSER_SPECS_H
+#ifndef BLOGATOR_REPORTER_CONTEXT_H
+#define BLOGATOR_REPORTER_CONTEXT_H
 
 #include <string>
 #include <ostream>
 
-namespace blogator::parser::specs {
+namespace blogator::reporter {
     enum class Context {
         UNKNOWN = 0,
+        ENCODING,
         NATIVE,
         HTML5,
         MARKDOWN,
@@ -18,7 +19,7 @@ namespace blogator::parser::specs {
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::specs::Context ctx );
+    std::string to_string( blogator::reporter::Context ctx );
 }
 
-#endif //BLOGATOR_PARSER_SPECS_H
+#endif //BLOGATOR_REPORTER_CONTEXT_H

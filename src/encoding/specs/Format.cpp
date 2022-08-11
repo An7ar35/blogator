@@ -8,7 +8,7 @@
  * @param fmt Format enum
  * @return Output stream
  */
-std::ostream & blogator::parser::encoding::operator <<( std::ostream &os, blogator::parser::encoding::Format fmt ) {
+std::ostream & blogator::encoding::specs::operator <<( std::ostream &os, blogator::encoding::specs::Format fmt ) {
     switch( fmt ) {
         case Format::UNKNOWN:  { os << "UNKNOWN";  } break;
         case Format::UTF8:     { os << "UTF-8";    } break;
@@ -23,22 +23,22 @@ std::ostream & blogator::parser::encoding::operator <<( std::ostream &os, blogat
 }
 
 /**
- * Converts a blogator::parser::encoding::Format enum to a string representation
+ * Converts a blogator::encoding::Format enum to a string representation
  * @param fmt Format enum
  * @return String representation
  */
-std::string blogator::to_string( blogator::parser::encoding::Format fmt ) {
+std::string blogator::to_string( blogator::encoding::specs::Format fmt ) {
     std::stringstream ss;
     ss << fmt;
     return ss.str();
 }
 
 /**
- * Converts a blogator::parser::encoding::Format enum to a string representation
+ * Converts a blogator::encoding::Format enum to a string representation
  * @param content_type Format enum
  * @return String representation
  */
-std::u32string blogator::to_u32string( blogator::parser::encoding::Format fmt ) {
+std::u32string blogator::to_u32string( blogator::encoding::specs::Format fmt ) {
     auto u8str = to_string( fmt );
     return { u8str.cbegin(), u8str.cend() };
 }

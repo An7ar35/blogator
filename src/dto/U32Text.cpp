@@ -2,11 +2,11 @@
 
 #include <utility>
 
-#include "../../logger/Logger.h"
-#include "../../unicode/ascii.h"
-#include "../../exception/failed_expectation.h"
+#include "../logger/Logger.h"
+#include "../unicode/ascii.h"
+#include "../exception/failed_expectation.h"
 
-using namespace blogator::parser;
+using namespace blogator;
 
 /**
  * Constructor
@@ -185,7 +185,7 @@ std::u32string U32Text::characters( std::u32string::iterator::difference_type n 
  * Gets the current position
  * @return Position
  */
-TextPos U32Text::position() const noexcept {
+blogator::TextPos U32Text::position() const noexcept {
     return _position;
 }
 
@@ -229,7 +229,7 @@ void U32Text::resetToMarker( const U32Text::State & state ) {
 
     } else {
         throw FAILED_EXPECTATION_EXCEPTION(
-            "[blogator::parser::U32Text::loadState( { " + std::to_string( state.id() ) + " } )] "
+            "[blogator::U32Text::loadState( { " + std::to_string( state.id() ) + " } )] "
             "Mismatched IDs (source: { " + std::to_string( this->_id ) + " })."
         );
     }
@@ -261,7 +261,7 @@ void U32Text::cacheLineSize( const TextPos &pos ) {
 
     } else if( pos.line == 0 || pos.line > next_row_no ) {
         LOG_ERROR(
-            "[blogator::parser::U32Text::cacheLineSize( ", pos, ", )] "
+            "[blogator::U32Text::cacheLineSize( ", pos, ", )] "
             "Trying to cache for row beyond scope (cached rows: ", _line_sizes.size(), ") for source: ", this->_path.string()
         );
     } //else: already cached row

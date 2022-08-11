@@ -1,12 +1,14 @@
 #include "CodeBlockTk.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::token::markdown;
 
 /**
  * Constructor
  * @param position Line:Col position of token in source text
  */
-CodeBlockTk::CodeBlockTk( blogator::parser::TextPos position ) :
+CodeBlockTk::CodeBlockTk( blogator::TextPos position ) :
     BlockBeginTk( specs::markdown::TokenType::CODE_BLOCK, position )
 {}
 
@@ -15,7 +17,7 @@ CodeBlockTk::CodeBlockTk( blogator::parser::TextPos position ) :
  * @param lang  Language tag for code block
  * @param position Line:Col position of token in source text
  */
-CodeBlockTk::CodeBlockTk( std::u32string lang, blogator::parser::TextPos position ) :
+CodeBlockTk::CodeBlockTk( std::u32string lang, blogator::TextPos position ) :
     BlockBeginTk( specs::markdown::TokenType::CODE_BLOCK, std::move( lang ), position )
 {}
 

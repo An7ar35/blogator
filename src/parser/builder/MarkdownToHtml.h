@@ -8,12 +8,12 @@
 #include <deque>
 #include <unordered_map>
 
-#include "../dto/TextPos.h"
+#include "../../dto/TextPos.h"
 #include "../specs/markdown/InsertionMode.h"
 #include "../specs/markdown/TokenType.h"
 #include "../specs/infra/Element.h"
 
-namespace blogator::parser {
+namespace blogator {
     class U32Text;
 }
 

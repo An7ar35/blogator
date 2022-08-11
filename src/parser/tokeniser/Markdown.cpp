@@ -3,16 +3,17 @@
 #include <set>
 #include <type_traits>
 
+#include "../token/markdown/tokens.h"
+#include "../specs/markdown/ErrorCode.h"
 #include "../../logger/Logger.h"
 #include "../../exception/parsing_failure.h"
-#include "../logging/ParserLog.h"
+#include "../../reporter/ParseReporter.h"
 #include "../../unicode/unicode.h"
-#include "../token/markdown/tokens.h"
 
 using namespace blogator::parser;
 using namespace blogator::parser::token::markdown;
 using           blogator::parser::specs::markdown::ErrorCode;
-using           blogator::parser::logging::ParserLog;
+using           blogator::reporter::ParseReporter;
 
 /**
  * Constructor
@@ -37,7 +38,7 @@ blogator::parser::tokeniser::Markdown::Markdown( parser::builder::MarkdownToHtml
  * @return Ending/break Context
  * @throws exception::parsing_failure when an unrecoverable error occurs during parsing
  */
-specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starting_ctx ) {
+blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter::Context starting_ctx ) {
     _src_path = text.path(); //internal caching for error calls
     _eof      = false;
 
@@ -1838,7 +1839,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
 
             case State_e::INLINE_CONTENT_DOUBLE_LEFT_CURLY_BRACKET: {
                 clearPendingTokensFromLastSectionMarkerPosition(); //i.e.: "{{"
-                return specs::Context::NATIVE; //EARLY RETURN
+                return reporter::Context::NATIVE; //EARLY RETURN
             } break;
 
             case State_e::INLINE_CONTENT_FORMATTING: {
@@ -3369,7 +3370,7 @@ specs::Context tokeniser::Markdown::parse( U32Text & text, specs::Context starti
         character = text.nextChar();
     }
 
-    return specs::Context::MARKDOWN;
+    return reporter::Context::MARKDOWN;
 }
 
 /**
@@ -3422,9 +3423,9 @@ inline void tokeniser::Markdown::logError( TextPos position, int err_code, bool 
         //             to avoid duplicates but if table-specific errors are also raised, they still
         //             need to be published and so, these are sent using the 'bypass' flag.
         ++_error_count;
-        logging::ParserLog::log( _src_path, THIS_CONTEXT, err_code, position );
+        reporter::ParseReporter::log( _src_path, THIS_CONTEXT, err_code, position );
     } else {
-        _queued_errors.emplace_back( logging::ErrorObject( _src_path, THIS_CONTEXT, err_code, position ) );
+        _queued_errors.emplace_back( reporter::ReporterObject( _src_path, THIS_CONTEXT, err_code, position ) );
     }
 }
 
@@ -3437,7 +3438,7 @@ inline void tokeniser::Markdown::logError( TextPos position, int err_code, bool 
 inline void tokeniser::Markdown::logError( TextPos position, int err_code, char32_t c ) {
     std::stringstream ss;
     ss << "\'" << unicode::utf8::convert( std::u32string( 1, c ) ) << "\'";
-    _queued_errors.emplace_back( logging::ErrorObject( _src_path, THIS_CONTEXT, err_code, position, ss.str() ) );
+    _queued_errors.emplace_back( reporter::ReporterObject( _src_path, THIS_CONTEXT, err_code, position, ss.str() ) );
 }
 
 /**
@@ -3447,7 +3448,7 @@ inline void tokeniser::Markdown::logError( TextPos position, int err_code, char3
  * @param str Description string
  */
 inline void tokeniser::Markdown::logError( TextPos position, int err_code, std::string str ) {
-    _queued_errors.emplace_back( logging::ErrorObject( _src_path, THIS_CONTEXT, err_code, position, std::move( str ) ) );
+    _queued_errors.emplace_back( reporter::ReporterObject( _src_path, THIS_CONTEXT, err_code, position, std::move( str ) ) );
 }
 
 /**
@@ -3590,7 +3591,7 @@ inline bool tokeniser::Markdown::isPendingBufferLastChar( char32_t c ) {
  * Gets the cached pending position
  * @return Cached position
  */
-inline TextPos tokeniser::Markdown::pendingBufferPosition() const {
+inline blogator::TextPos tokeniser::Markdown::pendingBufferPosition() const {
     return _pending.position;
 }
 
@@ -3611,7 +3612,7 @@ inline std::u32string tokeniser::Markdown::pendingBufferToStr( size_t offset ) c
  * Gets the pending block-fence size as a TextPos object { 0, x }
  * @return Number of characters taken by the block fence
  */
-inline TextPos tokeniser::Markdown::currentFenceSize() const {
+inline blogator::TextPos tokeniser::Markdown::currentFenceSize() const {
     return { 0, specs::markdown::sizeOf( _pending.block_fence ) };
 }
 
@@ -4194,7 +4195,7 @@ inline void tokeniser::Markdown::dispatchQueuedTokens() {
     _error_count += _queued_errors.size();
 
     while( !_queued_errors.empty() ) {
-        ParserLog::log( std::move( _queued_errors.front() ) );
+        ParseReporter::log( std::move( _queued_errors.front() ) );
         _queued_errors.pop_front();
     }
 

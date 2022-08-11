@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/dto/TextPos.h"
+#include "../../../src/dto/TextPos.h"
 
-using blogator::parser::TextPos;
+using blogator::TextPos;
 
 TEST( parser_dto_TextPos, operator_equal ) {
     ASSERT_TRUE( TextPos( 5, 10 ) == TextPos( 5, 10 ) );

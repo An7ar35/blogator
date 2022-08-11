@@ -7,8 +7,8 @@
 namespace blogator::parser::token::native {
     class NativeTk : public token::Token {
       public:
-        NativeTk( specs::Context ns, specs::native::Element element, TextPos position );
-        NativeTk( specs::Context ns, specs::native::Element element, std::u32string text, TextPos position );
+        NativeTk( reporter::Context ns, specs::native::Element element, TextPos position );
+        NativeTk( reporter::Context ns, specs::native::Element element, std::u32string text, TextPos position );
 
         [[nodiscard]] specs::native::Element element() const;
 

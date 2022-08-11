@@ -8,6 +8,10 @@
 #include "../specs/infra/specifications.h"
 #include "../token/html5/HTML5Tk.h"
 
+namespace blogator {
+    class U32Text;
+}
+
 namespace blogator::parser::dom {
     class TreeBuilder;
 }
@@ -25,7 +29,7 @@ namespace blogator::parser::tokeniser {
         explicit HTML5( dom::TreeBuilder & tree_builder );
         explicit HTML5( dom::TreeBuilder & tree_builder, specs::infra::TokeniserState init_state, std::u32string  last_start_tag = U"" );
 
-        specs::Context parse( U32Text &source, specs::Context starting_ctx = specs::Context::HTML5 );
+        reporter::Context parse( U32Text &source, reporter::Context starting_ctx = reporter::Context::HTML5 );
         void reset();
 
         [[nodiscard]] size_t errors() const;
@@ -36,7 +40,7 @@ namespace blogator::parser::tokeniser {
 
         static const char32_t REPLACEMENT_CHAR      = 0xFFFD;
         static const char32_t UNDEFINED_CHAR_10FFFF = 0x10FFFF;
-        static const auto     THIS_CONTEXT          = specs::Context::HTML5;
+        static const auto     THIS_CONTEXT          = reporter::Context::HTML5;
 
         bool                  _eof;
         std::filesystem::path _src_path;

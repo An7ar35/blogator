@@ -1,5 +1,7 @@
 #include "HTML5Tk.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::token;
 
 /**
@@ -8,7 +10,7 @@ using namespace blogator::parser::token;
  * @param position Line:Col position of token in source text
  */
 html5::HTML5Tk::HTML5Tk( specs::infra::TokenType type, TextPos position ) :
-    Token( specs::Context::HTML5, position ),
+    Token( reporter::Context::HTML5, position ),
     _type( type )
 {}
 
@@ -19,7 +21,7 @@ html5::HTML5Tk::HTML5Tk( specs::infra::TokenType type, TextPos position ) :
  * @param position Line:Col position of token in source text
  */
 html5::HTML5Tk::HTML5Tk( specs::infra::TokenType type, std::u32string text, TextPos position ) :
-    Token( specs::Context::HTML5, std::move( text ), position ),
+    Token( reporter::Context::HTML5, std::move( text ), position ),
     _type( type )
 {}
 

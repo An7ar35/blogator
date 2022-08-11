@@ -5,15 +5,17 @@
 #include "../specs/markdown/ListType.h"
 #include "../specs/markdown/ErrorCode.h"
 #include "../token/markdown/tokens.h"
-#include "../logging/ParserLog.h"
+#include "../../dto/U32Text.h"
+#include "../../reporter/ParseReporter.h"
 #include "../../logger/Logger.h"
+#include "../../unicode/utf8.h"
 #include "../../exception/failed_expectation.h"
 #include "../../exception/parsing_failure.h"
 
 using namespace blogator::parser::builder;
 using namespace blogator::parser::token::markdown;
 using           blogator::parser::specs::markdown::ErrorCode;
-using           blogator::parser::logging::ParserLog;
+using           blogator::reporter::ParseReporter;
 
 //template pre-declarations
 template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::INITIAL>( std::unique_ptr<token::markdown::MarkdownTk> token );
@@ -78,7 +80,7 @@ void MarkdownToHtml::dispatch( std::unique_ptr<token::markdown::MarkdownTk> toke
  * Extracts the html output
  * @return HTML text output
  */
-std::unique_ptr<blogator::parser::U32Text> MarkdownToHtml::reset() {
+std::unique_ptr<blogator::U32Text> MarkdownToHtml::reset() {
     if( _output ) {
         if( currentInsertionMode() != InsertionMode_e::END_OF_FILE ) {
             LOG_WARNING(
@@ -119,7 +121,7 @@ size_t MarkdownToHtml::errors() const {
  */
 void MarkdownToHtml::logError( TextPos position, int err_code ) {
     ++_error_count;
-    logging::ParserLog::log( _src_path, specs::Context::MARKDOWN, err_code, position );
+    reporter::ParseReporter::log( _src_path, reporter::Context::MARKDOWN, err_code, position );
 }
 
 /**
@@ -128,9 +130,9 @@ void MarkdownToHtml::logError( TextPos position, int err_code ) {
  * @param err_code Markdown error code
  * @param str Description string to append
  */
-void MarkdownToHtml::logError( blogator::parser::TextPos position, int err_code, std::string str ) {
+void MarkdownToHtml::logError( blogator::TextPos position, int err_code, std::string str ) {
     ++_error_count;
-    logging::ParserLog::log( _src_path, specs::Context::MARKDOWN, err_code, std::move( str ), position );
+    reporter::ParseReporter::log( _src_path, reporter::Context::MARKDOWN, err_code, std::move( str ), position );
 }
 
 /**

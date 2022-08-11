@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/dto/U32Text.h"
+#include "../../../src/dto/U32Text.h"
 #include "../../../src/exception/failed_expectation.h"
 
-using blogator::parser::U32Text;
-using blogator::parser::TextPos;
+using blogator::U32Text;
+using blogator::TextPos;
 
 TEST( parser_dto_U32Text, constructor_1 ) { //string
     const auto str  = std::u32string( U"B" );

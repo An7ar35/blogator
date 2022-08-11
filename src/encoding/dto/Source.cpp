@@ -1,6 +1,6 @@
 #include "Source.h"
 
-using namespace blogator::parser;
+using namespace blogator::encoding;
 
 /**
  * Constructor
@@ -10,8 +10,8 @@ using namespace blogator::parser;
 Source::Source( std::istream &in, std::filesystem::path path ) :
     _stream( in ),
     _path( std::move( path ) ),
-    _format( encoding::Format::UNKNOWN ),
-    _confidence( encoding::Confidence::TENTATIVE ),
+    _format( specs::Format::UNKNOWN ),
+    _confidence( specs::Confidence::TENTATIVE ),
     _position( TextPos() )
 {}
 
@@ -21,11 +21,11 @@ Source::Source( std::istream &in, std::filesystem::path path ) :
  * @param path Filepath of source
  * @param format Known source format (with certainty)
  */
-Source::Source( std::istream &in, std::filesystem::path path, encoding::Format format ) :
+Source::Source( std::istream &in, std::filesystem::path path, specs::Format format ) :
     _stream( in ),
     _path( std::move( path ) ),
     _format( format ),
-    _confidence( encoding::Confidence::CERTAIN ),
+    _confidence( specs::Confidence::CERTAIN ),
     _position( TextPos() )
 {}
 
@@ -42,7 +42,7 @@ std::istream & Source::stream() {
  * Gets the position tracker
  * @return Position
  */
-TextPos & Source::position() {
+blogator::TextPos & Source::position() {
     return _position;
 }
 
@@ -58,7 +58,7 @@ const std::filesystem::path &Source::path() const {
  * Gets the source format
  * @return Source format
  */
-encoding::Format Source::format() const {
+specs::Format Source::format() const {
     return _format;
 }
 
@@ -66,7 +66,7 @@ encoding::Format Source::format() const {
  * Gets the confidence of the source format
  * @return Confidence
  */
-encoding::Confidence Source::confidence() const {
+specs::Confidence Source::confidence() const {
     return _confidence;
 }
 
@@ -74,7 +74,7 @@ encoding::Confidence Source::confidence() const {
  * Sets the source format
  * @param format Format
  */
-void Source::setFormat( encoding::Format format ) {
+void Source::setFormat( specs::Format format ) {
     _format = format;
 }
 
@@ -82,6 +82,6 @@ void Source::setFormat( encoding::Format format ) {
  * Sets the confidence of the source format
  * @param confidence Confidence
  */
-void Source::setConfidence( encoding::Confidence confidence ) {
+void Source::setConfidence( specs::Confidence confidence ) {
     _confidence = confidence;
 }

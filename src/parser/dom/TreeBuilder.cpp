@@ -11,9 +11,9 @@
 #include "node/DocumentType.h"
 #include "node/Element.h"
 #include "node/Text.h"
-#include "../encoding/Format.h"
+#include "../../encoding/specs/Format.h"
 #include "../specs/infra/Attribute.h"
-#include "../logging/ParserLog.h"
+#include "../../reporter/ParseReporter.h"
 #include "../../logger/Logger.h"
 #include "../../exception/failed_expectation.h"
 #include "../../unicode/unicode.h"
@@ -199,7 +199,7 @@ void TreeBuilder::init( node::Element * context_element, TextPos position ) {
     const auto   context_enum     = context_element->elementType();
 
     if( context_document == nullptr ) {  //default fallback
-        _document = std::make_unique<node::Document>( blogator::to_u32string( parser::encoding::Format::UTF8 ),
+        _document = std::make_unique<node::Document>( blogator::to_u32string( encoding::specs::Format::UTF8 ),
                                                       specs::infra::ContentType::APPLICATION_XHTML_XML,
                                                       _context_element->baseURI(),
                                                       std::filesystem::path(),
@@ -396,7 +396,7 @@ size_t TreeBuilder::errors() const {
  * @return New Document node
  */
 std::unique_ptr<node::Document> TreeBuilder::createHtmlDocument( USVString_t url, std::filesystem::path origin, QuirksMode quirks ) {
-    return std::make_unique<node::Document>( blogator::to_u32string( encoding::Format::UTF8 ),
+    return std::make_unique<node::Document>( blogator::to_u32string( encoding::specs::Format::UTF8 ),
                                              specs::infra::ContentType::APPLICATION_XHTML_XML,
                                              std::move( url ),
                                              std::move( origin ),
@@ -413,7 +413,7 @@ std::unique_ptr<node::Document> TreeBuilder::createHtmlDocument( USVString_t url
 void TreeBuilder::logError( TextPos position, int err_code, const std::string & desc ) {
     std::stringstream ss;
     ss << "{ '" << _current_insert_mode  << "' | " << desc << " }";
-    parser::logging::ParserLog::log( _document->filepath(), specs::Context::HTML5, err_code, ss.str(), position );
+    reporter::ParseReporter::log( _document->filepath(), reporter::Context::HTML5, err_code, ss.str(), position );
     ++_error_count;
 }
 
@@ -449,7 +449,7 @@ void TreeBuilder::logError( int err_code, const std::unique_ptr<token::html5::HT
 
     ss << " }";
 
-    parser::logging::ParserLog::log( _document->filepath(), specs::Context::HTML5, err_code, ss.str(), token->position() );
+    reporter::ParseReporter::log( _document->filepath(), reporter::Context::HTML5, err_code, ss.str(), token->position() );
     ++_error_count;
 }
 

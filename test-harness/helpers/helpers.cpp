@@ -6,16 +6,16 @@
 
 #include "../../src/unicode/unicode.h"
 #include "../../src/string/helpers.h"
-#include "../../../src/parser/dto/Source.h"
-#include "../../../src/parser/encoding/Transcode.h"
-#include "../../../src/parser/dom/node/Attr.h"
-#include "../../../src/parser/dom/node/CDATASection.h"
-#include "../../../src/parser/dom/node/Comment.h"
-#include "../../../src/parser/dom/node/Document.h"
-#include "../../../src/parser/dom/node/DocumentFragment.h"
-#include "../../../src/parser/dom/node/DocumentType.h"
-#include "../../../src/parser/dom/node/Element.h"
-#include "../../../src/parser/dom/node/Text.h"
+#include "../../src/encoding/dto/Source.h"
+#include "../../src/encoding/Transcode.h"
+#include "../../src/parser/dom/node/Attr.h"
+#include "../../src/parser/dom/node/CDATASection.h"
+#include "../../src/parser/dom/node/Comment.h"
+#include "../../src/parser/dom/node/Document.h"
+#include "../../src/parser/dom/node/DocumentFragment.h"
+#include "../../src/parser/dom/node/DocumentType.h"
+#include "../../src/parser/dom/node/Element.h"
+#include "../../src/parser/dom/node/Text.h"
 
 typedef std::vector<std::pair<test_harness::html5lib_tests::TreeConstructionTest, std::filesystem::path>> TreeConstructionTests_t;
 typedef std::vector<test_harness::html5lib_tests::TreeConstructionTest>                                   TreeConstructionTestCollection_t;
@@ -64,15 +64,15 @@ std::set<std::filesystem::path> test_harness::getTestFiles( const std::filesyste
  * @return Processed/checked UTF-32 text
  * @throws std::runtime_error when transcoding fails
  */
-blogator::parser::U32Text test_harness::transcodeInput( const std::string &raw, const std::filesystem::path &path ) {
+blogator::U32Text test_harness::transcodeInput( const std::string &raw, const std::filesystem::path &path ) {
     std::vector<char32_t> out;
     std::stringstream     ss;
 
     ss << raw;
 
-    auto source = blogator::parser::Source( ss, path, blogator::parser::encoding::Format::UTF8 );
+    auto source = blogator::encoding::Source( ss, path, blogator::encoding::specs::Format::UTF8 );
 
-    if( !blogator::parser::encoding::Transcode::convert( source, out ) ) {
+    if( !blogator::encoding::Transcode::convert( source, out ) ) {
         throw std::runtime_error( "Failed to transcode u8 source data to u32" );
     }
 
@@ -84,7 +84,7 @@ blogator::parser::U32Text test_harness::transcodeInput( const std::string &raw, 
  * @param os Output stream
  * @param u32text U32 text
  */
-void test_harness::printU32Buffer( std::ostream &os, blogator::parser::U32Text & u32text ) {
+void test_harness::printU32Buffer( std::ostream &os, blogator::U32Text & u32text ) {
     while( !u32text.reachedEnd() ) {
         blogator::unicode::utf8::convert( os, u32text.character() );
         u32text.nextChar();
@@ -223,7 +223,7 @@ std::string test_harness::markdown::to_string( const blogator::parser::token::ma
  * @param token ErrorObject instance
  * @return String
  */
-std::string test_harness::markdown::to_string( const blogator::parser::logging::ErrorObject & error ) {
+std::string test_harness::markdown::to_string( const blogator::reporter::ReporterObject & error ) {
     std::stringstream ss;
     ss << "{ description: \"" << error.error() << "\", line: " << error.textpos().line << ", col: " << error.textpos().col << " }";
     return ss.str();
@@ -677,7 +677,7 @@ std::ostream &test_harness::html5lib_tests::jsonifyMarkdownTokens( std::ostream 
  * @param err Error objects
  * @return Output stream
  */
-std::ostream & test_harness::html5lib_tests::jsonifyErrorObjects( std::ostream & os, const std::vector<blogator::parser::logging::ErrorObject> &err ) {
+std::ostream & test_harness::html5lib_tests::jsonifyErrorObjects( std::ostream & os, const std::vector<blogator::reporter::ReporterObject> &err ) {
     os << "[";
 
     for( auto it = err.cbegin(); it != err.cend(); ++ it ) {
@@ -700,7 +700,7 @@ std::ostream & test_harness::html5lib_tests::jsonifyErrorObjects( std::ostream &
  * @param err ErrorObject
  * @return Formatted string
  */
-std::string test_harness::html5lib_tests::formatErrorObject( const blogator::parser::logging::ErrorObject &err ) { //TODO
+std::string test_harness::html5lib_tests::formatErrorObject( const blogator::reporter::ReporterObject &err ) { //TODO
     return std::string();
 }
 

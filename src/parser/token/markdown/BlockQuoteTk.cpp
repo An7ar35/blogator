@@ -1,6 +1,7 @@
 #include "BlockQuoteTk.h"
 
 #include "../../../unicode/ascii.h"
+#include "../../../unicode/utf8.h"
 
 using namespace blogator::parser::token::markdown;
 
@@ -9,7 +10,7 @@ using namespace blogator::parser::token::markdown;
  * @param nesting Nesting level for blockquote
  * @param position Line:Col position of token in source text
  */
-BlockQuoteTk::BlockQuoteTk( size_t nesting, blogator::parser::TextPos position ) :
+BlockQuoteTk::BlockQuoteTk( size_t nesting, blogator::TextPos position ) :
     BlockBeginTk( specs::markdown::TokenType::BLOCKQUOTE, std::u32string( 1, blogator::unicode::GREATER_THAN_SIGN ), position ),
     _nesting( nesting )
 {}

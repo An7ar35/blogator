@@ -1,5 +1,7 @@
 #include "HorizontalRuleTk.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::token::markdown;
 
 /**

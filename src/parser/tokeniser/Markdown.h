@@ -6,18 +6,14 @@
 
 #include "markdown/Block.h"
 #include "markdown/HtmlTag.h"
-#include "../dto/U32Text.h"
 #include "../token/markdown/FormattingTk.h"
 #include "../specs/markdown/HtmlBlockType.h"
 #include "../specs/markdown/TokeniserState.h"
 #include "../specs/markdown/BlockFenceType.h"
 #include "../specs/markdown/ListSpacing.h"
 #include "../builder/MarkdownToHtml.h"
-#include "../logging/ErrorObject.h"
-
-namespace blogator::parser {
-    class U32Text;
-}
+#include "../../dto/U32Text.h"
+#include "../../reporter/dto/ReporterObject.h"
 
 namespace blogator::parser::token::markdown {
     class MarkdownTk;
@@ -30,7 +26,7 @@ namespace blogator::parser::tokeniser {
       public:
         explicit Markdown( parser::builder::MarkdownToHtml & html_builder );
 
-        specs::Context parse( U32Text & text, specs::Context starting_ctx = specs::Context::MARKDOWN );
+        reporter::Context parse( U32Text & text, reporter::Context starting_ctx = reporter::Context::MARKDOWN );
 
         void reset();
 
@@ -45,7 +41,7 @@ namespace blogator::parser::tokeniser {
         typedef specs::markdown::ListSpacing                 ListSpacing_e;
         typedef std::unique_ptr<token::markdown::MarkdownTk> TokenPtr_t;
 
-        static constexpr auto     THIS_CONTEXT     = specs::Context::MARKDOWN;
+        static constexpr auto     THIS_CONTEXT     = reporter::Context::MARKDOWN;
         static constexpr auto     FOUR_SPACE_CHARS = UR"(    )";
 
         bool                      _eof;
@@ -103,7 +99,7 @@ namespace blogator::parser::tokeniser {
          * @param heading_tokens   Pointers to heading tokens (helps keep track of n° of columns)
          */
         struct TableCache {
-            std::unique_ptr<U32Text::State>                fallback_state;
+            std::unique_ptr<blogator::U32Text::State>      fallback_state;
             bool                                           is_fake_table    { false };
             size_t                                         starting_block_i { 0 };
             size_t                                         col_i            { 0 };
@@ -119,18 +115,18 @@ namespace blogator::parser::tokeniser {
          * @param buffer         Character buffer
          */
         struct HtmlBlockCache {
-            std::unique_ptr<U32Text::State> fallback_state;
-            HtmlBlockType_e                 block_type      { HtmlBlockType_e::UNKNOWN };
-            markdown::HtmlTag               pending_tag;
-            TextPos                         buffer_pos;
-            std::vector<char32_t>           buffer;
+            std::unique_ptr<blogator::U32Text::State> fallback_state;
+            HtmlBlockType_e                           block_type      { HtmlBlockType_e::UNKNOWN };
+            markdown::HtmlTag                         pending_tag;
+            TextPos                                   buffer_pos;
+            std::vector<char32_t>                     buffer;
         };
 
         BlockCache                                  _pending;               //cached variables for current block
         TableCache                                  _table_cache;           //cached variable for current table block
         HtmlBlockCache                              _html_cache;            //cached variables for current HTML block
         std::deque<TokenPtr_t>                      _queued_tokens;         //token queue for the current root block
-        std::deque<logging::ErrorObject>            _queued_errors;         //errors queued for the current root block
+        std::deque<reporter::ReporterObject>        _queued_errors;         //errors queued for the current root block
         std::deque<token::markdown::FormattingTk *> _formatting_markers;    //formatting characters for the block (added as single CharacterTk and converted as appropriate on dispatch)
         std::deque<SectionMarker>                   _section_markers;       //markers pointing to the beginning of sections that are not yet formally identified
         std::deque<markdown::Block>                 _open_blocks;           //keeps track of current blocks opened

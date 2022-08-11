@@ -1,5 +1,7 @@
 #include "HeadingTk.h"
 
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::token::markdown;
 
 /**
@@ -18,7 +20,7 @@ HeadingTk::HeadingTk( std::u32string text, TextPos position ) :
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
-HeadingTk::HeadingTk( uint8_t level, std::u32string text, blogator::parser::TextPos position )  :
+HeadingTk::HeadingTk( uint8_t level, std::u32string text, blogator::TextPos position )  :
     BlockBeginTk( specs::markdown::TokenType::HEADING, std::move( text ), position ),
     _level( level )
 {}

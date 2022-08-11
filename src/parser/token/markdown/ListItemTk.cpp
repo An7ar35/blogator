@@ -1,6 +1,7 @@
 #include "ListItemTk.h"
 
 #include <unordered_map>
+#include "../../../unicode/utf8.h"
 
 using namespace blogator::parser::token::markdown;
 
@@ -28,7 +29,7 @@ ListItemTk::ListItemTk( bool ticked, TextPos position ) :
  * @param ref_id Reference ID string
  * @param position Line:Col position of token in source text
  */
-ListItemTk::ListItemTk( std::u32string ref_id, blogator::parser::TextPos position ) :
+ListItemTk::ListItemTk( std::u32string ref_id, blogator::TextPos position ) :
     BlockBeginTk( specs::markdown::TokenType::LIST_ITEM, std::move( ref_id ), position ),
     _modality( Modality::NONE )
 {}

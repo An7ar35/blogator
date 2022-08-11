@@ -10,7 +10,7 @@ using namespace blogator::parser::token;
  * @param position Line:Col position of token in source text
  */
 markdown::MarkdownTk::MarkdownTk( specs::markdown::TokenType type, TextPos position ) :
-    Token( specs::Context::HTML5, position ),
+    Token( reporter::Context::HTML5, position ),
     _type( type )
 {}
 
@@ -21,7 +21,7 @@ markdown::MarkdownTk::MarkdownTk( specs::markdown::TokenType type, TextPos posit
  * @param position Line:Col position of token in source text
  */
 markdown::MarkdownTk::MarkdownTk( specs::markdown::TokenType type, std::u32string text, TextPos position ) :
-    Token( specs::Context::HTML5, std::move( text ), position ),
+    Token( reporter::Context::HTML5, std::move( text ), position ),
     _type( type )
 {}
 

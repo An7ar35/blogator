@@ -6,7 +6,7 @@ using namespace blogator::parser::token::html5;
  * Constructor
  * @param position Line:Col position of token in source text
  */
-EndTagTk::EndTagTk( blogator::parser::TextPos position ) :
+EndTagTk::EndTagTk( blogator::TextPos position ) :
     GenericTagTk( specs::infra::TokenType::END_TAG, position )
 {}
 
@@ -15,11 +15,13 @@ EndTagTk::EndTagTk( blogator::parser::TextPos position ) :
  * @param text UTF32 text
  * @param position Line:Col position of token in source text
  */
-EndTagTk::EndTagTk( std::u32string text, blogator::parser::TextPos position ) :
+EndTagTk::EndTagTk( std::u32string text, blogator::TextPos position ) :
     GenericTagTk( specs::infra::TokenType::END_TAG, std::move( text ), position )
 {}
 
 #ifdef TESTING
+
+#include "../../../unicode/utf8.h"
 
 /**
  * Prints out a string representation of the token

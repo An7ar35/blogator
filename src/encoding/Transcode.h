@@ -1,13 +1,13 @@
-#ifndef BLOGATOR_PARSER_ENCODING_TRANSCODE_H
-#define BLOGATOR_PARSER_ENCODING_TRANSCODE_H
+#ifndef BLOGATOR_ENCODING_TRANSCODE_H
+#define BLOGATOR_ENCODING_TRANSCODE_H
 
 #include <vector>
 #include <deque>
 #include <istream>
 
-#include "../dto/Source.h"
+#include "../encoding/dto/Source.h"
 
-namespace blogator::parser::encoding {
+namespace blogator::encoding {
     enum class Endianness {
         LE,
         BE
@@ -18,7 +18,7 @@ namespace blogator::parser::encoding {
     struct Transcode {
       public:
         static bool convert( Source &src, std::vector<char32_t> &out );
-        static Format sniffBOM( std::deque<char8_t> &bom );
+        static specs::Format sniffBOM( std::deque<char8_t> &bom );
 
         static bool U32toByteStream( const std::u32string &in, std::ostream &out, Endianness endianness );
         static bool U32toByteStream( const std::vector<char32_t> &in, std::ostream &out, Endianness endianness );
@@ -49,7 +49,7 @@ namespace blogator::parser::encoding {
 }
 
 namespace blogator {
-    std::string to_string( blogator::parser::encoding::Endianness e );
+    std::string to_string( blogator::encoding::Endianness e );
 }
 
-#endif //BLOGATOR_PARSER_ENCODING_TRANSCODE_H
+#endif //BLOGATOR_ENCODING_TRANSCODE_H

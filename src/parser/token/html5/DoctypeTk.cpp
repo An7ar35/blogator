@@ -8,7 +8,7 @@ using namespace blogator::parser::token::html5;
  * Constructor
  * @param position Line:Col position of token in source text
  */
-DoctypeTk::DoctypeTk( blogator::parser::TextPos position ) :
+DoctypeTk::DoctypeTk( blogator::TextPos position ) :
     HTML5Tk( specs::infra::TokenType::DOCTYPE, position ),
     _has_name( false ),
     _pid_flag( false ),

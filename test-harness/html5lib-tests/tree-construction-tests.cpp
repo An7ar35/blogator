@@ -8,21 +8,21 @@
  * - `blogator::parser::encoding::Transcode`: Source data is run through that first
  * - `blogator::parser::tokeniser::HTML5`   : UTF32 encoded data is then fed through the tokeniser
  * - `blogator::parser::dom::TreeBuilder`   : Finally, the tokens are fed into the tree constructor (main subject of the tests)
- * - `blogator::parser::logging::ParserLog` : where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
+ * - `blogator::reporter::ParserLog` : where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
  */
 
 #include "gtest/gtest.h"
-#include "../../../src/parser/encoding/Transcode.h"
+#include "../../../src/encoding/Transcode.h"
+#include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
-#include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dom/node/Element.h"
 
 #include "../helpers/helpers.h"
 
 using blogator::parser::dom::TreeBuilder;
 using blogator::parser::token::html5::HTML5Tk;
-using blogator::parser::logging::ParserLog;
+using blogator::reporter::ParseReporter;
 
 /**
  * Resolves the test prefix into a Namespace
@@ -44,7 +44,7 @@ blogator::parser::specs::infra::Namespace resolveNamespace( const std::u32string
  * @param errors List of errors
  * @return Presence of 'UNKNOWN' or 'NONE' type of errors
  */
-bool hasUnknownErrors( const std::vector<blogator::parser::logging::ErrorObject> & errors ) {
+bool hasUnknownErrors( const std::vector<blogator::reporter::ReporterObject> & errors ) {
     return ( std::find_if( errors.cbegin(),
                            errors.cend(),
                            []( const auto & err ) {
@@ -59,7 +59,7 @@ bool hasUnknownErrors( const std::vector<blogator::parser::logging::ErrorObject>
  */
 class ParserLogCatcher {
   public:
-    void log( const blogator::parser::logging::ErrorObject & e ) {
+    void log( const blogator::reporter::ReporterObject & e ) {
         _errors.push_back( e );
     }
 
@@ -75,7 +75,7 @@ class ParserLogCatcher {
         return os;
     }
 
-    [[nodiscard]] const std::vector<blogator::parser::logging::ErrorObject> & errors() const {
+    [[nodiscard]] const std::vector<blogator::reporter::ReporterObject> & errors() const {
         return _errors;
     };
 
@@ -84,7 +84,7 @@ class ParserLogCatcher {
     }
 
   private:
-    std::vector<blogator::parser::logging::ErrorObject> _errors;
+    std::vector<blogator::reporter::ReporterObject> _errors;
 };
 
 /**
@@ -100,7 +100,7 @@ testing::AssertionResult runTest( const test_harness::html5lib_tests::TreeConstr
 
     ParserLogCatcher error_catcher;
 
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
     auto src             = test_harness::transcodeInput( test.data, path );
     auto builder         = blogator::parser::dom::TreeBuilder( test.scripting );

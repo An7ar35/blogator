@@ -15,7 +15,7 @@ CharacterTk::CharacterTk( TextPos position ) :
  * @param c Character
  * @param position Line:Col position of token in source text
  */
-CharacterTk::CharacterTk( char32_t c, blogator::parser::TextPos position ) :
+CharacterTk::CharacterTk( char32_t c, blogator::TextPos position ) :
     MarkdownTk( specs::markdown::TokenType::CHARACTER, std::u32string( 1, c ), position )
 {}
 

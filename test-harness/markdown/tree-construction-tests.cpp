@@ -1,16 +1,16 @@
 //TODO description and notes
 
 #include "gtest/gtest.h"
-#include "../../../src/parser/encoding/Transcode.h"
+#include "../../../src/encoding/Transcode.h"
+#include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
-#include "../../../src/parser/logging/ParserLog.h"
 #include "../../../src/parser/dom/node/Element.h"
 
 #include "../helpers/helpers.h"
 
-using blogator::parser::logging::ParserLog;
+using blogator::reporter::ParseReporter;
 
 
 /**
@@ -18,7 +18,7 @@ using blogator::parser::logging::ParserLog;
  */
 class ParserLogCatcher {
   public:
-    void log( const blogator::parser::logging::ErrorObject & e ) {
+    void log( const blogator::reporter::ReporterObject & e ) {
         _errors.push_back( e );
     }
 
@@ -34,7 +34,7 @@ class ParserLogCatcher {
         return os;
     }
 
-    [[nodiscard]] const std::vector<blogator::parser::logging::ErrorObject> & errors() const {
+    [[nodiscard]] const std::vector<blogator::reporter::ReporterObject> & errors() const {
         return _errors;
     };
 
@@ -43,7 +43,7 @@ class ParserLogCatcher {
     }
 
   private:
-    std::vector<blogator::parser::logging::ErrorObject> _errors;
+    std::vector<blogator::reporter::ReporterObject> _errors;
 };
 
 /**
@@ -61,7 +61,7 @@ testing::AssertionResult runMarkdownTreeBuilderTest( const test_harness::markdow
 
     ParserLogCatcher error_catcher;
 
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ error_catcher.log( err ); } );
 
     auto src             = test_harness::transcodeInput( test.markdown, path );
     auto md2html         = blogator::parser::builder::MarkdownToHtml();

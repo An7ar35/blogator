@@ -1,36 +1,38 @@
 #include "gtest/gtest.h"
-#include "../../../src/parser/encoding/Transcode.h"
+#include "../../src/encoding/Transcode.h"
 
 #include <fstream>
 #include <locale>
 #include <codecvt>
 #include <bit>
 
-#include "../../helper.h"
-#include "../../TestHelpers/UnicodeTestStrings.h"
-#include "../../../src/parser/logging/ParserLog.h"
-#include "../../../src/unicode/unicode.h"
+#include "../helper.h"
+#include "../TestHelpers/UnicodeTestStrings.h"
+#include "../../src/reporter/ParseReporter.h"
+#include "../../src/unicode/unicode.h"
+#include "../../src/parser/specs/infra/ErrorCode.h"
+#include "../../src/encoding/specs/ErrorCode.h"
 
-using namespace blogator::parser;
-using namespace blogator::parser::encoding;
-using           blogator::parser::Source;
-using           blogator::parser::specs::Context;
+using namespace blogator::encoding;
+using           blogator::encoding::specs::Format;
+using           blogator::encoding::Source;
+using           blogator::reporter::Context;
 
 /**
  * Parsing log catcher
  */
 class ParserLogCatcher {
   public:
-    void log( const logging::ErrorObject & e ) {
+    void log( const blogator::reporter::ReporterObject & e ) {
         _errors.push_back( e );
     }
 
-    [[nodiscard]] const std::vector<logging::ErrorObject> & getErrors() const {
+    [[nodiscard]] const std::vector<blogator::reporter::ReporterObject> & getErrors() const {
         return _errors;
     };
 
   private:
-    std::vector<blogator::parser::logging::ErrorObject> _errors;
+    std::vector<blogator::reporter::ReporterObject> _errors;
 };
 
 
@@ -219,7 +221,7 @@ TEST( parser_encoding_Transcode, fetchCodeUnit_prebuffer_greedy ) {
 
 TEST( parser_encoding_Transcode, addCodePoint ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::string           test_str = "abcde12345";
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
@@ -236,7 +238,7 @@ TEST( parser_encoding_Transcode, addCodePoint ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_nonchar ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -244,10 +246,10 @@ TEST( parser_encoding_Transcode, addCodePoint_nonchar ) {
 
     Transcode::addCodePoint( in_source, 0x00, test_char, out_buffer );
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::HTML5,
-                                                                specs::infra::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::HTML5,
+                                                            blogator::parser::specs::infra::ErrorCode::NONCHARACTER_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
     ASSERT_EQ( test_char, out_buffer.back() );
@@ -257,7 +259,7 @@ TEST( parser_encoding_Transcode, addCodePoint_nonchar ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_BELL ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -265,10 +267,10 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_BELL ) {
 
     Transcode::addCodePoint( in_source, 0x00, test_char, out_buffer );
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::HTML5,
-                                                                specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::HTML5,
+                                                            blogator::parser::specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
     ASSERT_EQ( test_char, out_buffer.at( 0 ) );
@@ -278,7 +280,7 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_BELL ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_DEL ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -286,10 +288,10 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_DEL ) {
 
     Transcode::addCodePoint( in_source, 0x00, test_char, out_buffer );
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::HTML5,
-                                                                specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::HTML5,
+                                                            blogator::parser::specs::infra::ErrorCode::CONTROL_CHARACTER_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_EQ( 1, out_buffer.size() );
     ASSERT_EQ( test_char, out_buffer.at( 0 ) );
@@ -299,7 +301,7 @@ TEST( parser_encoding_Transcode, addCodePoint_ctrlchar_DEL ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_newline_CRLF ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -316,7 +318,7 @@ TEST( parser_encoding_Transcode, addCodePoint_newline_CRLF ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_newline_LFLF ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -334,7 +336,7 @@ TEST( parser_encoding_Transcode, addCodePoint_newline_LFLF ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_newline_CRCR ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -352,7 +354,7 @@ TEST( parser_encoding_Transcode, addCodePoint_newline_CRCR ) {
 
 TEST( parser_encoding_Transcode, addCodePoint_newline_LFCR ) {
     ParserLogCatcher      log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
     std::stringstream     in_stream; //unused
     Source                in_source = Source( in_stream, "", Format::UNKNOWN );
     std::vector<char32_t> out_buffer;
@@ -435,7 +437,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_2 ) { //with pre-
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_fail ) { //with pre-buffered bytes (incomplete + fail fetch
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t> in_buffer = { 0xD6 }; //LE 0x0001FAD6 (TEAPOT) - 1/4 byte
     std::stringstream in_stream;
@@ -444,10 +446,10 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_fail ) { //with p
 
     in_stream << (char) 0xFA << (char) 0xFA; //2/4 bytes w/ missing last 0x00
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INCOMPLETE_UTF32_CODEPOINT_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U32LEtoU32( in_buffer, in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -550,7 +552,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream ) {
 
 TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_0 ) { //incomplete codepoint in stream (2/4 bytes)
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::stringstream     in_stream;
     Source                in_source = Source( in_stream, "", Format::UTF8 );
@@ -558,10 +560,10 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_0 ) { //incomplete c
 
     in_stream << (char) 0xf0 << (char) 0x9f; //U+1FAD6 (TEAPOT) - 2/4 bytes
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -571,17 +573,17 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_0 ) { //incomplete c
 
 TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_1 ) { //invalid codepoint in stream
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::stringstream     in_stream;
     Source                in_source = Source( in_stream, "", Format::UTF8 );
     std::vector<char32_t> out_buffer;
 
     in_stream << (char) 0xA0 << (char) 0x61; //invalid byte and 'a'
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -660,17 +662,17 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_3 ) { //pre-buffered
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_0 ) { //incomplete codepoint buffered (2/4 bytes)
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t>   in_buffer = { 0xf0, 0x9f }; //U+1FAD6 (TEAPOT) - 2/4 bytes
     std::stringstream     in_stream;
     Source                in_source = Source( in_stream, "", Format::UTF8 );
     std::vector<char32_t> out_buffer;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INCOMPLETE_UTF8_CODEPOINT_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -680,17 +682,17 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_0 ) { //incompl
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_1 ) { //invalid codepoint buffered
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t>   in_buffer = { 0xA0, 0x61 }; //invalid byte and 'a'
     std::stringstream     in_stream;
     Source                in_source = Source( in_stream, "", Format::UTF8 );
     std::vector<char32_t> out_buffer;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INVALID_UTF8_CODEPOINT_START_BYTE,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U8toU32( in_buffer, in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -746,7 +748,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream ) {
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_1 ) { //1 bytes available in stream
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::stringstream      in_stream;
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -754,10 +756,10 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_1 ) { //1 bytes a
 
     in_stream << (char) 0xD8;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_source, out_buffer ) );
     ASSERT_EQ( 0, out_buffer.size() );
@@ -767,7 +769,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_1 ) { //1 bytes a
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_2 ) { //3 bytes available in stream (incomplete surrogate pair)
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::stringstream      in_stream;
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -775,10 +777,10 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_2 ) { //3 bytes a
 
     in_stream << (char) 0xD8 << (char) 0x3E << (char) 0xDE; //U+1FAD6 (TEAPOT) - 3/4 bytes
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                            { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_source, out_buffer ) );
     ASSERT_EQ( 0, out_buffer.size() );
@@ -788,7 +790,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_2 ) { //3 bytes a
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_3 ) { //valid high surrogate w/ invalid low surrogate
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::stringstream      in_stream;
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -798,10 +800,10 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_3 ) { //valid hig
               << (char) 0xDB << (char) 0xFF  //pair: invalid low surrogate
               << (char) 0x00 << (char) 0x61; //single: valid codepoint ('a')
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                                   Context::ENCODING,
+                                                                   blogator::encoding::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
+                                                                   { 1, 1 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_source, out_buffer ) );
     ASSERT_EQ( 1, out_buffer.size() );
@@ -812,7 +814,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_3 ) { //valid hig
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_4 ) { //invalid high surrogate
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::stringstream      in_stream;
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -822,10 +824,10 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_4 ) { //invalid h
               << (char) 0xDC << (char) 0x00  //invalid high surrogate (low surrogate range)
               << (char) 0x00 << (char) 0x62; //single/valid codepoint ('b')
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::HTML5,
-                                                                specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
-                                                                { 1, 2 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                                   Context::HTML5,
+                                                                   blogator::parser::specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                                                   { 1, 2 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_source, out_buffer ) );
     ASSERT_EQ( 3, out_buffer.size() );
@@ -906,17 +908,17 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_3 ) { //incomplet
 
 TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_1 ) { //1 byte available only
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t>    in_buffer = { 0xD8 };
     std::stringstream      in_stream;
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
     std::vector<char32_t>  out_buffer;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                                   Context::ENCODING,
+                                                                   blogator::encoding::ErrorCode::INCOMPLETE_UTF16_HIGH_SURROGATE_IN_INPUT_STREAM,
+                                                                   { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -926,17 +928,17 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_1 ) { //1 byte avai
 
 TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_2 ) { //high surrogate w/o its low surrogate
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t>    in_buffer = { 0xD8, 0x3E };
     std::stringstream      in_stream;
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
     std::vector<char32_t>  out_buffer;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                                   Context::ENCODING,
+                                                                   blogator::encoding::ErrorCode::INCOMPLETE_UTF16_CODEPOINT_IN_INPUT_STREAM,
+                                                                   { 1, 1 } );
 
     ASSERT_FALSE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );
     ASSERT_TRUE( out_buffer.empty() );
@@ -946,7 +948,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_2 ) { //high surrog
 
 TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_3 ) { //valid high surrogate w/ invalid low surrogate
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t>    in_buffer = { 0xD8, 0x3E,   //pair: valid high surrogate
                                          0xDB, 0xFF,   //pair: invalid low surrogate
@@ -955,10 +957,10 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_3 ) { //valid high 
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
     std::vector<char32_t>  out_buffer;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::NATIVE,
-                                                                specs::native::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
-                                                                { 1, 1 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::ENCODING,
+                                                            blogator::encoding::ErrorCode::INVALID_UTF16_SURROGATE_PAIR,
+                                                            { 1, 1 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );
     ASSERT_EQ( 1, out_buffer.size() );
@@ -969,7 +971,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_3 ) { //valid high 
 
 TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_4 ) { //invalid high surrogate
     ParserLogCatcher       log_catcher;
-    blogator::parser::logging::ParserLog::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
+    blogator::reporter::ParseReporter::attachOutputCallback( [&]( auto err ){ log_catcher.log( err ); } );
 
     std::deque<char8_t>    in_buffer = { 0x00, 0x61,   //single/valid codepoint ('a')
                                          0xDC, 0x00,   //invalid high surrogate (low surrogate range)
@@ -978,10 +980,10 @@ TEST( parser_encoding_Transcode, U16BEtoU32_prebuffered_fail_4 ) { //invalid hig
     Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
     std::vector<char32_t>  out_buffer;
 
-    auto expected_err = blogator::parser::logging::ErrorObject( "",
-                                                                Context::HTML5,
-                                                                specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
-                                                                { 1, 2 } );
+    auto expected_err = blogator::reporter::ReporterObject( "",
+                                                            Context::HTML5,
+                                                            blogator::parser::specs::infra::ErrorCode::SURROGATE_IN_INPUT_STREAM,
+                                                            { 1, 2 } );
 
     ASSERT_TRUE( Transcode::U16BEtoU32( in_buffer, in_source, out_buffer ) );
     ASSERT_EQ( 3, out_buffer.size() );

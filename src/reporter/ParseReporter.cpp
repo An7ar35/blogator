@@ -1,47 +1,47 @@
-#include "ParserLog.h"
+#include "ParseReporter.h"
 
 #include <iostream> //TODO temp/remove
 #include <utility>
 
-#include "../../logger/Logger.h"
+#include "../logger/Logger.h"
 
-using namespace blogator::parser::logging;
+using namespace blogator::reporter;
 
-ParserLog ParserLog::_instance = ParserLog();
+ParseReporter ParseReporter::_instance = ParseReporter();
 
 /**
  * Destructor
  */
-ParserLog::~ParserLog() {
-    ParserLog::flush();
+ParseReporter::~ParseReporter() {
+    ParseReporter::flush();
 }
 
 /**
  * Sets the buffering (turning it off will dispatch error items to all callbacks as they come)
  * @param flag On: true (default), Off: false
  */
-void ParserLog::setBuffering( bool flag ) {
+void ParseReporter::setBuffering( bool flag ) {
     LOG_DEBUG(
-        "[parser::logging::ParserLog::setBuffering( ", ( flag ? "true" : "false" ), " )] "
+        "[reporter::ParseReporter::setBuffering( ", ( flag ? "true" : "false" ), " )] "
         "Buffering turned ", ( flag ? "ON" : "OFF" )
     );
 
-    ParserLog::_instance._buffering = flag;
+    ParseReporter::_instance._buffering = flag;
 }
 
 /**
  * [THREAD-SAFE] Attaches the primary output callback where ErrorObjects can be sent to
  * @param cb Callback method to add as primary
  */
-void ParserLog::attachOutputCallback( ParserLog::OutputCallback_f cb ) {
-    ParserLog::_instance.attachPrimaryOutputCb( std::move( cb ) );
+void ParseReporter::attachOutputCallback( ParseReporter::OutputCallback_f cb ) {
+    ParseReporter::_instance.attachPrimaryOutputCb( std::move( cb ) );
 }
 
 /**
  * [THREAD-SAFE] Detaches the primary output callback only
  */
-void ParserLog::detachOutputCallback() {
-    ParserLog::_instance.detachPrimaryOutputCb();
+void ParseReporter::detachOutputCallback() {
+    ParseReporter::_instance.detachPrimaryOutputCb();
 }
 
 /**
@@ -50,8 +50,8 @@ void ParserLog::detachOutputCallback() {
  * @param cb Output callback
  * @return Success
  */
-bool ParserLog::appendOutputCallback( const std::string &name, ParserLog::OutputCallback_f cb ) {
-    return ParserLog::_instance.appendOutputCb( name, std::move( cb ) );
+bool ParseReporter::appendOutputCallback( const std::string &name, ParseReporter::OutputCallback_f cb ) {
+    return ParseReporter::_instance.appendOutputCb( name, std::move( cb ) );
 }
 
 /**
@@ -59,16 +59,16 @@ bool ParserLog::appendOutputCallback( const std::string &name, ParserLog::Output
  * @param name Name
  * @return Success
  */
-bool ParserLog::detachOutputCallback( const std::string &name ) {
-    return ParserLog::_instance.removeOutputCb( name );
+bool ParseReporter::detachOutputCallback( const std::string &name ) {
+    return ParseReporter::_instance.removeOutputCb( name );
 }
 
 /**
  * [THREAD-SAFE] Logs a message
  * @param err_obj Error object
  */
-void ParserLog::log( ErrorObject && err_obj  ) {
-    ParserLog::_instance.logErrorObject( std::move( err_obj ) );
+void ParseReporter::log( ReporterObject && err_obj  ) {
+    ParseReporter::_instance.logErrorObject( std::move( err_obj ) );
 }
 
 /**
@@ -78,8 +78,8 @@ void ParserLog::log( ErrorObject && err_obj  ) {
  * @param err_code Error code within the context
  * @param position Text position
  */
-void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code, TextPos position ) {
-    ParserLog::_instance.logErrorObject( ErrorObject( std::move( src ), ctx, err_code, position ) );
+void ParseReporter::log( std::filesystem::path src, reporter::Context ctx, int err_code, TextPos position ) {
+    ParseReporter::_instance.logErrorObject( ReporterObject( std::move( src ), ctx, err_code, position ) );
 }
 
 /**
@@ -90,30 +90,30 @@ void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code
  * @param txt Optional text to append to the error message
  * @param position Text position
  */
-void ParserLog::log( std::filesystem::path src, specs::Context ctx, int err_code, std::string txt, TextPos position ) {
-    ParserLog::_instance.logErrorObject( ErrorObject( std::move( src ), ctx, err_code, position, std::move( txt ) ) );
+void ParseReporter::log( std::filesystem::path src, reporter::Context ctx, int err_code, std::string txt, TextPos position ) {
+    ParseReporter::_instance.logErrorObject( ReporterObject( std::move( src ), ctx, err_code, position, std::move( txt ) ) );
 }
 
 /**
  * [THREAD-SAFE] Flushes every error message pools
  */
-void ParserLog::flush() {
-    ParserLog::_instance.flushPools();
+void ParseReporter::flush() {
+    ParseReporter::_instance.flushPools();
 }
 
 /**
  * [THREAD-SAFE] Flushes all error messages mapped to a given file path
  * @param path File path
  */
-void ParserLog::flush( const std::filesystem::path &path ) {
-    ParserLog::_instance.flushPool( path );
+void ParseReporter::flush( const std::filesystem::path &path ) {
+    ParseReporter::_instance.flushPool( path );
 }
 
 /**
  * [PRIVATE/THREAD-SAFE] Attaches a primary output callback
  * @param cb Output callback
  */
-void ParserLog::attachPrimaryOutputCb( ParserLog::OutputCallback_f cb ) {
+void ParseReporter::attachPrimaryOutputCb( ParseReporter::OutputCallback_f cb ) {
     std::lock_guard<std::mutex> guard( _mutex );
     _output_cb = std::move( cb );
 }
@@ -121,7 +121,7 @@ void ParserLog::attachPrimaryOutputCb( ParserLog::OutputCallback_f cb ) {
 /**
  * [PRIVATE/THREAD-SAFE] Detaches the primary output callback
  */
-void ParserLog::detachPrimaryOutputCb() {
+void ParseReporter::detachPrimaryOutputCb() {
     std::lock_guard<std::mutex> guard( _mutex );
     _output_cb = nullptr;
 }
@@ -132,7 +132,7 @@ void ParserLog::detachPrimaryOutputCb() {
  * @param cb Output callback
  * @return Success
  */
-bool ParserLog::appendOutputCb( const std::string &name, ParserLog::OutputCallback_f cb ) {
+bool ParseReporter::appendOutputCb( const std::string &name, ParseReporter::OutputCallback_f cb ) {
     std::lock_guard<std::mutex> guard( _mutex );
     return _outputs.try_emplace( name, std::move( cb ) ).second;
 }
@@ -142,7 +142,7 @@ bool ParserLog::appendOutputCb( const std::string &name, ParserLog::OutputCallba
  * @param name Name
  * @return Success
  */
-bool ParserLog::removeOutputCb( const std::string &name ) {
+bool ParseReporter::removeOutputCb( const std::string &name ) {
     std::lock_guard<std::mutex> guard( _mutex );
     return ( _outputs.erase( name ) > 0 );
 }
@@ -151,7 +151,7 @@ bool ParserLog::removeOutputCb( const std::string &name ) {
  * [PRIVATE/THREAD-SAFE] Logs an error
  * @param err Error object
  */
-void ParserLog::logErrorObject( ErrorObject &&err ) {
+void ParseReporter::logErrorObject( ReporterObject &&err ) {
     std::lock_guard<std::mutex> guard( _mutex );
 
     if( _buffering ) {
@@ -169,13 +169,13 @@ void ParserLog::logErrorObject( ErrorObject &&err ) {
  * [PRIVATE/THREAD-SAFE] Flushes an error pool
  * @param path Source path (key) of pool
  */
-void ParserLog::flushPool( const std::filesystem::path &path ) {
+void ParseReporter::flushPool( const std::filesystem::path &path ) {
     std::lock_guard<std::mutex> guard( _mutex );
 
     auto it = _pools.find( path );
 
     if( it != _pools.end() ) {
-        LOG_DEBUG( "[parser::logging::ParserLog::flushPool( ", path, " )] Flushing error pool (", it->second.size(), " items)" );
+        LOG_DEBUG( "[reporter::ParseReporter::flushPool( ", path, " )] Flushing error pool (", it->second.size(), " items)" );
 
         for( const auto & err : it->second ) {
             dispatch( err );
@@ -188,11 +188,11 @@ void ParserLog::flushPool( const std::filesystem::path &path ) {
 /**
  * [PRIVATE/THREAD-SAFE] Flushes all error pools buffered
  */
-void ParserLog::flushPools() {
+void ParseReporter::flushPools() {
     std::lock_guard<std::mutex> guard( _mutex );
 
     for( const auto & pool : _pools ) {
-        LOG_DEBUG( "[parser::logging::ParserLog::flushPools()] Flushing error pool for: ", pool.first, " (", pool.second.size(), " items)" );
+        LOG_DEBUG( "[reporter::ParseReporter::flushPools()] Flushing error pool for: ", pool.first, " (", pool.second.size(), " items)" );
 
         for( const auto & err : pool.second ) {
             dispatch( err );
@@ -206,7 +206,7 @@ void ParserLog::flushPools() {
  * [PRIVATE] Dispatches an error
  * @param err Error object
  */
-void ParserLog::dispatch( const ErrorObject &err ) {
+void ParseReporter::dispatch( const ReporterObject &err ) {
     if( _output_cb ) {
         _output_cb( err );
     }

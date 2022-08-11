@@ -1,6 +1,6 @@
 #include "NativeTk.h"
 
-#include "../../../exception/parsing_failure.h"
+#include "../../../unicode/utf8.h"
 
 using namespace blogator::parser::token::native;
 using namespace blogator::parser::specs::native;
@@ -11,7 +11,7 @@ using namespace blogator::parser::specs::native;
  * @param element Element type
  * @param position Line:Col position of token
  */
-NativeTk::NativeTk( specs::Context ns, specs::native::Element element, TextPos position ) :
+NativeTk::NativeTk( reporter::Context ns, specs::native::Element element, TextPos position ) :
     Token( ns, position ),
     _element( element )
 {}
@@ -23,7 +23,7 @@ NativeTk::NativeTk( specs::Context ns, specs::native::Element element, TextPos p
  * @param text UTF32 Text
  * @param position Line:Col position of token
  */
-NativeTk::NativeTk( specs::Context ns, specs::native::Element element, std::u32string text, TextPos position ) :
+NativeTk::NativeTk( reporter::Context ns, specs::native::Element element, std::u32string text, TextPos position ) :
     Token( ns, std::move( text ), position ),
     _element( element )
 {}
@@ -102,6 +102,6 @@ void NativeTk::toStr( std::ostream &os ) const {
 //        }
 //    }
 //
-//    return { specs::Context::BLOGATOR, element, std::u32string( start_it, iterator - 1 ), start_pos.line, start_pos.col };
+//    return { reporter::Context::BLOGATOR, element, std::u32string( start_it, iterator - 1 ), start_pos.line, start_pos.col };
 //}
 
