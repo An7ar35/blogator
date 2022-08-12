@@ -1,8 +1,9 @@
-#ifndef TEST_HARNESS_HELPERS_COMMONMARKTEST_H
-#define TEST_HARNESS_HELPERS_COMMONMARKTEST_H
+#ifndef TEST_HARNESS_COMMONMARK_SPEC_HARNESS_COMMONMARKTEST_H
+#define TEST_HARNESS_COMMONMARK_SPEC_HARNESS_COMMONMARKTEST_H
 
 #include <filesystem>
 #include <string>
+#include <ostream>
 
 namespace test_harness::commonmark_spec_tests {
     struct CommonMarkTest {
@@ -14,6 +15,8 @@ namespace test_harness::commonmark_spec_tests {
         std::string           markdown     {};
         std::string           html_output  {};
     };
+
+    std::ostream & operator <<( std::ostream &os, const CommonMarkTest &test );
 }
 
-#endif //TEST_HARNESS_HELPERS_COMMONMARKTEST_H
+#endif //TEST_HARNESS_COMMONMARK_SPEC_HARNESS_COMMONMARKTEST_H

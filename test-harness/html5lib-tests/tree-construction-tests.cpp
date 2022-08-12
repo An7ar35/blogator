@@ -12,13 +12,16 @@
  */
 
 #include "gtest/gtest.h"
-#include "../../../src/encoding/Transcode.h"
 #include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/dom/node/Element.h"
 
 #include "../helpers/helpers.h"
+#include "test-harness-sources.h"
+#include "harness/harness.h"
+#include "harness/TreeConstructionTest.h"
+
 
 using blogator::parser::dom::TreeBuilder;
 using blogator::parser::token::html5::HTML5Tk;

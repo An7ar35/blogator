@@ -1,14 +1,14 @@
 //TODO description and notes
 
 #include "gtest/gtest.h"
-#include "../../../src/encoding/Transcode.h"
 #include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
-#include "../../../src/parser/dom/node/Element.h"
 
+#include "test-harness-sources.h"
 #include "../helpers/helpers.h"
+#include "harness/harness.h"
 
 using blogator::reporter::ParseReporter;
 
@@ -76,8 +76,6 @@ testing::AssertionResult runMarkdownTest( const test_harness::commonmark_spec_te
 
     auto raw_html = md2html.reset();
 
-//    test_harness::printU32Buffer( std::cout, *raw_html );
-
     md_tree_builder.init( TreeBuilder::createHtmlDocument( U"", path ) );
     md_tree_builder.setStrictChecking( false ); //some tests have some funky tags/attributes
     html5_tokeniser.parse( *raw_html );
@@ -88,8 +86,8 @@ testing::AssertionResult runMarkdownTest( const test_harness::commonmark_spec_te
 
     const auto   output_document    = md_tree_builder.reset();
     const auto   expected_document  = exp_tree_builder.reset();
-    const auto   returned_u8        = test_harness::markdown::printDocumentBody( *output_document ) + "\n";
-    const auto   expected_u8        = test_harness::markdown::printDocumentBody( *expected_document );
+    const auto   returned_u8        = test_harness::commonmark_spec_tests::printDocumentBody( *output_document ) + "\n";
+    const auto   expected_u8        = test_harness::commonmark_spec_tests::printDocumentBody( *expected_document );
     const bool   output_match       = ( returned_u8 == expected_u8 );
     const auto & errors_received    = error_catcher.errors();
     bool         failed_err         = false;

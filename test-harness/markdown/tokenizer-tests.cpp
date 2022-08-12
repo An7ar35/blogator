@@ -6,13 +6,13 @@
  * - `blogator::reporter::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
  */
 #include "gtest/gtest.h"
-#include "../../../src/encoding/Transcode.h"
 #include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
-#include "../../../src/encoding/dto/Source.h"
+#include "../../../src/parser/token/markdown/CharacterTk.h"
 
-#include "../helpers/helpers.h"
+#include "test-harness-sources.h"
+#include "harness/harness.h"
 
 using blogator::parser::dom::TreeBuilder;
 using blogator::parser::tokeniser::Markdown;

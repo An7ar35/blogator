@@ -405,10 +405,6 @@ set(SOURCE_FILES
         src/logger/output/Stream.cpp
         src/logger/output/Stream.h
         src/parser/dom/defs.h
-        src/parser/dom/validation/Validator.cpp
-        src/parser/dom/validation/Validator.h
-        src/parser/dom/Variables.cpp
-        src/parser/dom/Variables.h
         src/parser/dom/datastructure/NamedNodeMap.cpp
         src/parser/dom/datastructure/NamedNodeMap.h
         src/parser/dom/filter/NodeFilter.cpp
@@ -442,8 +438,10 @@ set(SOURCE_FILES
         src/parser/token/markdown/HtmlBlockTk.h
         src/parser/specs/markdown/ListSpacing.cpp
         src/parser/specs/markdown/ListSpacing.h
-        src/engine/config/parser/token/ConfigTk.cpp
-        src/engine/config/parser/token/ConfigTk.h)
+        src/configuration/parser/token/ConfigTk.cpp
+        src/configuration/parser/token/ConfigTk.h
+        src/configuration/parser/Parser.cpp
+        src/configuration/parser/Parser.h src/configuration/dto/Configuration.cpp src/configuration/dto/Configuration.h src/configuration/parser/Tokeniser.cpp src/configuration/parser/Tokeniser.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -533,20 +531,36 @@ set(TEST_FILES
         tests/parser/specs/infra/ContentType.cpp
         tests/parser/dom/validation/XML.cpp
         tests/parser/specs/infra/DocType.cpp
+        tests/parser/specs/markdown/InsertionMode.cpp
 
-        test-harness/helpers/MarkdownTkTest.h
-        test-harness/helpers/TreeConstructionTest.h
-        test-harness/helpers/CommonMarkTest.h
         test-harness/helpers/helpers.cpp
         test-harness/helpers/helpers.h
+
+        test-harness/html5lib-tests/harness/harness.cpp
+        test-harness/html5lib-tests/harness/harness.h
+        test-harness/html5lib-tests/harness/TreeConstructionTest.cpp
+        test-harness/html5lib-tests/harness/TreeConstructionTest.h
         test-harness/html5lib-tests/tokenizer-tests.cpp
         test-harness/html5lib-tests/tree-construction-tests.cpp
-        test-harness/commonmark-spec/commonmark-spec-tests.cpp
-        test-harness/markdown/tokenizer-tests.cpp
-        tests/parser/specs/markdown/InsertionMode.cpp
+
+        test-harness/markdown/harness/harness.cpp
+        test-harness/markdown/harness/harness.h
+        test-harness/markdown/harness/MarkdownTkTest.cpp
+        test-harness/markdown/harness/MarkdownTkTest.h
+        test-harness/markdown/harness/MarkdownToHtmlTest.cpp
+        test-harness/markdown/harness/MarkdownToHtmlTest.h
+        test-harness/markdown/harness/ErrorDescription.cpp
         test-harness/markdown/tree-construction-tests.cpp
-        test-harness/helpers/MarkdownToHtmlTest.h
-        test-harness/helpers/ErrorDescription.h)
+        test-harness/markdown/tokenizer-tests.cpp
+
+        test-harness/commonmark-spec/harness/harness.cpp
+        test-harness/commonmark-spec/harness/harness.h
+        test-harness/commonmark-spec/harness/CommonMarkTest.cpp
+        test-harness/commonmark-spec/harness/CommonMarkTest.h
+        test-harness/commonmark-spec/commonmark-spec-tests.cpp
+
+        test-harness/blogator/configuration-parser-tests.cpp
+        test-harness/blogator/configuration-tokenizer-tests.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)

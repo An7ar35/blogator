@@ -1,8 +1,9 @@
-#ifndef TEST_HARNESS_HELPERS_MARKDOWNTOHTMLTEST_H
-#define TEST_HARNESS_HELPERS_MARKDOWNTOHTMLTEST_H
+#ifndef TEST_HARNESS_MARKDOWN_HARNESS_MARKDOWNTOHTMLTEST_H
+#define TEST_HARNESS_MARKDOWN_HARNESS_MARKDOWNTOHTMLTEST_H
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #include "ErrorDescription.h"
 
@@ -17,6 +18,8 @@ namespace test_harness::markdown {
         std::string           html_output {};
         Errors_t              errors      {};
     };
+
+    std::ostream & operator <<( std::ostream &os, const MarkdownToHtmlTest &test );
 }
 
-#endif //TEST_HARNESS_HELPERS_MARKDOWNTOHTMLTEST_H
+#endif //TEST_HARNESS_MARKDOWN_HARNESS_MARKDOWNTOHTMLTEST_H

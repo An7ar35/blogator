@@ -12,13 +12,14 @@
  */
 
 #include "gtest/gtest.h"
+#include "../../../src/dto/U32Text.h"
 #include "../../../src/encoding/Transcode.h"
 #include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
-#include "../../../src/encoding/dto/Source.h"
 
-#include "../helpers/helpers.h"
+#include "test-harness-sources.h"
+#include "harness/harness.h"
 
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;

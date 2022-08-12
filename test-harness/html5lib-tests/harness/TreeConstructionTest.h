@@ -1,9 +1,10 @@
-#ifndef TEST_HARNESS_HELPERS_TREECONSTRUCTIONTEST_H
-#define TEST_HARNESS_HELPERS_TREECONSTRUCTIONTEST_H
+#ifndef TEST_HARNESS_HTML5LIB_TESTS_HARNESS_TREECONSTRUCTIONTEST_H
+#define TEST_HARNESS_HTML5LIB_TESTS_HARNESS_TREECONSTRUCTIONTEST_H
 
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <ostream>
 
 namespace test_harness::html5lib_tests {
     struct TreeConstructionTest {
@@ -22,6 +23,9 @@ namespace test_harness::html5lib_tests {
         bool                  scripting       { false };
         Output_t              expected_output {};
     };
+
+    std::ostream & operator <<( std::ostream &os, const TreeConstructionTest &test );
+    std::string to_string( const TreeConstructionTest::Errors_t &errors );
 }
 
-#endif //TEST_HARNESS_HELPERS_TREECONSTRUCTIONTEST_H
+#endif //TEST_HARNESS_HTML5LIB_TESTS_HARNESS_TREECONSTRUCTIONTEST_H

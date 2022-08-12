@@ -1,14 +1,22 @@
-//TODO description and notes
-
+/**
+ * This is a test harness to run all the MarkdownToHtml tests from source JSON files
+ *
+ * Test subjects:
+ * - `blogator::parser::tokeniser::Markdown`: Input is pipelined to this to get to MarkdownToHtml
+ * - `blogator::parser::builder::MarkdownToHtml`: main subject of the tests
+ * - `blogator::parser::tokeniser::HTML5`: Output of MarkdownToHtml is fed into the HTML pipeline to deal with the tree constuction
+ * - `blogator::parser::dom::TreeBuilder`: ^^^ (see above)
+ * - `blogator::reporter::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
+ */
 #include "gtest/gtest.h"
-#include "../../../src/encoding/Transcode.h"
 #include "../../../src/reporter/ParseReporter.h"
 #include "../../../src/parser/dom/TreeBuilder.h"
 #include "../../../src/parser/tokeniser/HTML5.h"
 #include "../../../src/parser/tokeniser/Markdown.h"
-#include "../../../src/parser/dom/node/Element.h"
 
+#include "test-harness-sources.h"
 #include "../helpers/helpers.h"
+#include "harness/harness.h"
 
 using blogator::reporter::ParseReporter;
 

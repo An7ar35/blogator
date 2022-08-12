@@ -1,0 +1,10 @@
+#ifndef BLOGATOR_CONFIGURATION_PARSER_TOKEN_CONFIGTK_H
+#define BLOGATOR_CONFIGURATION_PARSER_TOKEN_CONFIGTK_H
+
+namespace blogator::configuration::parser::token {
+    class ConfigTk {
+
+    };
+}
+
+#endif //BLOGATOR_CONFIGURATION_PARSER_TOKEN_CONFIGTK_H
