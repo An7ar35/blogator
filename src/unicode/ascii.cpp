@@ -194,6 +194,54 @@ bool blogator::unicode::ascii::islxdigit( char32_t c ) noexcept {
 }
 
 /**
+ * Checks if code-point is an operator
+ * @param c Character
+ * @return Is operator '[', ']', '+', '-', '/', ':', '*', '='
+ */
+bool blogator::unicode::ascii::isOperator( char32_t c ) {
+    switch( c ) {
+        case U'[':
+        case U']':
+        case U'+':
+        case U'-':
+        case U'/':
+        case U':':
+        case U'*': [[fallthrough]];
+        case U'=': return true;
+        default  : return false;
+    }
+}
+
+/**
+ * Checks if code-point is a punctuator
+ * @param c Character
+ * @return Is punctuator ',', '.', ';'
+ */
+bool blogator::unicode::ascii::isPunctuator( char32_t c ) {
+    switch( c ) {
+        case U',':
+        case U'.': [[fallthrough]];
+        case U';': return true;
+        default  : return false;
+    }
+}
+
+/**
+ * Checks if code-point is a bracket
+ * @param c Character
+ * @return Is bracket '{', '}', '(', ')'
+ */
+bool blogator::unicode::ascii::isBracket( char32_t c ) {
+    switch( c ) {
+        case U'{':
+        case U'}':
+        case U'(': [[fallthrough]];
+        case U')': return true;
+        default  : return false;
+    }
+}
+
+/**
  * Convert uppercase ASCII letter to lowercase
  * @param c Character
  * @return Lowercase ASCII letter or unchanged input if not ASCII

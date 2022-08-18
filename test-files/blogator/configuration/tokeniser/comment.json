@@ -1,0 +1,236 @@
+{ "tests": [
+
+  {
+    "description": "fake comment EOF",
+    "input": "/",
+    "tokens":[
+      {"type": "OPERATOR", "text": "/", "position": "1:1"}
+    ],
+    "errors":[
+      {"description": "syntax error: '/'", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "simple lined comment",
+    "input": "//comment",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple nested lined comment",
+    "input": "//comment //nested",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment //nested", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "multi-lined lined comment",
+    "input": "//comment line 1\n//comment line 2",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment line 1", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment line 2", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple block comment 1",
+    "input": "/*comment*/",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple block comment 2",
+    "input": "/*comment * 10*/",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment * 10", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple block comment (unclosed 1)",
+    "input": "/*",
+    "tokens":[
+      {"type": "COMMENT", "text": "", "position": "1:1"}
+    ],
+    "errors":[
+      {"description": "EOF in comment block", "line": 1, "col": 3}
+    ]
+  },
+
+  {
+    "description": "simple block comment (unclosed 2)",
+    "input": "/*comment",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment", "position": "1:1"}
+    ],
+    "errors":[
+      {"description": "EOF in comment block", "line": 1, "col": 10}
+    ]
+  },
+
+  {
+    "description": "simple block comment (unclosed 3)",
+    "input": "/*comment*",
+    "tokens":[
+      {"type": "COMMENT", "text": "comment*", "position": "1:1"}
+    ],
+    "errors":[
+      {"description": "EOF in comment block", "line": 1, "col": 11}
+    ]
+  },
+
+  {
+    "description": "lined comment in key",
+    "input": "key//comment",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "block comment in key",
+    "input": "key/*comment*/",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "lined comment in key (spaced)",
+    "input": "key //comment",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "block comment in key (spaced)",
+    "input": "key /*comment*/",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment", "position": "1:5"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "lined comment before value",
+    "input": "key=//comment\nvalue;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "COMMENT", "text": "comment", "position": "1:5"},
+      {"type": "VALUE_NAME", "text": "value", "position": "2:1"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "2:6"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "block comment before value",
+    "input": "key=/*comment*/value;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "COMMENT", "text": "comment", "position": "1:5"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:16"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:21"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "lined comment before value (spaced)",
+    "input": "key= //comment\n value;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "COMMENT", "text": "comment", "position": "1:6"},
+      {"type": "VALUE_NAME", "text": "value", "position": "2:2"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "2:7"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "block comment before value (spaced)",
+    "input": "key= /*comment*/ value;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "COMMENT", "text": "comment", "position": "1:6"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:18"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:23"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "lined comment after value",
+    "input": "key=value//comment\n;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment", "position": "1:10"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "block comment after value",
+    "input": "key=value/*comment*/;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment", "position": "1:10"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:21"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "lined comment after value (spaced)",
+    "input": "key=value //comment\n;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment", "position": "1:11"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "block comment after value (spaced)",
+    "input": "key=value /*comment*/ ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment", "position": "1:11"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:23"}
+    ],
+    "errors":[]
+  }
+]}

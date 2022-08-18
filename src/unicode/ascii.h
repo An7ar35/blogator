@@ -23,6 +23,7 @@ namespace blogator::unicode {
     static constexpr char32_t RIGHT_PARENTHESIS      { 0x29 }; //')'
     static constexpr char32_t ASTERISK               { 0x2A }; //'*'
     static constexpr char32_t PLUS_SIGN              { 0x2B }; //'+'
+    static constexpr char32_t COMMA                  { 0x2C }; //','
     static constexpr char32_t HYPHEN_MINUS           { 0x2D }; //'-'
     static constexpr char32_t FULL_STOP              { 0x2E }; //'.'
     static constexpr char32_t SOLIDUS                { 0x2F }; //'/'
@@ -70,6 +71,10 @@ namespace blogator::unicode::ascii {
     bool isnewline( char32_t c ) noexcept;
     bool isuxdigit( char32_t c ) noexcept;
     bool islxdigit( char32_t c ) noexcept;
+
+    bool isOperator( char32_t c );
+    bool isPunctuator( char32_t c );
+    bool isBracket( char32_t c );
 
     char32_t tolower( char32_t c ) noexcept;
     char32_t toupper( char32_t c ) noexcept;

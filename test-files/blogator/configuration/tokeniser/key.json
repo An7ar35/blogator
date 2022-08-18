@@ -1,0 +1,146 @@
+{ "tests": [
+
+  {
+    "description": "EOF",
+    "input": "",
+    "tokens":[],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key",
+    "input": "key",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key on next line",
+    "input": " \nkey",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "2:1"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "invalid key (1st char)",
+    "input": "ĸey",
+    "tokens":[
+      {"type": "KEY", "text": "ĸey", "position": "1:1"}
+    ],
+    "errors":[
+      {"description": "invalid character in key: 'ĸ'", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "invalid key (2nd char)",
+    "input": "k£y",
+    "tokens":[
+      {"type": "KEY", "text": "k£y", "position": "1:1"}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '£'", "line": 1, "col": 2}
+    ]
+  },
+
+  {
+    "description": "simple namespace (EOF)",
+    "input": "ns:",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple namespace (space)",
+    "input": "ns: ",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:3"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple namespace + key",
+    "input": "ns:key",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:3"},
+      {"type": "KEY", "text": "key", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple namespace + key with double colon",
+    "input": "ns::key",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:3"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key", "position": "1:5"}
+    ],
+    "errors":[
+      {"description": "invalid namespace separator format: ':'", "line": 1, "col": 4}
+    ]
+  },
+
+  {
+    "description": "multi-nested namespace + key",
+    "input": "ns1:ns2:ns3:key",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "1:5"},
+      {"type": "OPERATOR", "text": ":", "position": "1:8"},
+      {"type": "NAMESPACE", "text": "ns3", "position": "1:9"},
+      {"type": "OPERATOR", "text": ":", "position": "1:12"},
+      {"type": "KEY", "text": "key", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple space separated keys",
+    "input": "key1 key2  key3",
+    "tokens":[
+      {"type": "KEY", "text": "key1", "position": "1:1"},
+      {"type": "KEY", "text": "key2", "position": "1:6"},
+      {"type": "KEY", "text": "key3", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple comma separated keys",
+    "input": "key1, key2, key3",
+    "tokens":[
+      {"type": "KEY", "text": "key1", "position": "1:1"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:5"},
+      {"type": "KEY", "text": "key2", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:11"},
+      {"type": "KEY", "text": "key3", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple newline separated keys",
+    "input": "key1\nkey2\n key3",
+    "tokens":[
+      {"type": "KEY", "text": "key1", "position": "1:1"},
+      {"type": "KEY", "text": "key2", "position": "2:1"},
+      {"type": "KEY", "text": "key3", "position": "3:2"}
+    ],
+    "errors":[]
+  }
+
+
+]}

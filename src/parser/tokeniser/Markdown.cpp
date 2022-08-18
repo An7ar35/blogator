@@ -3518,10 +3518,10 @@ inline void tokeniser::Markdown::setPendingBufferStartPosition( TextPos position
     _pending.position = position;
 }
 
-/*
-* Append a character to the temporary text buffer
-* @param c Character
-*/
+/**
+ * Append a character to the temporary text buffer
+ * @param c Character
+ */
 inline void tokeniser::Markdown::appendToPendingBuffer( char32_t c ) {
     _pending.buffer.emplace_back( c );
 }

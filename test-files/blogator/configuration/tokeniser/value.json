@@ -1,0 +1,395 @@
+{ "tests": [
+
+  {
+    "description": "EOF before value",
+    "input": "key=",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "EOF after value name",
+    "input": "key=value",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:5"}
+    ],
+    "errors":[
+      {"description": "EOF in value", "line": 1, "col": 10}
+    ]
+  },
+
+  {
+    "description": "simple value name",
+    "input": "key=value;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple value name (spaced)",
+    "input": "key = value ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "invalid value name (first char)",
+    "input": "key=~value;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "CHARACTER", "text": "~value", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:11"}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "invalid value name (last char)",
+    "input": "key=valu$;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "CHARACTER", "text": "valu$", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:10"}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "simple string literal value",
+    "input": "key=\"value\";",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "STRING_LITERAL", "text": "value", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "escaped chars in string literal value",
+    "input": "key=\"\\a \\n \\>\";",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "STRING_LITERAL", "text": "a n >", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple string literal value EOF",
+    "input": "key=\"value",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "STRING_LITERAL", "text": "value", "position": "1:5"}
+    ],
+    "errors":[
+      {"description": "EOF in string literal", "line": 1, "col": 11}
+    ]
+  },
+
+  {
+    "description": "simple string literal value (spaced)",
+    "input": "key = \"value\" ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "STRING_LITERAL", "text": "value", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple integer literal value",
+    "input": "key=123456789;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "INTEGER_LITERAL_10", "text": "123456789", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "fake integer literal value",
+    "input": "key=123a;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "CHARACTER", "text": "123a", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:9"}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "simple integer literal value (spaced)",
+    "input": "key = 123456789 ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "INTEGER_LITERAL_10", "text": "123456789", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:17"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "fake integer float literal value",
+    "input": "key=1.a;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "CHARACTER", "text": "1.a", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:8"}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "simple integer float literal value 1",
+    "input": "key=1234.56789;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "INTEGER_LITERAL_FLT", "text": "1234.56789", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple integer float literal value 2",
+    "input": "key=.123456789;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "INTEGER_LITERAL_FLT", "text": ".123456789", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple integer float literal value 3",
+    "input": "key=123456789.;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "INTEGER_LITERAL_FLT", "text": "123456789.", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple integer float literal value 1 (spaced)",
+    "input": "key = 1234.56789 ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "INTEGER_LITERAL_FLT", "text": "1234.56789", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:18"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple integer float literal value 2 (spaced)",
+    "input": "key = .123456789 ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "INTEGER_LITERAL_FLT", "text": ".123456789", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:18"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple integer float literal value 3 (spaced)",
+    "input": "key = 123456789. ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "INTEGER_LITERAL_FLT", "text": "123456789.", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:18"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple hex integer literal value",
+    "input": "key=0x0fB6;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "INTEGER_LITERAL_16", "text": "0x0fB6", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:11"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "fake hex integer literal value",
+    "input": "key=0x0fZ6;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "CHARACTER", "text": "0x0fZ6", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:11"}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "simple hex integer literal value (spaced)",
+    "input": "key = 0x0fB6 ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "INTEGER_LITERAL_16", "text": "0x0fB6", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:14"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple boolean literal (T) value",
+    "input": "key=true;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "BOOLEAN_LITERAL", "text": "true", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:9"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple boolean literal (F) value",
+    "input": "key=false;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "BOOLEAN_LITERAL", "text": "false", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple boolean literal (T) value (spaced)",
+    "input": "key = true ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "BOOLEAN_LITERAL", "text": "true", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:12"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple boolean literal (T) value (spaced)",
+    "input": "key = false ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "BOOLEAN_LITERAL", "text": "false", "position": "1:7"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:13"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "named value operation 1",
+    "input": "key = value / 5;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "VALUE_NAME", "text": "value", "position": "1:7"},
+      {"type": "OPERATOR", "text": "/", "position": "1:13"},
+      {"type": "INTEGER_LITERAL_10", "text": "5", "position": "1:15"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:16"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "array of values (single line)",
+    "input": "key = [ named, 123, .1 , 0xFF, \"string\" ];",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "OPERATOR", "text": "[", "position": "1:7"},
+      {"type": "VALUE_NAME", "text": "named", "position": "1:9"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:14"},
+      {"type": "INTEGER_LITERAL_10", "text": "123", "position": "1:16"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:19"},
+      {"type": "INTEGER_LITERAL_FLT", "text": ".1", "position": "1:21"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:24"},
+      {"type": "INTEGER_LITERAL_16", "text": "0xFF", "position": "1:26"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:30"},
+      {"type": "STRING_LITERAL", "text": "string", "position": "1:32"},
+      {"type": "OPERATOR", "text": "]", "position": "1:41"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:42"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "array of values (multi-line)",
+    "input": "key = \n[\n\tnamed,\n\t123,\n\t.1,\n\t0xFF,\n\t\"string\"\n];",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "OPERATOR", "text": "[", "position": "2:1"},
+      {"type": "VALUE_NAME", "text": "named", "position": "3:2"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "3:7"},
+      {"type": "INTEGER_LITERAL_10", "text": "123", "position": "4:2"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "4:5"},
+      {"type": "INTEGER_LITERAL_FLT", "text": ".1", "position": "5:2"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "5:4"},
+      {"type": "INTEGER_LITERAL_16", "text": "0xFF", "position": "6:2"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "6:6"},
+      {"type": "STRING_LITERAL", "text": "string", "position": "7:2"},
+      {"type": "OPERATOR", "text": "]", "position": "8:1"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "8:2"}
+    ],
+    "errors":[]
+  }
+
+]}

@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "../../configuration/parser/specs/ErrorCode.h"
 #include "../../parser/specs/native/ErrorCode.h"
 #include "../../parser/specs/infra/ErrorCode.h"
 #include "../../parser/specs/markdown/ErrorCode.h"
@@ -106,6 +107,10 @@ std::string ReporterObject::context() const {
  */
 std::string ReporterObject::error() const {
     switch( _context ) {
+        case Context::CONFIGURATION:
+            return ( _text.empty()
+                     ? configuration::parser::specs::ErrorCode::str( _code )
+                     : configuration::parser::specs::ErrorCode::str( _code ) + ": " + _text );
         case Context::NATIVE:
             return ( _text.empty()
                      ? specs::native::ErrorCode::str( _code )
@@ -129,6 +134,8 @@ std::string ReporterObject::error() const {
  */
 std::string ReporterObject::detailed() const {
     switch( _context ) {
+        case Context::CONFIGURATION:
+            return configuration::parser::specs::ErrorCode::detailed( _code );
         case Context::NATIVE:
             return specs::native::ErrorCode::detailed( _code );
         case Context::HTML5:
@@ -185,6 +192,10 @@ std::ostream & ReporterObject::context( std::ostream &os ) const {
  */
 std::ostream & ReporterObject::error( std::ostream &os ) const {
     switch( _context ) {
+        case Context::CONFIGURATION:
+            os << configuration::parser::specs::ErrorCode::str( _code );
+            break;
+
         case Context::NATIVE:
             os << specs::native::ErrorCode::str( _code );
             break;
@@ -212,6 +223,10 @@ std::ostream & ReporterObject::error( std::ostream &os ) const {
  */
 std::ostream & ReporterObject::detailed( std::ostream &os ) const {
     switch( _context ) {
+        case Context::CONFIGURATION:
+            os << configuration::parser::specs::ErrorCode::detailed( _code );
+            break;
+
         case Context::NATIVE:
             os << specs::native::ErrorCode::detailed( _code );
             break;

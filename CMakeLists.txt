@@ -438,10 +438,22 @@ set(SOURCE_FILES
         src/parser/token/markdown/HtmlBlockTk.h
         src/parser/specs/markdown/ListSpacing.cpp
         src/parser/specs/markdown/ListSpacing.h
+
+
+        src/configuration/dto/Configuration.cpp
+        src/configuration/dto/Configuration.h
         src/configuration/parser/token/ConfigTk.cpp
         src/configuration/parser/token/ConfigTk.h
         src/configuration/parser/Parser.cpp
-        src/configuration/parser/Parser.h src/configuration/dto/Configuration.cpp src/configuration/dto/Configuration.h src/configuration/parser/Tokeniser.cpp src/configuration/parser/Tokeniser.h)
+        src/configuration/parser/Parser.h
+        src/configuration/parser/Tokeniser.cpp
+        src/configuration/parser/Tokeniser.h
+        src/configuration/parser/specs/TokenType.cpp
+        src/configuration/parser/specs/TokenType.h
+        src/configuration/parser/specs/TokeniserState.cpp
+        src/configuration/parser/specs/TokeniserState.h
+        src/configuration/parser/specs/ErrorCode.cpp
+        src/configuration/parser/specs/ErrorCode.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -532,6 +544,7 @@ set(TEST_FILES
         tests/parser/dom/validation/XML.cpp
         tests/parser/specs/infra/DocType.cpp
         tests/parser/specs/markdown/InsertionMode.cpp
+        tests/configuration/parser/specs/TokenType.cpp
 
         test-harness/helpers/helpers.cpp
         test-harness/helpers/helpers.h
@@ -559,6 +572,14 @@ set(TEST_FILES
         test-harness/commonmark-spec/harness/CommonMarkTest.h
         test-harness/commonmark-spec/commonmark-spec-tests.cpp
 
+        test-harness/blogator/harness/harness.cpp
+        test-harness/blogator/harness/harness.h
+        test-harness/blogator/harness/ErrorDescription.cpp
+        test-harness/blogator/harness/ErrorDescription.h
+        test-harness/blogator/harness/ConfigurationTkTest.cpp
+        test-harness/blogator/harness/ConfigurationTkTest.h
+        test-harness/blogator/harness/ConfigurationParserTest.cpp
+        test-harness/blogator/harness/ConfigurationParserTest.h
         test-harness/blogator/configuration-parser-tests.cpp
         test-harness/blogator/configuration-tokenizer-tests.cpp)
 

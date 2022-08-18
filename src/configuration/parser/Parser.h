@@ -3,18 +3,20 @@
 
 #include <memory>
 
-namespace blogator::encoding {
-    class Source;
-}
-
 namespace blogator::configuration {
     class Configuration;
+}
+
+namespace blogator::configuration::token {
+    class ConfigTk;
 }
 
 namespace blogator::configuration::parser {
     class Parser {
       public:
-        std::unique_ptr<Configuration> parse( encoding::Source &source );
+        virtual void dispatch( std::unique_ptr<token::ConfigTk> token );
+
+        std::unique_ptr<Configuration> reset();
 
         [[nodiscard]] size_t errors() const;
 

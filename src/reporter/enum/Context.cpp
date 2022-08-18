@@ -10,11 +10,12 @@
  */
 std::ostream & blogator::reporter::operator <<( std::ostream &os, blogator::reporter::Context ctx ) {
     switch( ctx ) {
-        case Context::UNKNOWN:  { os << "Unknown";  } break;
-        case Context::ENCODING: { os << "Encoding"; } break;
-        case Context::NATIVE:   { os << "Blogator"; } break;
-        case Context::HTML5:    { os << "HTML";     } break;
-        case Context::MARKDOWN: { os << "Markdown"; } break;
+        case Context::UNKNOWN:       { os << "Unknown";       } break;
+        case Context::ENCODING:      { os << "Encoding";      } break;
+        case Context::CONFIGURATION: { os << "Configuration"; } break;
+        case Context::NATIVE:        { os << "Blogator";      } break;
+        case Context::HTML5:         { os << "HTML";          } break;
+        case Context::MARKDOWN:      { os << "Markdown";      } break;
         default:
             LOG_ERROR( "[blogator::reporter::ctxToStr( ", static_cast<int>( ctx ), " )] "
                        "Missing string representation for enum." );

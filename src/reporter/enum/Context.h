@@ -8,6 +8,7 @@ namespace blogator::reporter {
     enum class Context {
         UNKNOWN = 0,
         ENCODING,
+        CONFIGURATION,
         NATIVE,
         HTML5,
         MARKDOWN,

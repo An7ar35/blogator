@@ -47,7 +47,7 @@ std::set<std::filesystem::path> test_harness::getTestFiles( const std::filesyste
  * @return Processed/checked UTF-32 text
  * @throws std::runtime_error when transcoding fails
  */
-blogator::U32Text test_harness::transcodeInput( const std::string &raw, const std::filesystem::path &path ) {
+::blogator::U32Text test_harness::transcodeInput( const std::string &raw, const std::filesystem::path &path ) {
     std::vector<char32_t> out;
     std::stringstream     ss;
 
@@ -67,7 +67,7 @@ blogator::U32Text test_harness::transcodeInput( const std::string &raw, const st
  * @param os Output stream
  * @param u32text U32 text
  */
-void test_harness::printU32Buffer( std::ostream &os, blogator::U32Text & u32text ) {
+void test_harness::printU32Buffer( std::ostream &os, ::blogator::U32Text & u32text ) {
     while( !u32text.reachedEnd() ) {
         blogator::unicode::utf8::convert( os, u32text.character() );
         u32text.nextChar();
