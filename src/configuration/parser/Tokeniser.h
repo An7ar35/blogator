@@ -50,6 +50,7 @@ namespace blogator::configuration::parser {
         Parser &              _parser;
         State_e               _current_state;
         std::stack<State_e>   _return_states;
+        int                   _nesting;
         Cache                 _pending;
 
 
@@ -59,6 +60,7 @@ namespace blogator::configuration::parser {
 
         void setState( State_e state ) noexcept;
         [[nodiscard]] State_e currentState() const noexcept;
+        [[nodiscard]] State_e returnState() const;
         void modifyReturnState( State_e state );
         void pushReturnState( State_e state );
         State_e consumeReturnState();

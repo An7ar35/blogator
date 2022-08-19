@@ -22,7 +22,8 @@ Tokeniser::Tokeniser( Parser & parser ) :
     _parser( parser ),
     _current_state( State_e::INITIAL ),
     _error_count( 0 ),
-    _eof( false )
+    _eof( false ),
+    _nesting( 0 )
 {}
 
 /**
@@ -31,6 +32,7 @@ Tokeniser::Tokeniser( Parser & parser ) :
  */
 void Tokeniser::parse( blogator::U32Text & text ) {
     _src_path = text.path(); //internal caching for error calls
+    _nesting  = 0;
     _eof      = false;
 
     text.reconsume(); //to stay on first char during first call to `text.nextChar()`
@@ -60,6 +62,13 @@ void Tokeniser::parse( blogator::U32Text & text ) {
 
                 if( text.reachedEnd() ) {
                     setState( State_e::END_OF_FILE );
+                } else if( _nesting > 0 && character == unicode::RIGHT_CURLY_BRACKET ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
+                    setState( consumeReturnState() );
+                    --_nesting;
+                } else if( _nesting > 0 && character == unicode::LEFT_CURLY_BRACKET ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
+                    ++_nesting;
                 } else if( character == unicode::SOLIDUS ) {
                     appendToPendingBuffer( character );
                     pushReturnState( State_e::INITIAL );
@@ -69,7 +78,12 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 {
                     appendToPendingBuffer( character );
                     setState( State_e::KEY );
-
+                } else if( unicode::ascii::isOperator( character ) ) {
+                    logError( text.position(), ErrorCode::INVALID_CHARACTER_IN_KEY, character );
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, character, text.position() ) );
+                } else if( unicode::ascii::isPunctuator( character ) ) {
+                    logError( text.position(), ErrorCode::INVALID_CHARACTER_IN_KEY, character );
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::PUNCTUATOR, character, text.position() ) );
                 } else if( !unicode::ascii::isfeed( character ) &&
                            character != unicode::SPACE          &&
                            character != unicode::TAB )
@@ -91,14 +105,13 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 {
                     dispatchPendingBufferAsToken( Type_e::KEY );
                     reconsume( State_e::AFTER_KEY );
-
                 } else if( unicode::ascii::isalnum( character ) || character == unicode::HYPHEN_MINUS ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::COLON ) {
                     dispatchPendingBufferAsToken( Type_e::NAMESPACE );
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, unicode::COLON, text.position() ) );
                     setState( State_e::NAMESPACE );
-                } else if( character == unicode::COMMA ) {
+                } else if( character == unicode::COMMA || character == unicode::SEMICOLON ) {
                     dispatchPendingBufferAsToken( Type_e::KEY );
                     reconsume( State_e::AFTER_KEY );
                 } else if( character == unicode::SOLIDUS ) {
@@ -143,7 +156,7 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                     appendToPendingBuffer( character );
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, pendingBufferToStr(), pendingBufferPosition() ) );
                     setState( State_e::BEFORE_VALUE );
-                } else if( character == unicode::COMMA ) {
+                } else if( character == unicode::COMMA || character == unicode::SEMICOLON ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::PUNCTUATOR, character, text.position() ) );
                     setState( State_e::INITIAL );
                 } else if( character == unicode::SOLIDUS ) {
@@ -163,7 +176,15 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                     appendToPendingBuffer( character );
                     pushReturnState( State_e::BEFORE_VALUE );
                     setState( State_e::COMMENT_SOLIDUS );
-                } else if( unicode::ascii::isBracket( character ) ) {
+                } else if( character == unicode::LEFT_CURLY_BRACKET ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
+                    pushReturnState( State_e::BEFORE_VALUE );
+                    setState( State_e::INITIAL );
+                    ++_nesting;
+                } else if( character == unicode::RIGHT_CURLY_BRACKET ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
+                    --_nesting;
+                } else if( character == unicode::LEFT_PARENTHESIS || character == unicode::RIGHT_PARENTHESIS ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
                 } else if( unicode::ascii::isOperator( character ) ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, character, text.position() ) );
@@ -357,6 +378,9 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                     clearPendingBuffer();
                     setState( State_e::COMMENT_BLOCK );
                 } else {
+                    if( returnState() == State_e::INITIAL ) {
+                        logError( pendingBufferPosition(), ErrorCode::INVALID_CHARACTER_IN_KEY, unicode::SOLIDUS );
+                    }
                     dispatchPendingBufferAsToken( Type_e::OPERATOR );
                     reconsume( consumeReturnState() );
                 }
@@ -400,6 +424,10 @@ void Tokeniser::parse( blogator::U32Text & text ) {
             } break;
 
             case State_e::END_OF_FILE: {
+                if( _nesting != 0 ) {
+                    logError( text.position(), ErrorCode::ASYMMETRIC_VALUE_NESTING, std::to_string( _nesting ) );
+                }
+
                 dispatchToken( std::make_unique<ConfigTk>( Type_e::END_OF_FILE, text.position() ) );
                 _eof = true;
             } break;
@@ -465,6 +493,14 @@ inline void Tokeniser::setState( Tokeniser::State_e state ) noexcept {
  */
 inline Tokeniser::State_e Tokeniser::currentState() const noexcept {
     return _current_state;
+}
+
+/**
+ * Gets the return state
+ * @return State
+ */
+inline Tokeniser::State_e Tokeniser::returnState() const {
+    return (_return_states.empty() ? State_e::INITIAL : _return_states.top() );
 }
 
 /**

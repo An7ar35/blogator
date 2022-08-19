@@ -19,6 +19,7 @@ namespace blogator::configuration::parser::specs {
             EOF_IN_COMMENT_BLOCK,
             EOF_IN_STRING_LITERAL,
             EOF_IN_VALUE,
+            ASYMMETRIC_VALUE_NESTING,
 
             ENUM_END
         };

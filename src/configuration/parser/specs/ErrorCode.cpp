@@ -51,6 +51,10 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "EOF in string literal",
             R"(This error occurs when EOF is encountered inside a string literal. I.e.: no closing '"' char was found prior EOF.)"
         };
+        arr[ ErrorCode::ASYMMETRIC_VALUE_NESTING ] = {
+            "asymmetric value nesting",
+            R"(This error occurs when the number of curly brackets opened does not match their closing.)"
+        };
         arr[ ErrorCode::EOF_IN_VALUE ] = {
             "EOF in value",
             R"(This error occurs when EOF is encountered without a semi-colon terminator on a key-value declaration.)"

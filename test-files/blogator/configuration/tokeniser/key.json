@@ -37,6 +37,18 @@
   },
 
   {
+    "description": "invalid key with solidus operator as first char",
+    "input": "/key",
+    "tokens":[
+      {"type": "OPERATOR", "text": "/", "position": "1:1"},
+      {"type": "KEY", "text": "key", "position": "1:2"}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '/'", "line": 1, "col": 1}
+    ]
+  },
+
+  {
     "description": "invalid key (2nd char)",
     "input": "k£y",
     "tokens":[
