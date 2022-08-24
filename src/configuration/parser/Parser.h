@@ -7,7 +7,7 @@ namespace blogator::configuration {
     class Configuration;
 }
 
-namespace blogator::configuration::token {
+namespace blogator::configuration::parser::token {
     class ConfigTk;
 }
 

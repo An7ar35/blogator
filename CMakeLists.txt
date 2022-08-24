@@ -453,7 +453,15 @@ set(SOURCE_FILES
         src/configuration/parser/specs/TokeniserState.cpp
         src/configuration/parser/specs/TokeniserState.h
         src/configuration/parser/specs/ErrorCode.cpp
-        src/configuration/parser/specs/ErrorCode.h)
+        src/configuration/parser/specs/ErrorCode.h
+        src/configuration/enum/ValueType.cpp
+        src/configuration/enum/ValueType.h
+        src/configuration/dto/Value.cpp
+        src/configuration/dto/Value.h
+        src/configuration/exception/value_type_mismatch.cpp
+        src/configuration/exception/value_type_mismatch.h
+        src/configuration/dto/ConfigurationNode.cpp
+        src/configuration/dto/ConfigurationNode.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -545,6 +553,9 @@ set(TEST_FILES
         tests/parser/specs/infra/DocType.cpp
         tests/parser/specs/markdown/InsertionMode.cpp
         tests/configuration/parser/specs/TokenType.cpp
+        tests/configuration/dto/Configuration.cpp
+        tests/configuration/dto/ConfigurationNode.cpp
+        tests/configuration/dto/Value.cpp
 
         test-harness/helpers/helpers.cpp
         test-harness/helpers/helpers.h

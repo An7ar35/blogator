@@ -1,5 +1,6 @@
 #include "Parser.h"
 
+#include "token/ConfigTk.h"
 #include "../dto/Configuration.h"
 
 using namespace blogator::configuration;
