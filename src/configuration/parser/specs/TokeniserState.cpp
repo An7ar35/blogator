@@ -16,6 +16,7 @@ std::ostream & blogator::configuration::parser::specs::operator <<( std::ostream
         case TokeniserState::AFTER_KEY:            { os << "AFTER_KEY";             } break;
         case TokeniserState::BEFORE_VALUE:         { os << "BEFORE_VALUE";          } break;
         case TokeniserState::VALUE_NAME:           { os << "VALUE_NAME";            } break;
+        case TokeniserState::VALUE_NAMESPACE:      { os << "VALUE_NAMESPACE";       } break;
         case TokeniserState::VALUE_STRING:         { os << "VALUE_STRING";          } break;
         case TokeniserState::VALUE_INTEGER_FLOAT:  { os << "VALUE_INTEGER_FLOAT";   } break;
         case TokeniserState::VALUE_INTEGER_BASE10: { os << "VALUE_INTEGER_BASE10";  } break;

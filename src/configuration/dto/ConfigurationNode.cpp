@@ -1,19 +1,8 @@
 #include "ConfigurationNode.h"
 
-#include "Value.h"
 #include "../../unicode/utf8.h"
 
 using namespace blogator::configuration;
-
-/**
- * Move-constructor
- * @param node Node to move
- */
-ConfigurationNode::ConfigurationNode( ConfigurationNode &&node ) noexcept :
-    suffix( std::move( node.suffix ) ),
-    value( std::move( node.value ) ),
-    children( std::move( node.children ) )
-{}
 
 /**
  * Constructor
@@ -24,13 +13,32 @@ ConfigurationNode::ConfigurationNode( std::u32string suffix ) :
 {}
 
 /**
+ * Move-constructor
+ * @param node Node to move
+ */
+ConfigurationNode::ConfigurationNode( ConfigurationNode &&node ) noexcept :
+    suffix( std::move( node.suffix ) ),
+    is_key( node.is_key ),
+    values( std::move( node.values ) ),
+    children( std::move( node.children ) )
+{}
+
+/**
  * Copy-constructor
  * @param node Node to copy
  */
 ConfigurationNode::ConfigurationNode( const ConfigurationNode & node ) :
     suffix( node.suffix ),
-    value( node.value ? std::make_unique<Value>( *node.value ) : nullptr )
+    is_key( node.is_key )
 {
+    for( auto &val_ptr: node.values() ) {
+        if( val_ptr ) {
+            this->values.emplace_back( std::make_unique<Value>( *val_ptr ) );
+        } else {
+            this->values.emplace_back( nullptr );
+        }
+    }
+
     for( const auto & child : node.children ) {
         this->children.emplace( child.first, child.second.copy() );
     }
@@ -42,10 +50,15 @@ ConfigurationNode::ConfigurationNode( const ConfigurationNode & node ) :
  * @return Moved node
  */
 ConfigurationNode & ConfigurationNode::operator =( ConfigurationNode &&node ) noexcept {
-    suffix = node.suffix;
+    suffix = std::move( node.suffix );
+    is_key = node.is_key;
 
-    if( node.value ) {
-        this->value = std::move( node.value );
+    for( auto &val_ptr: node.values() ) {
+        if( val_ptr ) {
+            this->values.emplace_back( std::move( val_ptr ) );
+        } else {
+            this->values.emplace_back( nullptr );
+        }
     }
 
     this->children = std::move( node.children );
@@ -59,10 +72,15 @@ ConfigurationNode & ConfigurationNode::operator =( ConfigurationNode &&node ) no
  * @return Copied node
  */
 ConfigurationNode & ConfigurationNode::operator =( const ConfigurationNode & node ) {
-    suffix = std::move( node.suffix );
+    suffix = node.suffix;
+    is_key = node.is_key;
 
-    if( node.value ) {
-        this->value = std::make_unique<Value>( *node.value );
+    for( const auto &val_ptr: node.values() ) {
+        if( val_ptr ) {
+            this->values.emplace_back( std::make_unique<Value>( *val_ptr ) );
+        } else {
+            this->values.emplace_back( nullptr );
+        }
     }
 
     for( const auto & child : node.children ) {
@@ -78,18 +96,10 @@ ConfigurationNode & ConfigurationNode::operator =( const ConfigurationNode & nod
  * @return Equality state of subtree
  */
 bool ConfigurationNode::operator ==( const ConfigurationNode &rhs ) const {
-    if( this->hasValue() && rhs.hasValue() ) {
-       return  this->suffix   == rhs.suffix
-           && *this->value    == *rhs.value
-           &&  this->children == rhs.children;
-    }
-
-    if( !this->hasValue() && !rhs.hasValue() ) {
-        return this->suffix   == rhs.suffix
-            && this->children == rhs.children;
-    }
-
-    return false;
+    return this->suffix   == rhs.suffix
+        && this->is_key   == rhs.is_key
+        && this->values   == rhs.values
+        && this->children == rhs.children;
 }
 
 /**
@@ -99,6 +109,33 @@ bool ConfigurationNode::operator ==( const ConfigurationNode &rhs ) const {
  */
 bool ConfigurationNode::operator !=( const ConfigurationNode &rhs ) const {
     return !( *this == rhs );
+}
+
+/**
+ * Clears the suffix for the node
+ */
+void ConfigurationNode::clearSuffix() {
+    suffix.clear();
+}
+
+/**
+ * Gets a pointer to the value store
+ * @return Pointer to value store or nullptr when node is not a key
+ */
+ValueStore * ConfigurationNode::value() {
+    return ( isKey() ? &values : nullptr );
+}
+
+/**
+ * Add a value to the value store
+ * @param val Value pointer
+ */
+void ConfigurationNode::addValue( std::unique_ptr<Value> &&val ) {
+    values.emplace_back( std::move( val ) );
+
+    if( !is_key ) {
+        is_key = true;
+    }
 }
 
 /**
@@ -118,11 +155,11 @@ bool ConfigurationNode::isLeaf() const {
 }
 
 /**
- * Checks if node has a value set
- * @return Value state
+ * Checks the key flag for the node
+ * @return Key-value state
  */
-bool ConfigurationNode::hasValue() const {
-    return value.operator bool();
+bool ConfigurationNode::isKey() const {
+    return is_key;
 }
 
 /**
@@ -130,7 +167,7 @@ bool ConfigurationNode::hasValue() const {
  * @return Number of keys with values in subtree
  */
 size_t ConfigurationNode::size() const {
-    size_t size = ( hasValue() ? 1 : 0 );
+    size_t size = ( isKey() ? 1 : 0 );
 
     for( const auto & [k, v] : children ) {
         size += v.size();
@@ -146,8 +183,8 @@ size_t ConfigurationNode::size() const {
  * @return Output stream
  */
 std::ostream & blogator::configuration::operator <<( std::ostream &os, const ConfigurationNode &node ) {
-    if( node.hasValue() ) {
-        os << blogator::unicode::utf8::convert( node.suffix ) << " = " << *node.value;
+    if( node.isKey() ) {
+        os << blogator::unicode::utf8::convert( node.suffix ) << " = " << node.values;
     } else {
         os << blogator::unicode::utf8::convert( node.suffix );
     }

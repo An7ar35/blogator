@@ -175,9 +175,9 @@ const std::u32string & Value::getString() const {
 std::ostream & blogator::configuration::operator <<( std::ostream &os, const Value &value ) {
     switch( value.type() ) {
         case ValueType::NAME   : { os << unicode::utf8::convert( value.getString() );                 } break;
-        case ValueType::BOOLEAN: { os << ( value.getBool() ? "true" : "false" ) << "\"";              } break;
-        case ValueType::INTEGER: { os << std::to_string( value.getInt() ) << "\"";                    } break;
-        case ValueType::FLOAT  : { os << std::to_string( value.getDouble() ) << "\"";                 } break;
+        case ValueType::BOOLEAN: { os << ( value.getBool() ? "true" : "false" );                      } break;
+        case ValueType::INTEGER: { os << std::to_string( value.getInt() );                            } break;
+        case ValueType::FLOAT  : { os << std::to_string( value.getDouble() );                         } break;
         case ValueType::STRING : { os << "\"" << unicode::utf8::convert( value.getString() ) << "\""; } break;
     }
 

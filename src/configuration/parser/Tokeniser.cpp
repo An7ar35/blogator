@@ -105,7 +105,7 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 {
                     dispatchPendingBufferAsToken( Type_e::KEY );
                     reconsume( State_e::AFTER_KEY );
-                } else if( unicode::ascii::isalnum( character ) || character == unicode::HYPHEN_MINUS ) {
+                } else if( unicode::ascii::isalnum( character ) || character == unicode::UNDERSCORE ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::COLON ) {
                     dispatchPendingBufferAsToken( Type_e::NAMESPACE );
@@ -225,13 +225,12 @@ void Tokeniser::parse( blogator::U32Text & text ) {
             } break;
 
             case State_e::VALUE_NAME: {
-                if( text.reachedEnd()                       ||
-                    unicode::ascii::isfeed( character )     ||
-                    unicode::ascii::isOperator( character ) ||
-                    character == unicode::SPACE             ||
-                    character == unicode::TAB               ||
-                    character == unicode::COMMA             ||
-                    character == unicode::SEMICOLON )
+                if( text.reachedEnd()                         ||
+                    ( unicode::ascii::isOperator( character ) && character != unicode::COLON ) ||
+                    unicode::ascii::isfeed( character )       ||
+                    unicode::ascii::isPunctuator( character ) ||
+                    character == unicode::SPACE               ||
+                    character == unicode::TAB )
                 {
                     if( matchPendingBuffer( U"true" ) || matchPendingBuffer( U"false" ) ) {
                         dispatchPendingBufferAsToken( Type_e::BOOLEAN_LITERAL );
@@ -240,11 +239,42 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                     }
                     reconsume( State_e::AFTER_VALUE );
 
-                } else if( unicode::ascii::isalnum( character ) || character == unicode::HYPHEN_MINUS ) {
+                } else if( character == unicode::COLON ) {
+                    dispatchPendingBufferAsToken( Type_e::NAMESPACE );
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, unicode::COLON, text.position() ) );
+                    setState( State_e::VALUE_NAMESPACE );
+                } else if( unicode::ascii::isalnum( character ) || character == unicode::UNDERSCORE ) {
                     appendToPendingBuffer( character );
+                } else if( character == unicode::SOLIDUS ) {
+                    dispatchPendingBufferAsToken( Type_e::VALUE_NAME );
+                    resetPendingBuffer( text.position() );
+                    appendToPendingBuffer( character );
+                    pushReturnState( State_e::AFTER_VALUE );
+                    setState( State_e::COMMENT_SOLIDUS );
                 } else {
                     logError( pendingBufferPosition(), ErrorCode::INVALID_VALUE_NAME_FORMAT );
                     reconsume( State_e::VALUE_RAW );
+                }
+            } break;
+
+            case State_e::VALUE_NAMESPACE: {
+                resetPendingBuffer( text.position() );
+
+                if( text.reachedEnd() ) {
+                    setState( State_e::END_OF_FILE );
+                } else if( character == unicode::COLON ) {
+                    logError( text.position(), ErrorCode::INVALID_NAMESPACE_SEPARATOR, character );
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, unicode::COLON, text.position() ) );
+                } else if( unicode::ascii::isfeed( character )     ||
+                           unicode::ascii::isOperator( character ) ||
+                           character == unicode::SPACE             ||
+                           character == unicode::TAB               ||
+                           character == unicode::COMMA             ||
+                           character == unicode::SEMICOLON )
+                {
+                    reconsume( State_e::AFTER_VALUE );
+                } else {
+                    reconsume( State_e::VALUE_NAME );
                 }
             } break;
 

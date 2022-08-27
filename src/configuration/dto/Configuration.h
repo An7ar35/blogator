@@ -41,7 +41,7 @@ namespace blogator::configuration {
         bool add( const Key_t & ns_key, const char32_t * val, bool is_name = false );
         bool add( const Key_t & ns_key, const std::u32string & val, bool is_name = false );
 
-        Value * find( const Key_t & ns_key );
+        ValueStore * find( const Key_t & ns_key );
         Configuration findAll( const Key_t & ns_key );
         size_t remove( const Key_t & ns_key );
         Configuration copy( const Key_t & ns );

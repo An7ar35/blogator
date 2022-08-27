@@ -3,12 +3,11 @@
 
 #include <map>
 #include <string>
-#include <memory>
 #include <ostream>
 
-namespace blogator::configuration {
-    class Value;
+#include "ValueStore.h"
 
+namespace blogator::configuration {
     /**
      * Configuration namespace/key node
      * @param children Child namespaces/key
@@ -24,20 +23,27 @@ namespace blogator::configuration {
         ConfigurationNode( ConfigurationNode && node ) noexcept ;
         ConfigurationNode( const ConfigurationNode & node );
 
+        friend std::ostream & operator <<( std::ostream & os, const ConfigurationNode & node );
+
         ConfigurationNode & operator =( ConfigurationNode && node ) noexcept ;
         ConfigurationNode & operator =( const ConfigurationNode & node );
 
         bool operator ==( const ConfigurationNode & rhs ) const;
         bool operator !=( const ConfigurationNode & rhs ) const;
 
+        void clearSuffix();
+        ValueStore * value();
+        void addValue( std::unique_ptr<Value> && val );
+
         [[nodiscard]] bool isLeaf() const;
-        [[nodiscard]] bool hasValue() const;
+        [[nodiscard]] bool isKey() const;
         [[nodiscard]] ConfigurationNode copy() const;
         [[nodiscard]] size_t size() const;
 
-        std::u32string         suffix;
-        NodeMap_t              children;
-        std::unique_ptr<Value> value;
+        NodeMap_t      children;
+        std::u32string suffix;
+        bool           is_key { false };
+        ValueStore     values;
     };
 
     std::ostream & operator <<( std::ostream & os, const ConfigurationNode & node );

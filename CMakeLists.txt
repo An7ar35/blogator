@@ -461,7 +461,11 @@ set(SOURCE_FILES
         src/configuration/exception/value_type_mismatch.cpp
         src/configuration/exception/value_type_mismatch.h
         src/configuration/dto/ConfigurationNode.cpp
-        src/configuration/dto/ConfigurationNode.h)
+        src/configuration/dto/ConfigurationNode.h
+        src/configuration/parser/specs/InsertionMode.cpp
+        src/configuration/parser/specs/InsertionMode.h
+        src/configuration/dto/ValueStore.cpp
+        src/configuration/dto/ValueStore.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -592,7 +596,7 @@ set(TEST_FILES
         test-harness/blogator/harness/ConfigurationParserTest.cpp
         test-harness/blogator/harness/ConfigurationParserTest.h
         test-harness/blogator/configuration-parser-tests.cpp
-        test-harness/blogator/configuration-tokenizer-tests.cpp)
+        test-harness/blogator/configuration-tokenizer-tests.cpp tests/configuration/dto/ValueStore.cpp)
 
 configure_file(tests/cmake/cmake.h ${CMAKE_BINARY_DIR}/generated-src/cmake_test_vars.h )
 configure_file(test-harness/sources.h ${CMAKE_BINARY_DIR}/generated-src/test-harness-sources.h)

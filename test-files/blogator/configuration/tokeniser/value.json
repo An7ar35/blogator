@@ -390,6 +390,196 @@
       {"type": "PUNCTUATOR", "text": ";", "position": "8:2"}
     ],
     "errors":[]
+  },
+
+  {
+    "description": "Namespaced named value 1",
+    "input": "key = :root:ns:name;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "OPERATOR", "text": ":", "position": "1:7"},
+      {"type": "NAMESPACE", "text": "root", "position": "1:8"},
+      {"type": "OPERATOR", "text": ":", "position": "1:12"},
+      {"type": "NAMESPACE", "text": "ns", "position": "1:13"},
+      {"type": "OPERATOR", "text": ":", "position": "1:15"},
+      {"type": "VALUE_NAME", "text": "name", "position": "1:16"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:20"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Namespaced named value 2",
+    "input": "key = root:ns:name ;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "NAMESPACE", "text": "root", "position": "1:7"},
+      {"type": "OPERATOR", "text": ":", "position": "1:11"},
+      {"type": "NAMESPACE", "text": "ns", "position": "1:12"},
+      {"type": "OPERATOR", "text": ":", "position": "1:14"},
+      {"type": "VALUE_NAME", "text": "name", "position": "1:15"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:20"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Namespaced named value 3",
+    "input": "key = ns:;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "NAMESPACE", "text": "ns", "position": "1:7"},
+      {"type": "OPERATOR", "text": ":", "position": "1:9"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:10"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Namespaced named value 4",
+    "input": "key = ns_1:ns:2:name_;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "NAMESPACE", "text": "ns_1", "position": "1:7"},
+      {"type": "OPERATOR", "text": ":", "position": "1:11"},
+      {"type": "NAMESPACE", "text": "ns", "position": "1:12"},
+      {"type": "OPERATOR", "text": ":", "position": "1:14"},
+      {"type": "NAMESPACE", "text": "2", "position": "1:15"},
+      {"type": "OPERATOR", "text": ":", "position": "1:16"},
+      {"type": "VALUE_NAME", "text": "name_", "position": "1:17"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:22"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Namespaced named value 5",
+    "input": "key = ns_1/*comment*/:ns_2:_name/*comment*/;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "VALUE_NAME", "text": "ns_1", "position": "1:7"},
+      {"type": "COMMENT", "text": "comment", "position": "1:11"},
+      {"type": "OPERATOR", "text": ":", "position": "1:22"},
+      {"type": "NAMESPACE", "text": "ns_2", "position": "1:23"},
+      {"type": "OPERATOR", "text": ":", "position": "1:27"},
+      {"type": "VALUE_NAME", "text": "_name", "position": "1:28"},
+      {"type": "COMMENT", "text": "comment", "position": "1:33"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:44"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Namespaced named value 6",
+    "input": "key = ns_/*comment*/1:ns_2:name;",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "VALUE_NAME", "text": "ns_", "position": "1:7"},
+      {"type": "COMMENT", "text": "comment", "position": "1:10"},
+      {"type": "INTEGER_LITERAL_10", "text": "1", "position": "1:21"},
+      {"type": "OPERATOR", "text": ":", "position": "1:22"},
+      {"type": "NAMESPACE", "text": "ns_2", "position": "1:23"},
+      {"type": "OPERATOR", "text": ":", "position": "1:27"},
+      {"type": "VALUE_NAME", "text": "name", "position": "1:28"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:32"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Array of namespaced named values",
+    "input": "key=[ns0:key0, ns1:ns11:key11, key2];",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:4"},
+      {"type": "OPERATOR", "text": "[", "position": "1:5"},
+      {"type": "NAMESPACE", "text": "ns0", "position": "1:6"},
+      {"type": "OPERATOR", "text": ":", "position": "1:9"},
+      {"type": "VALUE_NAME", "text": "key0", "position": "1:10"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:14"},
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:16"},
+      {"type": "OPERATOR", "text": ":", "position": "1:19"},
+      {"type": "NAMESPACE", "text": "ns11", "position": "1:20"},
+      {"type": "OPERATOR", "text": ":", "position": "1:24"},
+      {"type": "VALUE_NAME", "text": "key11", "position": "1:25"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:30"},
+      {"type": "VALUE_NAME", "text": "key2", "position": "1:32"},
+      {"type": "OPERATOR", "text": "]", "position": "1:36"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "1:37"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "Array of namespaced named values (multi-lined)",
+    "input": "key = [\nns0:key0,\nns1:ns11:key11,\nkey2\n];",
+    "tokens":[
+      {"type": "KEY", "text": "key", "position": "1:1"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "OPERATOR", "text": "[", "position": "1:7"},
+      {"type": "NAMESPACE", "text": "ns0", "position": "2:1"},
+      {"type": "OPERATOR", "text": ":", "position": "2:4"},
+      {"type": "VALUE_NAME", "text": "key0", "position": "2:5"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "2:9"},
+      {"type": "NAMESPACE", "text": "ns1", "position": "3:1"},
+      {"type": "OPERATOR", "text": ":", "position": "3:4"},
+      {"type": "NAMESPACE", "text": "ns11", "position": "3:5"},
+      {"type": "OPERATOR", "text": ":", "position": "3:9"},
+      {"type": "VALUE_NAME", "text": "key11", "position": "3:10"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "3:15"},
+      {"type": "VALUE_NAME", "text": "key2", "position": "4:1"},
+      {"type": "OPERATOR", "text": "]", "position": "5:1"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "5:2"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "namespaced named values in nested namespace (multi-lined)",
+    "input": "ns: = {\n\tns0:key0 = 0;\n\tns1:ns11:key11 = 11;\n\tns2 = { key2 = 2; ns22:key22 = 22; }\n};",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:3"},
+      {"type": "OPERATOR", "text": "=", "position": "1:5"},
+      {"type": "BRACKET", "text": "{", "position": "1:7"},
+      {"type": "NAMESPACE", "text": "ns0", "position": "2:2"},
+      {"type": "OPERATOR", "text": ":", "position": "2:5"},
+      {"type": "KEY", "text": "key0", "position": "2:6"},
+      {"type": "OPERATOR", "text": "=", "position": "2:11"},
+      {"type": "INTEGER_LITERAL_10", "text": "0", "position": "2:13"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "2:14"},
+      {"type": "NAMESPACE", "text": "ns1", "position": "3:2"},
+      {"type": "OPERATOR", "text": ":", "position": "3:5"},
+      {"type": "NAMESPACE", "text": "ns11", "position": "3:6"},
+      {"type": "OPERATOR", "text": ":", "position": "3:10"},
+      {"type": "KEY", "text": "key11", "position": "3:11"},
+      {"type": "OPERATOR", "text": "=", "position": "3:17"},
+      {"type": "INTEGER_LITERAL_10", "text": "11", "position": "3:19"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "3:21"},
+      {"type": "KEY", "text": "ns2", "position": "4:2"},
+      {"type": "OPERATOR", "text": "=", "position": "4:6"},
+      {"type": "BRACKET", "text": "{", "position": "4:8"},
+      {"type": "KEY", "text": "key2", "position": "4:10"},
+      {"type": "OPERATOR", "text": "=", "position": "4:15"},
+      {"type": "INTEGER_LITERAL_10", "text": "2", "position": "4:17"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "4:18"},
+      {"type": "NAMESPACE", "text": "ns22", "position": "4:20"},
+      {"type": "OPERATOR", "text": ":", "position": "4:24"},
+      {"type": "KEY", "text": "key22", "position": "4:25"},
+      {"type": "OPERATOR", "text": "=", "position": "4:31"},
+      {"type": "INTEGER_LITERAL_10", "text": "22", "position": "4:33"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "4:35"},
+      {"type": "BRACKET", "text": "}", "position": "4:37"},
+      {"type": "BRACKET", "text": "}", "position": "5:1"},
+      {"type": "PUNCTUATOR", "text": ";", "position": "5:2"}
+    ],
+    "errors":[]
   }
 
 ]}

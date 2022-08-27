@@ -14,6 +14,7 @@ namespace blogator::configuration::parser::specs {
         AFTER_KEY,
         BEFORE_VALUE,
         VALUE_NAME,
+        VALUE_NAMESPACE,
         VALUE_STRING,
         VALUE_INTEGER_FLOAT,
         VALUE_INTEGER_BASE10,

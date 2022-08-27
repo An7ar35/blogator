@@ -131,6 +131,23 @@
   },
 
   {
+    "description": "space separated namespaced keys",
+    "input": "ns1:key1 ns2:key2  ns3:key3",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key1", "position": "1:5"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "1:10"},
+      {"type": "OPERATOR", "text": ":", "position": "1:13"},
+      {"type": "KEY", "text": "key2", "position": "1:14"},
+      {"type": "NAMESPACE", "text": "ns3", "position": "1:20"},
+      {"type": "OPERATOR", "text": ":", "position": "1:23"},
+      {"type": "KEY", "text": "key3", "position": "1:24"}
+    ],
+    "errors":[]
+  },
+
+  {
     "description": "simple comma separated keys",
     "input": "key1, key2, key3",
     "tokens":[
@@ -144,6 +161,25 @@
   },
 
   {
+    "description": "comma separated namespaced keys",
+    "input": "ns1:key1, ns2:key2, ns3:key3",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key1", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:9"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "1:11"},
+      {"type": "OPERATOR", "text": ":", "position": "1:14"},
+      {"type": "KEY", "text": "key2", "position": "1:15"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:19"},
+      {"type": "NAMESPACE", "text": "ns3", "position": "1:21"},
+      {"type": "OPERATOR", "text": ":", "position": "1:24"},
+      {"type": "KEY", "text": "key3", "position": "1:25"}
+    ],
+    "errors":[]
+  },
+
+  {
     "description": "simple newline separated keys",
     "input": "key1\nkey2\n key3",
     "tokens":[
@@ -152,7 +188,23 @@
       {"type": "KEY", "text": "key3", "position": "3:2"}
     ],
     "errors":[]
-  }
+  },
 
+  {
+    "description": "newline separated namespaced keys",
+    "input": "ns1:key1\nns2:key2\n ns3:key3",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key1", "position": "1:5"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "2:1"},
+      {"type": "OPERATOR", "text": ":", "position": "2:4"},
+      {"type": "KEY", "text": "key2", "position": "2:5"},
+      {"type": "NAMESPACE", "text": "ns3", "position": "3:2"},
+      {"type": "OPERATOR", "text": ":", "position": "3:5"},
+      {"type": "KEY", "text": "key3", "position": "3:6"}
+    ],
+    "errors":[]
+  }
 
 ]}

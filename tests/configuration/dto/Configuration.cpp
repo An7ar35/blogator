@@ -9,11 +9,12 @@ TEST( configuration_Configuration, add_0 ) {
     const auto nsk = Configuration::Key_t( { U"key" } );
 
     cfg.add( nsk, U"value" );
-    auto val = cfg.find( nsk );
+    auto val_store = cfg.find( nsk );
 
     ASSERT_EQ( cfg.size(), 1 );
-    ASSERT_NE( val, nullptr );
-    ASSERT_EQ( val->getString(), U"value" );
+    ASSERT_NE( val_store, nullptr );
+    ASSERT_FALSE( val_store->empty() );
+    ASSERT_EQ( val_store->values().front()->getString(), U"value" );
 }
 
 TEST( configuration_Configuration, add_1 ) {
@@ -21,11 +22,12 @@ TEST( configuration_Configuration, add_1 ) {
     const auto nsk = Configuration::Key_t( { U"ns0", U"ns1", U"key" } );
 
     cfg.add( nsk, true );
-    auto val = cfg.find( nsk );
+    auto val_store = cfg.find( nsk );
 
     ASSERT_EQ( cfg.size(), 1 );
-    ASSERT_NE( val, nullptr );
-    ASSERT_EQ( val->getBool(), true );
+    ASSERT_NE( val_store, nullptr );
+    ASSERT_FALSE( val_store->empty() );
+    ASSERT_EQ( val_store->values().front()->getBool(), true );
 }
 
 TEST( configuration_Configuration, add_2 ) { //2x keys in same namespace
@@ -37,13 +39,15 @@ TEST( configuration_Configuration, add_2 ) { //2x keys in same namespace
     cfg.add( nsk2, double( .654321 ) );
     ASSERT_EQ( cfg.size(), 2 );
 
-    auto val1 = cfg.find( nsk1 );
-    ASSERT_NE( val1, nullptr );
-    ASSERT_EQ( val1->getInt(), 123456 );
+    auto val_store_1 = cfg.find( nsk1 );
+    ASSERT_NE( val_store_1, nullptr );
+    ASSERT_FALSE( val_store_1->empty() );
+    ASSERT_EQ( val_store_1->values().front()->getInt(), 123456 );
 
-    auto val2 = cfg.find( nsk2 );
-    ASSERT_NE( val2, nullptr );
-    ASSERT_EQ( val2->getDouble(), .654321 );
+    auto val_store_2 = cfg.find( nsk2 );
+    ASSERT_NE( val_store_2, nullptr );
+    ASSERT_FALSE( val_store_2->empty() );
+    ASSERT_EQ( val_store_2->values().front()->getDouble(), .654321 );
 }
 
 TEST( configuration_Configuration, add_3 ) { //2x keys in different namespace
@@ -55,15 +59,17 @@ TEST( configuration_Configuration, add_3 ) { //2x keys in different namespace
     cfg.add( nsk2, U"value2", true );
     ASSERT_EQ( cfg.size(), 2 );
 
-    auto val1 = cfg.find( nsk1 );
-    ASSERT_NE( val1, nullptr );
-    ASSERT_EQ( val1->type(), ValueType::STRING );
-    ASSERT_EQ( val1->getString(), U"value1" );
+    auto val_store_1 = cfg.find( nsk1 );
+    ASSERT_NE( val_store_1, nullptr );
+    ASSERT_FALSE( val_store_1->empty() );
+    ASSERT_EQ( val_store_1->values().front()->type(), ValueType::STRING );
+    ASSERT_EQ( val_store_1->values().front()->getString(), U"value1" );
 
-    auto val2 = cfg.find( nsk2 );
-    ASSERT_NE( val2, nullptr );
-    ASSERT_EQ( val2->type(), ValueType::NAME );
-    ASSERT_EQ( val2->getString(), U"value2" );
+    auto val_store_2 = cfg.find( nsk2 );
+    ASSERT_NE( val_store_2, nullptr );
+    ASSERT_FALSE( val_store_2->empty() );
+    ASSERT_EQ( val_store_2->values().front()->type(), ValueType::NAME );
+    ASSERT_EQ( val_store_2->values().front()->getString(), U"value2" );
 }
 
 TEST( configuration_Configuration, remove_0 ) {

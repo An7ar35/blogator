@@ -232,5 +232,95 @@
       {"type": "PUNCTUATOR", "text": ";", "position": "1:23"}
     ],
     "errors":[]
+  },
+
+  {
+    "description": "comment in space separated keys",
+    "input": "key1 /*comment*/ key2",
+    "tokens":[
+      {"type": "KEY", "text": "key1", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment", "position": "1:6"},
+      {"type": "KEY", "text": "key2", "position": "1:18"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment in space separated namespaced keys",
+    "input": "ns1:key1 /*comment*/ ns2:key2",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key1", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment", "position": "1:10"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "1:22"},
+      {"type": "OPERATOR", "text": ":", "position": "1:25"},
+      {"type": "KEY", "text": "key2", "position": "1:26"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment in simple comma separated keys ",
+    "input": "key1/*comment 1*/,/*comment 2*/key2",
+    "tokens":[
+      {"type": "KEY", "text": "key1", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment 1", "position": "1:5"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:18"},
+      {"type": "COMMENT", "text": "comment 2", "position": "1:19"},
+      {"type": "KEY", "text": "key2", "position": "1:32"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment in comma separated namespaced keys",
+    "input": "ns1:key1/*comment 1*/, /*comment 2*/ns2:key2",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key1", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment 1", "position": "1:9"},
+      {"type": "PUNCTUATOR", "text": ",", "position": "1:22"},
+      {"type": "COMMENT", "text": "comment 2", "position": "1:24"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "1:37"},
+      {"type": "OPERATOR", "text": ":", "position": "1:40"},
+      {"type": "KEY", "text": "key2", "position": "1:41"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment in simple newline separated keys",
+    "input": "key1 //comment 1\nkey2/*comment 2*/\n/*comment 3*/ key3",
+    "tokens":[
+      {"type": "KEY", "text": "key1", "position": "1:1"},
+      {"type": "COMMENT", "text": "comment 1", "position": "1:6"},
+      {"type": "KEY", "text": "key2", "position": "2:1"},
+      {"type": "COMMENT", "text": "comment 2", "position": "2:5"},
+      {"type": "COMMENT", "text": "comment 3", "position": "3:1"},
+      {"type": "KEY", "text": "key3", "position": "3:15"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment in newline separated namespaced keys",
+    "input": "ns1:key1//comment 1\nns2:key2/*comment 2*/\n/*comment 3*/ ns3:key3",
+    "tokens":[
+      {"type": "NAMESPACE", "text": "ns1", "position": "1:1"},
+      {"type": "OPERATOR", "text": ":", "position": "1:4"},
+      {"type": "KEY", "text": "key1", "position": "1:5"},
+      {"type": "COMMENT", "text": "comment 1", "position": "1:9"},
+      {"type": "NAMESPACE", "text": "ns2", "position": "2:1"},
+      {"type": "OPERATOR", "text": ":", "position": "2:4"},
+      {"type": "KEY", "text": "key2", "position": "2:5"},
+      {"type": "COMMENT", "text": "comment 2", "position": "2:9"},
+      {"type": "COMMENT", "text": "comment 3", "position": "3:1"},
+      {"type": "NAMESPACE", "text": "ns3", "position": "3:15"},
+      {"type": "OPERATOR", "text": ":", "position": "3:18"},
+      {"type": "KEY", "text": "key3", "position": "3:19"}
+    ],
+    "errors":[]
   }
 ]}

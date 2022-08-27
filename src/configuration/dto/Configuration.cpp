@@ -14,7 +14,7 @@ using namespace blogator::configuration;
 Configuration::Configuration( ConfigurationNode root ) :
     _root( std::move( root ) )
 {
-    _root.suffix.clear(); //root doesn't have a suffix
+    _root.clearSuffix(); //root doesn't have a suffix
 }
 
 /**
@@ -43,7 +43,7 @@ bool Configuration::operator !=( const Configuration &rhs ) const {
  */
 bool Configuration::add( const Configuration::Key_t & ns_key, bool val ) {
     auto [ node, created ] = createNode( ns_key );
-    node.value = std::make_unique<Value>( val );
+    node.addValue( std::make_unique<Value>( val ) );
     return created;
 }
 
@@ -55,7 +55,7 @@ bool Configuration::add( const Configuration::Key_t & ns_key, bool val ) {
  */
 bool Configuration::add( const Configuration::Key_t & ns_key, int64_t val ) {
     auto [ node, created ] = createNode( ns_key );
-    node.value = std::make_unique<Value>( val );
+    node.addValue( std::make_unique<Value>( val ) );
     return created;
 }
 
@@ -67,7 +67,7 @@ bool Configuration::add( const Configuration::Key_t & ns_key, int64_t val ) {
  */
 bool Configuration::add( const Configuration::Key_t & ns_key, double val ) {
     auto [ node, created ] = createNode( ns_key );
-    node.value = std::make_unique<Value>( val );
+    node.addValue( std::make_unique<Value>( val ) );
     return created;
 }
 
@@ -91,18 +91,18 @@ bool Configuration::add( const Configuration::Key_t & ns_key, const char32_t * v
  */
 bool Configuration::add( const Configuration::Key_t & ns_key, const std::u32string & val, bool is_name ) {
     auto [ node, created ] = createNode( ns_key );
-    node.value = std::make_unique<Value>( val, is_name );
+    node.addValue( std::make_unique<Value>( val, is_name ) );
     return created;
 }
 
 /**
  * Find the value for a namespaced key
  * @param ns_key Namespaced key
- * @return Pointer to value associated with key (or nullptr when namespaced key or value does not exist)
+ * @return Pointer to the value store associated with key (or nullptr when namespaced key-value does not exist - i.e. just a plain namespace)
  */
-Value * Configuration::find( const Configuration::Key_t & ns_key ) {
+ValueStore * Configuration::find( const Configuration::Key_t & ns_key ) {
     auto * node = findNode( ns_key );
-    return ( node == nullptr ? nullptr : node->value.get() );
+    return ( node == nullptr ? nullptr : node->value() );
 }
 
 /**
@@ -216,7 +216,7 @@ size_t Configuration::remove( ConfigurationNode * parent, Key_t::const_iterator 
     if( std::next( begin ) == end ) { //i.e.: last
         if( *begin == U"*" ) {
             rm_count = parent->size();
-            parent->value.reset();
+            parent->values.clear();
             parent->children.clear();
 
         } else {
@@ -265,8 +265,9 @@ void Configuration::accumulate( Configuration & cfg, ConfigurationNode * src_par
                 target_parent.children.emplace( k, v );
             }
 
-            if( src_parent->hasValue() ) {
-                target_parent.value = std::make_unique<Value>( *src_parent->value );
+            if( !src_parent->values.empty() ) {
+                target_parent.is_key = src_parent->is_key;
+                target_parent.values = src_parent->values;
             }
 
         } else {
@@ -303,7 +304,7 @@ void Configuration::accumulate( Configuration & cfg, ConfigurationNode * src_par
  * @param out Output stream
  */
 void Configuration::printAll( std::vector<std::string> & prefix, const ConfigurationNode * node, std::ostream & out ) const {
-    if( node->hasValue() ) {
+    if( !node->values.empty() ) {
         out << ":";
 
         for( const auto &p: prefix ) {
