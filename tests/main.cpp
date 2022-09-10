@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
     blogator::logger::Logger::addOutput(
-        blogator::logger::LogLevel::ERROR,
+        blogator::logger::LogLevel::WARNING,
         blogator::logger::formatter::LogFormatterType::DEFAULT_PRINT_COLOUR,
         blogator::logger::output::LogOutputType::TERMINAL,
         "std colour terminal"
