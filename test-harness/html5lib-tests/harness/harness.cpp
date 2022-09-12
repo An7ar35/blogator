@@ -187,26 +187,6 @@ std::ostream & test_harness::html5lib_tests::jsonifyHtml5Tokens( std::ostream &o
 }
 
 /**
- * JSON-ify a collection of Markdown tokens into a stream
- * @param os Output stream
- * @param tokens Tokens
- * @return Output stream
- */
-std::ostream &test_harness::html5lib_tests::jsonifyMarkdownTokens( std::ostream &os, const std::vector<std::unique_ptr<blogator::parser::token::markdown::MarkdownTk>> &tokens ) {
-    os << "[";
-
-    for( auto it = tokens.cbegin(); it != tokens.cend(); ++ it ) {
-        os << *( *it );
-        if( std::next( it ) != tokens.cend() ) {
-            os << ", ";
-        }
-    }
-
-    os << "]";
-    return os;
-}
-
-/**
  * JSON-ify a collection of error objects into a stream
  * @param os Output stream
  * @param err Error objects
@@ -228,15 +208,6 @@ std::ostream & test_harness::html5lib_tests::jsonifyErrorObjects( std::ostream &
 
     os << "]";
     return os;
-}
-
-/**
- * Formats error object into string
- * @param err ErrorObject
- * @return Formatted string
- */
-std::string test_harness::html5lib_tests::formatErrorObject( const blogator::reporter::ReporterObject &err ) { //TODO
-    return std::string();
 }
 
 std::u32string test_harness::html5lib_tests::unescape( const std::u32string &str ) {

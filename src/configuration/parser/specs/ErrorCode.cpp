@@ -53,12 +53,69 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
         };
         arr[ ErrorCode::ASYMMETRIC_VALUE_NESTING ] = {
             "asymmetric value nesting",
-            R"(This error occurs when the number of curly brackets opened does not match their closing.)"
+            R"(This error occurs when the number of curly brackets opened does not match the number closed (opened: +1, closed: -1).)"
         };
         arr[ ErrorCode::EOF_IN_VALUE ] = {
             "EOF in value",
             R"(This error occurs when EOF is encountered without a semi-colon terminator on a key-value declaration.)"
         };
+        arr[ ErrorCode::UNSPECIFIED_KEY ] = {
+            "unspecified key",+
+            R"(This error occurs when no key has been given.)"
+        };
+        arr[ ErrorCode::ROOT_IN_SCOPED_KEY ] = {
+            "root in scoped key",
+            R"(This error occurs when a root key (i.e.: with a ':' prefix) is declared inside a scoped namespace.)"
+        };
+        arr[ ErrorCode::INVALID_CONFIG_FORMAT ] = {
+            "invalid configuration format",
+            R"(This error occurs when the configuration format is incorrect (generic error).)"
+        };
+        arr[ ErrorCode::INVALID_NAMESPACE_FORMAT ] = {
+            "invalid namespace format",
+            R"(This error occurs when the format of a namespace is incorrect.)"
+        };
+        arr[ ErrorCode::INVALID_KEY_FORMAT ] = {
+            "invalid key format",
+            R"(This error occurs when the format of a key or value name is incorrect.)"
+        };
+        arr[ ErrorCode::INVALID_VALUE_FORMAT ] = {
+            "invalid value format",
+            R"(This error occurs when the format of a value is incorrect.)"
+        };
+        arr[ ErrorCode::UNRESOLVED_NAMED_VALUE ] = {
+            "unresolved named value",
+            R"(This error occurs when a cached named value could not be resolved to an existing namespaced key.)"
+        };
+        arr[ ErrorCode::MISSING_TERMINATOR ] = {
+            "missing terminator",
+            R"(This error occurs when a key-value is missing its ';' terminator at the end.)"
+        };
+        arr[ ErrorCode::MISSING_LIST_DECLARATION ] = {
+            "missing list declaration",
+            R"(This error occurs when a list is detected but the list declaration ("[...]") is missing.)"
+        };
+        arr[ ErrorCode::MISSING_LIST_SEPARATOR ] = {
+            "missing list separator",
+            R"(This error occurs when a sequence of values in a list is missing comma separator(s) between.)"
+        };
+        arr[ ErrorCode::UNCLOSED_BRACKET ] = {
+            "unclosed bracket",
+            R"(This error occurs when a bracket was opened but not closed.)"
+        };
+        arr[ ErrorCode::UNOPENED_BRACKET ] = {
+            "unopened bracket",
+            R"(This error occurs when a bracket is being closed without an opened matching.)"
+        };
+        arr[ ErrorCode::VALUE_OVERRIDE ] = {
+            "value override",
+            R"(This error occurs when a already existing key with a atomic value is being overridden.)"
+        };
+        arr[ ErrorCode::ABRUPT_EOF ] = {
+            "EOF in key",
+            R"(This error occurs when EOF is encountered before the current KV and any opened scopes conclude.)"
+        };
+
         return std::move( arr );
 
     } catch( ... ) {

@@ -1,0 +1,61 @@
+{ "tests": [
+
+  {
+    "description": "simple array",
+    "input": "key = [ 0, 1, 2 ];",
+    "entries":[
+      {"key": ":key", "value": [ 0, 1, 2 ]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "nested array",
+    "input": "key = [ [ 0, 1, 2 ] ];",
+    "entries":[
+      {"key": ":key", "value": [ [ 0, 1, 2 ] ]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "multiple nested arrays",
+    "input": "key = [ [ 0 ], [ 1 ], [ 2 ] ];",
+    "entries":[
+      {"key": ":key", "value": [ [ 0 ], [ 1 ], [ 2 ] ]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "multiple nested arrays of various depth",
+    "input": "key = [ 0, [ 0 ], 1, [ [ 1 ] ], 2, [ [ [ 2 ] ] ], 0 ];",
+    "entries":[
+      {"key": ":key", "value": [ 0, [ 0 ], 1, [ [ 1 ] ], 2, [ [ [ 2 ] ] ], 0 ]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "multiple nested arrays with various value types (unresolved)",
+    "input": "key = [ \"string\", [ 1, 0.123 ], [ [ key1, key2 ], [ [ false, true ] ] ] ];",
+    "entries":[
+      {"key": ":key", "value": [ "string", [ 1, 0.123 ], [ [ ":key1", ":key2" ], [ [ false, true ] ] ] ]}
+    ],
+    "errors":[
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key1 }", "line": 1, "col": 7},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key2 }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "multiple nested arrays with various value types (resolved)",
+    "input": "key1 = [];\nkey2 = [ \"a\", \"b\", \"c\" ];\nkey3 = [ \"string\", [ 1, 0.123 ], [ [ key1, key2 ], [ [ false, true ] ] ] ];",
+    "entries":[
+      {"key": ":key1", "value": []},
+      {"key": ":key2", "value": [ "a", "b", "c"]},
+      {"key": ":key3", "value": [ "string", [ 1, 0.123 ], [ [ [], [ "a", "b", "c" ] ], [ [ false, true ] ] ] ]}
+    ],
+    "errors":[]
+  }
+]}

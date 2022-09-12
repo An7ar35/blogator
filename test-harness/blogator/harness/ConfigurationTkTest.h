@@ -11,6 +11,14 @@
 namespace test_harness::blogator {
     typedef nlohmann::json TokenDescription_t;
 
+    /**
+     * Configuration token test object
+     * @param src Source file of test
+     * @param description Description of test
+     * @param input Raw text input
+     * @param tokens Collection of expected tokens
+     * @param errors Collection of expected errors
+     */
     struct ConfigurationTkTest {
         typedef std::vector<TokenDescription_t> Tokens_t;
         typedef std::vector<ErrorDescription>   Errors_t;

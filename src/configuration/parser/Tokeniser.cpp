@@ -62,13 +62,20 @@ void Tokeniser::parse( blogator::U32Text & text ) {
 
                 if( text.reachedEnd() ) {
                     setState( State_e::END_OF_FILE );
-                } else if( _nesting > 0 && character == unicode::RIGHT_CURLY_BRACKET ) {
+                } else if( character == unicode::RIGHT_CURLY_BRACKET ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
-                    setState( consumeReturnState() );
-                    --_nesting;
-                } else if( _nesting > 0 && character == unicode::LEFT_CURLY_BRACKET ) {
+
+                    if( --_nesting > 0 ) {
+                        setState( consumeReturnState() );
+                    }
+
+                } else if( character == unicode::LEFT_CURLY_BRACKET ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
                     ++_nesting;
+                } else if( character == unicode::LEFT_PARENTHESIS || character == unicode::RIGHT_PARENTHESIS ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
+                } else if( unicode::ascii::isPunctuator( character ) ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::PUNCTUATOR, character, text.position() ) );
                 } else if( character == unicode::SOLIDUS ) {
                     appendToPendingBuffer( character );
                     pushReturnState( State_e::INITIAL );
@@ -78,8 +85,12 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 {
                     appendToPendingBuffer( character );
                     setState( State_e::KEY );
+                } else if( character == unicode::EQUALS_SIGN ) {
+                    reconsume( State_e::AFTER_KEY );
                 } else if( unicode::ascii::isOperator( character ) ) {
-                    logError( text.position(), ErrorCode::INVALID_CHARACTER_IN_KEY, character );
+                    if( character != unicode::COLON ) {
+                        logError( text.position(), ErrorCode::INVALID_CHARACTER_IN_KEY, character );
+                    }
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, character, text.position() ) );
                 } else if( unicode::ascii::isPunctuator( character ) ) {
                     logError( text.position(), ErrorCode::INVALID_CHARACTER_IN_KEY, character );
@@ -98,9 +109,10 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 if( text.reachedEnd() ) {
                     dispatchPendingBufferAsToken( Type_e::KEY );
                     reconsume( State_e::END_OF_FILE );
-                } else if( unicode::ascii::isfeed( character ) ||
-                           character == unicode::SPACE         ||
-                           character == unicode::TAB           ||
+                } else if( unicode::ascii::isfeed( character )    ||
+                           unicode::ascii::isBracket( character ) ||
+                           character == unicode::SPACE            ||
+                           character == unicode::TAB              ||
                            character == unicode::EQUALS_SIGN )
                 {
                     dispatchPendingBufferAsToken( Type_e::KEY );
@@ -163,6 +175,8 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                     appendToPendingBuffer( character );
                     pushReturnState( State_e::INITIAL );
                     setState( State_e::COMMENT_SOLIDUS );
+                } else if( unicode::ascii::isBracket( character ) ) {
+                    dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
                 } else if( character != unicode::SPACE && character != unicode::TAB ) {
                     reconsume( State_e::INITIAL );
                 } //else: ignore space and tab characters
@@ -178,7 +192,7 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                     setState( State_e::COMMENT_SOLIDUS );
                 } else if( character == unicode::LEFT_CURLY_BRACKET ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
-                    pushReturnState( State_e::BEFORE_VALUE );
+                    pushReturnState( State_e::AFTER_VALUE );
                     setState( State_e::INITIAL );
                     ++_nesting;
                 } else if( character == unicode::RIGHT_CURLY_BRACKET ) {
@@ -187,7 +201,15 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 } else if( character == unicode::LEFT_PARENTHESIS || character == unicode::RIGHT_PARENTHESIS ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, character, text.position() ) );
                 } else if( unicode::ascii::isOperator( character ) ) {
-                    dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, character, text.position() ) );
+                    const auto [next_char, end] = text.character( 1 );
+
+                    if( character == unicode::HYPHEN_MINUS && !end && unicode::ascii::isdigit( next_char ) ) { //"-[0-9]"
+                        resetPendingBuffer( text.position() );
+                        appendToPendingBuffer( character );
+                        setState( State_e::VALUE_INTEGER_BASE10 );
+                    } else {
+                        dispatchToken( std::make_unique<ConfigTk>( Type_e::OPERATOR, character, text.position() ) );
+                    }
                 } else if( character == unicode::COMMA ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::PUNCTUATOR, character, text.position() ) );
                 } else if( character == unicode::SEMICOLON ) {
@@ -377,12 +399,17 @@ void Tokeniser::parse( blogator::U32Text & text ) {
                 } else if( character == unicode::SEMICOLON ) {
                     dispatchToken( std::make_unique<ConfigTk>( Type_e::PUNCTUATOR, character, text.position() ) );
                     setState( State_e::INITIAL );
+                } else if( character == unicode::COMMA             ||
+                           unicode::ascii::isOperator( character ) ||
+                           unicode::ascii::isBracket( character ) )
+                {
+                    resetPendingBuffer( text.position() );
+                    reconsume( State_e::BEFORE_VALUE );
                 } else if( !unicode::ascii::isfeed( character ) &&
                            character != unicode::SPACE          &&
                            character != unicode::TAB )
                 {
-                    resetPendingBuffer( text.position() );
-                    reconsume( State_e::BEFORE_VALUE );
+                    reconsume( State_e::INITIAL );
                 } //else: ignore whitespace
             } break;
 
@@ -634,7 +661,11 @@ void Tokeniser::flushPendingBufferCharactersToDispatch() {
     auto position = _pending.position;
 
     for( const auto c : _pending.buffer ) {
-        dispatchToken( std::make_unique<ConfigTk>( Type_e::CHARACTER, std::u32string( 1, c ), position ) );
+        if( unicode::ascii::isBracket( c ) ) {
+            dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, c, position ) );
+        } else {
+            dispatchToken( std::make_unique<ConfigTk>( Type_e::CHARACTER, std::u32string( 1, c ), position ) );
+        }
 
         if( unicode::ascii::isfeed( c ) ) {
             position = { position.line + 1, 1 };
@@ -647,11 +678,13 @@ void Tokeniser::flushPendingBufferCharactersToDispatch() {
 }
 
 /**
- * Sends the content of the buffer as a single token to the parser
+ * Sends the content of the buffer as a single token to the parser if it has any characters inside of it
  * @param tk_type TokenType enum
  */
 inline void Tokeniser::dispatchPendingBufferAsToken( Tokeniser::Type_e tk_type ) {
-    dispatchToken( std::make_unique<ConfigTk>( tk_type, pendingBufferToStr(), pendingBufferPosition() ) );
+    if( !_pending.buffer.empty() ) {
+        dispatchToken( std::make_unique<ConfigTk>( tk_type, pendingBufferToStr(), pendingBufferPosition() ) );
+    }
 }
 
 /**

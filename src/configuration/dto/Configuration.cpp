@@ -2,8 +2,12 @@
 
 #include <stack>
 #include <vector>
+#include <stdexcept>
 
+#include "../../unicode/ascii.h"
 #include "../../unicode/utf8.h"
+#include "../../string/helpers.h"
+#include "../../logger/Logger.h"
 
 using namespace blogator::configuration;
 
@@ -38,71 +42,107 @@ bool Configuration::operator !=( const Configuration &rhs ) const {
 /**
  * Adds a namespaced key-value pair
  * @param ns_key Namespaced key
- * @param val Value
- * @return Key-value insertion state
+ * @param value Value object to set the value as
+ * @return Reference to the inserted value
  */
-bool Configuration::add( const Configuration::Key_t & ns_key, bool val ) {
+Value & Configuration::add( const Configuration::Key_t &ns_key, Value && value ) { //TODO unit test
     auto [ node, created ] = createNode( ns_key );
-    node.addValue( std::make_unique<Value>( val ) );
-    return created;
+    return node.setValue( std::move( value ) );
+}
+
+/**
+ * Adds a namespaced key-value pair with no value set
+ * @param ns_key Namespaced key
+ * @param flags Value flags indicating property of the value added (default: 0x00)
+ * @return Reference to the inserted value
+ */
+Value & Configuration::add( const Configuration::Key_t & ns_key, Flags_t flags ) {
+    auto [ node, created ] = createNode( ns_key );
+
+    return ( ( flags & APPEND_VALUE_FLAG ) || ( node.isKey() && node.value.type() == Value::Type_e::ARRAY )
+             ? node.appendValue( Value( flags ) )
+             : node.setValue( Value( flags ) ) );
 }
 
 /**
  * Adds a namespaced key-value pair
  * @param ns_key Namespaced key
  * @param val Value
- * @return Key-value insertion state
+ * @param flags Value flags indicating property of the value added (default: 0x00)
+ * @return Reference to the inserted value
  */
-bool Configuration::add( const Configuration::Key_t & ns_key, int64_t val ) {
+Value & Configuration::add( const Configuration::Key_t & ns_key, bool val, Flags_t flags ) {
     auto [ node, created ] = createNode( ns_key );
-    node.addValue( std::make_unique<Value>( val ) );
-    return created;
+
+    return ( ( flags & APPEND_VALUE_FLAG ) || ( node.isKey() && node.value.type() == Value::Type_e::ARRAY )
+             ? node.appendValue( Value( val, flags ) )
+             : node.setValue( Value( val, flags ) ) );
 }
 
 /**
  * Adds a namespaced key-value pair
  * @param ns_key Namespaced key
  * @param val Value
- * @return Key-value insertion state
+ * @param flags Value flags indicating property of the value added (default: 0x00)
+ * @return Reference to the inserted value
  */
-bool Configuration::add( const Configuration::Key_t & ns_key, double val ) {
+Value & Configuration::add( const Configuration::Key_t & ns_key, int64_t val, Flags_t flags ) {
     auto [ node, created ] = createNode( ns_key );
-    node.addValue( std::make_unique<Value>( val ) );
-    return created;
+
+    return ( ( flags & APPEND_VALUE_FLAG ) || ( node.isKey() && node.value.type() == Value::Type_e::ARRAY )
+             ? node.appendValue( Value( val, flags ) )
+             : node.setValue( Value( val, flags ) ) );
 }
 
 /**
  * Adds a namespaced key-value pair
  * @param ns_key Namespaced key
  * @param val Value
- * @param is_name Flag to signal that the string is a named reference
- * @return Key-value insertion state
+ * @param flags Value flags indicating property of the value added (default: 0x00)
+ * @return Reference to the inserted value
  */
-bool Configuration::add( const Configuration::Key_t & ns_key, const char32_t * val, bool is_name ) {
-    return add( ns_key, std::u32string( val ), is_name );
+Value & Configuration::add( const Configuration::Key_t & ns_key, double val, Flags_t flags ) {
+    auto [ node, created ] = createNode( ns_key );
+
+    return ( ( flags & APPEND_VALUE_FLAG ) || ( node.isKey() && node.value.type() == Value::Type_e::ARRAY )
+             ? node.appendValue( Value( val, flags ) )
+             : node.setValue( Value( val, flags ) ) );
 }
 
 /**
  * Adds a namespaced key-value pair
  * @param ns_key Namespaced key
  * @param val Value
- * @param is_name Flag to signal that the string is a named reference
- * @return Key-value insertion state
+ * @param flags Value flags indicating property of the value added (default: 0x00)
+ * @return Reference to the inserted value
  */
-bool Configuration::add( const Configuration::Key_t & ns_key, const std::u32string & val, bool is_name ) {
+Value & Configuration::add( const Configuration::Key_t & ns_key, const char32_t * val, Flags_t flags ) {
+    return add( ns_key, std::u32string( val ), flags );
+}
+
+/**
+ * Adds a namespaced key-value pair
+ * @param ns_key Namespaced key
+ * @param val Value
+ * @param flags Value flags indicating property of the value added (default: 0x00)
+ * @return Reference to the inserted value
+ */
+Value & Configuration::add( const Configuration::Key_t & ns_key, const std::u32string & val, Flags_t flags ) {
     auto [ node, created ] = createNode( ns_key );
-    node.addValue( std::make_unique<Value>( val, is_name ) );
-    return created;
+
+    return ( ( flags & APPEND_VALUE_FLAG ) || ( node.isKey() && node.value.type() == Value::Type_e::ARRAY )
+             ? node.appendValue( Value( val, flags ) )
+             : node.setValue( Value( val, flags ) ) );
 }
 
 /**
  * Find the value for a namespaced key
  * @param ns_key Namespaced key
- * @return Pointer to the value store associated with key (or nullptr when namespaced key-value does not exist - i.e. just a plain namespace)
+ * @return Pointer to the value associated with key (or nullptr when namespaced key-value does not exist - i.e. just a plain namespace)
  */
-ValueStore * Configuration::find( const Configuration::Key_t & ns_key ) {
+Value * Configuration::find( const Configuration::Key_t & ns_key ) {
     auto * node = findNode( ns_key );
-    return ( node == nullptr ? nullptr : node->value() );
+    return ( node != nullptr && node->isKey() ? &node->getValue() : nullptr );
 }
 
 /**
@@ -136,6 +176,28 @@ Configuration Configuration::copy( const Configuration::Key_t & ns ) {
 }
 
 /**
+ * Checks if namespaced key with a value already exists
+ * @param ns_key Namespaced key
+ * @return Key-Value existence state
+ */
+bool Configuration::exists( const Configuration::Key_t & ns_key ) const {
+    auto * node = const_cast<Configuration *>( this )->findNode( ns_key );
+    return ( node != nullptr && node->isKey() );
+}
+
+/**
+ * Prints key-value pairs to a container
+ * @param quoted_types Set of Value types whose value are to be double quoted (default: none)
+ * @return Collection of UTF-8 encoded Key-Value pairs
+ */
+std::vector<std::pair<std::string, std::string>> Configuration::printToCollection( const std::set<Value::Type_e> & quoted_types ) const {
+    auto suffix     = std::vector<std::string>();
+    auto collection = std::vector<std::pair<std::string, std::string>>();
+    this->printAll( suffix, &_root, collection, quoted_types );
+    return std::move( collection );
+}
+
+/**
  * Gets the number of keys in the configuration
  * @return Key count
  */
@@ -156,7 +218,7 @@ bool Configuration::empty() const {
  * @param key Namespaced key
  * @return Key node and insertion state in a pair
  */
-std::pair<ConfigurationNode &, bool> Configuration::createNode( const Configuration::Key_t &key ) {
+std::pair<ConfigurationNode &, bool> Configuration::createNode( const Configuration::Key_t & key ) {
     if( key.empty() ) {
         return { _root, false };
     }
@@ -216,7 +278,7 @@ size_t Configuration::remove( ConfigurationNode * parent, Key_t::const_iterator 
     if( std::next( begin ) == end ) { //i.e.: last
         if( *begin == U"*" ) {
             rm_count = parent->size();
-            parent->values.clear();
+            parent->value = Value();
             parent->children.clear();
 
         } else {
@@ -245,7 +307,7 @@ size_t Configuration::remove( ConfigurationNode * parent, Key_t::const_iterator 
 }
 
 /**
- * Recursively accumulate keys and namespaces into a Configuration object
+ * [PRIVATE] Recursively accumulate keys and namespaces into a Configuration object
  * @param cfg Target Configuration object
  * @param src_parent Source root of subtree
  * @param root_ns Source root namespace prefix
@@ -265,10 +327,8 @@ void Configuration::accumulate( Configuration & cfg, ConfigurationNode * src_par
                 target_parent.children.emplace( k, v );
             }
 
-            if( !src_parent->values.empty() ) {
-                target_parent.is_key = src_parent->is_key;
-                target_parent.values = src_parent->values;
-            }
+            target_parent.is_key = src_parent->is_key;
+            target_parent.value  = src_parent->value;
 
         } else {
             auto it = src_parent->children.find( *begin );
@@ -298,16 +358,16 @@ void Configuration::accumulate( Configuration & cfg, ConfigurationNode * src_par
 }
 
 /**
- * Prints all nodes in the subtree
+ * [PRIVATE] Prints all nodes in the subtree
  * @param prefix Prefix(es) of subtree
  * @param node Root node of subtree
  * @param out Output stream
  */
 void Configuration::printAll( std::vector<std::string> & prefix, const ConfigurationNode * node, std::ostream & out ) const {
-    if( !node->values.empty() ) {
+    if( node->value.type() != Value::Type_e::VOID ) {
         out << ":";
 
-        for( const auto &p: prefix ) {
+        for( const auto & p: prefix ) {
             out << p << ":";
         }
 
@@ -330,6 +390,131 @@ void Configuration::printAll( std::vector<std::string> & prefix, const Configura
 }
 
 /**
+ * [PRIVATE] Prints all nodes in the subtree to a collection of Key-Value pairs
+ * @param prefix Prefix(es) of subtree
+ * @param node Root node of subtree
+ * @param out Output KV collection
+ * @param quoted_types Set of Value types whose value are to be double quoted (default: none)
+ */
+void Configuration::printAll( std::vector<std::string> & prefix, const ConfigurationNode * node, std::vector<std::pair<std::string, std::string>> & out, const std::set<Value::Type_e> & quoted_types ) const {
+    if( node->isKey() ) {
+        std::stringstream k_ss;
+        std::stringstream v_ss;
+
+        k_ss << ":";
+
+        for( const auto & p: prefix ) {
+            k_ss << p << ":";
+        }
+
+        k_ss << blogator::unicode::utf8::convert( node->suffix );
+
+        Value::print( v_ss, node->value, quoted_types );
+
+        out.emplace_back( std::make_pair( k_ss.str(), v_ss.str() ) );
+    }
+
+    if( !node->isLeaf() ) {
+        if( node != &_root ) { //<- deals with 'root' edge case
+            prefix.emplace_back( blogator::unicode::utf8::convert( node->suffix ) );
+        }
+
+        for( const auto & [k, v] : node->children ) {
+            printAll( prefix, &v, out, quoted_types );
+        }
+
+        if( node != &_root ) {
+            prefix.pop_back();
+        }
+    }
+}
+
+
+/**
+ * Converts a namespace key formatted string into a namespace key structure (e.g.: "ns:key" -> ["ns"]["key"])
+ * @param ns_key Namespaced key string
+ * @return Configuration Key
+ * @throws std::invalid_argument when the namespaced key string is invalid
+ */
+Configuration::Key_t Configuration::convert( std::u32string ns_key ) {
+    for( auto & c : ns_key ) {
+        if( unicode::ascii::isupper( c ) ) {
+            c = unicode::ascii::tolower( c );
+        }
+    }
+
+    auto nsk_struct = string::split<char32_t>( ns_key, U':', true );
+
+    if( !Configuration::validate( nsk_struct ) ) {
+        LOG_ERROR(
+            "[configuration::Configuration::convert( \"", unicode::utf8::convert( ns_key ), "\" )] "
+            "Invalid namespaced key format"
+        );
+
+        throw std::invalid_argument( "invalid char in namespaced key string" );
+    }
+
+    return std::move( nsk_struct );
+}
+
+/**
+ * Converts a namespace key structure into a formatted namespaced key string (e.g.: ["ns"]["key"] -> "ns:key")
+ * @param ns_key Namespaced key structure (unchecked)
+ * @return Namespace key string
+ */
+std::u32string Configuration::convert( const Configuration::Key_t &ns_key ) {
+    auto str = std::u32string();
+
+    str.append( 1, U':' );
+
+    for( size_t i = 0; i < ns_key.size(); ++i ) {
+        str.append( ns_key.at( i ) );
+
+        if( i != ( ns_key.size() - 1 ) ) {
+            str.append( 1, U':' );
+        }
+    }
+
+    return std::move( str );
+}
+
+/**
+ * Checks string is formatted correctly to be a namespace or key part
+ * @param str String to check
+ * @return Validation state
+ */
+bool Configuration::validate( const std::u32string &str ) {
+    auto it = str.cbegin();
+
+    if( it != str.cend() && *it == unicode::UNDERSCORE ) {
+        while( it != str.cend() && *(it++) == unicode::UNDERSCORE );
+    }
+
+    if( it != str.cend() && unicode::ascii::islower( *it ) ) {
+        while( it++ != str.cend() && ( unicode::ascii::islower( *it ) || unicode::ascii::isdigit( *it ) || *it == unicode::UNDERSCORE ) );
+
+        return ( it == str.cend() ); //EARLY RETURN
+    }
+
+    return false;
+}
+
+/**
+ * Checks namespaced key parts are correctly formatted
+ * @param ns_key Namespaced key
+ * @return Validation state
+ */
+bool Configuration::validate( const Configuration::Key_t &ns_key ) {
+    for( const auto & part : ns_key ) {
+        if( !Configuration::validate( part ) ) {
+            return false; //EARLY RETURN
+        }
+    }
+
+    return true;
+}
+
+/**
  * Output stream operator
  * @param os Output stream
  * @param cfg Configuration object to print
@@ -339,4 +524,46 @@ std::ostream & blogator::configuration::operator <<( std::ostream &os, const Con
     auto suffix = std::vector<std::string>();
     cfg.printAll( suffix, &cfg._root, os );
     return os;
+}
+
+/**
+ * Output stream operator
+ * @param os Output stream
+ * @param key Configuration::Key_t object
+ * @return Output stream
+ */
+std::ostream & blogator::configuration::operator <<( std::ostream &os, const Configuration::Key_t & key ) {
+    os << ":";
+
+    for( size_t i = 0; i < key.size(); ++i ) {
+        os << unicode::utf8::convert( key.at( i ) );
+
+        if( i < ( key.size() - 1 ) ) {
+            os << ":";
+        }
+    }
+
+    return os;
+}
+
+/**
+ * Converts a configuration::Configuration object to a string representation
+ * @param type Configuration object
+ * @return String representation
+ */
+std::string blogator::to_string( const Configuration &cfg ) {
+    std::stringstream ss;
+    ss << cfg;
+    return ss.str();
+}
+
+/**
+ * Converts a configuration::Configuration::Key_t object to a string representation
+ * @param type Configuration::Key_t object
+ * @return String representation
+ */
+std::string blogator::to_string( const Configuration::Key_t &key ) {
+    std::stringstream ss;
+    ss << key;
+    return ss.str();
 }

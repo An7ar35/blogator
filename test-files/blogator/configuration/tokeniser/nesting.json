@@ -12,7 +12,6 @@
       {"type": "PUNCTUATOR", "text": ";", "position": "1:9"}
     ],
     "errors":[
-      {"description": "invalid character in key: ';'", "line": 1, "col": 9},
       {"description": "asymmetric value nesting: 2", "line": 1, "col": 10}
     ]
   },

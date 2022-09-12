@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <ostream>
 
+#include "utf8.h"
+
 using namespace blogator::unicode;
 
 constexpr char32_t UTF16_LEAD_OFFSET = ( 0xD800 - ( 0x10000 >> 10 ) ); //0xD7FF
@@ -271,4 +273,40 @@ std::u32string utf32::toxunicode( char32_t val, const std::u32string &prefix ) {
     );
 
     return { out_buffer.begin(), out_buffer.end() };
+}
+
+/**
+ * Converts a number in a UTF-32 formatted string to a signed long
+ * @param str String representing a number
+ * @param base Base (default=10)
+ * @return Converted number
+ * @throws std::invalid_argument when conversion fails
+ */
+int64_t utf32::toLong( const std::u32string &str, int base ) {
+    std::string            u8str  = unicode::utf8::convert( str );
+    std::string::size_type i      = 0;
+    int64_t                result = std::stol( u8str, &i, base );
+
+    if( i < str.size() ) {
+        throw std::invalid_argument(
+            "[blogator::string::toLong( \"" + u8str + "\", " + std::to_string( base ) + " )] "
+            "String is not a valid number for the base given."
+        );
+    }
+
+    return result;
+}
+
+/**
+ * Converts a floating number in a UTF-32 formatted string to a double
+ * @param str String representing a float
+ * @return Converted number
+ * @throws std::invalid_argument when conversion fail or in cases of overflow/underflow
+ */
+double utf32::toDouble( const std::u32string &str ) {
+    try {
+        return std::stod( unicode::utf8::convert( str ) );
+    } catch( const std::out_of_range &e ) {
+        throw std::invalid_argument( e.what() );
+    }
 }

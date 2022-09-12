@@ -8,11 +8,13 @@ namespace blogator::configuration {
      * Configuration value type in key-value pairs
      */
     enum class ValueType {
-        NAME = 0,
+        VOID = 0,
+        NAME,
         BOOLEAN,
         INTEGER,
         FLOAT,
         STRING,
+        ARRAY,
     };
 
     std::ostream & operator <<( std::ostream & os, ValueType type );

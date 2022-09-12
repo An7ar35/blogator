@@ -36,6 +36,8 @@ namespace blogator {
         [[nodiscard]] size_t size() const;
         [[nodiscard]] size_t available() const;
 
+        static bool active( ObjectPool<T> * pool_ptr );
+
       private:
         static std::mutex                _global_mutex;
         static std::set<ObjectPool<T> *> _global_pools;
@@ -64,7 +66,7 @@ namespace blogator {
         std::reference_wrapper<ObjectPool<T>> _pool;
     };
 
-    template<typename U> std::ostream & operator <<( std::ostream &out, const ObjectPool<U> &pool );
+    template<typename U> std::ostream & operator <<( std::ostream &os, const ObjectPool<U> &pool );
 }
 
 /**
@@ -171,6 +173,17 @@ template<class T> size_t blogator::ObjectPool<T>::size() const {
 template<class T> size_t blogator::ObjectPool<T>::available() const {
     std::lock_guard<std::mutex> guard( _mutex );
     return _pool.size();
+}
+
+/**
+ * Checks ObjectPool is still active
+ * @tparam T ObjectPool Type
+ * @param pool_ptr Pointer to ObjectPool (only pointer value will be used)
+ * @return Active state
+ */
+template<typename T> bool blogator::ObjectPool<T>::active( blogator::ObjectPool<T> * pool_ptr ) {
+    std::lock_guard<std::mutex> guard( ObjectPool<T>::_global_mutex );
+    return ObjectPool<T>::_global_pools.contains( pool_ptr );
 }
 
 /**

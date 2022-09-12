@@ -12,6 +12,7 @@ namespace blogator::configuration::parser::specs {
             NONE    = 0,
             UNKNOWN = 1,
 
+            /* Tokeniser */
             SYNTAX_ERROR,
             INVALID_NAMESPACE_SEPARATOR,
             INVALID_CHARACTER_IN_KEY,
@@ -20,6 +21,22 @@ namespace blogator::configuration::parser::specs {
             EOF_IN_STRING_LITERAL,
             EOF_IN_VALUE,
             ASYMMETRIC_VALUE_NESTING,
+
+            /* Parser */
+            UNSPECIFIED_KEY,
+            ROOT_IN_SCOPED_KEY,
+            INVALID_CONFIG_FORMAT,
+            INVALID_NAMESPACE_FORMAT,
+            INVALID_KEY_FORMAT,
+            INVALID_VALUE_FORMAT,
+            UNRESOLVED_NAMED_VALUE,
+            UNCLOSED_BRACKET,
+            UNOPENED_BRACKET,
+            MISSING_TERMINATOR,
+            MISSING_LIST_DECLARATION,
+            MISSING_LIST_SEPARATOR,
+            VALUE_OVERRIDE,
+            ABRUPT_EOF,
 
             ENUM_END
         };

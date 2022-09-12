@@ -8,12 +8,15 @@ namespace blogator::configuration::parser::specs {
     enum class InsertionMode {
         ENUM_BEGIN = 0, //used for iterating enums
 
-        BEFORE_KEY = ENUM_BEGIN,
+        BEFORE_KEYS = ENUM_BEGIN,
+        BEFORE_KEY,
         IN_KEY,
         AFTER_KEY,
+        BEFORE_VALUES,
         BEFORE_VALUE,
-        IN_VALUE,
+        IN_NAMED_VALUE,
         AFTER_VALUE,
+        AFTER_SCOPE,
         END_OF_FILE,
 
         ENUM_END = END_OF_FILE, //used for iterating enums

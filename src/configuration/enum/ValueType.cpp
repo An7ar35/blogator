@@ -10,11 +10,13 @@
  */
 std::ostream & blogator::configuration::operator <<( std::ostream &os, blogator::configuration::ValueType type ) {
     switch( type ) {
+        case ValueType::VOID:    { os << "VOID";                  } break;
         case ValueType::NAME:    { os << "NAME";                  } break;
         case ValueType::BOOLEAN: { os << "BOOLEAN";               } break;
         case ValueType::INTEGER: { os << "INTEGER";               } break;
         case ValueType::FLOAT:   { os << "FLOAT";                 } break;
         case ValueType::STRING:  { os << "STRING";                } break;
+        case ValueType::ARRAY:   { os << "ARRAY";                 } break;
         default:                 { os << "enum string not found"; } break;
     }
 

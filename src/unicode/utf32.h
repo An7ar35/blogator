@@ -32,6 +32,8 @@ namespace blogator::unicode::utf32 {
     size_t toU16BE( char32_t codepoint, std::ostream & out );
 
     std::u32string toxunicode( char32_t val, const std::u32string & prefix = U"\\u" );
+    int64_t toLong( const std::u32string & str, int base = 10 );
+    double toDouble( const std::u32string & str );
 }
 
 #endif //BLOGATOR_UNICODE_UTF32_H

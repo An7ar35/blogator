@@ -221,5 +221,5 @@ TEST_P( configuration_parser_Tokeniser_Tests, tokeniser_tests ) {
 INSTANTIATE_TEST_CASE_P(
     ConfigurationTokeniserTestInstance,
     configuration_parser_Tokeniser_Tests,
-    ::testing::ValuesIn( test_harness::blogator::loadTokeniserTests( test_harness::BLOGATOR_CONFIGURATION_TOKENIZER_TEST_PATH ) )
+    ::testing::ValuesIn( test_harness::blogator::loadConfigTokeniserTests( test_harness::BLOGATOR_CONFIGURATION_TOKENIZER_TEST_PATH ) )
 );

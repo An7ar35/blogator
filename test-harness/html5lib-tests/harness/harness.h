@@ -5,7 +5,6 @@
 
 #include "TreeConstructionTest.h"
 #include "../../src/parser/dom/node/Document.h"
-#include "../../src/parser/token/markdown/MarkdownTk.h"
 #include "../../src/parser/token/html5/HTML5Tk.h"
 #include "../../src/reporter/dto/ReporterObject.h"
 
@@ -17,9 +16,7 @@ namespace test_harness::html5lib_tests {
 
     /* Formatters */
     std::ostream & jsonifyHtml5Tokens( std::ostream & os , const std::vector<std::unique_ptr<blogator::parser::token::html5::HTML5Tk>> & tokens );
-    std::ostream & jsonifyMarkdownTokens( std::ostream & os , const std::vector<std::unique_ptr<blogator::parser::token::markdown::MarkdownTk>> & tokens );
     std::ostream & jsonifyErrorObjects( std::ostream & os, const std::vector<blogator::reporter::ReporterObject> &err );
-    std::string    formatErrorObject( const blogator::reporter::ReporterObject & err );
 
     /* Unicode un-escape */
     std::u32string unescape( const std::u32string & str );

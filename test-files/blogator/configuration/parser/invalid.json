@@ -1,0 +1,219 @@
+{ "tests": [
+
+  {
+    "description": "missing terminator",
+    "input": "key1 = 1\nkey2 = 2",
+    "entries":[
+      {"key": ":key1", "value": 1},
+      {"key": ":key2", "value": 2}
+    ],
+    "errors":[
+      {"description": "missing terminator", "line": 2, "col": 1},
+      {"description": "EOF in value", "line": 2, "col": 9}
+    ]
+  },
+
+  {
+    "description": "missing terminator in scope",
+    "input": "ns = { key = 1 };",
+    "entries":[
+      {"key": ":ns:key", "value": 1}
+    ],
+    "errors":[
+      {"description": "missing terminator", "line": 1, "col": 16}
+    ]
+  },
+
+  {
+    "description": "missing terminator outside scope",
+    "input": "ns1 = { key = 1; }\nns2 = { key = 2; }",
+    "entries":[
+      {"key": ":ns1:key", "value": 1},
+      {"key": ":ns2:key", "value": 2}
+    ],
+    "errors":[
+      {"description": "missing terminator", "line": 2, "col": 1},
+      {"description": "missing terminator", "line": 2, "col": 19}
+    ]
+  },
+
+  {
+    "description": "missing scope terminators",
+    "input": "ns1 = { ns2 = { key = 1 } }",
+    "entries":[
+      {"key": ":ns1:ns2:key", "value": 1}
+    ],
+    "errors":[
+      {"description": "missing terminator", "line": 1, "col": 25},
+      {"description": "missing terminator", "line": 1, "col": 27},
+      {"description": "missing terminator", "line": 1, "col": 28}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '['",
+    "input": "key = 1];",
+    "entries":[
+      {"key": ":key", "value": [1]}
+    ],
+    "errors":[
+      {"description": "unopened bracket: { 'AFTER_VALUE' | 'OPERATOR': \"]\" }", "line": 1, "col": 8}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '[['",
+    "input": "key = 1]];",
+    "entries":[
+      {"key": ":key", "value": [[1]]}
+    ],
+    "errors":[
+      {"description": "unopened bracket: { 'AFTER_VALUE' | 'OPERATOR': \"]\" }", "line": 1, "col": 8},
+      {"description": "unopened bracket: { 'AFTER_VALUE' | 'OPERATOR': \"]\" }", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '('",
+    "input": "key = 1 );",
+    "entries":[
+      {"key": ":key", "value": 1}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'AFTER_VALUE' | 'BRACKET': \")\" }", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '(('",
+    "input": "key = 1));",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'CHARACTER': \"1\" }", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'BRACKET': \")\" }", "line": 1, "col": 8},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'BRACKET': \")\" }", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '{'",
+    "input": "key = 1;};",
+    "entries":[
+      {"key": ":key", "value": 1}
+    ],
+    "errors":[
+      {"description": "unopened bracket: { 'BEFORE_KEYS' | 'BRACKET': \"}\" }", "line": 1, "col": 9},
+      {"description": "invalid configuration format: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10},
+      {"description": "asymmetric value nesting: -1", "line": 1, "col": 11}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '{' without terminator",
+    "input": "key = 1};",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'CHARACTER': \"1\" }", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'BRACKET': \"}\" }", "line": 1, "col": 8}
+    ]
+  },
+
+  {
+    "description": "missing open bracket '{{'",
+    "input": "key = 1;}};",
+    "entries":[
+      {"key": ":key", "value": 1}
+    ],
+    "errors":[
+      {"description": "unopened bracket: { 'BEFORE_KEYS' | 'BRACKET': \"}\" }", "line": 1, "col": 9},
+      {"description": "unopened bracket: { 'BEFORE_KEYS' | 'BRACKET': \"}\" }", "line": 1, "col": 10},
+      {"description": "invalid configuration format: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 11},
+      {"description": "asymmetric value nesting: -2", "line": 1, "col": 12}
+    ]
+  },
+
+  {
+    "description": "missing close bracket ']'",
+    "input": "key = [1;",
+    "entries":[
+      {"key": ":key", "value": [1]}
+    ],
+    "errors":[
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "missing close bracket ']]'",
+    "input": "key = [[1;",
+    "entries":[
+      {"key": ":key", "value": [[1]]}
+    ],
+    "errors":[
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10},
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10}
+    ]
+  },
+
+  {
+    "description": "missing close bracket ')'",
+    "input": "key = (1;",
+    "entries":[
+      {"key": ":key", "value": 1}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'BRACKET': \"(\" }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "missing close bracket '))'",
+    "input": "key = ((1;",
+    "entries":[
+      {"key": ":key", "value": 1}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'BRACKET': \"(\" }", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'BRACKET': \"(\" }", "line": 1, "col": 8}
+    ]
+  },
+
+  {
+    "description": "missing close bracket '}'",
+    "input": "key = {1;",
+    "entries":[
+      {"key": ":key:1", "value": null}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '1'", "line": 1, "col": 8},
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"1\" }", "line": 1, "col": 8},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 9},
+      {"description": "asymmetric value nesting: 1", "line": 1, "col": 10},
+      {"description": "unclosed bracket: { 'END_OF_FILE' | '{' }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "missing close bracket '}}'",
+    "input": "key = {{1;",
+    "entries":[
+      {"key": ":key:1", "value": null}
+    ],
+    "errors":[
+      {"description": "syntax error: { 'BEFORE_KEYS' | 'BRACKET': \"{\" }", "line": 1, "col": 8},
+      {"description": "invalid character in key: '1'", "line": 1, "col": 9},
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"1\" }", "line": 1, "col": 9},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10},
+      {"description": "asymmetric value nesting: 2", "line": 1, "col": 11},
+      {"description": "unclosed bracket: { 'END_OF_FILE' | '{' }", "line": 1, "col": 7},
+      {"description": "unclosed bracket: { 'END_OF_FILE' | '{' }", "line": 1, "col": 8}
+    ]
+  }
+
+]}

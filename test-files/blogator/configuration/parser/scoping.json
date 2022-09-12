@@ -1,0 +1,202 @@
+{ "tests": [
+
+  {
+    "description": "root key",
+    "input": ": = 0;",
+    "entries":[
+      {"key": ":", "value": 0}
+    ],
+    "errors":[
+      {"description":  "unspecified key", "line": 1, "col": 3}
+    ]
+  },
+
+  {
+    "description": "root key overload",
+    "input": ": = 0; : = 1;",
+    "entries":[
+      {"key": ":", "value": 1}
+    ],
+    "errors":[
+      {"description":  "unspecified key", "line": 1, "col": 3},
+      {"description":  "unspecified key", "line": 1, "col": 10},
+      {"description":  "value override: 0 <- 1", "line": 1, "col": 12}
+    ]
+  },
+
+  {
+    "description": "key overload",
+    "input": "key = \"a\"; key = \"b\";",
+    "entries":[
+      {"key": ":key", "value": "b"}
+    ],
+    "errors":[
+      {"description":  "value override: \"a\" <- \"b\"", "line": 1, "col": 18}
+    ]
+  },
+
+  {
+    "description": "key overload (named value)",
+    "input": "ref1 = 1; ref2 = 8; key = ref1; key = ref2;",
+    "entries":[
+      {"key": ":key", "value": 8},
+      {"key": ":ref1", "value": 1},
+      {"key": ":ref2", "value": 8}
+    ],
+    "errors":[
+      {"description":  "value override: 1 <- 8", "line": 1, "col": 39}
+    ]
+  },
+
+  {
+    "description": "named value overload after resolution (re-assignment)",
+    "input": "ref = 1; key = ref; ref = 8;",
+    "entries":[
+      {"key": ":key", "value": 1},
+      {"key": ":ref", "value": 8}
+    ],
+    "errors":[
+      {"description":  "value override: 1 <- 8", "line": 1, "col": 27}
+    ]
+  },
+
+  {
+    "description": "root in scope",
+    "input": ": = { :key=0; };",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description":  "unspecified key", "line": 1, "col": 3}
+    ]
+  },
+
+  {
+    "description": "root in scope",
+    "input": "ns: = { :key=0; };",
+    "entries":[
+      {"key": ":ns:key", "value": 0}
+    ],
+    "errors":[
+      {"description":  "root in scoped key", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "double bracketed root in scope",
+    "input": "ns: = {{ :key=0; }};",
+    "entries":[
+      {"key": ":ns:key", "value": 0}
+    ],
+    "errors":[
+      {"description": "syntax error: { 'BEFORE_KEYS' | 'BRACKET': \"{\" }", "line": 1, "col": 8},
+      {"description":  "root in scoped key", "line": 1, "col": 10},
+      {"description": "missing terminator", "line": 1, "col": 19}
+    ]
+  },
+
+  {
+    "description": "scoped key",
+    "input": "ns: = { key=0; };",
+    "entries":[
+      {"key": ":ns:key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "double bracketed scoped key",
+    "input": "ns: = {{ key=0; }};",
+    "entries":[
+      {"key": ":ns:key", "value": 0}
+    ],
+    "errors":[
+      {"description": "syntax error: { 'BEFORE_KEYS' | 'BRACKET': \"{\" }", "line": 1, "col": 8},
+      {"description": "missing terminator", "line": 1, "col": 18}
+    ]
+  },
+
+  {
+    "description": "double scoped key",
+    "input": "ns0: = { ns1: = { key=0; }; };",
+    "entries":[
+      {"key": ":ns0:ns1:key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "double scoped keys",
+    "input": "ns0: = { ns1: = { key1=0; key2=1; }; };",
+    "entries":[
+      {"key": ":ns0:ns1:key1", "value": 0},
+      {"key": ":ns0:ns1:key2", "value": 1}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "key in double scoped namespaces 1",
+    "input": "ns0: = { ns1: = { key=0; }; ns2: = { key=1; }; };",
+    "entries":[
+      {"key": ":ns0:ns1:key", "value": 0},
+      {"key": ":ns0:ns2:key", "value": 1}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "key in double scoped namespaces 2",
+    "input": "ns0 = { ns1 = { key=0; }; ns2 = { key=1; }; };",
+    "entries":[
+      {"key": ":ns0:ns1:key", "value": 0},
+      {"key": ":ns0:ns2:key", "value": 1}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "key in double scoped namespaces 3",
+    "input": "ns0 = { ns1, ns2 = { key=0; }; };",
+    "entries":[
+      {"key": ":ns0:ns1:key", "value": 0},
+      {"key": ":ns0:ns2:key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "key in double scoped namespaces 4",
+    "input": "ns0: = { ns1:, ns2: = { key=0; }; };",
+    "entries":[
+      {"key": ":ns0:ns1:key", "value": 0},
+      {"key": ":ns0:ns2:key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "multi-keys multi-scoped namespaces",
+    "input": "root0, root1:, :root2, :root3: = { ns0:, ns1 = { key1, key2 = false; }; };",
+    "entries":[
+      {"key": ":root0:ns0:key1", "value": false},
+      {"key": ":root0:ns0:key2", "value": false},
+      {"key": ":root0:ns1:key1", "value": false},
+      {"key": ":root0:ns1:key2", "value": false},
+      {"key": ":root1:ns0:key1", "value": false},
+      {"key": ":root1:ns0:key2", "value": false},
+      {"key": ":root1:ns1:key1", "value": false},
+      {"key": ":root1:ns1:key2", "value": false},
+      {"key": ":root2:ns0:key1", "value": false},
+      {"key": ":root2:ns0:key2", "value": false},
+      {"key": ":root2:ns1:key1", "value": false},
+      {"key": ":root2:ns1:key2", "value": false},
+      {"key": ":root3:ns0:key1", "value": false},
+      {"key": ":root3:ns0:key2", "value": false},
+      {"key": ":root3:ns1:key1", "value": false},
+      {"key": ":root3:ns1:key2", "value": false}
+    ],
+    "errors":[]
+  }
+
+]}

@@ -8,10 +8,18 @@
 
 #include "../../../src/reporter/dto/ReporterObject.h"
 
+namespace blogator::configuration {
+    class Configuration;
+}
+
 namespace test_harness::blogator {
     std::string to_string( const ::blogator::reporter::ReporterObject & error );
 
-    std::vector<std::pair<ConfigurationTkTest, std::filesystem::path>> loadTokeniserTests( const std::filesystem::path &test_dir );
+    std::vector<std::pair<ConfigurationTkTest, std::filesystem::path>> loadConfigTokeniserTests( const std::filesystem::path &test_dir );
+    std::vector<std::pair<ConfigurationParserTest, std::filesystem::path>> loadConfigParserTests( const std::filesystem::path &test_dir );
+
+    nlohmann::json jsonifyConfiguration( const ::blogator::configuration::Configuration & cfg );
+    std::ostream & jsonifyConfiguration( std::ostream & os, const ::blogator::configuration::Configuration & cfg );
 };
 
 

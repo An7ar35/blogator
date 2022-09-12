@@ -1,0 +1,106 @@
+{ "tests": [
+
+  {
+    "description": "simple key-value (boolean 1)",
+    "input": "key=true;",
+    "entries":[
+      {"key": ":key", "value": true}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (boolean 0)",
+    "input": "key=false;",
+    "entries":[
+      {"key": ":key", "value": false}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (integer +)",
+    "input": "key=1;",
+    "entries":[
+      {"key": ":key", "value": 1}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (integer -)",
+    "input": "key=-1;",
+    "entries":[
+      {"key": ":key", "value": -1}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (double)",
+    "input": "key=0.123456;",
+    "entries":[
+      {"key": ":key", "value": 0.123456}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (hex)",
+    "input": "key=0xFF;",
+    "entries":[
+      {"key": ":key", "value": 255}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (string)",
+    "input": "key=\"value\";",
+    "entries":[
+      {"key": ":key", "value": "value"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (named value - in order hit)",
+    "input": "x = 5;\ny = x;",
+    "entries":[
+      {"key": ":x", "value": 5},
+      {"key": ":y", "value": 5}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (named value - out of order hit)",
+    "input": "x = y;\ny = 5;",
+    "entries":[
+      {"key": ":x", "value": 5},
+      {"key": ":y", "value": 5}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (named value - miss)",
+    "input": "key=value;",
+    "entries":[
+      {"key": ":key", "value": ":value"}
+    ],
+    "errors":[
+      {"description": "unresolved named value: { 'END_OF_FILE' | :value }", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "simple key-value (void)",
+    "input": "key=;",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[]
+  }
+
+]}

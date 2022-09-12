@@ -470,7 +470,8 @@ set(SOURCE_FILES
         src/configuration/parser/dto/ValueCache.h
         src/datastructure/ObjectPool.h
         src/exception/resource_unavailable.cpp
-        src/exception/resource_unavailable.h)
+        src/exception/resource_unavailable.h
+        src/datastructure/MessageQueue.h)
 
 configure_file(src/cmake/cmake_vars.h ${CMAKE_BINARY_DIR}/generated-src/project_version.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated-src/ )
@@ -506,6 +507,7 @@ set(TEST_FILES
         tests/TestHelpers/TestDOMs.cpp
         tests/TestHelpers/TestDOMs.h
         tests/html/reader/reader.cpp
+        tests/datastructure/ObjectPool.cpp
         tests/dto/DateStamp.cpp
         tests/dto/Templates.cpp
         tests/dto/Article.cpp

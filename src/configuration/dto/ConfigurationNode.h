@@ -5,7 +5,7 @@
 #include <string>
 #include <ostream>
 
-#include "ValueStore.h"
+#include "Value.h"
 
 namespace blogator::configuration {
     /**
@@ -32,8 +32,9 @@ namespace blogator::configuration {
         bool operator !=( const ConfigurationNode & rhs ) const;
 
         void clearSuffix();
-        ValueStore * value();
-        void addValue( std::unique_ptr<Value> && val );
+        Value & getValue();
+        Value & setValue( Value && val );
+        Value & appendValue( Value && val );
 
         [[nodiscard]] bool isLeaf() const;
         [[nodiscard]] bool isKey() const;
@@ -43,7 +44,7 @@ namespace blogator::configuration {
         NodeMap_t      children;
         std::u32string suffix;
         bool           is_key { false };
-        ValueStore     values;
+        Value          value;
     };
 
     std::ostream & operator <<( std::ostream & os, const ConfigurationNode & node );

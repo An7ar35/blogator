@@ -56,10 +56,10 @@ namespace blogator::parser::tokeniser {
          * and/or processing markdown special characters as format token
          */
         enum class CharacterProcessing {
-            NONE                = 0x00,
-            FORMAT_ONLY         = 0x01,
-            ENCODING_ONLY       = 0x10,
-            FORMAT_AND_ENCODING = 0x11,
+            NONE                = 0b00,
+            FORMAT_ONLY         = 0b01,
+            ENCODING_ONLY       = 0b10,
+            FORMAT_AND_ENCODING = 0b11,
         };
 
         /**

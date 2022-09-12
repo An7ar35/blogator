@@ -19,7 +19,7 @@ ConfigurationNode::ConfigurationNode( std::u32string suffix ) :
 ConfigurationNode::ConfigurationNode( ConfigurationNode &&node ) noexcept :
     suffix( std::move( node.suffix ) ),
     is_key( node.is_key ),
-    values( std::move( node.values ) ),
+    value( std::move( node.value ) ),
     children( std::move( node.children ) )
 {}
 
@@ -29,16 +29,9 @@ ConfigurationNode::ConfigurationNode( ConfigurationNode &&node ) noexcept :
  */
 ConfigurationNode::ConfigurationNode( const ConfigurationNode & node ) :
     suffix( node.suffix ),
-    is_key( node.is_key )
+    is_key( node.is_key ),
+    value( node.value )
 {
-    for( auto &val_ptr: node.values() ) {
-        if( val_ptr ) {
-            this->values.emplace_back( std::make_unique<Value>( *val_ptr ) );
-        } else {
-            this->values.emplace_back( nullptr );
-        }
-    }
-
     for( const auto & child : node.children ) {
         this->children.emplace( child.first, child.second.copy() );
     }
@@ -50,19 +43,10 @@ ConfigurationNode::ConfigurationNode( const ConfigurationNode & node ) :
  * @return Moved node
  */
 ConfigurationNode & ConfigurationNode::operator =( ConfigurationNode &&node ) noexcept {
-    suffix = std::move( node.suffix );
-    is_key = node.is_key;
-
-    for( auto &val_ptr: node.values() ) {
-        if( val_ptr ) {
-            this->values.emplace_back( std::move( val_ptr ) );
-        } else {
-            this->values.emplace_back( nullptr );
-        }
-    }
-
-    this->children = std::move( node.children );
-
+    suffix   = std::move( node.suffix );
+    is_key   = node.is_key;
+    value    = std::move( node.value );
+    children = std::move( node.children );
     return *this;
 }
 
@@ -74,14 +58,7 @@ ConfigurationNode & ConfigurationNode::operator =( ConfigurationNode &&node ) no
 ConfigurationNode & ConfigurationNode::operator =( const ConfigurationNode & node ) {
     suffix = node.suffix;
     is_key = node.is_key;
-
-    for( const auto &val_ptr: node.values() ) {
-        if( val_ptr ) {
-            this->values.emplace_back( std::make_unique<Value>( *val_ptr ) );
-        } else {
-            this->values.emplace_back( nullptr );
-        }
-    }
+    value  = node.value;
 
     for( const auto & child : node.children ) {
         this->children.emplace( child.first, child.second.copy() );
@@ -98,7 +75,7 @@ ConfigurationNode & ConfigurationNode::operator =( const ConfigurationNode & nod
 bool ConfigurationNode::operator ==( const ConfigurationNode &rhs ) const {
     return this->suffix   == rhs.suffix
         && this->is_key   == rhs.is_key
-        && this->values   == rhs.values
+        && this->value    == rhs.value
         && this->children == rhs.children;
 }
 
@@ -119,24 +96,48 @@ void ConfigurationNode::clearSuffix() {
 }
 
 /**
- * Gets a pointer to the value store
- * @return Pointer to value store or nullptr when node is not a key
+ * Gets the node's value
+ * @return Reference to the value
  */
-ValueStore * ConfigurationNode::value() {
-    return ( isKey() ? &values : nullptr );
+Value & ConfigurationNode::getValue() {
+    return value;
 }
 
 /**
- * Add a value to the value store
- * @param val Value pointer
+ * Sets the node's value
+ * @param val Value
+ * @return Reference to the value in the node
  */
-void ConfigurationNode::addValue( std::unique_ptr<Value> &&val ) {
-    values.emplace_back( std::move( val ) );
-
+Value & ConfigurationNode::setValue( Value &&val ) {
     if( !is_key ) {
         is_key = true;
     }
+
+    return ( value = std::move( val ) );
 }
+
+/**
+ * Appends a value to the node's value (convert into array if already has an atomic value)
+ * @param val Value
+ * @return Reference to the value added to the node
+ */
+Value & ConfigurationNode::appendValue( Value &&val ) { //TODO unit test
+    if( value.type() == ValueType::ARRAY ) {
+        auto & list = value.getArray();
+        return list.emplace_back( std::move( val ) );
+
+    } else if( isKey() && value.type() != ValueType::VOID ) { //i.e.: already has a value
+        auto old_val = std::move( value );
+        value = Value( Value::IS_ARRAY_VALUE );
+        auto & list = value.getArray();
+        list.emplace_back( std::move( old_val ) );
+        return list.emplace_back( std::move( val ) );
+
+    } else {
+        return setValue( std::move( val ) );
+    }
+}
+
 
 /**
  * Copy node recursively
@@ -184,7 +185,7 @@ size_t ConfigurationNode::size() const {
  */
 std::ostream & blogator::configuration::operator <<( std::ostream &os, const ConfigurationNode &node ) {
     if( node.isKey() ) {
-        os << blogator::unicode::utf8::convert( node.suffix ) << " = " << node.values;
+        os << blogator::unicode::utf8::convert( node.suffix ) << " = " << node.value;
     } else {
         os << blogator::unicode::utf8::convert( node.suffix );
     }
