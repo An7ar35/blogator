@@ -23,6 +23,7 @@ namespace blogator::parser::token::html5 {
       public:
         GenericTagTk( specs::infra::TokenType type, TextPos position );
         GenericTagTk( specs::infra::TokenType type, std::u32string text, TextPos position );
+        ~GenericTagTk() override = default;
 
         [[nodiscard]] std::u32string & name();
         [[nodiscard]] const std::u32string & name() const;

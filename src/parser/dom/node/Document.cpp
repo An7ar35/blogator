@@ -219,7 +219,7 @@ Document & Document::operator =( const Document &document ) {
  */
 Document & Document::operator =( Document &&document ) noexcept {
     if( &document != this ) {
-        Node::operator =( dynamic_cast<node::Node &&>( document ) );
+        Node::operator =( static_cast<node::Node &&>( document ) );
         this->_encoding     = std::move( document._encoding );
         this->_content_type = document._content_type;
         this->_url          = std::move( document._url );

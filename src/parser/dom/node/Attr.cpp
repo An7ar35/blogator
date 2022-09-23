@@ -181,7 +181,7 @@ Attr::Attr( Attr &&node ) noexcept :
  */
 Attr & Attr::operator =( const Attr &node ) {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<const node::Node &>( node ) );
+        Node::operator =( static_cast<const node::Node &>( node ) );
         this->_namespace_id = node._namespace_id ;
         this->_prefix       = node._prefix;
         this->_name         = node._name;
@@ -199,7 +199,7 @@ Attr & Attr::operator =( const Attr &node ) {
  */
 Attr & Attr::operator =( Attr &&node ) noexcept {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<node::Node &&>( node ) );
+        Node::operator =( static_cast<node::Node &&>( node ) );
         this->_namespace_id = node._namespace_id ;
         this->_prefix       = std::move( node._prefix );
         this->_name         = std::move( node._name );

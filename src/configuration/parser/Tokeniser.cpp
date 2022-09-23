@@ -658,13 +658,28 @@ inline std::u32string Tokeniser::pendingBufferToStr() const {
  * Sends the content of the buffer as character tokens to the parser
  */
 void Tokeniser::flushPendingBufferCharactersToDispatch() {
-    auto position = _pending.position;
+    auto position      = _pending.position;
+    auto bundling_pos  = position;
+    auto bundling_buff = std::vector<char32_t>();
+
+    /**
+     * [LAMBDA] Dispatches a character bundle when not empty
+     * @param bundle Character bundle to dispatch
+     * @param bundle_pos Position in source text of the first character of bundle
+     */
+    const auto dispatchBundle = [this]( std::vector<char32_t> & bundle, TextPos & bundle_pos ) {
+        if( !bundle.empty() ) {
+            dispatchToken( std::make_unique<ConfigTk>( Type_e::CHARACTER, std::u32string( bundle.begin(), bundle.end() ), bundle_pos ) );
+            bundle.clear();
+        }
+    };
 
     for( const auto c : _pending.buffer ) {
         if( unicode::ascii::isBracket( c ) ) {
+            dispatchBundle( bundling_buff, bundling_pos );
             dispatchToken( std::make_unique<ConfigTk>( Type_e::BRACKET, c, position ) );
         } else {
-            dispatchToken( std::make_unique<ConfigTk>( Type_e::CHARACTER, std::u32string( 1, c ), position ) );
+            bundling_buff.emplace_back( c );
         }
 
         if( unicode::ascii::isfeed( c ) ) {
@@ -672,8 +687,13 @@ void Tokeniser::flushPendingBufferCharactersToDispatch() {
         } else {
             position += { 0, 1 };
         }
+
+        if( bundling_buff.empty() ) {
+            bundling_pos = position;
+        }
     }
 
+    dispatchBundle( bundling_buff, bundling_pos );
     resetPendingBuffer( position );
 }
 

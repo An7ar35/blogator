@@ -50,7 +50,7 @@
 
   {
     "description": "multiple nested arrays with various value types (resolved)",
-    "input": "key1 = [];\nkey2 = [ \"a\", \"b\", \"c\" ];\nkey3 = [ \"string\", [ 1, 0.123 ], [ [ key1, key2 ], [ [ false, true ] ] ] ];",
+    "input": "key1 = [];\nkey2 = [ \"a\", \"b\", \"c\" ];\nkey3 = [ \"string\", [ 1, 0.123 ], [ [ :key1, key2 ], [ [ false, true ] ] ] ];",
     "entries":[
       {"key": ":key1", "value": []},
       {"key": ":key2", "value": [ "a", "b", "c"]},
@@ -58,4 +58,5 @@
     ],
     "errors":[]
   }
+
 ]}

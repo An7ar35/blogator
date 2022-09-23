@@ -55,7 +55,7 @@ CharacterData::CharacterData( CharacterData &&node )  noexcept :
  */
 CharacterData & CharacterData::operator =( const CharacterData & node ) {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<const node::Node &>( node ) );
+        Node::operator =( static_cast<const node::Node &>( node ) );
         this->_data = node._data;
     }
 
@@ -69,7 +69,7 @@ CharacterData & CharacterData::operator =( const CharacterData & node ) {
  */
 CharacterData & CharacterData::operator =( CharacterData && node ) noexcept {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<node::Node &&>( node ) );
+        Node::operator =( static_cast<node::Node &&>( node ) );
         this->_data = std::move( node._data );
     }
 

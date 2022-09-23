@@ -174,6 +174,8 @@ void parser::Parser::logError( TextPos position, int err_code, const token::Conf
         ss << "': \"";
         unicode::utf8::convert( ss, token.text() );
         ss << "\"";
+    } else {
+        ss << "'";
     }
 
     ss << " }";
@@ -268,14 +270,19 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::BEF
 
         case specs::TokenType::BRACKET: {
             if( token->text() == U"}" ) { //closing scope
-                if( currBracket() == U"{" ) {
-                    setInsertionMode( InsertionMode_e::AFTER_SCOPE );
-                    processContent < InsertionMode_e::AFTER_SCOPE > ( token );
+                if( currBracket() == U"{" ) { //closing scope without a value
+                    logError( token->position(), ErrorCode::INVALID_CONFIG_FORMAT, *token );
+                    addValueToCache( Value::Type_e::VOID, token->text(), token->position() );
+                    setInsertionMode( InsertionMode_e::AFTER_VALUE );
+                    processContent<InsertionMode_e::AFTER_VALUE>( token );
                 } else if( !closeBracketsDownTo( U"{", token->position() ) ) {
                     logError( token->position(), ErrorCode::UNOPENED_BRACKET, *token );
                 }
+            } else if( token->text() == U"{" ) {
+                setInsertionMode( InsertionMode_e::AFTER_KEY );
+                processContent<InsertionMode_e::AFTER_KEY>( token );
             } else {
-                //check if that can happen
+                logError( token->position(), ErrorCode::INVALID_CONFIG_FORMAT, *token );
             }
         } break;
 
@@ -295,9 +302,7 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::BEF
  */
 template<> void parser::Parser::processContent<parser::specs::InsertionMode::IN_KEY>( const std::unique_ptr<token::ConfigTk> & token ) {
     switch( token->type() ) {
-        case specs::TokenType::COMMENT: { //dropped/ignored
-            setInsertionMode( InsertionMode_e::AFTER_KEY );
-        } break;
+        case specs::TokenType::COMMENT: break; //dropped/ignored
 
         case specs::TokenType::NAMESPACE: {
             if( !Configuration::validate( token->text() ) ) {
@@ -371,8 +376,20 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::AFT
             }
         } break;
 
-        case specs::TokenType::BRACKET:
-        case specs::TokenType::CHARACTER:
+        case specs::TokenType::BRACKET: {
+            if( token->text() == U"{" ) {
+                logError( token->position(), ErrorCode::MISSING_ASSIGNMENT_OPERATOR );
+                setInsertionMode( InsertionMode_e::BEFORE_VALUES );
+                processContent<InsertionMode_e::BEFORE_VALUES>( token );
+            } else {
+                logError( token->position(), ErrorCode::INVALID_CONFIG_FORMAT, *token );
+            }
+        } break;
+
+        case specs::TokenType::CHARACTER: {
+            logError( token->position(), ErrorCode::INVALID_CONFIG_FORMAT, *token );
+        } break;
+
         case specs::TokenType::VALUE_NAME:
         case specs::TokenType::STRING_LITERAL:
         case specs::TokenType::INTEGER_LITERAL_10:
@@ -385,7 +402,7 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::AFT
         } break;
 
         case specs::TokenType::END_OF_FILE: {
-            logError( token->position(), ErrorCode::ABRUPT_EOF, *token );
+            logError( token->position(), ErrorCode::EOF_IN_KEY, *token );
             addValueToCache( Value::Type_e::VOID, token->text(), token->position() );
             addToConfiguration( _cache.value );
             setInsertionMode( InsertionMode_e::END_OF_FILE );
@@ -400,11 +417,18 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::AFT
  */
 template<> void parser::Parser::processContent<parser::specs::InsertionMode::BEFORE_VALUES>( const std::unique_ptr<token::ConfigTk> & token ) {
     switch( token->type() ) {
+        case specs::TokenType::COMMENT: break; //dropped/ignored
+
         case specs::TokenType::OPERATOR: {
             if( token->text() == U"[" ) { //array
                 addValueToCache( Value::Type_e::ARRAY, token->text(), token->position() );
                 pushBracket( token->text(), token->position() );
                 setInsertionMode( InsertionMode_e::BEFORE_VALUE );
+
+            } else if( token->text() == U":" ) {
+                resetPendingNamedValueCache( token->position() );
+                setInsertionMode( InsertionMode_e::IN_NAMED_VALUE );
+                processContent < InsertionMode_e::IN_NAMED_VALUE > ( token );
 
             } else {
                 logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
@@ -442,7 +466,7 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::BEF
         } break;
 
         case specs::TokenType::END_OF_FILE: {
-            logError( token->position(), ErrorCode::ABRUPT_EOF, *token );
+            logError( token->position(), ErrorCode::EOF_IN_VALUE );
             addValueToCache( Value::Type_e::VOID, token->text(), token->position() );
             addToConfiguration( _cache.value );
             setInsertionMode( InsertionMode_e::END_OF_FILE );
@@ -486,16 +510,18 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::BEF
                     }
                 }
 
+            } else if( token->text() == U":" ) {
+                resetPendingNamedValueCache( token->position() );
+                setInsertionMode( InsertionMode_e::IN_NAMED_VALUE );
+                processContent < InsertionMode_e::IN_NAMED_VALUE > ( token );
+
             } else {
                 logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
             }
         } break;
 
         case specs::TokenType::PUNCTUATOR: {
-            if( token->text() != U";" ) {
-                logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
-            }
-
+            logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
             addValueToCache( Value::Type_e::VOID, token->text(), token->position() );
             setInsertionMode( InsertionMode_e::AFTER_VALUE );
             processContent<InsertionMode_e::AFTER_VALUE>( token );
@@ -538,13 +564,13 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::BEF
         } break;
 
         case specs::TokenType::END_OF_FILE: {
-            logError( token->position(), ErrorCode::ABRUPT_EOF, *token );
-            addValueToCache( Value::Type_e::VOID, token->text(), token->position() );
+            logError( token->position(), ErrorCode::EOF_IN_VALUE );
+            addToConfiguration( _cache.value );
             setInsertionMode( InsertionMode_e::END_OF_FILE );
             processContent<InsertionMode_e::END_OF_FILE>( token );
         } break;
 
-        default: {
+        default: { //i.e.: 'KEY' & 'CHARACTER'
             logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
         } break;
     }
@@ -569,11 +595,20 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::IN_
         case specs::TokenType::OPERATOR: {
             if( token->text() != U":" ) {
                 logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
-                setInsertionMode( InsertionMode_e::AFTER_VALUE );
-                processContent<InsertionMode_e::AFTER_VALUE>( token );
             } //else: drop ':'
         } break;
 
+        case specs::TokenType::PUNCTUATOR: {
+            if( token->text() == U";" ) {
+                addValueToCache( Value::Type_e::VOID, token->text(), token->position() );
+                setInsertionMode( InsertionMode_e::AFTER_VALUE );
+                processContent<InsertionMode_e::AFTER_VALUE>( token );
+            } else {
+                logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
+            }
+        } break;
+
+        case specs::TokenType::KEY:        [[fallthrough]];
         case specs::TokenType::VALUE_NAME: {
             if( !Configuration::validate( token->text() ) ) {
                 logError( token->position(), ErrorCode::INVALID_KEY_FORMAT, U"\"" + token->text() + U"\"" );
@@ -584,9 +619,15 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::IN_
             setInsertionMode( InsertionMode_e::AFTER_VALUE );
         } break;
 
-        default: {
+        case specs::TokenType::END_OF_FILE: {
+            logError( token->position(), ErrorCode::EOF_IN_VALUE );
+            addValueToCache( Value::Type_e::NAME, Configuration::convert( pendingNamedValue() ), pendingNamedValuePosition() );
             setInsertionMode( InsertionMode_e::AFTER_VALUE );
             processContent<InsertionMode_e::AFTER_VALUE>( token );
+        } break;
+
+        default: {
+            logError( token->position(), ErrorCode::INVALID_VALUE_FORMAT, *token );
         } break;
     }
 }
@@ -630,7 +671,9 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::AFT
                 setInsertionMode( InsertionMode_e::BEFORE_KEYS );
 
                 while( currBracket() == U"[" ) {
-                    logError( token->position(), ErrorCode::UNCLOSED_BRACKET, *token );
+                    logError( token->position(),
+                              ErrorCode::UNCLOSED_BRACKET,
+                              ( "'" + unicode::utf8::convert( currBracket() ) + "' at " + currBracketPosition().str() ) );
                     popBracket();
                 }
 
@@ -840,45 +883,19 @@ inline bool parser::Parser::hasScope() const {
 }
 
 /**
- * Checks empty state of last scoped key (if any)
- * @return State of either no scope, last scope empty or last scoped key empty
- */
-inline bool parser::Parser::emptyLastScopedKey() const {
-    return ( _cache.scope.empty() || _cache.scope.back().empty() || _cache.scope.back().back().empty() );
-}
-
-/**
- * Checks if there are no keys in the last scope
- * @return Last scope empty or filled with empty keys
- */
-inline bool parser::Parser::emptyKeysInLastScope() const {
-    if( hasScope() && !_cache.scope.back().empty() ) {
-        for( auto & k : _cache.scope.back() ) {
-            if( !k.empty() ) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-/**
  * Checks if the state of the parser inside the root scope
  * @return Inside root scope state
  */
 inline bool parser::Parser::inRootScope() const {
     if( !_cache.scope.empty() ) {
-        const auto it = std::find_if( _cache.scope.cbegin(),
-                                      _cache.scope.cend(),
-                                      []( const auto &scope ) {
-                                          return !scope.empty();
-                                      } );
-
-        return ( it == _cache.scope.cend() || it == _cache.scope.begin() );
+        for( auto it = _cache.scope.crbegin(); it != _cache.scope.crend(); ++it ) {
+            if( !it->empty() ) {
+                return ( std::next( it ) == _cache.scope.crend() ); //i.e.: is it the first list of keys in the current scopes collection
+            }
+        }
     }
 
-    return true;
+    return true; //i.e.: there are no scopes, or they are all empty
 }
 
 /**
@@ -920,7 +937,7 @@ inline void parser::Parser::addValueToCache( Value::Type_e value_type, const std
         case Value::Type_e::NAME: {
             const auto * val = _config->find( pendingNamedValue() );
 
-            if( val != nullptr ) {
+            if( val != nullptr && val->type() != Value::Type_e::NAME ) {
                 if( _cache.value.initialised() ) {
                     _cache.value.addValueToCurrentContext( val->clone(), position );
 
@@ -1073,11 +1090,11 @@ void parser::Parser::addToConfiguration_( std::vector<Scope_t>::const_iterator i
             }
         }
 
-        if( resolveNamedValue( root_ns, cached_value.position, *cached_value.root ) == 0 ) {
-            resolveCachedNamedValue( Configuration::convert( root_ns ), cached_value.root.get() );
-        }
+        auto & value = _config->add( root_ns, cached_value.root->clone() );
 
-        _config->add( root_ns, cached_value.root->clone() );
+        if( resolveNamedValue( root_ns, cached_value.position, value ) == 0 ) {
+            resolveCachedNamedValue( Configuration::convert( root_ns ), &value );
+        }
 
     } else {
         for( const auto & scoped_nsk : *it ) {
@@ -1108,12 +1125,12 @@ size_t parser::Parser::resolveNamedValue( const Configuration::Key_t & nsk, cons
     } else if( value.type() == Value::Type_e::NAME ) {
         const auto * resolved_val = _config->find( Configuration::convert( value.getString() ) );
 
-        if( resolved_val != nullptr ) {
+        if( resolved_val != nullptr && resolved_val->type() != Value::Type_e::NAME ) {
             value = *resolved_val; //copy!
 
         } else {
             unresolved += 1;
-            cacheUnresolvedNamedValue( value.getString(), { position, _config->add( nsk ) } );
+            cacheUnresolvedNamedValue( value.getString(), { position, value } );
         }
     }
 
@@ -1172,7 +1189,7 @@ inline void parser::Parser::cacheUnresolvedNamedValue( const std::u32string & ns
 inline bool parser::Parser::resolveCachedNamedValue( const std::u32string &nsk, const Value * value ) {
     auto it = _cache.unresolved_named_values.find( nsk );
 
-    if( it != _cache.unresolved_named_values.end() && value != nullptr ) {
+    if( value != nullptr && value->type() != Value::Type_e::NAME && it != _cache.unresolved_named_values.end() ) {
         for( auto & val : it->second.values ) {
             val.ref.get() = *value;
         }
@@ -1203,6 +1220,15 @@ inline std::u32string parser::Parser::currBracket() const {
     }
 
     return {};
+}
+
+/**
+ * Gets the position of the current bracket at the top of the opened bracket stack
+ * @return Position of last opened bracket
+ * @throws std::out_of_range when stack is empty
+ */
+inline const blogator::TextPos & parser::Parser::currBracketPosition() const {
+    return _cache.opened_brackets.back().pos;
 }
 
 /**
@@ -1248,19 +1274,6 @@ inline bool parser::Parser::closeBracketsDownTo( const std::u32string &bracket_c
 }
 
 /**
- * Checks if a bracket is currently opened
- * @param bracket_char Bracket character to look for
- * @return Opened bracket state
- */
-inline bool parser::Parser::inBracketScope( const std::u32string &bracket_char ) {
-    const auto target_it = std::find_if( _cache.opened_brackets.rbegin(),
-                                         _cache.opened_brackets.rend(),
-                                         [&bracket_char]( const auto & bracket) { return bracket.character == bracket_char; } );
-
-    return ( target_it != _cache.opened_brackets.rend() );
-}
-
-/**
  * Wraps up everything and checks pending scopes, unresolved named values, etc...
  */
 void parser::Parser::cleanupEOF() {
@@ -1273,8 +1286,17 @@ void parser::Parser::cleanupEOF() {
     auto errors = std::vector<Err>();
 
     for( auto & unv : _cache.unresolved_named_values ) {
-        for( const auto & entry : unv.second.values ) {
-            errors.emplace_back( Err { entry.pos, ErrorCode::UNRESOLVED_NAMED_VALUE, unv.first } );
+        const auto * resolved = _config->find( unv.second.nsk );
+
+        if( resolved != nullptr && resolved->type() != Value::Type_e::NAME ) {
+            for( const auto & entry : unv.second.values ) {
+                entry.ref.get() = *resolved;
+            }
+
+        } else {
+            for( const auto & entry : unv.second.values ) {
+                errors.emplace_back( Err { entry.pos, ErrorCode::UNRESOLVED_NAMED_VALUE, unv.first } );
+            }
         }
     }
 

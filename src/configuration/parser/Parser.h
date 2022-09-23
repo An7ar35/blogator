@@ -63,12 +63,6 @@ namespace blogator::configuration::parser {
          * @param value keeps track of the current value(s) and any nesting hierarchy
          */
         struct Cache {
-            //ns: = ... <- if no "{..}" then warn in log
-            //ns:key = ...
-            //ns:key1, ns:key2, ..., ns:keyN = ... <- if "{..}" then applies to all key namespaces. e.g: { nsX:k } -> ns:key1:nsX:k, ns:key2:nsX:k ...
-            //key = ...
-            //key1, key2, ..., keyN = ...
-
             /*
              * +-------+
              * | Scope |
@@ -170,8 +164,6 @@ namespace blogator::configuration::parser {
         Scope_t::value_type & lastScopedKey();
         void popLastScope();
         [[nodiscard]] bool hasScope() const;
-        [[nodiscard]] bool emptyLastScopedKey() const;
-        [[nodiscard]] bool emptyKeysInLastScope() const;
         [[nodiscard]] bool inRootScope() const;
 
         void addValueToCache( Value::Type_e value_type, const std::u32string & value_str, const TextPos & position );
@@ -189,9 +181,9 @@ namespace blogator::configuration::parser {
 
         void pushBracket( std::u32string c, TextPos position );
         std::u32string currBracket() const;
+        [[nodiscard]] const TextPos & currBracketPosition() const;
         void popBracket();
         bool closeBracketsDownTo( const std::u32string & bracket_char, const TextPos & position );
-        [[nodiscard]] bool inBracketScope( const std::u32string & bracket_char );
 
         void cleanupEOF();
     };

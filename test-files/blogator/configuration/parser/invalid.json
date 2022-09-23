@@ -145,7 +145,7 @@
       {"key": ":key", "value": [1]}
     ],
     "errors":[
-      {"description": "unclosed bracket: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 9}
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | '[' at 1:7 }", "line": 1, "col": 9}
     ]
   },
 
@@ -156,8 +156,8 @@
       {"key": ":key", "value": [[1]]}
     ],
     "errors":[
-      {"description": "unclosed bracket: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10},
-      {"description": "unclosed bracket: { 'BEFORE_KEYS' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10}
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | '[' at 1:8 }", "line": 1, "col": 10},
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | '[' at 1:7 }", "line": 1, "col": 10}
     ]
   },
 
@@ -213,6 +213,444 @@
       {"description": "asymmetric value nesting: 2", "line": 1, "col": 11},
       {"description": "unclosed bracket: { 'END_OF_FILE' | '{' }", "line": 1, "col": 7},
       {"description": "unclosed bracket: { 'END_OF_FILE' | '{' }", "line": 1, "col": 8}
+    ]
+  },
+
+  {
+    "description": "key in brackets \"(..)\"",
+    "input": "(:key)=0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "syntax error: { 'BEFORE_KEYS' | 'BRACKET': \"(\" }", "line": 1, "col": 1},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'BRACKET': \")\" }", "line": 1, "col": 6}
+    ]
+  },
+
+  {
+    "description": "key in brackets \"{..}\"",
+    "input": "{:key}=0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "syntax error: { 'BEFORE_KEYS' | 'BRACKET': \"{\" }", "line": 1, "col": 1},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'BRACKET': \"}\" }", "line": 1, "col": 6},
+      {"description": "asymmetric value nesting: 1", "line": 1, "col": 10},
+      {"description": "unclosed bracket: { 'END_OF_FILE' | '{' }", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "operator prefix on key (1st)",
+    "input": "+key=0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '+'", "line": 1, "col": 1},
+      {"description": "invalid configuration format: { 'BEFORE_KEYS' | 'OPERATOR': \"+\" }", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "operator prefix on key (2nd)",
+    "input": "key1, *key2=0;",
+    "entries":[
+      {"key": ":key1", "value": 0},
+      {"key": ":key2", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '*'", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_KEY' | 'OPERATOR': \"*\" }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "operator '=' before key",
+    "input": "key1, = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0}
+    ],
+    "errors":[
+      {"description": "unspecified key", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "bracket '{' before key",
+    "input": "key1, { key2 = 0; };",
+    "entries":[
+      {"key": ":key1:key2", "value": 0}
+    ],
+    "errors":[
+      {"description": "missing assignment operator", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "bracket '}' after key",
+    "input": "key1 = { key2, };",
+    "entries":[
+      {"key": ":key1:key2", "value": null}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'BEFORE_KEY' | 'BRACKET': \"}\" }", "line": 1, "col": 16},
+      {"description": "missing terminator", "line": 1, "col": 16}
+    ]
+  },
+
+  {
+    "description": "bracket '}' before key",
+    "input": "key1, } = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0}
+    ],
+    "errors":[
+      {"description": "unopened bracket: { 'BEFORE_KEY' | 'BRACKET': \"}\" }", "line": 1, "col": 7},
+      {"description": "unspecified key", "line": 1, "col": 9},
+      {"description": "asymmetric value nesting: -1", "line": 1, "col": 13}
+    ]
+  },
+
+  {
+    "description": "bracket '(' before key",
+    "input": "key1, ( key2 = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0},
+      {"key": ":key2", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'BEFORE_KEY' | 'BRACKET': \"(\" }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "bracket ')' before key",
+    "input": "key1, ) key2 = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0},
+      {"key": ":key2", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'BEFORE_KEY' | 'BRACKET': \")\" }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "operator ':' after key",
+    "input": "key1 : = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0}
+    ],
+    "errors":[
+      {"description": "unspecified key", "line": 1, "col": 8}
+    ]
+  },
+
+  {
+    "description": "operator '+' after key",
+    "input": "key1 + = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '+'", "line": 1, "col": 6},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'OPERATOR': \"+\" }", "line": 1, "col": 6}
+    ]
+  },
+
+  {
+    "description": "punctuator '.' after key",
+    "input": "key1 . = 0;",
+    "entries":[
+      {"key": ":key1", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'PUNCTUATOR': \".\" }", "line": 1, "col": 6}
+    ]
+  },
+
+  {
+    "description": "character '&' after key",
+    "input": "key1 & = 0;",
+    "entries":[
+      {"key": ":&", "value": 0},
+      {"key": ":key1", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '&'", "line": 1, "col": 6 },
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"&\" }", "line": 1, "col": 6}
+    ]
+  },
+
+  {
+    "description": "invalid key format",
+    "input": "key$ = 0;",
+    "entries":[
+      {"key": ":key$", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '$'", "line": 1, "col": 4 },
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"key$\" }", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "invalid namespace format",
+    "input": "n$:key = 0;",
+    "entries":[
+      {"key": ":n$:key", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '$'", "line": 1, "col": 2 },
+      {"description": "invalid namespace format: { 'IN_KEY' | 'NAMESPACE': \"n$\" }", "line": 1, "col": 1}
+    ]
+  },
+
+  {
+    "description": "integer after key",
+    "input": "key 10 = 0;",
+    "entries":[
+      {"key": ":10", "value": 0},
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '1'", "line": 1, "col": 5},
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"10\" }", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "integer as key",
+    "input": "key:10 = 0;",
+    "entries":[
+      {"key": ":key:10", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"10\" }", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "EOF in key",
+    "input": "key:",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[
+      {"description": "EOF in key: { 'AFTER_KEY' | 'END_OF_FILE' }", "line": 1, "col": 5}
+    ]
+  },
+
+  {
+    "description": "punctuator '.' after value",
+    "input": "key = \"value\".",
+    "entries":[
+      {"key": ":key", "value": "value"}
+    ],
+    "errors":[
+      {"description": "invalid configuration format: { 'AFTER_VALUE' | 'PUNCTUATOR': \".\" }", "line": 1, "col": 14}
+    ]
+  },
+
+  {
+    "description": "EOF before values",
+    "input": "key = ",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[
+      {"description": "EOF in value", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "EOF before value",
+    "input": "key = [.1, ",
+    "entries":[
+      {"key": ":key", "value": [0.1]}
+    ],
+    "errors":[
+      {"description": "EOF in value", "line": 1, "col": 12},
+      {"description": "unclosed bracket: { 'END_OF_FILE' | '[' }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "EOF in value",
+    "input": "key = 0xFF",
+    "entries":[
+      {"key": ":key", "value": 255}
+    ],
+    "errors":[
+      {"description": "EOF in value", "line": 1, "col": 11}
+    ]
+  },
+
+  {
+    "description": "EOF in namespaced value",
+    "input": "key = ns:",
+    "entries":[
+      {"key": ":key", "value": ":ns"}
+    ],
+    "errors":[
+      {"description": "EOF in value", "line": 1, "col": 10},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :ns }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "operator before values",
+    "input": "key = = 0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid value format: { 'BEFORE_VALUES' | 'OPERATOR': \"=\" }", "line": 1, "col": 7 }
+    ]
+  },
+
+  {
+    "description": "operator before value",
+    "input": "key = [ 0, =1 ];",
+    "entries":[
+      {"key": ":key", "value": [0, 1]}
+    ],
+    "errors":[
+      {"description": "invalid value format: { 'BEFORE_VALUE' | 'OPERATOR': \"=\" }", "line": 1, "col": 12 }
+    ]
+  },
+
+  {
+    "description": "terminator before value",
+    "input": "key = [ 0, ;",
+    "entries":[
+      {"key": ":key", "value": [0, null]}
+    ],
+    "errors":[
+      {"description": "invalid value format: { 'BEFORE_VALUE' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 12},
+      {"description": "unclosed bracket: { 'BEFORE_KEYS' | '[' at 1:7 }", "line": 1, "col": 12}
+    ]
+  },
+
+  {
+    "description": "invalid namespace in named value",
+    "input": "key = n$:key;",
+    "entries":[
+      {"key": ":key", "value": ":key"}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 7},
+      {"description": "invalid configuration format: { 'BEFORE_VALUES' | 'CHARACTER': \"n$\" }", "line": 1, "col": 7},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key }", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "invalid key in named value",
+    "input": "key = ns:k£y;",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[
+      {"description": "invalid value name format", "line": 1, "col": 10},
+      {"description": "invalid value format: { 'IN_NAMED_VALUE' | 'CHARACTER': \"k£y\" }", "line": 1, "col": 10}
+    ]
+  },
+
+  {
+    "description": "punctuator in named value",
+    "input": "key = ns:.key;",
+    "entries":[
+      {"key": ":key", "value": ":ns:key"}
+    ],
+    "errors":[
+      {"description": "invalid value format: { 'IN_NAMED_VALUE' | 'PUNCTUATOR': \".\" }", "line": 1, "col": 10},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :ns:key }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "comment in named value",
+    "input": "key = ns:/*comment*/key;",
+    "entries":[
+      {"key": ":key", "value": ":ns:key"}
+    ],
+    "errors":[
+      {"description": "unresolved named value: { 'END_OF_FILE' | :ns:key }", "line": 1, "col": 7}
+    ]
+  },
+
+  {
+    "description": "operator after value",
+    "input": "key = 0 =;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid value format: { 'AFTER_VALUE' | 'OPERATOR': \"=\" }", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "unbracketed list of values",
+    "input": "key = 0, 1;",
+    "entries":[
+      {"key": ":key", "value": [0, 1]}
+    ],
+    "errors":[
+      {"description": "missing list declaration: { 'AFTER_VALUE' | 'PUNCTUATOR': \",\" }", "line": 1, "col": 8}
+    ]
+  },
+
+  {
+    "description": "bracket in list of values",
+    "input": "key = 0, (1);",
+    "entries":[
+      {"key": ":key", "value": [0, null]}
+    ],
+    "errors":[
+      {"description": "missing list declaration: { 'AFTER_VALUE' | 'PUNCTUATOR': \",\" }", "line": 1, "col": 8},
+      {"description": "invalid configuration format: { 'BEFORE_VALUE' | 'BRACKET': \"(\" }", "line": 1, "col": 10},
+      {"description": "invalid value name format", "line": 1, "col": 11},
+      {"description": "invalid value format: { 'BEFORE_VALUE' | 'CHARACTER': \"1\" }", "line": 1, "col": 11},
+      {"description": "invalid configuration format: { 'BEFORE_VALUE' | 'BRACKET': \")\" }", "line": 1, "col": 12},
+      {"description": "invalid value format: { 'BEFORE_VALUE' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 13}
+    ]
+  },
+
+  {
+    "description": "space separated list of values 1",
+    "input": "key = 0 1;",
+    "entries":[
+      {"key": ":1", "value": null},
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '1'", "line": 1, "col": 9},
+      {"description": "missing terminator", "line": 1, "col": 9},
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"1\" }", "line": 1, "col": 9},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 10}
+    ]
+  },
+
+  {
+    "description": "space separated list of values 2",
+    "input": "key = [ 0 1 ];",
+    "entries":[
+      {"key": ":1", "value": null},
+      {"key": ":key", "value": [0]}
+    ],
+    "errors":[
+      {"description": "invalid character in key: '1'", "line": 1, "col": 11},
+      {"description": "missing terminator", "line": 1, "col": 11},
+      {"description": "invalid key format: { 'IN_KEY' | 'KEY': \"1\" }", "line": 1, "col": 11},
+      {"description": "invalid character in key: ']'", "line": 1, "col": 13},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'OPERATOR': \"]\" }", "line": 1, "col": 13},
+      {"description": "invalid configuration format: { 'AFTER_KEY' | 'PUNCTUATOR': \";\" }", "line": 1, "col": 14},
+      {"description": "unclosed bracket: { 'END_OF_FILE' | '[' }", "line": 1, "col": 7}
     ]
   }
 

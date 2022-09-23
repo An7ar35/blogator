@@ -87,6 +87,10 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "unresolved named value",
             R"(This error occurs when a cached named value could not be resolved to an existing namespaced key.)"
         };
+        arr[ ErrorCode::MISSING_ASSIGNMENT_OPERATOR ] = {
+            "missing assignment operator",
+            R"(This error occurs when a scope is opened in a key declaration instead of after the assignment operator '='. )"
+        };
         arr[ ErrorCode::MISSING_TERMINATOR ] = {
             "missing terminator",
             R"(This error occurs when a key-value is missing its ';' terminator at the end.)"
@@ -111,7 +115,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             "value override",
             R"(This error occurs when a already existing key with a atomic value is being overridden.)"
         };
-        arr[ ErrorCode::ABRUPT_EOF ] = {
+        arr[ ErrorCode::EOF_IN_KEY ] = {
             "EOF in key",
             R"(This error occurs when EOF is encountered before the current KV and any opened scopes conclude.)"
         };

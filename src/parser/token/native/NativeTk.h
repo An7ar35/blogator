@@ -9,6 +9,7 @@ namespace blogator::parser::token::native {
       public:
         NativeTk( reporter::Context ns, specs::native::Element element, TextPos position );
         NativeTk( reporter::Context ns, specs::native::Element element, std::u32string text, TextPos position );
+        ~NativeTk() override = default;
 
         [[nodiscard]] specs::native::Element element() const;
 

@@ -12,6 +12,7 @@ namespace blogator::parser::token::html5 {
       public:
         HTML5Tk( specs::infra::TokenType type, TextPos position );
         HTML5Tk( specs::infra::TokenType type, std::u32string text, TextPos position );
+        ~HTML5Tk() override = default;
 
         [[nodiscard]] specs::infra::TokenType type() const;
 

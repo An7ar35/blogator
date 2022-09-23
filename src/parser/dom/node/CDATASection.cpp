@@ -35,7 +35,7 @@ void CDATASection::swap( Node &rhs ) {
  * @param rhs node::CDATASection to swap with
  */
 void CDATASection::swap( CDATASection &rhs ) {
-    CharacterData::swap( dynamic_cast<CharacterData &>( rhs ) );
+    CharacterData::swap( static_cast<CharacterData &>( rhs ) );
 }
 
 /**

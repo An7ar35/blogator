@@ -1,0 +1,24 @@
+{ "tests": [
+
+  {
+    "description": "sample config 1",
+    "input": "//Example configuration 1\n//-----------------------\n\ninteger: = {\n    number = 123;\n    array = { /* lists */\n        empty  = [];\n        filled = [ 0, 1, 2 ];\n    };\n};\n\ndouble: = {\n    value = 0.123;\n    array = [ 0.1, .2, 1. ];\n};\n\nstrings: = { value=\"Hello!\"; array=[\"arr1\",\"arr2\", :void]; };\n\nnamed: = {\n    value = integer:number;\n    array = [ integer:array:empty, strings:array ];\n};\n\n/*null value*/\n:void =;\n\n:boolean: = {\n    yes  = true;\n    no = false;\n    array = [ :void, boolean:yes, false ];\n};",
+    "entries":[
+      {"key":":boolean:array","value": [null,true, false]},
+      {"key":":boolean:no","value": false},
+      {"key":":boolean:yes","value": true},
+      {"key":":double:array","value": [0.1,0.2,1.0]},
+      {"key":":double:value","value": 0.123},
+      {"key":":integer:array:empty","value": []},
+      {"key":":integer:array:filled","value": [0,1,2]},
+      {"key":":integer:number","value": 123},
+      {"key":":named:array","value": [[],["arr1","arr2",null]]},
+      {"key":":named:value","value": 123},
+      {"key":":strings:array","value": ["arr1","arr2",null]},
+      {"key":":strings:value","value": "Hello!"},
+      {"key":":void","value": null}
+    ],
+    "errors":[]
+  }
+
+]}

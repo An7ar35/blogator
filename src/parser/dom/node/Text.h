@@ -15,6 +15,7 @@ namespace blogator::parser::dom::node {
         Text( Document * document, DOMString_t str );
         Text( NodeType type, DOMString_t str );
         Text( Document * document, NodeType type, DOMString_t str );
+        ~Text() override = default;
 
         void swap( Node & rhs ) override;
         void swap( Text & rhs );

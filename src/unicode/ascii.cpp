@@ -3,6 +3,9 @@
 #include <cctype>
 #include <algorithm>
 
+//TODO https://git.zx2c4.com/wireguard-tools/tree/src/ctype.h
+//     https://drewdevault.com/2020/09/25/A-story-of-two-libcs.html
+
 /**
  * Checks if character a space
  * @param c Character

@@ -35,7 +35,7 @@ void Comment::swap( Node &rhs ) {
  * @param rhs node::Comment to swap with
  */
 void Comment::swap( Comment &rhs ) {
-    CharacterData::swap( dynamic_cast<CharacterData &>( rhs ) );
+    CharacterData::swap( static_cast<CharacterData &>( rhs ) );
 }
 
 /**

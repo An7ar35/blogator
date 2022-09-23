@@ -14,6 +14,7 @@ namespace blogator::parser::dom::node {
         CharacterData( Document * document, NodeType type, DOMString_t data );
         CharacterData( const CharacterData & node );
         CharacterData( CharacterData && node ) noexcept;
+        ~CharacterData() override = default;
 
         CharacterData & operator =( const CharacterData & node );
         CharacterData & operator =( CharacterData && node ) noexcept;

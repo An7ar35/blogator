@@ -52,7 +52,7 @@ void Text::swap( Node &rhs ) {
  * @param rhs node::Text to swap with
  */
 void Text::swap( Text &rhs ) {
-    CharacterData::swap( dynamic_cast<CharacterData &>( rhs ) );
+    CharacterData::swap( static_cast<CharacterData &>( rhs ) );
 }
 
 /**

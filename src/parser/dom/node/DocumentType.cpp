@@ -94,7 +94,7 @@ DocumentType & DocumentType::operator =( const DocumentType &node ) {
  */
 DocumentType & DocumentType::operator =( DocumentType &&node ) noexcept {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<node::Node &&>( node ) );
+        Node::operator =( static_cast<node::Node &&>( node ) );
         this->_name      = std::move( node._name );
         this->_public_id = std::move( node._public_id );
         this->_system_id = std::move( node._system_id );

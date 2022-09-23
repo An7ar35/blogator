@@ -8,6 +8,7 @@ namespace blogator::parser::token::markdown {
       public:
         BlockBeginTk( specs::markdown::TokenType type, TextPos position );
         BlockBeginTk( specs::markdown::TokenType type, std::u32string text, TextPos position );
+        ~BlockBeginTk() override = default;
 
         [[nodiscard]] unsigned indent() const;
         [[nodiscard]] bool hasID() const;

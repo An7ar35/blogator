@@ -19,7 +19,7 @@ namespace blogator::configuration::parser::specs {
             INVALID_VALUE_NAME_FORMAT,
             EOF_IN_COMMENT_BLOCK,
             EOF_IN_STRING_LITERAL,
-            EOF_IN_VALUE,
+            EOF_IN_VALUE, //also in Parser
             ASYMMETRIC_VALUE_NESTING,
 
             /* Parser */
@@ -32,11 +32,12 @@ namespace blogator::configuration::parser::specs {
             UNRESOLVED_NAMED_VALUE,
             UNCLOSED_BRACKET,
             UNOPENED_BRACKET,
+            MISSING_ASSIGNMENT_OPERATOR,
             MISSING_TERMINATOR,
             MISSING_LIST_DECLARATION,
             MISSING_LIST_SEPARATOR,
             VALUE_OVERRIDE,
-            ABRUPT_EOF,
+            EOF_IN_KEY,
 
             ENUM_END
         };

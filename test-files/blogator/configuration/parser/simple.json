@@ -84,6 +84,26 @@
   },
 
   {
+    "description": "simple key-value (rooted named value - in order hit)",
+    "input": "x = 5;\ny = :x;",
+    "entries":[
+      {"key": ":x", "value": 5},
+      {"key": ":y", "value": 5}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (rooted named value - out of order hit)",
+    "input": "x = :y;\ny = 5;",
+    "entries":[
+      {"key": ":x", "value": 5},
+      {"key": ":y", "value": 5}
+    ],
+    "errors":[]
+  },
+
+  {
     "description": "simple key-value (named value - miss)",
     "input": "key=value;",
     "entries":[
@@ -95,8 +115,17 @@
   },
 
   {
-    "description": "simple key-value (void)",
+    "description": "simple key-value (void 1)",
     "input": "key=;",
+    "entries":[
+      {"key": ":key", "value": null}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "simple key-value (void 2)",
+    "input": "key = ;",
     "entries":[
       {"key": ":key", "value": null}
     ],

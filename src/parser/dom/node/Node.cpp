@@ -847,12 +847,12 @@ unsigned short Node::compareDocumentPosition( const Node &other ) {
 
     if( node1->nodeType() == NodeType::ATTRIBUTE_NODE ){
         attr1 = dynamic_cast<Attr *>( node1 );
-        node1 = dynamic_cast<Node *>( attr1->ownerElement() );
+        node1 = static_cast<Node *>( attr1->ownerElement() );
     }
 
     if( node2->nodeType() == NodeType::ATTRIBUTE_NODE ) {
         attr2 = dynamic_cast<Attr *>( node2 );
-        node2 = dynamic_cast<Node *>( attr2->ownerElement() );
+        node2 = static_cast<Node *>( attr2->ownerElement() );
 
         if( attr1 && node1 && node2 == node1 ) {
             for( const AttrPtr_t & attr : dynamic_cast<Element *>( node2 )->attributes().list() ) {

@@ -12,6 +12,7 @@ namespace blogator::parser::token::markdown {
       public:
         MarkdownTk( specs::markdown::TokenType type, TextPos position );
         MarkdownTk( specs::markdown::TokenType type, std::u32string text, TextPos position );
+        ~MarkdownTk() override = default;
 
         [[nodiscard]] specs::markdown::TokenType type() const;
 

@@ -191,7 +191,7 @@ Element::Element( Element &&node ) noexcept :
  */
 Element & Element::operator =( const Element &node ) {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<const node::Node &>( node ) );
+        Node::operator =( static_cast<const node::Node &>( node ) );
         this->_namespace_id = node._namespace_id;
         this->_element_id   = node._element_id;
         this->_prefix       = node._prefix;
@@ -210,7 +210,7 @@ Element & Element::operator =( const Element &node ) {
  */
 Element & Element::operator =( Element &&node ) noexcept {
     if( &node != this ) {
-        Node::operator =( dynamic_cast<node::Node &&>( node ) );
+        Node::operator =( static_cast<node::Node &&>( node ) );
         this->_namespace_id = node._namespace_id;
         this->_element_id   = node._element_id;
         this->_prefix       = std::move( node._prefix );

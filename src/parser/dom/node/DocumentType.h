@@ -11,6 +11,7 @@ namespace blogator::parser::dom::node {
         DocumentType( DOMString_t name, DOMString_t public_id, DOMString_t system_id, node::Node * parent, node::Node * prev_sibling, node::Node * next_sibling );
         DocumentType( const DocumentType &node );
         DocumentType( DocumentType &&node ) noexcept;
+        virtual ~DocumentType() = default;
 
         DocumentType & operator =( const DocumentType &node );
         DocumentType & operator =( DocumentType &&node ) noexcept;

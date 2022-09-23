@@ -20,6 +20,7 @@ namespace blogator::parser::token::markdown {
 
         FormattingTk( specs::markdown::TokenType type, TextPos position );
         FormattingTk( specs::markdown::TokenType type, std::u32string text, TextPos position );
+        ~FormattingTk() override = default;
 
         friend std::ostream & operator <<( std::ostream &os, FormattingTk::Type type );
 

@@ -1,0 +1,143 @@
+{ "tests": [
+
+  {
+    "description": "key overload (named value)",
+    "input": "ref1 = 1; ref2 = 8; key = ref1; key = ref2;",
+    "entries":[
+      {"key": ":key", "value": 8},
+      {"key": ":ref1", "value": 1},
+      {"key": ":ref2", "value": 8}
+    ],
+    "errors":[
+      {"description":  "value override: 1 <- 8", "line": 1, "col": 39}
+    ]
+  },
+
+  {
+    "description": "named value overload after resolution (re-assignment)",
+    "input": "ref = 1; key = ref; ref = 8;",
+    "entries":[
+      {"key": ":key", "value": 1},
+      {"key": ":ref", "value": 8}
+    ],
+    "errors":[
+      {"description":  "value override: 1 <- 8", "line": 1, "col": 27}
+    ]
+  },
+
+  {
+    "description": "named value ref in string array",
+    "input": ":ref = \"referenced\";\n:array = [\"string\", :ref];",
+    "entries":[
+      {"key": ":array", "value": ["string", "referenced"]},
+      {"key": ":ref", "value": "referenced"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "undeclared nested named value ref 1",
+    "input": ":nested = [:array];\n:array = [:ref];\n:ref = \"referenced\";",
+    "entries":[
+      {"key": ":array", "value": ["referenced"]},
+      {"key": ":nested", "value": [["referenced"]]},
+      {"key": ":ref", "value": "referenced"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "undeclared nested named value ref 2",
+    "input": ":nested = [0x00, :array];\n:array = [0xFF, :ref];\n:ref = [\"referenced\"];",
+    "entries":[
+      {"key": ":array", "value": [255, ["referenced"]]},
+      {"key": ":nested", "value": [0, [255, ["referenced"]]]},
+      {"key": ":ref", "value": ["referenced"]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "null value ref in string array",
+    "input": ":ref = ;\n:array = [\"string\", :ref];",
+    "entries":[
+      {"key": ":array", "value": ["string", null]},
+      {"key": ":ref", "value": null}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "scoped named value ref in string array",
+    "input": ":scope: = { ref = \"referenced\";\narray = [\"string\", :scope:ref]; };",
+    "entries":[
+      {"key": ":scope:array", "value": ["string", "referenced"]},
+      {"key": ":scope:ref", "value": "referenced"}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "root named value ref in scoped string array",
+    "input": "ref = \"referenced\";\n:scope: = { \narray = [\"string\", :ref]; };",
+    "entries":[
+      {"key": ":ref", "value": "referenced"},
+      {"key": ":scope:array", "value": ["string", "referenced"]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "root null value ref in scoped string array",
+    "input": "ref = ;\n:scope = { array = [\"string\", :ref]; };",
+    "entries":[
+      {"key": ":ref", "value": null},
+      {"key": ":scope:array", "value": ["string", null]}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "unresolved name in variable dependency chain",
+    "input": "key1 = unresolved;\nkey2 = [\"str\", key1];\nkey3 = key2;",
+    "entries":[
+      {"key": ":key1", "value": ":unresolved"},
+      {"key": ":key2", "value": ["str", ":key1"]},
+      {"key": ":key3", "value": ["str", ":key1"]}
+    ],
+    "errors":[
+      {"description": "unresolved named value: { 'END_OF_FILE' | :unresolved }", "line": 1, "col": 8},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key1 }", "line": 2, "col": 8},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key1 }", "line": 3, "col": 8}
+    ]
+  },
+
+  {
+    "description": "unresolved variable circular dependency chain",
+    "input": "key1 = key2;\nkey2 = key1;",
+    "entries": [
+      {"key": ":key1", "value": ":key2"},
+      {"key": ":key2", "value": ":key1"}
+    ],
+    "errors":[
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key2 }", "line": 1, "col": 8},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key1 }", "line": 2, "col": 8}
+    ]
+  },
+
+  {
+    "description": "unresolved name in variable dependency chain",
+    "input": "key1 = unresolved;\nkey2 = [\"str\", key1];\nkey3 = key2;",
+    "entries":[
+      {"key": ":key1", "value": ":unresolved"},
+      {"key": ":key2", "value": ["str", ":key1"]},
+      {"key": ":key3", "value": ["str", ":key1"]}
+    ],
+    "errors":[
+      {"description": "unresolved named value: { 'END_OF_FILE' | :unresolved }", "line": 1, "col": 8},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key1 }", "line": 2, "col": 8},
+      {"description": "unresolved named value: { 'END_OF_FILE' | :key1 }", "line": 3, "col": 8}
+    ]
+  }
+
+]}

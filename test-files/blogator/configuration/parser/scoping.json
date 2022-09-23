@@ -36,31 +36,6 @@
   },
 
   {
-    "description": "key overload (named value)",
-    "input": "ref1 = 1; ref2 = 8; key = ref1; key = ref2;",
-    "entries":[
-      {"key": ":key", "value": 8},
-      {"key": ":ref1", "value": 1},
-      {"key": ":ref2", "value": 8}
-    ],
-    "errors":[
-      {"description":  "value override: 1 <- 8", "line": 1, "col": 39}
-    ]
-  },
-
-  {
-    "description": "named value overload after resolution (re-assignment)",
-    "input": "ref = 1; key = ref; ref = 8;",
-    "entries":[
-      {"key": ":key", "value": 1},
-      {"key": ":ref", "value": 8}
-    ],
-    "errors":[
-      {"description":  "value override: 1 <- 8", "line": 1, "col": 27}
-    ]
-  },
-
-  {
     "description": "root in scope",
     "input": ": = { :key=0; };",
     "entries":[
@@ -72,13 +47,25 @@
   },
 
   {
-    "description": "root in scope",
+    "description": "root in scope (1st key)",
     "input": "ns: = { :key=0; };",
     "entries":[
       {"key": ":ns:key", "value": 0}
     ],
     "errors":[
       {"description":  "root in scoped key", "line": 1, "col": 9}
+    ]
+  },
+
+  {
+    "description": "root in scope (2nd key)",
+    "input": "ns: = { key1, :key2 = 0; };",
+    "entries":[
+      {"key": ":ns:key1", "value": 0},
+      {"key": ":ns:key2", "value": 0}
+    ],
+    "errors":[
+      {"description":  "root in scoped key", "line": 1, "col": 15}
     ]
   },
 

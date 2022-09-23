@@ -1,0 +1,96 @@
+{ "tests": [
+
+  {
+    "description": "comment before keys",
+    "input": "/*comment*/key=0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment before key 1",
+    "input": "key1/*comment*/key2=0;",
+    "entries":[
+      {"key": ":key1", "value": 0},
+      {"key": ":key2", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment before key 2",
+    "input": "key1, /*comment*/key2=0;",
+    "entries":[
+      {"key": ":key1", "value": 0},
+      {"key": ":key2", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment after key",
+    "input": ":key /*comment*/=0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment after key",
+    "input": ":key1 /*comment*/, :key2=0;",
+    "entries":[
+      {"key": ":key1", "value": 0},
+      {"key": ":key2", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment after namespace",
+    "input": ":ns:/*comment*/key=0;",
+    "entries":[
+      {"key": ":ns:key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment before value",
+    "input": ":key=/*comment*/0;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment after value",
+    "input": ":key=0/*comment*/;",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment after values",
+    "input": ":key=0;/*comment*/",
+    "entries":[
+      {"key": ":key", "value": 0}
+    ],
+    "errors":[]
+  },
+
+  {
+    "description": "comment before value",
+    "input": "key= [ 0, /*comment*/1];",
+    "entries":[
+      {"key": ":key", "value": [0, 1]}
+    ],
+    "errors":[]
+  }
+
+]}

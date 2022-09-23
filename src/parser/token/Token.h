@@ -13,6 +13,7 @@ namespace blogator::parser::token {
       public:
         Token( reporter::Context ns, TextPos position );
         Token( reporter::Context ns, std::u32string text, TextPos position );
+        virtual ~Token() = default;
 
         friend std::ostream & operator<<( std::ostream &os, const Token &token ) {
             token.toStr( os );
