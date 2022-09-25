@@ -1,5 +1,8 @@
 #include "Text.h"
 
+#include "../../../unicode/ascii.h"
+#include "../../../unicode/utf8.h"
+
 using namespace blogator::parser::dom::node;
 
 /**
@@ -177,6 +180,22 @@ blogator::parser::dom::NodePtr_t Text::replaceChildNode( NodePtr_t &node, NodePt
     using exception::DOMExceptionType;
 
     throw DOMException( DOMExceptionType::HierarchyRequestError, "Text nodes do not have children." );
+}
+
+/**
+ * [OVERRIDE] Outputs the node as UTF-8 formatted html into a stream
+ * @param os Output stream
+ */
+void Text::toUTF8Stream( std::ostream &os ) const {
+    for( auto c : this->data() ) {
+        switch( c ) {
+            case unicode::QUOTATION_MARK   : { os << "&quot;"; } break;
+            case unicode::AMPERSAND        : { os << "&amp;";  } break;
+            case unicode::LESS_THAN_SIGN   : { os << "&lt;";   } break;
+            case unicode::GREATER_THAN_SIGN: { os << "&gt;";   } break;
+            default                        : { blogator::unicode::utf8::convert( os, c ); } break;
+        }
+    }
 }
 
 /**

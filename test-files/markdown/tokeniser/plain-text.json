@@ -155,21 +155,34 @@
 
   {
     "description":"Non escapable character",
-    "input":"\\?",
+    "input":"\\¬",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "CHARACTER", "text": "\\?", "position": "1:1"},
+      {"type": "CHARACTER", "text": "\\¬", "position": "1:1"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:3"}
     ],
     "errors":[]
   },
 
   {
+    "description":"newline on escape characters",
+    "input":"text\\\n",
+    "tokens":[
+      {"type": "PARAGRAPH", "id": "", "position": "1:1"},
+      {"type": "CHARACTER", "text": "text", "position": "1:1"},
+      {"type": "LINE_BREAK", "position": "1:5"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"}
+    ],
+    "errors":[]
+  }
+,
+  {
     "description":"EOF on escape characters",
     "input":"text\\",
     "tokens":[
       {"type": "PARAGRAPH", "id": "", "position": "1:1"},
-      {"type": "CHARACTER", "text": "text\\", "position": "1:1"},
+      {"type": "CHARACTER", "text": "text", "position": "1:1"},
+      {"type": "LINE_BREAK", "position": "1:5"},
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:6"}
     ],
     "errors":[]
