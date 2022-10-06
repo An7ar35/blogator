@@ -217,6 +217,31 @@
       {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "1:5"}
     ],
     "errors":[]
+  },
+
+  {
+    "description": "rule separated list 1 '*'",
+    "input": "* list A\n\n***\n\n* list B\n",
+    "tokens":[
+      {"type": "LIST", "list": "UL_ASTERISK", "tight": "true", "position": "1:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "1:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "1:3"},
+      {"type": "CHARACTER", "text": "list A", "position": "1:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "2:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "3:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "3:1"},
+
+      {"type": "HORIZONTAL_RULE", "text": "***", "position": "3:1"},
+
+      {"type": "LIST", "list": "UL_ASTERISK", "tight": "true", "position": "5:1"},
+      {"type": "LIST_ITEM", "ref": "", "modality": "NONE", "position": "5:1"},
+      {"type": "PARAGRAPH", "id": "", "position": "5:3"},
+      {"type": "CHARACTER", "text": "list B", "position": "5:3"},
+      {"type": "BLOCK_END", "block": "PARAGRAPH", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST_ITEM", "position": "6:1"},
+      {"type": "BLOCK_END", "block": "LIST", "position": "6:1"}
+    ],
+    "errors":[]
   }
 
 ]}

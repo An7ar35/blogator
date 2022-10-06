@@ -248,7 +248,7 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
             if( tk->lang().empty() ) {
                 openElement( HtmlElement_e::HTML5_CODE );
             } else {
-                openElement( HtmlElement_e::HTML5_CODE, UR"(class="code-block-)" + tk->lang() + UR"(")" );
+                openElement( HtmlElement_e::HTML5_CODE, UR"(class="language-)" + tk->lang() + UR"(")" );
             }
         } break;
 

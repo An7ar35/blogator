@@ -8,11 +8,38 @@
  * Character code constants in the ASCII range
  */
 namespace blogator::unicode {
-    static constexpr char32_t NUL                    { 0x00 }; //'\0'
-    static constexpr char32_t TAB                    { 0x09 }; //'\t'
-    static constexpr char32_t LF                     { 0x0A }; //'\n'
-    static constexpr char32_t FF                     { 0x0C }; //'\f'
-    static constexpr char32_t CR                     { 0x0D }; //'\r'
+    static constexpr char32_t NUL                    { 0x00 }; //'\0' Null (^@)
+    static constexpr char32_t SOH                    { 0x01 }; //Start of heading (^A)
+    static constexpr char32_t STX                    { 0x02 }; //Start of text (^B)
+    static constexpr char32_t ETX                    { 0x03 }; //End of text (^C)
+    static constexpr char32_t EOT                    { 0x04 }; //End of transmission (^D)
+    static constexpr char32_t INQ                    { 0x05 }; //Inquiry (^E)
+    static constexpr char32_t ACK                    { 0x06 }; //Acknowledgement (^F)
+    static constexpr char32_t BEL                    { 0x07 }; //Bell (^G)
+    static constexpr char32_t BS                     { 0x08 }; //Backspace (^H)
+    static constexpr char32_t TAB                    { 0x09 }; //'\t' Horizontal tab (^I)
+    static constexpr char32_t LF                     { 0x0A }; //'\n' Line feed (^J)
+    static constexpr char32_t VT                     { 0x0B }; //'\v' Vertical Tab (^K)
+    static constexpr char32_t FF                     { 0x0C }; //'\f' Form feed (^L)
+    static constexpr char32_t CR                     { 0x0D }; //'\r' Carriage return (^M)
+    static constexpr char32_t SO                     { 0x0E }; //Shift out (^N)
+    static constexpr char32_t SI                     { 0x0F }; //Shift in (^O)
+    static constexpr char32_t DLE                    { 0x10 }; //Data link escape (^P)
+    static constexpr char32_t DC1                    { 0x11 }; //Device control 1/XON (^Q)
+    static constexpr char32_t DC2                    { 0x13 }; //Device control 3 (^R)
+    static constexpr char32_t DC3                    { 0x13 }; //Device control 3/XOFF (^S)
+    static constexpr char32_t DC4                    { 0x14 }; //Device control 4 (^T)
+    static constexpr char32_t NAK                    { 0x15 }; //Negative acknowledgement (^U)
+    static constexpr char32_t SYN                    { 0x16 }; //Synchronous idle (^V)
+    static constexpr char32_t ETB                    { 0x17 }; //End of transmission block (^W)
+    static constexpr char32_t CAN                    { 0x18 }; //Cancel (^X)
+    static constexpr char32_t EM                     { 0x19 }; //End of medium (^Y)
+    static constexpr char32_t SUB                    { 0x1A }; //Substitute (^Z)
+    static constexpr char32_t ESC                    { 0x1B }; //'\e' Escape (^[)
+    static constexpr char32_t FS                     { 0x1C }; //File separator (^\)
+    static constexpr char32_t GS                     { 0x1D }; //Group separator (^])
+    static constexpr char32_t RS                     { 0x1E }; //Record separator (^^)
+    static constexpr char32_t US                     { 0x1F }; //Unit separator (^_)
     static constexpr char32_t SPACE                  { 0x20 }; //' '
     static constexpr char32_t EXCLAMATION_MARK       { 0x21 }; //'!'
     static constexpr char32_t QUOTATION_MARK         { 0x22 }; //'"'
@@ -50,7 +77,7 @@ namespace blogator::unicode {
     static constexpr char32_t VERTICAL_LINE          { 0x7C }; //'|'
     static constexpr char32_t RIGHT_CURLY_BRACKET    { 0x7D }; //'}'
     static constexpr char32_t TILDE                  { 0x7E }; //'~'
-    static constexpr char32_t DEL                    { 0x7F };
+    static constexpr char32_t DEL                    { 0x7F }; //Delete (^?)
 }
 
 /**

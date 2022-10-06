@@ -4,11 +4,13 @@
 #include <vector>
 #include <string>
 #include <type_traits>
+#include <functional>
 
 namespace blogator::string {
     template<typename CharType> std::vector<std::basic_string<CharType>> split( std::basic_string<CharType> str, CharType separator, bool discard_empty = false );
     template<typename CharType> typename std::basic_string<CharType>::iterator & skipWhitespace( const std::basic_string<CharType> &str, typename std::basic_string<CharType>::iterator &it );
     template<typename CharType> typename std::basic_string<CharType>::const_iterator & skipWhitespace( const std::basic_string<CharType> &str, typename std::basic_string<CharType>::const_iterator &it );
+    template<typename CharType> typename std::basic_string<CharType> remove( std::basic_string<CharType> str, std::function<bool( CharType )> predicate_fn );
 }
 
 // =================================== TEMPLATE IMPLEMENTATIONS ================================= //
@@ -96,6 +98,37 @@ template<typename CharType> typename std::basic_string<CharType>::const_iterator
     }
 
     return it;
+}
+
+/**
+ * Removes any characters matching the predicate
+ * @tparam CharType Character type
+ * @param str String
+ * @param predicate_fn Predicate function that return true on a character to remove
+ * @return String with characters removed
+ * @throws std::bad_alloc if the function needs to allocate storage and fails
+ */
+template<typename CharType> std::basic_string<CharType> blogator::string::remove( //TODO unit test
+    std::basic_string<CharType> str,
+    std::function<bool( CharType )> predicate_fn )
+{
+    auto it1 = str.begin();
+    auto it2 = it1;
+
+    while( it2 != str.end() ) {
+        if( !predicate_fn ) {
+            *it1 = *it2;
+            ++it1;
+        }
+
+        ++it2;
+    }
+
+    try {
+        return str.substr( 0, std::distance( str.begin(), it1 ) );
+    } catch( const std::out_of_range & e ) {
+        return {};
+    }
 }
 
 #endif //BLOGATOR_STRING_STRING_H

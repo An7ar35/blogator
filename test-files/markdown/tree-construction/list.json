@@ -89,6 +89,27 @@
     "markdown": "1. 1\n  - a\n    * 1a1\n\n    * 1a2\n  - b\n2. 2",
     "html": "<ol type=\"1\"><li>1<ul><li>a<ul><li><p>1a1</p></li><li><p>1a2</p></li></ul></li><li>b</li></ul></li><li>2</li></ol>",
     "errors": []
+  },
+
+  {
+    "description": "rule separated unordered list 1 (* with ***)",
+    "markdown": "* list A\n\n***\n\n* list B\n",
+    "html": "<ul><li>list A</li></ul><hr><ul><li>list B</li></ul>",
+    "errors": []
+  },
+
+  {
+    "description": "rule separated unordered list 2 (* with ---)",
+    "markdown": "* list A\n\n---\n\n* list B\n",
+    "html": "<ul><li>list A</li></ul><hr><ul><li>list B</li></ul>",
+    "errors": []
+  },
+
+  {
+    "description": "nested rule in unordered list",
+    "markdown": "- paragraph\n- * * *\n",
+    "html": "<ul><li>paragraph</li><li><hr></li></ul>",
+    "errors": []
   }
 
 ]}

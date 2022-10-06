@@ -240,12 +240,13 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 } else if( character == unicode::UNDERSCORE ) { //"___"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_UNDERSCORE );
+                } else if( character == unicode::SPACE ) {
+                    appendToPendingBuffer( character );
                 } else { //"__?" i.e.: inline paragraph formatting
                     pushSectionMarker(
                         queueParagraphToken( pendingBufferPosition() )
                     );
-                    queueFormattingToken( pendingBufferPosition(), unicode::UNDERSCORE, unicode::UNDERSCORE );
-                    resetPendingBuffer( text.position() );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
                 }
             } break;
@@ -278,12 +279,13 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 } else if( character == unicode::ASTERISK ) { //"***"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_ASTERISK );
+                } else if( character == unicode::SPACE ) {
+                    appendToPendingBuffer( character );
                 } else { //"**?" i.e.: inline paragraph formatting
                     pushSectionMarker(
                         queueParagraphToken( pendingBufferPosition() )
                     );
-                    queueFormattingToken( pendingBufferPosition(), unicode::ASTERISK, unicode::ASTERISK );
-                    resetPendingBuffer( text.position() );
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::PARAGRAPH_BLOCK_LINE_CONTENT );
                 }
             } break;
@@ -357,10 +359,26 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 } else if( character == unicode::HYPHEN_MINUS ) { //"- -"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_HYPHEN );
+                } else if( character == unicode::SPACE ) {
+                    appendToPendingBuffer( character );
+                    setState( State_e::BLOCK_BEGIN_HYPHEN_SPACE_SPACE );
                 } else if( character == unicode::LEFT_SQUARE_BRACKET ) { //"- [" could be a task list or ul with a footnote def
                     appendToPendingBuffer( character );
                     setState( State_e::BLOCK_BEGIN_HYPHEN_SPACE_LEFT_SQUARE_BRACKET );
                 } else { //"- ?" i.e.: unordered list
+                    reconsume( State_e::BLOCK_BEGIN_UNORDERED_LIST_ITEM_HYPHEN );
+                }
+            } break;
+
+            case State_e::BLOCK_BEGIN_HYPHEN_SPACE_SPACE: { //"-  "
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::BLOCK_BEGIN_UNORDERED_LIST_ITEM_HYPHEN );
+                } else if( character == unicode::HYPHEN_MINUS ) { //"-  -"
+                    appendToPendingBuffer( character );
+                    setState( State_e::HORIZONTAL_RULE_HYPHEN );
+                } else if( character == unicode::SPACE ) { //"-   "
+                    appendToPendingBuffer( character );
+                } else { //"-  ?" i.e.: unordered list
                     reconsume( State_e::BLOCK_BEGIN_UNORDERED_LIST_ITEM_HYPHEN );
                 }
             } break;
@@ -1060,7 +1078,11 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                         if( peekLastOpenContainerBlockType() == Type_e::LIST_ITEM &&
                             _list_spacing                    != ListSpacing_e::DEFAULT_TIGHT )
                         {
-                            loosenLastListBlockSpacing();
+                            if( text.reachedEnd() ) {
+                                _list_spacing = ListSpacing_e::DEFAULT_TIGHT; //since no content
+                            } else {
+                                loosenLastListBlockSpacing();
+                            }
                         }
 
                         reconsume( consumeReturnState() );
@@ -1912,27 +1934,24 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
             } break;
 
             case State_e::ESCAPED_CHARACTER_TO_TOKEN_QUEUE: {
-                if( text.reachedEnd() ) {
-                    reconsume( consumeReturnState() );
-                } else {
-                    if( Markdown::isEscapable( character ) ) {
-                        popLastQueuedToken(); //'\'
-                        queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
-                    } else if( character == unicode::AMPERSAND ) {
-                        popLastQueuedToken(); //'\'
-                        queueToken( std::make_unique<CharacterTk>( U"&amp;", text.position() ) );
-                    } else if( character == unicode::LESS_THAN_SIGN ) {
-                        popLastQueuedToken(); //'\'
-                        queueToken( std::make_unique<CharacterTk>( U"&lt;", text.position() ) );
-                    } else if( character == unicode::GREATER_THAN_SIGN ) {
-                        popLastQueuedToken(); //'\'
-                        queueToken( std::make_unique<CharacterTk>( U"&gt;", text.position() ) );
-                    } else {
-                        queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
-                    }
+                if( text.reachedEnd() || unicode::ascii::isfeed( character ) ) {
+                    popLastQueuedToken();
+                    queueToken( std::make_unique<LineBreakTk>( text.position() - TextPos( 0, 1 ) ) );
+                } else if( Markdown::isEscapable( character ) ) {
+                    popLastQueuedToken();
 
-                    setState( consumeReturnState() );
+                    switch( character ) {
+                        case unicode::QUOTATION_MARK   : { queueToken( std::make_unique<CharacterTk>( U"&quot;", text.position() ) ); } break;
+                        case unicode::AMPERSAND        : { queueToken( std::make_unique<CharacterTk>( U"&amp;", text.position() ) );  } break;
+                        case unicode::LESS_THAN_SIGN   : { queueToken( std::make_unique<CharacterTk>( U"&lt;", text.position() ) );   } break;
+                        case unicode::GREATER_THAN_SIGN: { queueToken( std::make_unique<CharacterTk>( U"&gt;", text.position() ) );   } break;
+                        default                        : { queueToken( std::make_unique<CharacterTk>( character, text.position() ) ); } break;
+                    }
+                } else {
+                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
                 }
+
+                setState( consumeReturnState() );
             } break;
 
             case State_e::ESCAPED_CHARACTER_TO_PENDING_CHAR_BUFFER: {
@@ -2357,7 +2376,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     queueToken( std::make_unique<CodeBlockTk>( pendingBufferPosition() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
-                } else if( unicode::ascii::isalpha( character ) ) {
+                } else if( unicode::ascii::isalpha( character ) || character == unicode::AMPERSAND ) {
                     resetPendingBuffer( text.position() );
                     reconsume( State_e::CODE_BLOCK_LANGUAGE_TAG );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
@@ -2416,7 +2435,11 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::END_OF_FILE );
-                } else if( unicode::ascii::isalpha( character ) ) {
+                } else if( unicode::ascii::isalpha( character ) ||
+                           character == unicode::AMPERSAND      ||
+                           character == unicode::SEMICOLON      ||
+                           character == unicode::HYPHEN_MINUS )
+                {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
@@ -4478,6 +4501,7 @@ inline token::markdown::MarkdownTk * tokeniser::Markdown::peekLastQueuedToken() 
 inline bool tokeniser::Markdown::isEscapable( char32_t c ) {
     static const auto MAP = std::set<char32_t>( {
         unicode::REVERSE_SOLIDUS,
+        unicode::SOLIDUS,
         unicode::GRAVE_ACCENT,
         unicode::ASTERISK,
         unicode::UNDERSCORE,
@@ -4488,10 +4512,26 @@ inline bool tokeniser::Markdown::isEscapable( char32_t c ) {
         unicode::LEFT_PARENTHESIS,
         unicode::RIGHT_PARENTHESIS,
         unicode::NUMBER_SIGN,
+        unicode::COMMA,
+        unicode::COLON,
+        unicode::SEMICOLON,
         unicode::PLUS_SIGN,
         unicode::HYPHEN_MINUS,
+        unicode::EQUALS_SIGN,
         unicode::FULL_STOP,
         unicode::EXCLAMATION_MARK,
+        unicode::QUESTION_MARK,
+        unicode::QUOTATION_MARK,
+        unicode::SINGLE_QUOTE,
+        unicode::AT_SYMBOL,
+        unicode::DOLLAR,
+        unicode::PERCENT_SIGN,
+        unicode::CIRCUMFLEX_ACCENT,
+        unicode::TILDE,
+        unicode::VERTICAL_LINE,
+        unicode::AMPERSAND,
+        unicode::LESS_THAN_SIGN,
+        unicode::GREATER_THAN_SIGN,
     } );
 
     return MAP.contains( c );
