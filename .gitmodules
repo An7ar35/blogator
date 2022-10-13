@@ -7,3 +7,6 @@
 [submodule "submodules/commonmark-spec"]
 	path = submodules/commonmark-spec
 	url = https://github.com/commonmark/commonmark-spec.git
+[submodule "submodules/url-testing"]
+	path = submodules/url-testing
+	url = https://github.com/cweb/url-testing

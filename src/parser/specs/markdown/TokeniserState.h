@@ -22,6 +22,7 @@ namespace blogator::parser::specs::markdown {
         BLOCK_BEGIN_UNDERSCORE_UNDERSCORE,
         BLOCK_BEGIN_ASTERISK,
         BLOCK_BEGIN_ASTERISK_SPACE,
+        BLOCK_BEGIN_ASTERISK_SPACE_SPACE,
         BLOCK_BEGIN_ASTERISK_TAB,
         BLOCK_BEGIN_ASTERISK_ASTERISK,
         BLOCK_BEGIN_HYPHEN,
@@ -43,6 +44,7 @@ namespace blogator::parser::specs::markdown {
 
         LINE_BEGIN,
         LINE_BEGIN_ASTERISK,
+        LINE_BEGIN_ASTERISK_SPACE,
         LINE_BEGIN_EQUAL_SIGN,
         LINE_BEGIN_EQUAL_SIGN_EQUAL_SIGN,
         LINE_BEGIN_PLUS_SIGN,

@@ -134,3 +134,18 @@ Indented code block declarations are __unsupported__.
 
 Link reference are __unsupported__.
 
+
+## Horizontal rules
+
+```
+---
+- - -
+***
+* * *
+___
+_ _ _
+```
+
+To break unordered lists apart make sure to have use non-spaced horizontal breaks (e.g.: `***`, `---`, `___`)
+
+Don't use line breaks inside lists.

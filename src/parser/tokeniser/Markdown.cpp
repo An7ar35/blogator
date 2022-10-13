@@ -295,6 +295,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 } else if( character == unicode::SPACE ) { //"*  "
                     appendToPendingBuffer( character );
+                    setState( State_e::BLOCK_BEGIN_ASTERISK_SPACE_SPACE );
                 } else if( character == unicode::ASTERISK ) { //"* *"
                     appendToPendingBuffer( character );
                     setState( State_e::HORIZONTAL_RULE_ASTERISK );
@@ -309,6 +310,19 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
                     reconsume( consumeReturnState() );
+                }
+            } break;
+
+            case State_e::BLOCK_BEGIN_ASTERISK_SPACE_SPACE: {
+                if( text.reachedEnd() ) {
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
+                } else if( character == unicode::SPACE ) { //"*  "
+                    appendToPendingBuffer( character );
+                } else if( character == unicode::ASTERISK ) { //"* *"
+                    appendToPendingBuffer( character );
+                    setState( State_e::HORIZONTAL_RULE_ASTERISK );
+                } else {
+                    reconsume( State_e::PARAGRAPH_BLOCK_NEW_PARAGRAPH_BLOCK );
                 }
             } break;
 
@@ -606,7 +620,25 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
             case State_e::LINE_BEGIN_ASTERISK: {
                 if( text.reachedEnd() ) {
                     reconsume( consumeReturnState() );
-                } else if( character == unicode::SPACE ) { //i.e.: list item "* "
+                } else if( character == unicode::SPACE ) { //could be list item
+                    appendToPendingBuffer( character );
+                    setState( State_e::LINE_BEGIN_ASTERISK_SPACE );
+                } else if( character == unicode::ASTERISK ) { //i.e.: formatting "**"
+                    appendToPendingBuffer( character );
+                    setState( consumeReturnState() );
+                } else {
+                    reconsume( consumeReturnState() );
+                }
+            } break;
+
+            case State_e::LINE_BEGIN_ASTERISK_SPACE: {
+                if( text.reachedEnd()           ||
+                    character == unicode::SPACE ||
+                    character == unicode::ASTERISK )
+                {
+                    reconsume( State_e::LINE_BEGIN_INSIDE_PARAGRAPH_BLOCK );
+
+                } else { //i.e.: list item "* ?"
                     if( specs::markdown::isLeafBlock( peekLastOpenBlockType() ) ) {
                         closeLastOpenedBlock( pendingBufferPosition() );
                     }
@@ -619,11 +651,6 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     resetPendingBuffer( text.position() );
                     modifyReturnState( State_e::BLOCK_BEGIN_WHITESPACE );
-                    setState( consumeReturnState() );
-                } else if( character == unicode::ASTERISK ) { //i.e.: formatting "**"
-                    appendToPendingBuffer( character );
-                    setState( consumeReturnState() );
-                } else {
                     reconsume( consumeReturnState() );
                 }
             } break;
@@ -2232,25 +2259,30 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 if( text.reachedEnd() ) {
                     reconsume( State_e::END_OF_FILE );
                 } else if( character != unicode::SPACE && character != unicode::TAB ) {
+                    resetPendingBuffer( text.position() );
                     reconsume( State_e::HEADING_BLOCK_ATX_TEXT );
                 } //else: ignore
             } break;
 
             case State_e::HEADING_BLOCK_ATX_TEXT: {
                 if( text.reachedEnd() ) {
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::LEFT_CURLY_BRACKET ) {
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     resetPendingBuffer( text.position() );
                     pushReturnState( State_e::HEADING_BLOCK_ATX_TEXT );
                     setState( State_e::INLINE_CONTENT_LEFT_CURLY_BRACKET );
                 } else if( unicode::ascii::isfeed( character ) ) {
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     setState( State_e::AFTER_BLOCK );
                 } else if( character == unicode::NUMBER_SIGN ) {
+                    flushPendingBufferToQueue( CharacterProcessing::FORMAT_ONLY );
                     resetPendingBuffer( pendingBufferPosition() );
                     appendToPendingBuffer( character );
                     setState( State_e::HEADING_BLOCK_ATX_TEXT_CLOSING );
                 } else {
-                    queueToken( std::make_unique<CharacterTk>( character, text.position() ) );
+                    appendToPendingBuffer( character );
                 }
             } break;
 
