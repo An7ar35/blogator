@@ -1270,7 +1270,11 @@ inline bool parser::Parser::closeBracketsDownTo( const std::u32string &bracket_c
 
             it = _cache.opened_brackets.erase( it );
         }
+
+        return true;
     }
+
+    return false;
 }
 
 /**
