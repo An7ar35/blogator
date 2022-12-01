@@ -159,7 +159,7 @@ TEST_P( configuration_parser_Parser_Tests, configuration_parser_tests ) {
     EXPECT_TRUE( runConfigurationParserTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ConfigurationParserTestInstance,
     configuration_parser_Parser_Tests,
     ::testing::ValuesIn( test_harness::blogator::loadConfigParserTests( test_harness::BLOGATOR_CONFIGURATION_PARSER_TEST_PATH ) )

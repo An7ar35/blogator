@@ -1,5 +1,6 @@
 #include "Markdown.h"
 
+#include <ranges>
 #include <set>
 #include <type_traits>
 
@@ -20,15 +21,15 @@ using           blogator::reporter::ParseReporter;
  * @param html_builder MarkdownToHtml instance
  */
 blogator::parser::tokeniser::Markdown::Markdown( parser::builder::MarkdownToHtml & html_builder ) :
+    _eof( false ),
+    _error_count( 0 ),
     _html_builder( html_builder ),
     _current_state( State_e::BEFORE_BLOCK ),
     _empty_lines( 0 ),
+    _curr_open_container_i( 0 ),
     _actual_blockquote_lvl( 0 ),
     _curr_blockquote_lvl( 0 ),
-    _curr_open_container_i( 0 ),
-    _list_spacing( ListSpacing_e::DEFAULT_TIGHT ),
-    _error_count( 0 ),
-    _eof( false )
+    _list_spacing( ListSpacing_e::DEFAULT_TIGHT )
 {}
 
 /**
@@ -1989,14 +1990,14 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
 
             case State_e::HORIZONTAL_RULE_ASTERISK: {
                 if( text.reachedEnd() ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::ASTERISK ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( State_e::HORIZONTAL_RULE_WHITESPACE );
                 } else if( unicode::ascii::isfeed( character ) ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     setState( State_e::AFTER_BLOCK );
                 } else {
                     text.reverseCaret( _pending.buffer.size() );
@@ -2007,14 +2008,14 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
 
             case State_e::HORIZONTAL_RULE_HYPHEN: {
                 if( text.reachedEnd() ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::HYPHEN_MINUS ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( State_e::HORIZONTAL_RULE_WHITESPACE );
                 } else if( unicode::ascii::isfeed( character ) ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     setState( State_e::AFTER_BLOCK );
                 } else {
                     text.reverseCaret( _pending.buffer.size() );
@@ -2025,14 +2026,14 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
 
             case State_e::HORIZONTAL_RULE_UNDERSCORE: {
                 if( text.reachedEnd() ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::UNDERSCORE ) {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     reconsume( State_e::HORIZONTAL_RULE_WHITESPACE );
                 } else if( unicode::ascii::isfeed( character ) ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     setState( State_e::AFTER_BLOCK );
                 } else {
                     text.reverseCaret( _pending.buffer.size() );
@@ -2043,12 +2044,12 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
 
             case State_e::HORIZONTAL_RULE_WHITESPACE: {
                 if( text.reachedEnd() ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
                     appendToPendingBuffer( character );
                 } else if( unicode::ascii::isfeed( character ) ) {
-                    queueToken( std::make_unique<HorizontalRuleTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HorizontalRuleTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     setState( State_e::AFTER_BLOCK );
                 } else if( character == unicode::ASTERISK && _pending.buffer.front() == unicode::ASTERISK ) {
                     reconsume( State_e::HORIZONTAL_RULE_ASTERISK );
@@ -2249,7 +2250,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 if( character == unicode::NUMBER_SIGN ) {
                     appendToPendingBuffer( character );
                 } else {
-                    queueToken( std::make_unique<HeadingTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() ) );
+                    queueToken( std::make_unique<HeadingTk>( pendingBufferToStr(), pendingBufferPosition() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::HEADING_BLOCK_ATX_BEFORE_TEXT );
                 }
@@ -2320,7 +2321,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     if( hasQueuedTokens() ) {
                         auto &     old_section_tk    = getQueuedToken( peekLastSectionMarker() );
                         const auto old_section_id    = dynamic_cast<BlockBeginTk *>( old_section_tk.get() )->id();
-                        auto       new_section_block = std::make_unique<HeadingTk>( 1, std::move( pendingBufferToStr() ), pendingBufferPosition() );
+                        auto       new_section_block = std::make_unique<HeadingTk>( 1, pendingBufferToStr(), pendingBufferPosition() );
 
                         dynamic_cast<BlockBeginTk *>( new_section_block.get() )->setID( old_section_id );
                         old_section_tk = std::move( new_section_block );
@@ -2354,7 +2355,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                     if( hasQueuedTokens() ) {
                         auto &     old_section_tk    = getQueuedToken( peekLastSectionMarker() );
                         const auto old_section_id    = dynamic_cast<BlockBeginTk *>( old_section_tk.get() )->id();
-                        auto       new_section_block = std::make_unique<HeadingTk>( 2, std::move( pendingBufferToStr() ), pendingBufferPosition() );
+                        auto       new_section_block = std::make_unique<HeadingTk>( 2, pendingBufferToStr(), pendingBufferPosition() );
 
                         dynamic_cast<BlockBeginTk *>( new_section_block.get() )->setID( old_section_id );
                         old_section_tk = std::move( new_section_block );
@@ -2464,7 +2465,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
             case State_e::CODE_BLOCK_LANGUAGE_TAG: {
                 if( text.reachedEnd() ) {
                     logError( text.position(), ErrorCode::EOF_IN_CODE_BLOCK );
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
+                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferToStr(), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::END_OF_FILE );
                 } else if( unicode::ascii::isalpha( character ) ||
@@ -2474,11 +2475,11 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 {
                     appendToPendingBuffer( character );
                 } else if( character == unicode::SPACE || character == unicode::TAB ) {
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
+                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferToStr(), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_WHITESPACE_AFTER_LANGUAGE_TAG );
                 } else if( unicode::ascii::isfeed( character ) ) {
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
+                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferToStr(), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     setState( State_e::CODE_BLOCK_CONTENT_NEWLINE );
                 } else if( ( character == unicode::GRAVE_ACCENT && _pending.block_fence == Fence_e::TRIPLE_GRAVE_ACCENT && text.characters( 3 ) == UR"(```)"  ) ||
@@ -2487,7 +2488,7 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                            ( character == unicode::TILDE        && _pending.block_fence == Fence_e::QUAD_TILDE          && text.characters( 4 ) == UR"(~~~~)" ) )
                 {
                     logError( text.position(), ErrorCode::INLINED_CODE_BLOCK );
-                    queueToken( std::make_unique<CodeBlockTk>( std::move( pendingBufferToStr() ), pendingBufferPosition() - currentFenceSize() ) );
+                    queueToken( std::make_unique<CodeBlockTk>( pendingBufferToStr(), pendingBufferPosition() - currentFenceSize() ) );
                     pushToOpenBlockStack( markdown::Block( peekLastQueuedToken() ) );
                     reconsume( State_e::CODE_BLOCK_END );
                 } else {
@@ -3037,9 +3038,9 @@ blogator::reporter::Context tokeniser::Markdown::parse( U32Text & text, reporter
                 } else if( unicode::ascii::isalpha( character ) ) { //"<![A-Za-z]"
                     setHtmlBlockType( HtmlBlockType_e::TYPE_4 );
                     reconsume( consumeReturnState() );
-                } else if( character == unicode::LEFT_SQUARE_BRACKET && text.characters( 7 ) == UR"([CDATA[)" ) { //"<![CDATA["
+                } else if( character == unicode::LEFT_SQUARE_BRACKET && text.characters( 7 /*NOLINT*/ ) == UR"([CDATA[)" ) { //"<![CDATA["
                     appendToPendingBuffer( UR"([CDATA[)" );
-                    text.advanceCaret( 6 );
+                    text.advanceCaret( 6 /*NOLINT*/ );
                     setHtmlBlockType( HtmlBlockType_e::TYPE_5 );
                     setState( consumeReturnState() );
                 } else {
@@ -4018,9 +4019,7 @@ size_t tokeniser::Markdown::queueParagraphToken( TextPos position ) {
  * @return Count of formatting characters used (0 or 1)
  */
 size_t tokeniser::Markdown::queueFormattingToken( TextPos position, char32_t fmt_char ) {
-    const auto   new_fmt_type            = FormattingTk::resolveFormatType( { fmt_char } );
-    const auto * last_opened_marker      = peekLastFormattingMarker();
-    const auto   last_opened_marker_type = lastFormattingMarker();
+    const auto new_fmt_type = FormattingTk::resolveFormatType( { fmt_char } );
 
     if( new_fmt_type == FormattingTk::Type::NONE ) {
         return 0; //EARLY RETURN
@@ -4059,10 +4058,8 @@ size_t tokeniser::Markdown::queueFormattingToken( TextPos position, char32_t fmt
                              [fmt_type]( auto * fmt_ptr ) { return fmt_ptr->formatType() == fmt_type; } );
     };
 
-    const auto   new_fmt_type_single     = FormattingTk::resolveFormatType( { fmt_char_1 } );
-    const auto   new_fmt_type_double     = FormattingTk::resolveFormatType( { fmt_char_1, fmt_char_2 } );
-    const auto * last_opened_marker      = peekLastFormattingMarker();
-    const auto   last_opened_marker_type = lastFormattingMarker();
+    const auto new_fmt_type_single = FormattingTk::resolveFormatType( { fmt_char_1 } );
+    const auto new_fmt_type_double = FormattingTk::resolveFormatType( { fmt_char_1, fmt_char_2 } );
 
     if( new_fmt_type_double == FormattingTk::Type::NONE ) { //only first char is a valid formatting character
         auto earliest_marker_it = findEarliestMarker( new_fmt_type_single );
@@ -4357,8 +4354,8 @@ inline token::markdown::FormattingTk *tokeniser::Markdown::peekLastFormattingMar
  * @param position Closing position
  */
 inline void tokeniser::Markdown::closeFormattingMarkers( TextPos position ) {
-    for( auto it = _formatting_markers.rbegin(); it != _formatting_markers.rend(); ++it ) {
-        _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( (*it)->text(), position ) );
+    for( auto & marker : std::ranges::reverse_view( _formatting_markers ) ) {
+        _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( marker->text(), position ) );
     }
 
     _formatting_markers.clear();
@@ -4417,9 +4414,7 @@ void tokeniser::Markdown::resetHtmlBuffer( TextPos position ) {
 inline void tokeniser::Markdown::flushHtmlBufferToQueue() {
     auto position = _html_cache.buffer_pos;
 
-    for( size_t i = 0; i < _html_cache.buffer.size(); ++i ) {
-        const auto c = _html_cache.buffer[ i ];
-
+    for( char32_t c : _html_cache.buffer) {
         queueToken( std::make_unique<CharacterTk>( c, position ) );
 
         if( unicode::ascii::isfeed( c ) ) {

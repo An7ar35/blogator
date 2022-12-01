@@ -4,7 +4,7 @@
  * Test subjects:
  * - `blogator::parser::tokeniser::Markdown`: Input is pipelined to this to get to MarkdownToHtml
  * - `blogator::parser::builder::MarkdownToHtml`: main subject of the tests
- * - `blogator::parser::tokeniser::HTML5`: Output of MarkdownToHtml is fed into the HTML pipeline to deal with the tree constuction
+ * - `blogator::parser::tokeniser::HTML5`: Output of MarkdownToHtml is fed into the HTML pipeline to deal with the tree construction
  * - `blogator::parser::dom::TreeBuilder`: ^^^ (see above)
  * - `blogator::reporter::ParserLog`: where all the parsing errors get sent to (a callback is used to check the actual msgs during testing)
  */
@@ -17,9 +17,6 @@
 #include "test-harness-sources.h"
 #include "../helpers/helpers.h"
 #include "harness/harness.h"
-
-using blogator::reporter::ParseReporter;
-
 
 /**
  * Parsing log catcher
@@ -171,7 +168,7 @@ TEST_P( parser_builder_MarkdownTreeBuilder_Tests, markdown_tree_builder_tests ) 
     EXPECT_TRUE( runMarkdownTreeBuilderTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MarkdownTreeBuilderTestInstance,
     parser_builder_MarkdownTreeBuilder_Tests,
     ::testing::ValuesIn( test_harness::markdown::loadTreeBuilderTests( test_harness::MARKDOWN_TREECONSTRUCTION_TEST_PATH ) )

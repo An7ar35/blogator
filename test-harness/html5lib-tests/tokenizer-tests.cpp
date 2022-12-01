@@ -24,7 +24,6 @@
 using blogator::parser::tokeniser::HTML5;
 using blogator::parser::token::html5::HTML5Tk;
 using blogator::parser::specs::infra::TokeniserState;
-using blogator::reporter::ParseReporter;
 
 TokeniserState getStateEnum( const std::string &str ) {
     static const std::map<std::string, TokeniserState> map = {
@@ -287,7 +286,7 @@ TEST_P( parser_tokeniser_HTML5_Tests, html5lib_tests) {
     EXPECT_TRUE( runHTML5TokeniserTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     HTML5TokeniserTestInstance,
     parser_tokeniser_HTML5_Tests,
     ::testing::ValuesIn( test_harness::html5lib_tests::loadJSONTests( test_harness::HTML5LIB_TOKENIZER_TEST_PATH ) )

@@ -24,8 +24,6 @@
 
 
 using blogator::parser::dom::TreeBuilder;
-using blogator::parser::token::html5::HTML5Tk;
-using blogator::reporter::ParseReporter;
 
 /**
  * Resolves the test prefix into a Namespace
@@ -133,7 +131,7 @@ testing::AssertionResult runTest( const test_harness::html5lib_tests::TreeConstr
     const bool error_count_match  = ( error_catcher.count() == test.errors.size() );
     const bool has_unknown_errors = hasUnknownErrors( error_catcher.errors() );
 
-    if( !output_match || has_unknown_errors /* || !error_count_match /* || test.errors.size() > 0 */ ) {
+    if( !output_match || has_unknown_errors /* || !error_count_match || test.errors.size() > 0 */ ) {
         const auto context = ( !test.ctx_prefix.empty() ? ( test.ctx_prefix + ":" + test.ctx_local_name ) : test.ctx_local_name ) + "\n";
 
         std::stringstream ss;
@@ -177,7 +175,7 @@ TEST_P( parser_dom_TreeBuilder_Tests, html5lib_tests ) {
     EXPECT_TRUE( runTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     TreeBuilderTestInstance,
     parser_dom_TreeBuilder_Tests,
     ::testing::ValuesIn( test_harness::html5lib_tests::loadTreeConstructionTests( test_harness::HTML5LIB_TREECONSTRUCTION_TEST_PATH ) )

@@ -10,7 +10,6 @@
 #include "../../../src/dto/U32Text.h"
 #include "../../../src/configuration/parser/Tokeniser.h"
 #include "../../../src/configuration/parser/Parser.h"
-#include "../../../src/configuration/parser/token/ConfigTk.h"
 
 #include "test-harness-sources.h"
 #include "harness/harness.h"
@@ -218,7 +217,7 @@ TEST_P( configuration_parser_Tokeniser_Tests, tokeniser_tests ) {
     EXPECT_TRUE( runConfigurationTokeniserTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ConfigurationTokeniserTestInstance,
     configuration_parser_Tokeniser_Tests,
     ::testing::ValuesIn( test_harness::blogator::loadConfigTokeniserTests( test_harness::BLOGATOR_CONFIGURATION_TOKENIZER_TEST_PATH ) )

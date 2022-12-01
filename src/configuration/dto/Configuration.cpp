@@ -194,7 +194,7 @@ std::vector<std::pair<std::string, std::string>> Configuration::printToCollectio
     auto suffix     = std::vector<std::string>();
     auto collection = std::vector<std::pair<std::string, std::string>>();
     this->printAll( suffix, &_root, collection, quoted_types );
-    return std::move( collection );
+    return collection;
 }
 
 /**
@@ -454,7 +454,7 @@ Configuration::Key_t Configuration::convert( std::u32string ns_key ) {
         throw std::invalid_argument( "invalid char in namespaced key string" );
     }
 
-    return std::move( nsk_struct );
+    return nsk_struct;
 }
 
 /**
@@ -475,7 +475,7 @@ std::u32string Configuration::convert( const Configuration::Key_t &ns_key ) {
         }
     }
 
-    return std::move( str );
+    return str;
 }
 
 /**

@@ -19,10 +19,10 @@ using           blogator::configuration::parser::token::ConfigTk;
  * @param parser Configuration parser instance
  */
 Tokeniser::Tokeniser( Parser & parser ) :
+    _eof( false ),
+    _error_count( 0 ),
     _parser( parser ),
     _current_state( State_e::INITIAL ),
-    _error_count( 0 ),
-    _eof( false ),
     _nesting( 0 )
 {}
 
@@ -626,7 +626,7 @@ inline void Tokeniser::clearPendingBuffer() {
  */
 bool Tokeniser::matchPendingBuffer( const std::u32string &txt ) const {
     if( _pending.buffer.size() == txt.size() ) {
-        for( auto i = 0; i < txt.size(); ++i ) {
+        for( size_t i = 0; i < txt.size(); ++i ) {
             if( _pending.buffer.at( i ) != txt.at( i ) ) {
                 return false;
             }

@@ -16,7 +16,6 @@
 using namespace blogator::parser;
 using           blogator::reporter::ParseReporter;
 using           blogator::parser::specs::infra::ErrorCode;
-using           blogator::parser::specs::infra::TokeniserState;
 
 //==========================================[ PUBLIC ]==============================================
 
@@ -913,10 +912,10 @@ blogator::reporter::Context tokeniser::HTML5::parse( U32Text &text, reporter::Co
                     createCommentToken( text.position() );
                     setState( State_e::COMMENT_START );
                 } else if( unicode::ascii::toupper( next7 ) == U"DOCTYPE" ) {
-                    text.advanceCaret( 6 );
+                    text.advanceCaret( 6 /*NOLINT*/ );
                     setState( State_e::DOCTYPE );
                 } else if( next7 == U"[CDATA[" ) {
-                    text.advanceCaret( 6 );
+                    text.advanceCaret( 6 /*NOLINT*/ );
                     auto [ adj_node_exists, adj_node_ns ] = _tree_builder.adjustedCurrentNodeNS();
 
                     if( adj_node_exists && adj_node_ns != specs::infra::Namespace::HTML ) {
@@ -1150,12 +1149,12 @@ blogator::reporter::Context tokeniser::HTML5::parse( U32Text &text, reporter::Co
                     setState( State_e::DATA );
                     emitPendingToken( text.position() );
                 } else {
-                    auto next6 = unicode::ascii::toupper( text.characters( 6 ) );
+                    auto next6 = unicode::ascii::toupper( text.characters( 6 /*NOLINT*/ ) );
                     if( next6 == U"PUBLIC" ) {
-                        text.advanceCaret( 5 );
+                        text.advanceCaret( 5 /*NOLINT*/ );
                         setState( State_e::AFTER_DOCTYPE_PUBLIC_KEYWORD );
                     } else if( next6 ==U"SYSTEM" ) {
-                        text.advanceCaret( 5 );
+                        text.advanceCaret( 5 /*NOLINT*/ );
                         setState( State_e::AFTER_DOCTYPE_SYSTEM_KEYWORD );
                     } else {
                         logError( text.position(), ErrorCode::INVALID_CHARACTER_SEQUENCE_AFTER_DOCTYPE_NAME );
@@ -2101,8 +2100,7 @@ inline void tokeniser::HTML5::setPendingTokenSelfCloseFlag() {
         );
     }
 
-    auto * tk = dynamic_cast<token::html5::GenericTagTk *>( _pending.token.get() );
-    tk->setSelfClosing( true );
+    dynamic_cast<token::html5::GenericTagTk *>( _pending.token.get() )->setSelfClosing( true );
 }
 
 /**
@@ -2181,5 +2179,5 @@ inline void tokeniser::HTML5::flushCodePoints( TextPos position ) {
         }
     }
 
-    clearTempBuffer(); //TODO check if need that
+    clearTempBuffer(); //TODO check if we need that
 }

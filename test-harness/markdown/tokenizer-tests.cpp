@@ -215,7 +215,7 @@ TEST_P( parser_tokeniser_Markdown_Tests, markdown_tests ) {
     EXPECT_TRUE( runMarkdownTokeniserTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MarkdownTokeniserTestInstance,
     parser_tokeniser_Markdown_Tests,
     ::testing::ValuesIn(

@@ -17,10 +17,10 @@ ConfigurationNode::ConfigurationNode( std::u32string suffix ) :
  * @param node Node to move
  */
 ConfigurationNode::ConfigurationNode( ConfigurationNode &&node ) noexcept :
+    children( std::move( node.children ) ),
     suffix( std::move( node.suffix ) ),
     is_key( node.is_key ),
-    value( std::move( node.value ) ),
-    children( std::move( node.children ) )
+    value( std::move( node.value ) )
 {}
 
 /**

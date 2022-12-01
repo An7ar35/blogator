@@ -113,7 +113,7 @@ TEST_P( parser_tokeniser_CommonMarkSpec_Tests, commonmark_spec_tests) {
     EXPECT_TRUE( runMarkdownTest( test.first, test.second ) ) << "File name: " << test.second;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MarkdownTokeniserTestInstance,
     parser_tokeniser_CommonMarkSpec_Tests,
     ::testing::ValuesIn( test_harness::commonmark_spec_tests::loadMarkdownTests( test_harness::COMMONMARK_SPEC_TEST_PATH ) )

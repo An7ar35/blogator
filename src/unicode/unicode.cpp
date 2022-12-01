@@ -1,6 +1,5 @@
 #include "unicode.h"
 
-#include <vector>
 #include <sstream>
 
 
@@ -42,7 +41,7 @@ std::ostream &blogator::unicode::normalize( std::ostream &os, const std::u32stri
 /**
  * Normalize a UTF8 string (control codes, ''', '"' and '\\' exchanged with a unicode representations)
  * @param os Output stream
- * @param u8str UTF8 string to normalise
+ * @param u8str UTF8 string to normalize
  * @return Output stream
  */
 std::ostream &blogator::unicode::normalize( std::ostream &os, const std::string & u8str ) {

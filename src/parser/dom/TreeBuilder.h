@@ -24,6 +24,7 @@ namespace blogator::parser::dom {
     class TreeBuilder {
       public:
         explicit TreeBuilder( bool scripting = false );
+        virtual ~TreeBuilder() = default;
 
         void setStrictChecking( bool flag = true );
         void setTokeniserStateChangeCallback( std::function<void( specs::infra::TokeniserState )> cb );

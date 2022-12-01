@@ -97,7 +97,7 @@ std::unique_ptr<blogator::U32Text> MarkdownToHtml::reset() {
         _open_elements.clear();
         _footnotes.clear();
 
-        return std::move( u32text );
+        return u32text;
 
     } else {
         throw FAILED_EXPECTATION_EXCEPTION(

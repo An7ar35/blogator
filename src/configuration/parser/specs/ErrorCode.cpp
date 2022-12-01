@@ -120,7 +120,7 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             R"(This error occurs when EOF is encountered before the current KV and any opened scopes conclude.)"
         };
 
-        return std::move( arr );
+        return arr;
 
     } catch( ... ) {
         TERMINATE( "[configuration::parser::specs::ErrorCode::] Failed to load error data (loadErrorStrings)." );
