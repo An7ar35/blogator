@@ -14,10 +14,10 @@ using           blogator::logger::output::LogOutput;
  */
 LogWriter::LogWriter( std::shared_ptr<LogQueue<LogMsg>> queue ) :
     _queue( std::move( queue ) ),
-    _last_wakeup_ts( std::chrono::steady_clock::now() ),
-    _suspend_timeout_ms( DFLT_SLEEP_TIMEOUT_MS ),
+    _is_sleeping( false ),
     _interrupt( false ),
-    _is_sleeping( false )
+    _last_wakeup_ts( std::chrono::steady_clock::now() ),
+    _suspend_timeout_ms( DFLT_SLEEP_TIMEOUT_MS )
 {}
 
 /**

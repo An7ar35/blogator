@@ -13,8 +13,8 @@ namespace blogator::parser::dom {
         using iterator_category = NodeIterator::iterator_category;
         using difference_type   = NodeIterator::difference_type;
         using value_type        = NodeIterator::value_type;
-        using pointer           = NodeIterator::const_pointer;
-        using pointer_const     = NodeIterator::const_pointer const;
+        using pointer           = NodeIterator::pointer;
+        using const_pointer     = NodeIterator::const_pointer const;
         using reference         = NodeIterator::const_reference;
 
       public:
@@ -38,9 +38,9 @@ namespace blogator::parser::dom {
         [[nodiscard]] unsigned long whatToShow() const;
         [[nodiscard]] const std::shared_ptr<NodeFilter> & nodeFilter() const;
 
-        [[nodiscard]] pointer_const node() const;
-        [[nodiscard]] pointer_const nextNode();
-        [[nodiscard]] pointer_const previousNode();
+        [[nodiscard]] const_pointer node() const;
+        [[nodiscard]] const_pointer nextNode();
+        [[nodiscard]] const_pointer previousNode();
         [[nodiscard]] bool done() const;
 
       private:

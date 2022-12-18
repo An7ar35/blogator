@@ -40,7 +40,7 @@ TEST( parser_dom_node_CharacterData_Tests, substringData_valid ) {
         { U"ab", 0, 2, U"ab" },
     } );
 
-    for( auto test_id = 0; test_id < test_cases.size(); ++test_id ) {
+    for( size_t test_id = 0; test_id < test_cases.size(); ++test_id ) {
         const auto & test = test_cases[test_id];
         const auto   node = CharacterData( NodeType::TEXT_NODE, test.str );
         const auto result = node.substringData( test.offset, test.length );
@@ -74,7 +74,7 @@ TEST( parser_dom_node_CharacterData_Tests, appendData ) {
         { "Append normal", U"abc", U"def", U"abcdef" },
     } );
 
-    for( auto test_id = 0; test_id < test_cases.size(); ++test_id ) {
+    for( size_t test_id = 0; test_id < test_cases.size(); ++test_id ) {
         const auto & test = test_cases[test_id];
         auto node = CharacterData( NodeType::TEXT_NODE, test.init_str );
         auto returned = node.appendData( test.append_str );
@@ -102,7 +102,7 @@ TEST( parser_dom_node_CharacterData_Tests, insertData_valid ) {
         { "Insert 4 middle", U"1234", U"abcd", 2, U"12abcd34" },
     } );
 
-    for( auto test_id = 0; test_id < test_cases.size(); ++test_id ) {
+    for( size_t test_id = 0; test_id < test_cases.size(); ++test_id ) {
         const auto & test = test_cases[test_id];
         auto node = CharacterData( NodeType::TEXT_NODE, test.init_str );
         auto returned = node.insertData( test.offset, test.insert_str );
@@ -145,7 +145,7 @@ TEST( parser_dom_node_CharacterData_Tests, deleteData_valid ) {
         { "delete 2 mid", U"1234", 2, 2, U"12" },
     } );
 
-    for( auto test_id = 0; test_id < test_cases.size(); ++test_id ) {
+    for( size_t test_id = 0; test_id < test_cases.size(); ++test_id ) {
         const auto & test = test_cases[test_id];
         auto node = CharacterData( NodeType::TEXT_NODE, test.init_str );
         auto returned = node.deleteData( test.offset, test.count );
@@ -195,7 +195,7 @@ TEST( parser_dom_node_CharacterData_Tests, replaceData_valid ) {
         { "Length 4", U"1234", U"abc", 0, 4, U"abc" },
     } );
 
-    for( auto test_id = 0; test_id < test_cases.size(); ++test_id ) {
+    for( size_t test_id = 0; test_id < test_cases.size(); ++test_id ) {
         const auto & test = test_cases[test_id];
         auto node = CharacterData( NodeType::TEXT_NODE, test.init_str );
         auto returned = node.replaceData( test.offset, test.length, test.replacement );

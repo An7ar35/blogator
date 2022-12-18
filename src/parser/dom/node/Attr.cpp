@@ -157,8 +157,8 @@ Attr::Attr( const Attr &node ) :
     _namespace_id( node._namespace_id ),
     _prefix( node._prefix ),
     _name( node._name ),
-    _has_value( node._has_value ),
-    _value( node._value )
+    _value( node._value ),
+    _has_value( node._has_value )
 {}
 
 /**
@@ -396,7 +396,7 @@ size_t Attr::length() const {
  * @param deep Deep copy flag
  * @return Pointer to clone
  */
-blogator::parser::dom::NodePtr_t Attr::cloneNode( bool deep ) const {
+blogator::parser::dom::NodePtr_t Attr::cloneNode( [[maybe_unused]] bool deep ) const {
     auto clone = (
         this->hasValue() ? std::make_unique<Attr>( _namespace_id, _prefix, _name, _value )
                          : std::make_unique<Attr>( _namespace_id, _prefix, _name )
@@ -470,7 +470,7 @@ blogator::parser::dom::DOMString_t Attr::lookupNamespaceURI( const DOMString_t &
  * @return Pointer to inserted child
  * @throws DOMException when insertion breaks DOM tree validity
  */
-Node * Attr::insertNodeBefore( NodePtr_t node, Node * child ) {
+Node * Attr::insertNodeBefore( [[maybe_unused]] NodePtr_t node, [[maybe_unused]] Node * child ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 
@@ -484,7 +484,7 @@ Node * Attr::insertNodeBefore( NodePtr_t node, Node * child ) {
  * @return Replaced child node
  * @throw DOMException when replacement breaks DOM tree validity
  */
-blogator::parser::dom::NodePtr_t Attr::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+blogator::parser::dom::NodePtr_t Attr::replaceChildNode( [[maybe_unused]] NodePtr_t &node, [[maybe_unused]] NodePtr_t &target ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 

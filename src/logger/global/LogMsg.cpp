@@ -13,9 +13,9 @@ using namespace blogator::logger;
 LogMsg::LogMsg( uint64_t id, LogLevel lvl, std::string src_file, int line_num, std::string message ) :
     _id( id ),
     _level( lvl ),
-    _ts( TimeStamp() ),
     _src_file( std::move( src_file ) ),
     _src_line( line_num ),
+    _ts( TimeStamp() ),
     _message( std::move( message ) )
 {}
 

@@ -150,7 +150,7 @@ blogator::parser::dom::NodePtr_t CharacterData::cloneNode( bool deep ) const {
         }
     }
 
-    return std::move( clone );
+    return clone;
 }
 
 /**
@@ -185,7 +185,7 @@ bool CharacterData::isEqualNode( const Node &other ) const {
  * @return Pointer to inserted child
  * @throws DOMException when insertion breaks DOM tree validity
  */
-Node * CharacterData::insertNodeBefore( NodePtr_t node, Node * child ) {
+Node * CharacterData::insertNodeBefore( [[maybe_unused]] NodePtr_t node, [[maybe_unused]] Node * child ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 
@@ -199,7 +199,7 @@ Node * CharacterData::insertNodeBefore( NodePtr_t node, Node * child ) {
  * @return Replaced child node
  * @throw DOMException when replacement breaks DOM tree validity
  */
-blogator::parser::dom::NodePtr_t CharacterData::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+blogator::parser::dom::NodePtr_t CharacterData::replaceChildNode( [[maybe_unused]] NodePtr_t &node, [[maybe_unused]] NodePtr_t &target ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 

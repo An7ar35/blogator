@@ -83,7 +83,7 @@ template<typename T> std::unique_ptr<T> blogator::logger::engine::LogQueue<T>::d
     if( !_queue.empty() ) {
         auto data = std::move( _queue.front() );
         _queue.pop_front();
-        return std::move( data );
+        return data;
 
     } else {
         return std::unique_ptr<T>();

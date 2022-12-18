@@ -439,7 +439,7 @@ AttrPtr_t NamedNodeMap::removeItem( size_t index ) {
             _nodes.erase( it );
         }
 
-        return std::move( removed );
+        return removed;
 
     } else {
         if( it != _nodes.end() ) {
@@ -479,7 +479,7 @@ AttrPtr_t NamedNodeMap::removeNode( const node::Attr * node ) {
 
         _nodes.erase( it );
 
-        return std::move( removed ); //EARLY RETURN
+        return removed; //EARLY RETURN
     }
 
     LOG_ERROR(
@@ -518,7 +518,7 @@ AttrPtr_t NamedNodeMap::removeNamedItem( DOMString_t qualified_name ) {
 
         _nodes.erase( node_it );
 
-        return std::move( removed );
+        return removed;
 
     } else {
         using blogator::unicode::utf8::convert;
@@ -547,7 +547,7 @@ AttrPtr_t NamedNodeMap::removeNamedItemNS( const DOMString_t &ns, const DOMStrin
 
         _nodes.erase( node_it );
 
-        return std::move( removed );
+        return removed;
 
     } else {
         using blogator::unicode::utf8::convert;

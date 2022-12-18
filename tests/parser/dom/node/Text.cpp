@@ -129,7 +129,7 @@ TEST( parser_dom_node_Text_Tests, splitText_fail_2 ) { //wrong parent - throw `b
     auto         real_parent = node::Node();
     auto         fake_parent = node::Node();
     node::Node * child       = real_parent.appendChild( std::make_unique<CorruptibleTextNode>( txt ) );
-    node::Node * sibling     = real_parent.appendChild( std::make_unique<node::Text>( txt ) );
+    std::ignore              = real_parent.appendChild( std::make_unique<node::Text>( txt ) );
 
     dynamic_cast<CorruptibleTextNode *>( child )->setPointers( &fake_parent ); //corrupt parent
 
@@ -172,9 +172,9 @@ TEST( parser_dom_node_Text_Tests, wholeText_2 ) { //consecutive Text nodes
     auto strings = std::vector<DOMString_t>{ U"A", U"B", U"C", U"E" };
     auto parent  = node::Node();
     auto child0 = parent.appendChild( std::make_unique<node::Text>( strings[0] ) );
-    auto child1 = parent.appendChild( std::make_unique<node::Text>( strings[1] ) );
+    std::ignore = parent.appendChild( std::make_unique<node::Text>( strings[1] ) );
     auto child2 = parent.appendChild( std::make_unique<node::Text>( strings[2] ) );
-    auto child3 = parent.appendChild( std::make_unique<node::Node>( NodeType::UNDEFINED, &parent, child2 ) );
+    std::ignore = parent.appendChild( std::make_unique<node::Node>( NodeType::UNDEFINED, &parent, child2 ) );
     parent.appendChild( std::make_unique<node::Text>( strings[3] ) );
 
     auto expected = strings[0] + strings[1] + strings[2]; //"ABC"

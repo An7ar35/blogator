@@ -29,7 +29,7 @@ void Stream::close() {
  * @param lvl Logging level (unused)
  * @param msg Line
  */
-void Stream::write( LogLevel lvl, const std::string &msg ) {
+void Stream::write( [[maybe_unused]] LogLevel lvl, const std::string &msg ) {
     if( _out ) {
         _out << msg << "\n";
     }

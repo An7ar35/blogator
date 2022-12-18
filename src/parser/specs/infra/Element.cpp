@@ -52,7 +52,7 @@ static std::unordered_map<std::u32string , blogator::parser::specs::infra::Eleme
             } break;
 
             default: {
-                return std::move( map ); //EARLY RETURN
+                return map; //EARLY RETURN
             }
         }
 
@@ -62,11 +62,13 @@ static std::unordered_map<std::u32string , blogator::parser::specs::infra::Eleme
             map.emplace( blogator::to_u32string( static_cast<Element>( i ) ), static_cast<Element>( i ) );
         }
 
-        return std::move( map );
+        return map;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::Element::loadElementMap( Namespace )] Failed to load map data." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 AmbiguousElements loadAmbiguousElements() noexcept {
@@ -83,11 +85,13 @@ AmbiguousElements loadAmbiguousElements() noexcept {
             }
         }
 
-        return std::move( ambiguous_elements );
+        return ambiguous_elements;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::Element::loadAmbiguousElements()] Failed to load set of ambiguous elements." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 static const std::unordered_map<std::u32string , blogator::parser::specs::infra::Element> ELEMENT_DEPR_STR_MAP   = loadElementMap( Namespace::DEPR );

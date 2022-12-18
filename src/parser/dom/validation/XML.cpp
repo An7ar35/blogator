@@ -193,8 +193,7 @@ std::vector<blogator::parser::dom::DOMString_t> XML::validateNS( const dom::DOMS
         }
 
     } else if( v.size() == 2 && dom::validation::XML::checkName( qualified_name ) ) {
-        const auto & prefix     = v[ 0 ];
-        const auto & local_name = v[ 1 ];
+        const auto & prefix = v[ 0 ];
 
         if( ns.empty() ) {
             throw DOMException(
@@ -228,7 +227,7 @@ std::vector<blogator::parser::dom::DOMString_t> XML::validateNS( const dom::DOMS
         );
     }
 
-    return std::move( v );
+    return v;
 }
 
 /**

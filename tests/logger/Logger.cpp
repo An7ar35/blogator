@@ -6,15 +6,15 @@
 
 using namespace blogator::logger;
 
-const uint64_t ASYNC_TEST_TIMEOUT = 100; //ms
-const char *   LOG_OUTPUT_NAME    = "void";
+const uint64_t     ASYNC_TEST_TIMEOUT = 100; //ms
+const char * const LOG_OUTPUT_NAME    = "void";
 
 class LogMsgCatcher : public formatter::LogFormatter {
   public:
     LogMsgCatcher( std::shared_ptr<std::vector<LogMsg>> catcher, std::function<void( const LogMsg & )> event_cb ) :
         formatter::LogFormatter( formatter::LogFormatterType::CUSTOM ),
-        _messages( std::move( catcher ) ),
-        _event_cb( std::move( event_cb ) )
+        _event_cb( std::move( event_cb ) ),
+        _messages( std::move( catcher ) )
     {}
 
     std::string format( const LogMsg &obj ) override {
@@ -26,11 +26,11 @@ class LogMsgCatcher : public formatter::LogFormatter {
     }
 
   protected:
-    void formatLogCounter( std::ostream &os, const LogMsg &obj ) override {}
-    void formatLogLevel( std::ostream &os, const LogMsg &obj ) override {}
-    void formatTimestamp( std::ostream &os, const LogMsg &obj ) override {}
-    void formatSource( std::ostream &os, const LogMsg &obj ) override {}
-    void formatMessageStr( std::ostream &os, const LogMsg &obj ) override {}
+    void formatLogCounter( [[maybe_unused]] std::ostream &, [[maybe_unused]] const LogMsg & ) override {}
+    void formatLogLevel( [[maybe_unused]] std::ostream &, [[maybe_unused]] const LogMsg & ) override {}
+    void formatTimestamp( [[maybe_unused]] std::ostream &, [[maybe_unused]] const LogMsg & ) override {}
+    void formatSource( [[maybe_unused]] std::ostream &, [[maybe_unused]] const LogMsg & ) override {}
+    void formatMessageStr( [[maybe_unused]] std::ostream &, [[maybe_unused]] const LogMsg & ) override {}
 
   private:
     std::function<void( const LogMsg & )> _event_cb;
@@ -45,7 +45,7 @@ class VoidLogOutput : public output::LogOutput {
 
     void open() override {}
     void close() override {}
-    void write( LogLevel lvl, const std::string &msg ) override {}
+    void write( [[maybe_unused]] LogLevel, [[maybe_unused]] const std::string & ) override {}
 };
 
 /**

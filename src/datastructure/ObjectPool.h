@@ -116,7 +116,7 @@ template<class T> typename blogator::ObjectPool<T>::ObjectPtr_t blogator::Object
 
     _pool.pop();
     _used++;
-    return std::move( tmp );
+    return tmp;
 }
 
 /**

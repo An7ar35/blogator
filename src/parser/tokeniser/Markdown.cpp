@@ -4354,8 +4354,8 @@ inline token::markdown::FormattingTk *tokeniser::Markdown::peekLastFormattingMar
  * @param position Closing position
  */
 inline void tokeniser::Markdown::closeFormattingMarkers( TextPos position ) {
-    for( auto & marker : std::ranges::reverse_view( _formatting_markers ) ) {
-        _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( marker->text(), position ) );
+    for( auto marker_it = _formatting_markers.crbegin(); marker_it != _formatting_markers.crend(); ++marker_it ) {
+        _queued_tokens.emplace_back( std::make_unique<FormatEndTk>( (*marker_it)->text(), position ) );
     }
 
     _formatting_markers.clear();

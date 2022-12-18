@@ -43,7 +43,7 @@ bool TimeStamp::operator !=( const TimeStamp &rhs ) const {
  * @return Time represented as HH:MM:SS
  */
 std::string TimeStamp::getTime( int fractional_precision ) const {
-    return std::move( getTimeStamp( "%H:%M:%S", fractional_precision ) );
+    return getTimeStamp( "%H:%M:%S", fractional_precision );
 }
 
 /**
@@ -51,7 +51,7 @@ std::string TimeStamp::getTime( int fractional_precision ) const {
  * @return Date formatted as dd/mm/yy
  */
 std::string TimeStamp::getDate() const {
-    return std::move( getTimeStamp( "%d/%m/%Y" ) );
+    return getTimeStamp( "%d/%m/%Y" );
 }
 
 /**
@@ -79,7 +79,7 @@ std::string TimeStamp::getTimeStamp( const std::string &formatter, int fractiona
  * @return UTC timestamp string
  */
 std::string TimeStamp::getUTC( int fractional_precision ) const {
-    return std::move( getUTC( "%FT%TZ", fractional_precision ) );
+    return getUTC( "%FT%TZ", fractional_precision );
 }
 
 /**

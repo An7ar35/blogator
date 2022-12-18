@@ -125,9 +125,11 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
     } catch( ... ) {
         TERMINATE( "[configuration::parser::specs::ErrorCode::] Failed to load error data (loadErrorStrings)." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
-static std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErrorStrings();
+static const std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErrorStrings();
 
 /**
  * Gets the description string for an error code
@@ -135,10 +137,11 @@ static std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErr
  * @return Short description string
  */
 const std::string & ErrorCode::str( int err ) {
-    if( ( err = abs( err ) ) >= ENUM_END )
-        return error_descriptions[ErrorCode::UNKNOWN].text;
-    else
-        return error_descriptions[err].text;
+    if( ( err = abs( err ) ) >= ENUM_END ) {
+        return error_descriptions.at( ErrorCode::UNKNOWN ).text;
+    } else {
+        return error_descriptions.at( err ).text;
+    }
 }
 
 /**
@@ -147,9 +150,10 @@ const std::string & ErrorCode::str( int err ) {
  * @return Long detailed description string
  */
 const std::string & ErrorCode::detailed( int err ) {
-    if( ( err = abs( err ) ) >= ENUM_END )
-        return error_descriptions[ErrorCode::UNKNOWN].detailed;
-    else
-        return error_descriptions[err].detailed;
+    if( ( err = abs( err ) ) >= ENUM_END ) {
+        return error_descriptions.at( ErrorCode::UNKNOWN ).detailed;
+    } else {
+        return error_descriptions.at( err ).detailed;
+    }
 }
 

@@ -29,6 +29,6 @@ void Terminal::close() {
  * @param lvl Logging level (unused)
  * @param msg Line
  */
-void Terminal::write( LogLevel lvl, const std::string &msg ) {
+void Terminal::write( [[maybe_unused]] LogLevel lvl, const std::string &msg ) {
     std::cout << msg << "\n";
 }

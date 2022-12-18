@@ -76,7 +76,7 @@ TEST( parser_encoding_Transcode, sniffBOM_unknown ) {
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32LE ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         const auto &      in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::stringstream out_stream;
         std::stringstream expected_stream;
@@ -89,7 +89,7 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32LE ) {
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32string_U32BE ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         const auto &      in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::stringstream out_stream;
         std::stringstream expected_stream;
@@ -111,7 +111,7 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32string_fail_1 ) { //bad outp
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32LE ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         const auto &          in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::vector<char32_t> in_vec( in_str.begin(), in_str.end() );
         std::stringstream     out_stream;
@@ -125,7 +125,7 @@ TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32LE ) {
 }
 
 TEST( parser_encoding_Transcode, U32toByteStream_u32collection_U32BE ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         const auto &          in_str = blogator::tests::UnicodeTestStrings::string( str_id );
         std::vector<char32_t> in_vec( in_str.begin(), in_str.end() );
         std::stringstream     out_stream;
@@ -371,7 +371,7 @@ TEST( parser_encoding_Transcode, addCodePoint_newline_LFCR ) {
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF32_LE );
         std::vector<char32_t>  out_buffer;
@@ -386,7 +386,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_stream ) {
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_0 ) { //with pre-buffered bytes
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t> in_buffer = { 0xD6, 0xFA, 0x01, 0x00 }; //LE 0x0001FAD6 (TEAPOT)
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_LE );
@@ -402,7 +402,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_0 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_1 ) { //with pre-buffered bytes (1/4 byte)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t> in_buffer = { 0xD6 }; //LE 0x0001FAD6 (TEAPOT) - 1/4 byte
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_LE );
@@ -419,7 +419,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_1 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U32LEtoU32_string_prebuffered_2 ) { //with pre-buffered bytes (3/4 byte)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t> in_buffer = { 0xD6, 0xFA, 0x01 }; //LE 0x0001FAD6 (TEAPOT) - 3/4 byte
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_LE );
@@ -481,7 +481,7 @@ TEST( parser_encoding_Transcode, U32LEtoU32_file ) {
 }
 
 TEST( parser_encoding_Transcode, U32BEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF32_BE );
         std::vector<char32_t> out_buffer;
@@ -496,7 +496,7 @@ TEST( parser_encoding_Transcode, U32BEtoU32_string_stream ) {
 }
 
 TEST( parser_encoding_Transcode, U32BEtoU32_string_prebuffered ) { //with pre-buffered bytes
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>  in_buffer = { 0x00, 0x01, 0xFA, 0xD6 }; //BE 0x0001FAD6 (TEAPOT)
         std::stringstream    in_stream;
         Source               in_source = Source( in_stream, "", Format::UTF32_BE );
@@ -536,7 +536,7 @@ TEST( parser_encoding_Transcode, U8toU32_u8_file ) {
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF8 );
         std::vector<char32_t> out_buffer;
@@ -592,7 +592,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_stream_fail_1 ) { //invalid code
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_0 ) { //with pre-buffered bytes
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t> in_buffer = { 0xf0, 0x9f, 0xab, 0x96 }; //U+1FAD6 (TEAPOT)
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF8 );
@@ -608,7 +608,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_0 ) { //with pre-buf
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_1 ) { //incomplete codepoint buffered (1/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t> in_buffer = { 0xf0 }; //U+1FAD6 (TEAPOT) - first byte
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF8 );
@@ -625,7 +625,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_1 ) { //incomplete c
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_2 ) { //incomplete codepoint buffered (3/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>   in_buffer = { 0xf0, 0x9f, 0xab }; //U+1FAD6 (TEAPOT) - first 3 byte
         std::stringstream     in_stream;
         Source                in_source = Source( in_stream, "", Format::UTF8 );
@@ -642,7 +642,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_2 ) { //incomplete c
 }
 
 TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_3 ) { //pre-buffered with variable width codepoints
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>   in_buffer = { 0xf0, 0x9f, 0xab, 0x96, //U+0001FAD6 (TEAPOT)
                                             0xC3, 0x84,             //U+000000C4 ('Ä')
                                             0xeb, 0x86, 0xa2,       //U+0000B1A2 ('놢')
@@ -701,7 +701,7 @@ TEST( parser_encoding_Transcode, U8toU32_string_prebuffered_fail_1 ) { //invalid
 }
 
 TEST( parser_encoding_Transcode, U16LEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF16_LE );
         std::vector<char32_t> out_buffer;
@@ -716,7 +716,7 @@ TEST( parser_encoding_Transcode, U16LEtoU32_string_stream ) {
 }
 
 TEST( parser_encoding_Transcode, U16LEtoU32_string_prebuffered_0 ) { //with pre-buffered bytes (complete)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>    in_buffer = { 0x3E, 0xD8, 0xD6, 0xDE }; //U+1FAD6 (TEAPOT)
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_LE );
@@ -732,7 +732,7 @@ TEST( parser_encoding_Transcode, U16LEtoU32_string_prebuffered_0 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_stream ) {
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::stringstream in_stream;
         Source in_source = Source( in_stream, "", Format::UTF16_BE );
         std::vector<char32_t> out_buffer;
@@ -839,7 +839,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_stream_fail_4 ) { //invalid h
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_0 ) { //with pre-buffered bytes (complete)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>    in_buffer = { 0xD8, 0x3E, 0xDE, 0xD6 }; //U+1FAD6 (TEAPOT)
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -855,7 +855,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_0 ) { //with pre-
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_1 ) { //incomplete codepoint buffered (1/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>    in_buffer = { 0xD8 }; //U+1FAD6 (TEAPOT) - 1/4 bytes
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -872,7 +872,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_1 ) { //incomplet
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_2 ) { //incomplete codepoint buffered (2/4 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>    in_buffer = { 0xD8, 0x3E }; //U+1FAD6 (TEAPOT) - 2/4 bytes
         std::stringstream      in_stream;
         Source                 in_source = Source( in_stream, "", Format::UTF16_BE );
@@ -889,7 +889,7 @@ TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_2 ) { //incomplet
 }
 
 TEST( parser_encoding_Transcode, U16BEtoU32_string_prebuffered_3 ) { //incomplete codepoint buffered (2/2 + 1/2 bytes)
-    for( auto str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
+    for( size_t str_id = 0; str_id < blogator::tests::UnicodeTestStrings::count(); ++str_id ) {
         std::deque<char8_t>    in_buffer = { 0x01, 0xA3, //U+01A3 ('ƣ')
                                              0xB1 };     //U+B1A2 ('놢') - 1/2 bytes;
         std::stringstream      in_stream;

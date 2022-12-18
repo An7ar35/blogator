@@ -32,7 +32,7 @@ TEST( unicode_utf32, toU8_codeunits_1 ) {
         0x7F
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 1, toU8( test_case[i], b1, b2, b3, b4 ) );
         ASSERT_EQ( test_case[i], b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "] (" << (uint8_t) test_case[i] << ")";
@@ -48,7 +48,7 @@ TEST( unicode_utf32, toU8_codeunits_2 ) {
         { 0x7FF, 0xDF, 0xBF },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 2, toU8( test_case[i].u32_cp, b1, b2, b3, b4 ) );
         ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "].b1 (" << (uint8_t) test_case[i].b1 << ")";
@@ -65,7 +65,7 @@ TEST( unicode_utf32, toU8_codeunits_3 ) {
         { 0xFFFF, 0xEF, 0xBF, 0xBF },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 3, toU8( test_case[i].u32_cp, b1, b2, b3, b4 ) );
         ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "].b1 (" << (uint8_t) test_case[i].b1 << ")";
@@ -83,7 +83,7 @@ TEST( unicode_utf32, toU8_codeunits_4 ) {
         { 0x10FFFF, 0xF4, 0x8F, 0xBF, 0xBF },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         char8_t b1 = 0x00, b2 = 0x00, b3 = 0x00, b4 = 0x00;
         ASSERT_EQ( 4, toU8( test_case[i].u32_cp, b1, b2, b3, b4 ) );
         ASSERT_EQ( test_case[i].b1, b1 ) << "Failed: " << (uint8_t) b1 << " != test_case[" << i << "].b1 (" << (uint8_t) test_case[i].b1 << ")";
@@ -107,7 +107,7 @@ TEST( unicode_utf32, toU8_stream_1byte ) {
         { 0x7F, { 0x7F } }
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 1, toU8( test_case[i].u32_cp, ss ) );
         auto out = ss.str();
@@ -124,7 +124,7 @@ TEST( unicode_utf32, toU8_stream_2bytes ) {
         { 0x7FF, { 0xDF, 0xBF } },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 2, toU8( test_case[i].u32_cp, ss ) );
         auto out = ss.str();
@@ -141,7 +141,7 @@ TEST( unicode_utf32, toU8_stream_3bytes ) {
         { 0xFFFF, { 0xEF, 0xBF, 0xBF } },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 3, toU8( test_case[i].u32_cp, ss ) );
         auto out = ss.str();
@@ -158,7 +158,7 @@ TEST( unicode_utf32, toU8_stream_4bytes ) {
         { 0x10FFFF, { 0xF4, 0x8F, 0xBF, 0xBF } },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 4, toU8( test_case[i].u32_cp,ss ) );
         auto out = ss.str();
@@ -200,7 +200,7 @@ TEST( unicode_utf32, toU16_codeunits_1 ) {
         0xFFFF
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         uint16_t hi = 0x00, lo = 0x00;
         ASSERT_EQ( 1, toU16( test_case[i], hi, lo ) );
         ASSERT_EQ( test_case[i], hi ) << "Failed: " << hi << " != test_case[" << i << "] (" << test_case[i] << ")";
@@ -216,7 +216,7 @@ TEST( unicode_utf32, toU16_codeunits_2 ) {
         { 0x10FFFF, 0xDBFF, 0xDFFF },
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         uint16_t hi = 0x00, lo = 0x00;
         ASSERT_EQ( 2, toU16( test_case[i].u32_cp, hi, lo ) );
         ASSERT_EQ( test_case[i].u16_hi, hi ) << "Failed: " << hi << " != test_case[" << i << "].u16_hi (" << test_case[i].u16_hi << ")";
@@ -235,7 +235,7 @@ TEST( unicode_utf32, toU16LE_stream_1 ) {
         { 0xFFFF, { 0xFF, 0xFF } }
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 1, toU16LE( test_case[i].u32_cp, ss ) );
         auto out = ss.str();
@@ -252,7 +252,7 @@ TEST( unicode_utf32, toU16LE_stream_2 ) {
         { 0x10FFFF, { 0xFF, 0xDB, 0xFF, 0xDF } }, //0xDBFF, 0xDFFF
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 2, toU16LE( test_case[i].u32_cp, ss ) );
         auto out = ss.str();
@@ -271,7 +271,7 @@ TEST( unicode_utf32, toU16BE_stream_1 ) {
         { 0xFFFF, { 0xFF, 0xFF } }
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 1, toU16BE( test_case[i].u32_cp, ss ) );
         auto out = ss.str();
@@ -288,7 +288,7 @@ TEST( unicode_utf32, toU16BE_stream_2 ) {
         { 0x10FFFF, { 0xDB, 0xFF, 0xDF, 0xFF } }, //0xDBFF, 0xDFFF
     } );
 
-    for( auto i = 0; i< test_case.size(); ++i ) {
+    for( size_t i = 0; i< test_case.size(); ++i ) {
         std::stringstream ss;
         ASSERT_EQ( 2, toU16BE( test_case[i].u32_cp, ss ) );
         auto out = ss.str();

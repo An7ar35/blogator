@@ -49,7 +49,7 @@ TEST( TrieNode_Tests, setEnd ) {
 TEST( TrieNode_Tests, hasChildren ) {
     auto root = TrieNode<uint32_t>( U'a', false );
     ASSERT_FALSE( root.hasChildren() );
-    auto [it, success] = root.addChild( U'b' );
+    std::ignore = root.addChild( U'b' );
     ASSERT_TRUE( root.hasChildren() );
 }
 

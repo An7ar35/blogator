@@ -77,7 +77,7 @@ std::vector<blogator::parser::dom::node::Node *> blogator::tests::createTestDOM_
         }
     );
 
-    return std::move( pre_order );
+    return pre_order;
 }
 
 /**
@@ -148,7 +148,7 @@ std::vector<blogator::parser::dom::node::Node *> blogator::tests::createTestDOM_
         }
     );
 
-    return std::move( pre_order );
+    return pre_order;
 }
 
 /**
@@ -235,5 +235,5 @@ std::vector<blogator::parser::dom::node::Node *> blogator::tests::createTestDOM_
         }
     );
 
-    return std::move( pre_order );
+    return pre_order;
 }

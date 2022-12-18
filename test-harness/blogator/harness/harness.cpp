@@ -95,7 +95,7 @@ std::vector<std::pair<test_harness::blogator::ConfigurationTkTest, std::filesyst
                     obj.input       = test.at( "input" );
 
                     for( const auto & token : test.at( "tokens" ) ) {
-                        auto & desc = obj.tokens.emplace_back( token );
+                        std::ignore = obj.tokens.emplace_back( token );
                     }
 
                     for( const auto & error : test.at( "errors" ) ) {
@@ -199,7 +199,7 @@ std::vector<std::pair<test_harness::blogator::ConfigurationParserTest, std::file
                     obj.input       = test.at( "input" );
 
                     for( const auto & token : test.at( "entries" ) ) {
-                        auto & desc = obj.entries.emplace_back( token );
+                        obj.entries.emplace_back( token );
                     }
 
                     for( const auto & error : test.at( "errors" ) ) {

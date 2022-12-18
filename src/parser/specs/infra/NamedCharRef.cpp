@@ -127,6 +127,8 @@ NamedCharRef NamedCharRef::loadNotFound() noexcept {
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::NamedCharRef::loadNotFound()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -2371,6 +2373,8 @@ std::unordered_map<std::u32string, NamedCharRef> NamedCharRef::loadMap() noexcep
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::NamedCharRef::loadMap()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -2385,10 +2389,12 @@ blogator::Trie<char32_t> NamedCharRef::loadTrie() noexcept {
             trie.add( pair.second.name.cbegin(), pair.second.name.cend() );
         }
 
-        return std::move( trie );
+        return trie;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::NamedCharRef::loadTrie()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 

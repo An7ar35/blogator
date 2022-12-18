@@ -46,8 +46,8 @@ ReporterObject::ReporterObject( std::filesystem::path src, Context ctx, int err_
     _src_file( std::move( src ) ),
     _context( ctx ),
     _code( err_code ),
-    _position( position ),
-    _text( std::move( txt ) )
+    _text( std::move( txt ) ),
+    _position( position )
 {}
 
 /**

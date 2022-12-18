@@ -792,7 +792,7 @@ template<> void parser::Parser::processContent<parser::specs::InsertionMode::AFT
  * Processes a token in the 'END_OF_FILE' insertion mode
  * @param token ConfigTk token
  */
-template<> void parser::Parser::processContent<parser::specs::InsertionMode::END_OF_FILE>( const std::unique_ptr<token::ConfigTk> & token ) {
+template<> void parser::Parser::processContent<parser::specs::InsertionMode::END_OF_FILE>( [[maybe_unused]] const std::unique_ptr<token::ConfigTk> & token ) {
     setInsertionMode( InsertionMode_e::END_OF_FILE );
     cleanupEOF();
 }

@@ -23,7 +23,7 @@ static std::unordered_map<std::u32string, Namespace> loadMap() noexcept {
             );
         }
 
-        return std::move( map );
+        return map;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::Namespace::] Failed to load map data (loadMap)." );

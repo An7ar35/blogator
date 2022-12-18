@@ -429,7 +429,7 @@ TEST( parser_dom_node_Document_Tests, getElementsByTagName_0 ) { //html doc
         auto elements = dynamic_cast<node::Document *>( doc.get() )->getElementsByTagName( test.tag_name );
         ASSERT_EQ( elements.size(), test.expected_found ) << "Failed on test " << count;
 
-        for( auto i = 0; i < elements.size(); ++i ) {
+        for( size_t i = 0; i < elements.size(); ++i ) {
             ASSERT_EQ( elements[i]->tagName(), test.tag_name ) << "Failed on test " << count << ", i=" << i;
         }
     }
@@ -463,7 +463,7 @@ TEST( parser_dom_node_Document_Tests, getElementsByTagName_1 ) { //xml doc
         auto elements = dynamic_cast<node::Document *>( doc.get() )->getElementsByTagName( test.tag_name );
         ASSERT_EQ( elements.size(), test.expected_found ) << "Failed on test " << count;
 
-        for( auto i = 0; i < elements.size(); ++i ) {
+        for( size_t i = 0; i < elements.size(); ++i ) {
             ASSERT_EQ( elements[i]->qualifiedName(), test.tag_name ) << "Failed on test " << count << ", i=" << i;
         }
     }
@@ -563,7 +563,7 @@ TEST( parser_dom_node_Document_Tests, getElementsByClassName_1 ) {
         auto elements = dynamic_cast<node::Document *>( doc.get() )->getElementsByClassName( { test.class_name } );
         ASSERT_EQ( elements.size(), test.expected_found ) << "Failed on test " << count;;
 
-        for( auto i = 0; i < elements.size(); ++i ) {
+        for( size_t i = 0; i < elements.size(); ++i ) {
             auto attr =  elements[i]->attributes().getNamedItem( U"class" );
             ASSERT_NE( attr, nullptr ) << "Failed on test " << count;;
             ASSERT_NE( attr->value(), nullptr ) << "Failed on test " << count;;

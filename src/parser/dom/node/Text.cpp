@@ -151,7 +151,7 @@ blogator::parser::dom::NodePtr_t Text::cloneNode( bool deep ) const {
         }
     }
 
-    return std::move( clone );
+    return clone;
 }
 
 /**
@@ -161,7 +161,7 @@ blogator::parser::dom::NodePtr_t Text::cloneNode( bool deep ) const {
  * @return Pointer to inserted child
  * @throws DOMException when insertion breaks DOM tree validity
  */
-Node * Text::insertNodeBefore( NodePtr_t node, Node * child ) {
+Node * Text::insertNodeBefore( [[maybe_unused]] NodePtr_t node, [[maybe_unused]] Node * child ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 
@@ -175,7 +175,7 @@ Node * Text::insertNodeBefore( NodePtr_t node, Node * child ) {
  * @return Replaced child node
  * @throw DOMException when replacement breaks DOM tree validity
  */
-blogator::parser::dom::NodePtr_t Text::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+blogator::parser::dom::NodePtr_t Text::replaceChildNode( [[maybe_unused]] NodePtr_t &node, [[maybe_unused]] NodePtr_t &target ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 

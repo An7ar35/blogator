@@ -542,7 +542,7 @@ blogator::parser::dom::HTMLCollection_t Document::getElementsByTagName( const DO
         }
     }
 
-    return std::move( list );
+    return list;
 }
 
 /**
@@ -614,7 +614,7 @@ blogator::parser::dom::HTMLCollection_t Document::getElementsByTagNameNS( const 
         }
     }
 
-    return std::move( list );
+    return list;
 }
 
 /**
@@ -658,7 +658,7 @@ blogator::parser::dom::HTMLCollection_t Document::getElementsByClassName( std::s
         ++it;
     }
 
-    return std::move( list );
+    return list;
 }
 
 /**
@@ -940,7 +940,7 @@ blogator::parser::dom::NodePtr_t Document::cloneNode( bool deep ) const {
         }
     }
 
-    return std::move( clone );
+    return clone;
 }
 
 /**
@@ -1151,7 +1151,7 @@ blogator::parser::dom::NodePtr_t Document::replaceChildNode( NodePtr_t &node, No
         _doctype = dynamic_cast<DocumentType *>( replacement );
     }
 
-    return std::move( replaced );
+    return replaced;
 }
 
 /**
@@ -1170,7 +1170,7 @@ blogator::parser::dom::NodePtr_t Document::removeChildNode( Nodes_t::iterator it
         }
     }
 
-    return std::move( removed );
+    return removed;
 }
 
 /**

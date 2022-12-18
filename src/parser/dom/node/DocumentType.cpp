@@ -179,7 +179,7 @@ blogator::parser::dom::NodePtr_t DocumentType::cloneNode( bool deep ) const {
         }
     }
 
-    return std::move( clone );
+    return clone;
 }
 
 /**
@@ -217,7 +217,7 @@ bool DocumentType::isEqualNode( const Node &other ) const {
  * @return Namespace URI (or "null")
  * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
  */
-blogator::parser::dom::DOMString_t DocumentType::lookupPrefix( const blogator::parser::dom::DOMString_t &ns ) const {
+blogator::parser::dom::DOMString_t DocumentType::lookupPrefix( [[maybe_unused]] const blogator::parser::dom::DOMString_t &ns ) const {
     return {};
 }
 
@@ -227,7 +227,7 @@ blogator::parser::dom::DOMString_t DocumentType::lookupPrefix( const blogator::p
  * @return Namespace URI
  * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
  */
-blogator::parser::dom::DOMString_t DocumentType::lookupNamespaceURI( const DOMString_t &prefix ) const {
+blogator::parser::dom::DOMString_t DocumentType::lookupNamespaceURI( [[maybe_unused]] const DOMString_t &prefix ) const {
     return {};
 }
 
@@ -238,7 +238,7 @@ blogator::parser::dom::DOMString_t DocumentType::lookupNamespaceURI( const DOMSt
  * @return Pointer to inserted node
  * @throws DOMException when valid hierarchy is violated
  */
-Node * DocumentType::insertNodeBefore( NodePtr_t node, Node * child ) {
+Node * DocumentType::insertNodeBefore( [[maybe_unused]] NodePtr_t node, [[maybe_unused]] Node * child ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 
@@ -252,7 +252,7 @@ Node * DocumentType::insertNodeBefore( NodePtr_t node, Node * child ) {
  * @return Replaced child node
  * @throw DOMException when replacement breaks DOM tree validity
  */
-blogator::parser::dom::NodePtr_t DocumentType::replaceChildNode( NodePtr_t &node, NodePtr_t &target ) {
+blogator::parser::dom::NodePtr_t DocumentType::replaceChildNode( [[maybe_unused]] NodePtr_t &node, [[maybe_unused]] NodePtr_t &target ) {
     using exception::DOMException;
     using exception::DOMExceptionType;
 

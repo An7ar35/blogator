@@ -400,7 +400,7 @@ TEST( parser_dom_node_Node_Tests, firstChild ) {
     auto * child1 = node->appendChild( std::make_unique<node::Node>() );
     ASSERT_NE( node->firstChild(), nullptr );
     ASSERT_EQ( node->firstChild(), child1 );
-    auto * child2 = node->appendChild( std::make_unique<node::Node>() );
+    std::ignore = node->appendChild( std::make_unique<node::Node>() );
     ASSERT_NE( node->firstChild(), nullptr );
     ASSERT_EQ( node->firstChild(), child1 );
 }
@@ -721,7 +721,7 @@ TEST( parser_dom_node_Node_Tests, copy_constructor ) {
     auto * origi_child_it = original.firstChild();
     auto * copy_child_it = copy.firstChild();
 
-    for( int i = 0; i < original.length(); ++i ) {
+    for( size_t i = 0; i < original.length(); ++i ) {
         ASSERT_EQ( origi_child_it->nodeType(), copy_child_it->nodeType() );
         ASSERT_NE( origi_child_it, copy_child_it ); //make sure ptr addresses are different
 
@@ -789,7 +789,7 @@ TEST( parser_dom_node_Node_Tests, copy_assignment ) {
     auto * origi_child_it = original.firstChild();
     auto * copy_child_it = copy.firstChild();
 
-    for( int i = 0; i < original.length(); ++i ) {
+    for( size_t i = 0; i < original.length(); ++i ) {
         ASSERT_EQ( origi_child_it->nodeType(), copy_child_it->nodeType() );
         ASSERT_NE( origi_child_it, copy_child_it ); //make sure ptr addresses are different
 
@@ -903,7 +903,7 @@ TEST( parser_dom_node_Node_Tests, cloneNode_1 ) { //Element with CharacterData n
 
     ASSERT_EQ( recast_clone->childNodes().size(), element->childNodes().size() );
 
-    for( auto i = 0; i < element->childNodes().size(); ++i ) {
+    for( size_t i = 0; i < element->childNodes().size(); ++i ) {
         ASSERT_EQ( recast_clone->childNodes()[i]->nodeType(), element->childNodes()[i]->nodeType() );
 
         if( element->childNodes()[i]->nodeType() == blogator::parser::dom::NodeType::CDATA_SECTION_NODE ||
@@ -944,7 +944,7 @@ TEST( parser_dom_node_Node_Tests, cloneNode_2 ) { //Mixed tree from Document roo
     auto * origi_child_it = original.firstChild();
     auto * clone_child_it = clone->firstChild();
 
-    for( int i = 0; i < original.length(); ++i ) {
+    for( size_t i = 0; i < original.length(); ++i ) {
         ASSERT_EQ( origi_child_it->nodeType(), clone_child_it->nodeType() );
         ASSERT_NE( origi_child_it, clone_child_it ); //make sure ptr addresses are different
 

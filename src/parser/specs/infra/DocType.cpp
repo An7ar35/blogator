@@ -60,6 +60,8 @@ std::set<std::u32string> DocType::loadFullPIDMatchesFullQuirks() noexcept {
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::DocType::loadFullPIDMatchesFullQuirks()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -132,11 +134,13 @@ blogator::Trie<char32_t> DocType::loadPartialPIDMatchesFullQuirks() noexcept {
             trie.add( pid.cbegin(), pid.cend() );
         }
 
-        return std::move( trie );
+        return trie;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::DocType::loadPartialPIDMatchesFullQuirks()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -152,6 +156,8 @@ std::set<std::u32string> DocType::loadFullSIDMatchesFullQuirks() noexcept {
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::DocType::loadFullSIDMatchesFullQuirks()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -171,11 +177,13 @@ blogator::Trie<char32_t> DocType::loadPartialPIDNoSIDMatchesFullQuirks() noexcep
             trie.add( pid.cbegin(), pid.cend() );
         }
 
-        return std::move( trie );
+        return trie;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::DocType::loadPartialPIDNoSIDMatchesFullQuirks()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -195,11 +203,13 @@ blogator::Trie<char32_t> DocType::loadPartialPIDMatchesLtdQuirks() noexcept {
             trie.add( pid.cbegin(), pid.cend() );
         }
 
-        return std::move( trie );
+        return trie;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::DocType::loadPartialPIDMatchesLtdQuirks()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
 /**
@@ -219,9 +229,11 @@ blogator::Trie<char32_t> DocType::loadPartialPIDWithSIDMatchesLtdQuirks() noexce
             trie.add( pid.cbegin(), pid.cend() );
         }
 
-        return std::move( trie );
+        return trie;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::infra::DocType::loadPartialPIDWithSIDMatchesLtdQuirks()] Failed to initialise." );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }

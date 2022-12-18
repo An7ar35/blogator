@@ -1807,7 +1807,7 @@ template<> void TreeBuilder::processAsHTMLContent<TreeBuilder::InsertionMode_e::
 
                         const auto curr_element_type = this->currentNodeType();
 
-                        if( curr_element_type != Element_e::DEPR_HTML_RTC || curr_element_type != Element_e::HTML5_RUBY ) {
+                        if( curr_element_type != Element_e::DEPR_HTML_RTC && curr_element_type != Element_e::HTML5_RUBY ) {
                             std::stringstream ss;
                             ss << "<" << this->currentNodeType() << "> "
                                << "inside <" << Element_e::DEPR_HTML_RTC << "> or <" << Element_e::HTML5_RUBY << "> scope";

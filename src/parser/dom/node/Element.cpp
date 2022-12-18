@@ -603,7 +603,7 @@ blogator::parser::dom::DOMTokenList_t Element::classList() const {
                      []( const auto & val ){ return !val.empty(); }
         );
 
-        return std::move( list );
+        return list;
     }
 
     return {};
@@ -655,7 +655,7 @@ blogator::parser::dom::Sequence_t<blogator::parser::dom::DOMString_t> Element::g
         }
     }
 
-    return std::move( sequence );
+    return sequence;
 }
 
 /**
@@ -743,7 +743,7 @@ bool Element::setAttribute( const DOMString_t &qualified_name, const DOMString_t
  * @return Success in adding/updating attribute
  * @throws DOMException when validation fails
  */
-bool Element::setAttributeNS( const DOMString_t &ns, const DOMString_t &qualified_name, const DOMString_t &value, ValidationState validation ) {
+bool Element::setAttributeNS( const DOMString_t &ns, const DOMString_t &qualified_name, const DOMString_t &value, [[maybe_unused]] ValidationState validation ) {
     try {
         auto v = validation::XML::validateNS( ns, qualified_name );
 
@@ -978,7 +978,7 @@ blogator::parser::dom::HTMLCollection_t Element::getElementsByTagName( DOMString
         }
     }
 
-    return std::move( list );
+    return list;
 }
 
 /**
@@ -1054,7 +1054,7 @@ blogator::parser::dom::HTMLCollection_t Element::getElementsByTagNameNS( const D
         }
     }
 
-    return std::move( list );
+    return list;
 }
 
 /**
@@ -1103,7 +1103,7 @@ blogator::parser::dom::HTMLCollection_t Element::getElementsByClassName( std::se
         ++it;
     }
 
-    return std::move( list );
+    return list;
 }
 
 /**
@@ -1124,7 +1124,7 @@ blogator::parser::dom::DOMString_t Element::textContent() const {
         }
     }
 
-    return std::move( concatenation );
+    return concatenation;
 }
 
 /**
@@ -1161,7 +1161,7 @@ blogator::parser::dom::NodePtr_t Element::cloneNode( bool deep ) const {
         }
     }
 
-    return std::move( clone );
+    return clone;
 }
 
 /**

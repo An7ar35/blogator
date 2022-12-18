@@ -33,6 +33,7 @@ namespace blogator::parser::dom {
       public:
         explicit NodeFilter( unsigned long what_to_show );
         NodeFilter( unsigned long what_to_show, std::function<Result( const node::Node & )> acceptNode_fn );
+        virtual ~NodeFilter() = default;
 
         [[nodiscard]] unsigned long whatToShow() const;
 

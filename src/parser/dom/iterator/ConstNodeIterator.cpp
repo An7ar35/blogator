@@ -107,7 +107,7 @@ const node::Node & ConstNodeIterator::operator *() const {
  */
 ConstNodeIterator::pointer ConstNodeIterator::operator ->() const {
     try {
-        return const_cast<pointer_const>( _it.operator->() );
+        return const_cast<pointer>( _it.operator->() );
 
     } catch( const std::runtime_error &e ) {
         throw std::runtime_error(
@@ -152,7 +152,7 @@ ConstNodeIterator & ConstNodeIterator::operator --() {
 const ConstNodeIterator ConstNodeIterator::operator --( int ) {
     ConstNodeIterator tmp = *this;
     --(*this);
-    return std::move( tmp );
+    return tmp;
 }
 
 /**
@@ -175,7 +175,7 @@ const std::shared_ptr<NodeFilter> & ConstNodeIterator::nodeFilter() const {
  * Gets the pointer of the current node pointed to by the iterator
  * @return Const pointer to node (or nullptr)
  */
-ConstNodeIterator::pointer_const ConstNodeIterator::node() const {
+ConstNodeIterator::const_pointer ConstNodeIterator::node() const {
     return _it.node();
 }
 
@@ -183,7 +183,7 @@ ConstNodeIterator::pointer_const ConstNodeIterator::node() const {
  * Gets the current node and moves the position of the iterator up
  * @return Pointer to current node (or nullptr when none)
  */
-ConstNodeIterator::pointer_const ConstNodeIterator::nextNode() {
+ConstNodeIterator::const_pointer ConstNodeIterator::nextNode() {
     return _it.nextNode();
 }
 
@@ -191,7 +191,7 @@ ConstNodeIterator::pointer_const ConstNodeIterator::nextNode() {
  * Gets the current node and moves the position of the iterator down
  * @return Pointer to current node (or nullptr when done/none)
  */
-ConstNodeIterator::pointer_const ConstNodeIterator::previousNode() {
+ConstNodeIterator::const_pointer ConstNodeIterator::previousNode() {
     return _it.previousNode();
 }
 

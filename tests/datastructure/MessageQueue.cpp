@@ -59,7 +59,7 @@ namespace blogator_tests::datastructure::MessageQueue {
      */
     template<size_t Q_SIZE, typename Q_TYPE> void consume(
         MessageQueue<Q_SIZE, Q_TYPE> & queue,
-        const std::string            & thread_id,
+        const std::string            & thread_id [[maybe_unused]],
         std::atomic<size_t>          & counter,
         std::atomic<bool>            & run_flag  )
     {
@@ -369,7 +369,7 @@ TEST( MessageQueue_Tests, low_concurrent_thrashing_3 ) { //2 producers and 1 con
         dequeue_counter += local_dequeue_counter;
     };
 
-    const auto consume = [&queue, &dequeue_counter, &run_flag]( const std::string &thread_name ) {
+    const auto consume = [&queue, &dequeue_counter, &run_flag]( [[maybe_unused]] const std::string &thread_name ) {
         auto ret = queue.dequeue();
 
         do {

@@ -308,7 +308,7 @@ bool encoding::Transcode::U8toU32( Source &src, std::vector<char32_t> &out ) {
             );
 
             std::stringstream ss;
-            for( auto i = 0; i < received; ++i ) {
+            for( size_t i = 0; i < received; ++i ) {
                 ss << " " << unicode::utf8::toxunicode( (char8_t) buffer[i], "0x" );
             }
 
@@ -339,7 +339,7 @@ bool encoding::Transcode::U8toU32( std::deque<char8_t> &pre_buffer, Source &src,
             const auto byte_length   = unicode::utf8::bytelength( pre_buffer.front() );
             const auto missing_bytes = ( byte_length > pre_buffer.size() ? ( byte_length - pre_buffer.size() ) : 0 );
 
-            for( int b = 0; !in.eof() && in.good() && b < missing_bytes; ++b ) {
+            for( size_t b = 0; !in.eof() && in.good() && b < missing_bytes; ++b ) {
                 pre_buffer.emplace_back( in.get() );
             }
 
@@ -385,7 +385,7 @@ bool encoding::Transcode::U8toU32( std::deque<char8_t> &pre_buffer, Source &src,
             encoding::Transcode::addCodePoint( src, prev, codepoint, out );
             prev = codepoint;
 
-            for( auto i = 0; i < byte_length; ++i ) {
+            for( size_t i = 0; i < byte_length; ++i ) {
                 pre_buffer.pop_front();
             }
         }
@@ -594,7 +594,7 @@ bool encoding::Transcode::U16toU32( std::deque<char8_t> &pre_buffer, Source &src
                 byte_length = ( byte_length == 0 ? 2 : byte_length ); //discard the code unit
             }
 
-            for( auto i = 0; i < byte_length; ++i ) {
+            for( size_t i = 0; i < byte_length; ++i ) {
                 pre_buffer.pop_front();
             }
         }
@@ -733,7 +733,7 @@ bool encoding::Transcode::U32toU32( std::deque<char8_t> &pre_buffer, Source &src
 
         const size_t code_point_count = ( pre_buffer.size() / 4 );
 
-        for( int i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
+        for( size_t i = 0, byte_i = 0; i < code_point_count; ++i, byte_i += 4 ) {
             char32_t codepoint = join( pre_buffer.at( byte_i ),
                                        pre_buffer.at( byte_i + 1 ),
                                        pre_buffer.at( byte_i + 2 ),
@@ -756,7 +756,6 @@ bool encoding::Transcode::U32toU32( std::deque<char8_t> &pre_buffer, Source &src
 bool encoding::Transcode::U32toU32( Source &src, std::vector<char32_t> &out ) {
     const auto join     = ( src.format() == Format::UTF32_LE ? encoding::Transcode::joinU32LE : unicode::utf32::join );
     auto &     in       = src.stream();
-    auto &     pos      = src.position();
     char32_t   prev     = 0x00;
     char8_t    bytes[4] = { 0x00, 0x00 };
 

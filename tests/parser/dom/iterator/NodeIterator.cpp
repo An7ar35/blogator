@@ -257,10 +257,10 @@ TEST( parser_dom_NodeIterator_Tests, access_operator ) {
     auto rbegin = doc.rbegin();
     auto rend   = doc.rend();
 
-    ASSERT_NO_THROW( begin->nodeType() );
-    ASSERT_NO_THROW( rbegin->nodeType() );
-    ASSERT_THROW( end->nodeType(), std::runtime_error );
-    ASSERT_THROW( rend->nodeType(), std::runtime_error );
+    ASSERT_NO_THROW( std::ignore = begin->nodeType() );
+    ASSERT_NO_THROW( std::ignore = rbegin->nodeType() );
+    ASSERT_THROW( std::ignore = end->nodeType(), std::runtime_error );
+    ASSERT_THROW( std::ignore = rend->nodeType(), std::runtime_error );
 }
 
 TEST( parser_dom_NodeIterator_Tests, whatToShow_0 ) { //default

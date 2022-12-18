@@ -46,7 +46,7 @@ namespace blogator::logger::output {
          * @param lvl Loglevel of the message
          * @param msg Log event string line
          */
-        virtual void write( LogLevel lvl, const std::string &msg ) = 0;
+        virtual void write( [[maybe_unused]] LogLevel lvl, const std::string &msg ) = 0;
 
         [[nodiscard]] virtual LogOutputType type() const final;
         [[nodiscard]] virtual const std::string & name() const final;

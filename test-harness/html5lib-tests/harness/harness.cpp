@@ -48,7 +48,7 @@ std::string test_harness::html5lib_tests::to_string( blogator::parser::dom::node
             --depth;
         }
 
-        for( auto i = 1; i < depth; ++i ) {
+        for( size_t i = 1; i < depth; ++i ) {
             ss << "  ";
         }
     };
@@ -564,7 +564,7 @@ TreeConstructionTestCollection_t loadTreeConstructionDat( const std::filesystem:
                         ++sequential_lf;
                     } else {
                         if( sequential_lf > 0 ) {
-                            for( auto i = 0; i <  sequential_lf; ++i ) {
+                            for( size_t i = 0; i <  sequential_lf; ++i ) {
                                 test->expected_output += "\n";
                             }
 

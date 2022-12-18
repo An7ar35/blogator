@@ -52,6 +52,6 @@ void File::close() {
  * @param lvl Logging level (unused)
  * @param msg Line
  */
-void File::write( LogLevel lvl, const std::string &msg ) {
+void File::write( [[maybe_unused]] LogLevel lvl, const std::string &msg ) {
     (*_out) << msg << "\n";
 }

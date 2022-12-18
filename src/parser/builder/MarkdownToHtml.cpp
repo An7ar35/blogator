@@ -495,7 +495,7 @@ template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::
  * Processes an end-of-file state for the current document
  * @param token EndOfFileTk token
  */
-template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::END_OF_FILE>( std::unique_ptr<token::markdown::MarkdownTk> token ) {
+template<> void MarkdownToHtml::processContent<MarkdownToHtml::InsertionMode_e::END_OF_FILE>( [[maybe_unused]] std::unique_ptr<token::markdown::MarkdownTk> token ) {
     while( !_insertion_mode.empty() ) {
         _insertion_mode.pop();
     }

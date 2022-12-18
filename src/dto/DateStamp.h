@@ -28,7 +28,7 @@ namespace blogator::dto {
 
         bool operator ==( const DateStamp &rhs ) const { return compare( *this, rhs ) == 0; };
         bool operator !=( const DateStamp &rhs ) const { return !( *this == rhs ); };
-        bool operator <( const DateStamp &rhs ) const  { return rhs < *this; };
+        bool operator <( const DateStamp &rhs ) const  { return compare( *this, rhs ) < 0; };
         bool operator >( const DateStamp &rhs ) const  { return compare( *this, rhs ) > 0; };
         bool operator <=( const DateStamp &rhs ) const { return !( *this > rhs ); };
         bool operator >=( const DateStamp &rhs ) const { return !( *this < rhs ); };

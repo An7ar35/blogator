@@ -40,7 +40,7 @@ std::vector<logger_LogLevel_Tests::Test> logger_LogLevel_Tests::tests = logger_L
 TEST_F( logger_LogLevel_Tests, ostream_operator ) {
     const auto & tests = logger_LogLevel_Tests::tests;
 
-    for( auto i = 0; i < tests.size(); ++i ) {
+    for( size_t i = 0; i < tests.size(); ++i ) {
         std::stringstream ss;
         ss << tests[i].level;
 
@@ -52,7 +52,7 @@ TEST_F( logger_LogLevel_Tests, ostream_operator ) {
 TEST_F( logger_LogLevel_Tests, to_string ) {
     const auto & tests = logger_LogLevel_Tests::tests;
 
-    for( auto i = 0; i < tests.size(); ++i ) {
+    for( size_t i = 0; i < tests.size(); ++i ) {
         ASSERT_EQ( blogator::logger::to_string( tests[i].level ), tests[i].expected )
             << "Failed on test case #" << i << ": '"<< tests[i].expected << "'";
     }

@@ -23,7 +23,7 @@ Node * DocumentFragment::host() {
  * @return Namespace URI
  * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
  */
-blogator::parser::dom::DOMString_t DocumentFragment::lookupPrefix( const blogator::parser::dom::DOMString_t &ns ) const {
+blogator::parser::dom::DOMString_t DocumentFragment::lookupPrefix( [[maybe_unused]] const blogator::parser::dom::DOMString_t &ns ) const {
     return {};
 }
 
@@ -33,7 +33,7 @@ blogator::parser::dom::DOMString_t DocumentFragment::lookupPrefix( const blogato
  * @return Namespace URI (or "null")
  * @throws blogator::exception::failed_expectation when NamespaceMap lookup with this node's ID failed
  */
-blogator::parser::dom::DOMString_t DocumentFragment::lookupNamespaceURI( const DOMString_t &prefix ) const {
+blogator::parser::dom::DOMString_t DocumentFragment::lookupNamespaceURI( [[maybe_unused]] const DOMString_t &prefix ) const {
     return {};
 }
 

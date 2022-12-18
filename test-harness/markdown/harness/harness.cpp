@@ -103,7 +103,7 @@ std::vector<std::pair<test_harness::markdown::MarkdownTkTest, std::filesystem::p
                     obj.input       = test.at( "input" );
 
                     for( const auto & token : test.at( "tokens" ) ) {
-                        auto & desc = obj.tokens.emplace_back( token );
+                        obj.tokens.emplace_back( token );
                     }
 
                     for( const auto & error : test.at( "errors" ) ) {

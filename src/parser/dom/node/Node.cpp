@@ -23,11 +23,11 @@ blogator::parser::dom::NamespaceMap Node::namespace_map = blogator::parser::dom:
  * Constructor
  */
 Node::Node() :
+    _node_type( NodeType::UNDEFINED ),
     _document( nullptr ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
-    _next_sibling( nullptr ),
-    _node_type( NodeType::UNDEFINED )
+    _next_sibling( nullptr )
 {}
 
 /**
@@ -35,11 +35,11 @@ Node::Node() :
  * @param type Node type
  */
 Node::Node( NodeType type ) :
+    _node_type( type ),
     _document( nullptr ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
-    _next_sibling( nullptr ),
-    _node_type( type )
+    _next_sibling( nullptr )
 {}
 
 /**
@@ -48,11 +48,11 @@ Node::Node( NodeType type ) :
  * @param type Node type
  */
 Node::Node( Document *document, NodeType type ) :
+    _node_type( type ),
     _document( document ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
-    _next_sibling( nullptr ),
-    _node_type( type )
+    _next_sibling( nullptr )
 {}
 
 /**
@@ -62,11 +62,11 @@ Node::Node( Document *document, NodeType type ) :
  * @param prev_sibling Pointer to previous sibling
  */
 Node::Node( NodeType type, Node * parent, Node * prev_sibling ) :
+    _node_type( type ),
     _document( ( parent ? parent->ownerDocument() : nullptr ) ),
     _parent( parent ),
     _prev_sibling( prev_sibling ),
-    _next_sibling( nullptr ),
-    _node_type( type )
+    _next_sibling( nullptr )
 {
     if( _prev_sibling != nullptr ) {
         this->setNextSibling( _prev_sibling->nextSibling() );
@@ -86,11 +86,11 @@ Node::Node( NodeType type, Node * parent, Node * prev_sibling ) :
  * @param next_sibling Pointer to next sibling
  */
 Node::Node( NodeType type, Node * parent, Node * prev_sibling, Node * next_sibling ) :
+    _node_type( type ),
     _document( ( parent ? parent->ownerDocument() : nullptr ) ),
     _parent( parent ),
     _prev_sibling( prev_sibling ),
-    _next_sibling( next_sibling ),
-    _node_type( type )
+    _next_sibling( next_sibling )
 {
     if( _prev_sibling != nullptr ) {
         _prev_sibling->setNextSibling( this );
@@ -106,11 +106,11 @@ Node::Node( NodeType type, Node * parent, Node * prev_sibling, Node * next_sibli
  * @param node Node to copy
  */
 Node::Node( const Node &node ) :
+    _node_type( node._node_type ),
     _document( nullptr ),
     _parent( nullptr ),
     _prev_sibling( nullptr ),
-    _next_sibling( nullptr ),
-    _node_type( node._node_type )
+    _next_sibling( nullptr )
 {
     for( const auto & child : node._children ) {
         this->appendChild( child->cloneNode( true ) );
@@ -122,11 +122,11 @@ Node::Node( const Node &node ) :
  * @param node Node to move
  */
 Node::Node( Node &&node )  noexcept :
+    _node_type( node._node_type ),
     _document( node._document ),
     _parent( node._parent ),
     _prev_sibling( node._prev_sibling ),
-    _next_sibling( node._next_sibling ),
-    _node_type( node._node_type )
+    _next_sibling( node._next_sibling )
 {
     for( auto & ptr : node._children ) {
         auto & child = _children.emplace_back( std::move( ptr ) );
@@ -759,7 +759,7 @@ blogator::parser::dom::NodePtr_t Node::cloneNode( bool deep ) const {
         }
     }
 
-    return std::move( clone );
+    return clone;
 }
 
 /**
@@ -1034,7 +1034,7 @@ blogator::parser::dom::NodePtr_t Node::replaceChild( NodePtr_t &node, NodePtr_t 
     }
 
     try {
-        auto it = this->getChildListIterator( child.get() ); //throws
+        std::ignore = this->getChildListIterator( child.get() ); //checking if child is an actual child of this object - if not; throws
 
         return this->replaceChildNode( node, child );
 
@@ -1300,7 +1300,7 @@ blogator::parser::dom::NodePtr_t Node::removeChildNode( dom::Nodes_t::iterator i
 
     _children.erase( it );
 
-    return std::move( node );
+    return node;
 }
 
 /**
@@ -1343,7 +1343,7 @@ void Node::setNextSibling( Node * node ) {
  * Outputs the node as UTF-8 formatted html into a stream
  * @param os Output stream
  */
-void Node::toUTF8Stream( std::ostream &os ) const { /* do nothing / use overrides */ }
+void Node::toUTF8Stream( [[maybe_unused]] std::ostream &os ) const { /* do nothing / use overrides */ }
 
 /**
  * [PRIVATE] Appends a single node to the end of the children list

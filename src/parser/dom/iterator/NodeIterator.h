@@ -29,6 +29,7 @@ namespace blogator::parser::dom {
         NodeIterator( node::Node * root, node::Node * curr, std::shared_ptr<NodeFilter> filter, bool reverse = false );
         NodeIterator( const NodeIterator &it );
         NodeIterator( NodeIterator &&it ) noexcept;
+        ~NodeIterator() = default;
 
         NodeIterator & operator =( const NodeIterator &it );
         NodeIterator & operator =( NodeIterator &&it ) noexcept;
@@ -41,9 +42,9 @@ namespace blogator::parser::dom {
         reference operator *() const;
         pointer operator ->() const;
         NodeIterator & operator ++();
-        NodeIterator operator ++( int );
+        const NodeIterator operator ++( int );
         NodeIterator & operator --();
-        NodeIterator operator --( int );
+        const NodeIterator operator --( int );
 
         [[nodiscard]] unsigned long whatToShow() const;
         [[nodiscard]] const std::shared_ptr<NodeFilter> & nodeFilter() const;

@@ -32,14 +32,16 @@ static std::array<Description, ErrorCode::ENUM_END> loadErrorStrings() noexcept 
             R"(This error occurs if a token of unknown type is passed to the tree construction stage. The token will be ignored.)"
         };
 
-        return std::move( arr );
+        return arr;
 
     } catch( ... ) {
         TERMINATE( "[parser::specs::native::ErrorCode::] Failed to load error data (loadErrorStrings): " );
     }
+
+    return {}; //(unreachable) suppresses "non-void function does not return a value in all control path" compiler warning
 }
 
-static std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErrorStrings();
+static const std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErrorStrings();
 
 /**
  * Gets the description string for an error code
@@ -47,10 +49,11 @@ static std::array<Description, ErrorCode::ENUM_END> error_descriptions = loadErr
  * @return Short description string
  */
 const std::string &blogator::parser::specs::native::ErrorCode::str( int err ) {
-    if( ( err = abs( err ) ) >= ENUM_END )
-        return error_descriptions[ErrorCode::UNKNOWN].text;
-    else
-        return error_descriptions[err].text;
+    if( ( err = abs( err ) ) >= ENUM_END ) {
+        return error_descriptions.at( ErrorCode::UNKNOWN ).text;
+    } else {
+        return error_descriptions.at( err ).text;
+    }
 }
 
 /**
@@ -59,8 +62,9 @@ const std::string &blogator::parser::specs::native::ErrorCode::str( int err ) {
  * @return Long detailed description string
  */
 const std::string &blogator::parser::specs::native::ErrorCode::detailed( int err ) {
-    if( ( err = abs( err ) ) >= ENUM_END )
-        return error_descriptions[ErrorCode::UNKNOWN].detailed;
-    else
-        return error_descriptions[err].detailed;
+    if( ( err = abs( err ) ) >= ENUM_END ) {
+        return error_descriptions.at( ErrorCode::UNKNOWN ).detailed;
+    } else {
+        return error_descriptions.at( err ).detailed;
+    }
 }
